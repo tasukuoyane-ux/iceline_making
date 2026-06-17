@@ -40,7 +40,7 @@ function Hero() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
         </div>
       ))}
-      <div className="relative mx-auto flex h-full max-w-[1280px] flex-col justify-end px-5 pb-20 pc:px-8 pc:pb-28">
+      <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-20 pc:px-8 pc:pb-28">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <p className="mb-4 text-white/80" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 13 }}>
             SINCE 1905 — {SITE.yearsLabel}
@@ -120,7 +120,7 @@ export function Top() {
 
       {/* 当社の強み（TOPの熱量ピーク） */}
       <Section heat={HEAT.topStrength} contained={false}>
-        <div className="mx-auto max-w-[1280px] px-5 pc:px-8">
+        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="OUR STRENGTH" jp="私たちの強み" />
           <p className="mt-4 max-w-2xl text-muted-foreground" style={{ fontSize: 16, lineHeight: 2 }}>
             需要が読めないときも、季節が外れているときも。約束した量を、欠かさず届ける。

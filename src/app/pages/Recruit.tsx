@@ -1,7 +1,7 @@
 import { useState, FormEvent } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight, MapPin, PlayCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, MapPin, PlayCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
@@ -17,8 +17,7 @@ import {
   RECRUIT_PHILOSOPHY,
   RECRUIT_LOCATIONS,
   RECRUIT_CHARM,
-  RECRUIT_DAY,
-  RECRUIT_DAY_NOTE,
+  RECRUIT_DAYS,
   RECRUIT_WORK,
   RECRUIT_APPLY,
   RECRUIT_JOBS,
@@ -31,13 +30,13 @@ function RecruitHero() {
     <section className="relative flex min-h-[88vh] w-full items-center overflow-hidden bg-ink">
       <ImageWithFallback src={IMG.team1} alt="採用" className="absolute inset-0 h-full w-full object-cover opacity-45" />
       <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/70 to-brand/30" />
-      <div className="relative mx-auto w-full max-w-[1280px] px-5 py-24 pc:px-8">
+      <div className="relative mx-auto w-full max-w-[1400px] px-5 py-24 pc:px-8">
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}>
           <p className="mb-6 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 14 }}>
             RECRUIT 2027
           </p>
           <h1 className="text-white" style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.15, letterSpacing: "0.01em" }}>
-            笑顔と、正直さ。<br />ただそれだけ。
+            笑顔と、正直さ。<br />ただ、それだけ。
           </h1>
           <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9 }}>{RECRUIT_MV.sub}</p>
         </motion.div>
@@ -48,6 +47,8 @@ function RecruitHero() {
 
 export function Recruit() {
   const [type, setType] = useState("entry");
+  const [dayRole, setDayRole] = useState(0);
+  const day = RECRUIT_DAYS[dayRole];
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -59,18 +60,31 @@ export function Recruit() {
     <>
       <RecruitHero />
 
-      {/* MV本文（採用コピー） */}
+      {/* 採用メッセージ（MV本文） */}
       <Section heat={HEAT.recruitMv}>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mx-auto max-w-3xl text-center"
+          className="mx-auto max-w-3xl text-center pc:max-w-[90%]"
           style={{ fontSize: 19, lineHeight: 2.4, fontWeight: 500 }}
         >
           {RECRUIT_MV.body}
         </motion.p>
+      </Section>
+
+      {/* 会社を知る｜企業理念 */}
+      <Section heat={HEAT.recruitPhilosophy} contained={false}>
+        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
+          <SectionTitle en="OUR CREED" jp="会社を知る — 企業理念" align="center" />
+          <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 23, fontWeight: 700, lineHeight: 1.8 }}>
+            {RECRUIT_PHILOSOPHY.creed}
+          </p>
+          <p className="mx-auto mt-8 max-w-2xl text-center text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }}>
+            {RECRUIT_PHILOSOPHY.body}
+          </p>
+        </div>
       </Section>
 
       {/* 会社を知る｜事業紹介 */}
@@ -92,25 +106,12 @@ export function Recruit() {
                 <p className="mt-5 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }}>{b.body}</p>
               </div>
               <ImageWithFallback
-                src={i % 2 ? IMG.foodPlate : IMG.iceMacro}
+                src={i % 2 ? IMG.iceMacro : IMG.foodPlate}
                 alt={b.mission}
                 className="aspect-[4/3] w-full rounded-2xl object-cover [direction:ltr]"
               />
             </motion.div>
           ))}
-        </div>
-      </Section>
-
-      {/* 会社を知る｜企業理念 */}
-      <Section heat={HEAT.recruitPhilosophy} contained={false}>
-        <div className="mx-auto max-w-[1280px] px-5 pc:px-8">
-          <SectionTitle en="OUR CREED" jp="会社を知る — 企業理念" align="center" />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 23, fontWeight: 700, lineHeight: 1.8 }}>
-            {RECRUIT_PHILOSOPHY.creed}
-          </p>
-          <p className="mx-auto mt-8 max-w-2xl text-center text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }}>
-            {RECRUIT_PHILOSOPHY.body}
-          </p>
         </div>
       </Section>
 
@@ -130,7 +131,7 @@ export function Recruit() {
 
       {/* 仕事を知る｜仕事の魅力 */}
       <Section heat={HEAT.recruitCharm} contained={false}>
-        <div className="mx-auto max-w-[1280px] px-5 pc:px-8">
+        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="OUR CULTURE" jp="仕事を知る — 仕事の魅力" />
           <div className="mt-12 space-y-6">
             {RECRUIT_CHARM.map((c, i) => (
@@ -153,23 +154,6 @@ export function Recruit() {
         </div>
       </Section>
 
-      {/* 仕事を知る｜一日の流れ */}
-      <Section heat={HEAT.recruitDay}>
-        <SectionTitle en="A DAY" jp="仕事を知る — 一日の流れ" />
-        <p className="mt-3 text-muted-foreground" style={{ fontSize: 14 }}>{RECRUIT_DAY_NOTE}</p>
-        <ol className="mt-10 space-y-0 border-l-2 border-brand/30 pl-6">
-          {RECRUIT_DAY.map((d, i) => (
-            <li key={i} className="relative mb-7 last:mb-0">
-              <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
-              <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
-                <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
-                <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
       {/* 仕事を知る｜業務内容 */}
       <Section heat={HEAT.recruitWork}>
         <SectionTitle en="WORK" jp="仕事を知る — 業務内容" />
@@ -187,9 +171,41 @@ export function Recruit() {
         </div>
       </Section>
 
+      {/* 仕事を知る｜一日の流れ（食品営業／アイス製造／品質管理） */}
+      <Section heat={HEAT.recruitDay}>
+        <SectionTitle en="A DAY" jp="仕事を知る — 一日の流れ" />
+        <div className="mt-8 flex flex-wrap gap-2">
+          {RECRUIT_DAYS.map((d, i) => (
+            <button
+              key={d.role}
+              type="button"
+              onClick={() => setDayRole(i)}
+              className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
+              style={{ fontSize: 13, fontWeight: 700 }}
+            >
+              {d.role}
+            </button>
+          ))}
+        </div>
+        <p className="mt-4 inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
+          <Clock size={15} className="text-brand" /> {day.note}
+        </p>
+        <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
+          {day.steps.map((d, i) => (
+            <li key={i} className="relative mb-7 last:mb-0">
+              <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
+              <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
+                <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
+                <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
       {/* カンパニーデック */}
       <Section heat={HEAT.recruitDeck} contained={false}>
-        <div className="mx-auto max-w-[1280px] px-5 pc:px-8">
+        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <div className="rounded-[2rem] bg-ink p-10 text-white pc:p-16">
             <SectionTitle en="COMPANY DECK" jp="数字で見るアイスライン" invert />
             <div className="mt-10 grid grid-cols-2 gap-8 pc:grid-cols-4">
@@ -242,7 +258,7 @@ export function Recruit() {
 
       {/* 募集要項｜応募を促すコピー */}
       <Section heat={HEAT.recruitApply} contained={false}>
-        <div className="mx-auto max-w-[1280px] px-5 pc:px-8">
+        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center">
             <p className="text-brand" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.4 }}>{RECRUIT_APPLY.copy}</p>
             <p className="mx-auto mt-6 max-w-2xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }}>{RECRUIT_APPLY.body}</p>

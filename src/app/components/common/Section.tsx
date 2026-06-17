@@ -16,7 +16,7 @@ export function Section({ heat, children, className, contained = true, id }: Sec
   const s = heatStyles(heat);
   return (
     <section id={id} className={cn(s.sectionPadding, s.surface, className)}>
-      <div className={cn(contained && "mx-auto max-w-[1280px] px-5 pc:px-8")}>{children}</div>
+      <div className={cn(contained && "mx-auto max-w-[1400px] px-5 pc:px-8")}>{children}</div>
     </section>
   );
 }

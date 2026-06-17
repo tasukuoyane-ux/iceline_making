@@ -124,6 +124,60 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+// MV下・事業紹介セクション（コピー＋事業内容 約200文字）
+export const DIVISION_BIZ: Record<
+  Division,
+  { copy: string; body: string }
+> = {
+  food: {
+    copy: "食の現場に、深く根を張る。",
+    body:
+      "食品事業部は、ドライアイスから業務用食材、冷凍食品まで、5,000品目を超える商品を全国の飲食店・ホテル・問屋へお届けしています。担当者はルート配送と営業を兼ね、毎日現場に通うからこそ、在庫の変化や困りごとにいち早く気づける。依頼を待つのではなく、必要なものを先回りして提案する。お客様一社一社の状況を丁寧に把握しながら、長く寄り添える関係を、一つひとつの商談の中で積み重ねていきます。",
+  },
+  ice: {
+    copy: "岡山の氷を、日本の氷に。",
+    body:
+      "アイス事業部の氷は、人気テーマパークからコンビニエンスストア、街の喫茶店まで、全国の食の現場で使われています。選ばれ続ける理由は、欠品を出さないこと。季節の波や急な需要の変動があっても、営業と製造が連携して在庫を調整します。さらに、色のある氷、味のある氷——誰も作っていなかった商品を市場へ送り出し、氷そのものを進化させ続けています。岡山から全国へ、氷の可能性を広げていきます。",
+  },
+};
+
+// 氷のレシピ（複数階層）。出典: https://www.iceline.co.jp/services/ice/recipe/
+export const ICE_RECIPES: {
+  category: string;
+  items: { name: string; note: string }[];
+}[] = [
+  {
+    category: "かき氷",
+    items: [
+      { name: "いちごミルク", note: "純氷のふわふわ食感" },
+      { name: "抹茶あずき", note: "宇治抹茶と粒あん" },
+      { name: "マンゴーレモン", note: "果実感たっぷり" },
+    ],
+  },
+  {
+    category: "ドリンク",
+    items: [
+      { name: "アイスコーヒー", note: "溶けにくいロック氷" },
+      { name: "クラフトレモネード", note: "色付き氷で華やかに" },
+      { name: "フルーツソーダ", note: "味付き氷が溶けて変化" },
+    ],
+  },
+  {
+    category: "カクテル",
+    items: [
+      { name: "モヒート", note: "クラッシュアイス" },
+      { name: "ジントニック", note: "大粒の透明氷" },
+    ],
+  },
+  {
+    category: "デザート",
+    items: [
+      { name: "フローズンフルーツ", note: "凍らせて即一品" },
+      { name: "アイスフラワー", note: "花を閉じ込めた氷" },
+    ],
+  },
+];
+
 export const DIVISION_INFO: Record<
   Division,
   { label: string; reasonCatch: string; reasonBody: string }

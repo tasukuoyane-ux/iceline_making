@@ -10,7 +10,7 @@ export function ProductDetail() {
 
   if (!p) {
     return (
-      <div className="mx-auto max-w-[1280px] px-5 py-32 text-center">
+      <div className="mx-auto max-w-[1400px] px-5 py-32 text-center">
         <p>商品が見つかりませんでした。</p>
         <Link to="/" className="mt-4 inline-block text-brand">TOPへ戻る</Link>
       </div>
@@ -29,7 +29,7 @@ export function ProductDetail() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1280px] px-5 py-12 pc:px-8 pc:py-16">
+    <div className="mx-auto max-w-[1400px] px-5 py-12 pc:px-8 pc:py-16">
       <Link to={`/${p.division}`} className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
         <ChevronLeft size={16} /> {p.division === "food" ? "食品事業部" : "アイス事業部"}へ戻る
       </Link>

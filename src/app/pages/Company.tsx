@@ -11,7 +11,7 @@ export function Company() {
       <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
         <ImageWithFallback src={IMG.warehouse} alt="会社情報" className="h-full w-full object-cover opacity-70" />
         <div className="absolute inset-0 bg-ink/50" />
-        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col justify-end px-5 pb-12 pc:px-8">
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-12 pc:px-8">
           <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>COMPANY</p>
           <h1 className="text-white" style={{ fontSize: 38, fontWeight: 900 }}>会社情報</h1>
         </div>
@@ -35,7 +35,7 @@ export function Company() {
 
       {/* 企業理念 */}
       <Section heat={HEAT.philosophy} contained={false}>
-        <div className="mx-auto max-w-[1280px] px-5 pc:px-8">
+        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" />
           <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8 }}>
             {PHILOSOPHY.body}
@@ -58,20 +58,29 @@ export function Company() {
         </table>
       </Section>
 
-      {/* 沿革 */}
+      {/* 沿革（PC時：右50%に画像） */}
       <Section heat={HEAT.history}>
         <SectionTitle en="HISTORY" jp="沿革" />
-        <ol className="mt-10 border-l-2 border-border pl-6">
-          {HISTORY.map((h) => (
-            <li key={h.year} className="relative mb-8 last:mb-0">
-              <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
-              <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
-                <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 20, fontWeight: 700 }}>{h.year}</span>
-                <p className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }}>{h.text}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-10 grid gap-10 pc:grid-cols-2">
+          <ol className="border-l-2 border-border pl-6">
+            {HISTORY.map((h) => (
+              <li key={h.year} className="relative mb-8 last:mb-0">
+                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
+                <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
+                  <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 20, fontWeight: 700 }}>{h.year}</span>
+                  <p className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }}>{h.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="hidden pc:block">
+            <ImageWithFallback
+              src={IMG.warehouse}
+              alt="アイスラインの歩み"
+              className="sticky top-24 aspect-[3/4] w-full rounded-2xl object-cover"
+            />
+          </div>
+        </div>
       </Section>
 
       {/* CSR */}

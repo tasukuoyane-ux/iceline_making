@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import { Menu, X } from "lucide-react";
 import { SITE } from "../../data/company";
-import logo from "../../imports/logo.png";
+import logo from "../../../images/logo.png";
 import { cn } from "../ui/utils";
 
 const NAV = [
@@ -20,28 +20,18 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5 pc:h-20 pc:px-8">
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 pc:h-20 pc:px-8">
         <Link
           to="/"
-          className="flex items-baseline gap-2"
+          className="flex items-center"
           onClick={() => setOpen(false)}
+          aria-label={SITE.name}
         >
-          <span
-            className="text-ink"
-            style={{
-              fontFamily: "var(--font-accent)",
-              fontSize: 26,
-              letterSpacing: "0.06em",
-            }}
-          >
-            ICELINE
-          </span>
-          <span
-            className="hidden text-muted-foreground tab:inline"
-            style={{ fontSize: 12 }}
-          >
-            {SITE.name}
-          </span>
+          <img
+            src={logo}
+            alt={SITE.name}
+            className="h-9 w-auto pc:h-11"
+          />
         </Link>
 
         {/* PC nav */}
@@ -90,7 +80,7 @@ export function Header() {
       {/* Mobile menu */}
       {open && (
         <nav className="border-t border-border bg-background pc:hidden">
-          <div className="mx-auto flex max-w-[1280px] flex-col px-5 py-2">
+          <div className="mx-auto flex max-w-[1400px] flex-col px-5 py-2">
             {NAV.map((n) => (
               <Link
                 key={n.to}

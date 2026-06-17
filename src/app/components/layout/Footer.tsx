@@ -31,7 +31,7 @@ export function Footer() {
   const tel = COMPANY_PROFILE.find((p) => p.label === "TEL")?.value;
   return (
     <footer className="bg-ink text-white">
-      <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-14 pc:grid-cols-[1.4fr_2fr] pc:px-8 pc:py-20">
+      <div className="mx-auto grid max-w-[1400px] gap-10 px-5 py-14 pc:grid-cols-[1.4fr_2fr] pc:px-8 pc:py-20">
         <div>
           <div style={{ fontFamily: "var(--font-accent)", fontSize: 30, letterSpacing: "0.06em" }}>ICELINE</div>
           <p className="mt-3 text-white/70" style={{ fontSize: 13 }}>{SITE.name}</p>
@@ -60,7 +60,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-[1280px] px-5 py-5 text-white/40 pc:px-8" style={{ fontSize: 12 }}>
+        <div className="mx-auto max-w-[1400px] px-5 py-5 text-white/40 pc:px-8" style={{ fontSize: 12 }}>
           © {new Date().getFullYear()} {SITE.name}
         </div>
       </div>

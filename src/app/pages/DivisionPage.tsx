@@ -1,21 +1,75 @@
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ShieldCheck, Snowflake, Sparkles, Palette, Droplets } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
-import { Division, DIVISION_INFO, PRODUCTS } from "../data/products";
+import { Division, DIVISION_INFO, DIVISION_BIZ, ICE_RECIPES, PRODUCTS } from "../data/products";
 
 const MV: Record<Division, { img: string; lead: string }> = {
   food: { img: IMG.foodPlate, lead: "食の現場に、深く根を張る。" },
   ice: { img: IMG.iceMacro, lead: "冷たいものなら、アイスライン。" },
 };
 
+// 新たな氷の可能性が広がっていくことを表現した図
+function IcePossibilityFigure() {
+  const branches = [
+    { icon: Palette, label: "色のある氷", note: "視覚で楽しむ" },
+    { icon: Sparkles, label: "味のある氷", note: "溶けて広がる香り" },
+    { icon: Droplets, label: "機能性の氷", note: "溶けにくい・形状自在" },
+    { icon: Snowflake, label: "用途別の氷", note: "業務用からレジャーまで" },
+  ];
+  return (
+    <div className="mt-12 rounded-2xl border border-border bg-card p-8 pc:p-12">
+      <div className="grid items-center gap-8 pc:grid-cols-[200px_1fr]">
+        {/* 中心：氷 */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto flex aspect-square w-40 flex-col items-center justify-center rounded-full bg-ink text-center text-white"
+        >
+          <Snowflake className="text-brand" size={36} />
+          <span className="mt-2" style={{ fontSize: 18, fontWeight: 700 }}>岡山の氷</span>
+          <span className="text-white/60" style={{ fontSize: 11 }}>ICELINE</span>
+        </motion.div>
+        {/* 枝：広がる可能性 */}
+        <div className="grid gap-4 tab:grid-cols-2">
+          {branches.map((b, i) => (
+            <motion.div
+              key={b.label}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="relative flex items-start gap-3 rounded-xl border border-border bg-background p-4"
+            >
+              <span className="absolute -left-4 top-1/2 hidden h-px w-4 -translate-y-1/2 bg-brand/40 pc:block" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <b.icon size={20} />
+              </span>
+              <div>
+                <p style={{ fontSize: 15, fontWeight: 700 }}>{b.label}</p>
+                <p className="mt-0.5 text-muted-foreground" style={{ fontSize: 12 }}>{b.note}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      <p className="mt-8 text-center text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9 }}>
+        一つの氷から、新たな価値へ。アイスラインは氷の可能性を、絶えず広げ続けています。
+      </p>
+    </div>
+  );
+}
+
 export function DivisionPage({ division }: { division: Division }) {
   const info = DIVISION_INFO[division];
+  const biz = DIVISION_BIZ[division];
   const items = PRODUCTS.filter((p) => p.division === division);
-  const mvHeat = division === "food" ? HEAT.foodMv : HEAT.iceMv;
+  const bizHeat = division === "food" ? HEAT.foodBiz : HEAT.iceBiz;
   const reasonHeat = division === "food" ? HEAT.foodReason : HEAT.iceReason;
   const listHeat = division === "food" ? HEAT.foodList : HEAT.iceList;
 
@@ -25,7 +79,7 @@ export function DivisionPage({ division }: { division: Division }) {
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-ink">
         <ImageWithFallback src={MV[division].img} alt={info.label} className="h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-ink/20" />
-        <div className="relative mx-auto flex h-full max-w-[1280px] flex-col justify-end px-5 pb-16 pc:px-8 pc:pb-24">
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-16 pc:px-8 pc:pb-24">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
               {division === "food" ? "FOOD DIVISION" : "ICE DIVISION"}
@@ -35,6 +89,28 @@ export function DivisionPage({ division }: { division: Division }) {
           </motion.div>
         </div>
       </section>
+
+      {/* 事業紹介（MV下・コピー＋事業内容） */}
+      <Section heat={bizHeat}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="mx-auto max-w-3xl text-center"
+        >
+          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
+            OUR BUSINESS
+          </p>
+          <h2 className="mt-3 text-brand" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.4 }}>
+            {biz.copy}
+          </h2>
+          <p className="mt-6 text-left text-foreground/80 pc:text-center" style={{ fontSize: 15, lineHeight: 2.1 }}>
+            {biz.body}
+          </p>
+        </motion.div>
+        {division === "ice" && <IcePossibilityFigure />}
+      </Section>
 
       {/* 選ばれる理由（熱量の強化・主語を明確化） */}
       <Section heat={reasonHeat}>
@@ -84,6 +160,52 @@ export function DivisionPage({ division }: { division: Division }) {
           ))}
         </div>
       </Section>
+
+      {/* 氷のレシピ（アイス事業部のみ・縦400px以内） */}
+      {division === "ice" && (
+        <Section heat={HEAT.iceRecipe}>
+          <div className="flex flex-col gap-3 tab:flex-row tab:items-end tab:justify-between">
+            <SectionTitle en="ICE RECIPE" jp="氷のレシピ" />
+            <a
+              href="https://www.iceline.co.jp/services/ice/recipe/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-brand"
+              style={{ fontSize: 13 }}
+            >
+              レシピ一覧を見る <ArrowUpRight size={15} />
+            </a>
+          </div>
+          {/* 複数階層（カテゴリ＞レシピ）を横スクロールで縦400px以内に収める */}
+          <div className="mt-6 max-h-[400px] overflow-x-auto overflow-y-hidden pb-3">
+            <div className="grid auto-cols-[minmax(220px,1fr)] grid-flow-col gap-4 tab:grid-flow-row tab:grid-cols-2 pc:grid-cols-4">
+              {ICE_RECIPES.map((cat) => (
+                <div key={cat.category} className="flex flex-col rounded-xl border border-border bg-card p-5">
+                  <p className="text-brand" style={{ fontSize: 15, fontWeight: 700 }}>{cat.category}</p>
+                  <ul className="mt-3 space-y-2">
+                    {cat.items.map((it) => (
+                      <li key={it.name}>
+                        <a
+                          href="https://www.iceline.co.jp/services/ice/recipe/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-start justify-between gap-2 border-b border-border/60 pb-2 transition-colors hover:text-brand"
+                        >
+                          <span>
+                            <span className="block" style={{ fontSize: 13, fontWeight: 500 }}>{it.name}</span>
+                            <span className="block text-muted-foreground" style={{ fontSize: 11 }}>{it.note}</span>
+                          </span>
+                          <ArrowUpRight size={13} className="mt-1 shrink-0 text-muted-foreground transition-colors group-hover:text-brand" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+      )}
     </>
   );
 }

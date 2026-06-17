@@ -12,14 +12,17 @@ export const HEAT: Record<string, HeatProfile> = {
 
   // ---- 食品事業部 ----
   foodMv: heat("B", "B", "C", "A", "A", "C"), // 6
+  foodBiz: heat("C", "C", "C", "D", "B", "C"), // 6.5 事業紹介
   foodReason: heat("A", "B", "D", "A", "A", "C"), // 7 選ばれる理由
   foodList: heat("A", "A", "B", "A", "A", "B"), // 8
   foodDetail: heat("A", "A", "A", "A", "A", "A"), // 9
 
   // ---- アイス事業部 ----
   iceMv: heat("B", "B", "C", "A", "A", "C"), // 10
+  iceBiz: heat("C", "C", "C", "D", "B", "C"), // 10.5 事業紹介
   iceReason: heat("A", "B", "D", "A", "A", "C"), // 11
   iceList: heat("A", "A", "B", "A", "A", "B"), // 12
+  iceRecipe: heat("C", "C", "D", "D", "B", "D"), // 12.5 氷のレシピ
   iceDetail: heat("A", "A", "A", "A", "A", "A"), // 13
 
   // ---- 会社情報 ----
