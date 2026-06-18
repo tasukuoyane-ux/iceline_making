@@ -19,10 +19,10 @@ export function Company() {
 
       {/* 代表メッセージ（会社情報の熱量ピーク） */}
       <Section heat={HEAT.ceoMessage}>
-        <div className="grid gap-10 pc:grid-cols-[1fr_1.3fr]">
-          <div>
+        <div className="grid items-stretch gap-10 pc:grid-cols-[1fr_1.3fr]">
+          <div className="flex flex-col">
             <SectionTitle en="MESSAGE" jp="代表メッセージ" />
-            <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="mt-6 aspect-[4/3] w-full rounded-2xl object-cover" />
+            <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="mt-6 aspect-[4/3] w-full rounded-2xl object-cover pc:aspect-auto pc:min-h-0 pc:flex-1" />
             <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }}>{CEO_MESSAGE.name}</p>
           </div>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-5">
@@ -37,7 +37,7 @@ export function Company() {
       <Section heat={HEAT.philosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8 }}>
+          <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8 }}>
             {PHILOSOPHY.body}
           </p>
         </div>
@@ -77,7 +77,7 @@ export function Company() {
             <ImageWithFallback
               src={IMG.warehouse}
               alt="アイスラインの歩み"
-              className="sticky top-24 aspect-[3/4] w-full rounded-2xl object-cover"
+              className="h-full min-h-0 w-full rounded-2xl object-cover"
             />
           </div>
         </div>

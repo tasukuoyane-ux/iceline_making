@@ -114,7 +114,7 @@ export function DivisionPage({ division }: { division: Division }) {
 
       {/* 選ばれる理由（熱量の強化・主語を明確化） */}
       <Section heat={reasonHeat}>
-        <div className="grid items-center gap-10 pc:grid-cols-2">
+        <div className="grid items-center gap-10 pc:grid-cols-2 pc:items-stretch">
           <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
             <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }}>
@@ -125,11 +125,11 @@ export function DivisionPage({ division }: { division: Division }) {
               <ShieldCheck size={16} className="text-brand" /> FSSC 22000 / ISO 認証取得
             </div>
           </motion.div>
-          <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="pc:h-full">
             <ImageWithFallback
               src={division === "food" ? IMG.kitchen : IMG.iceClose}
               alt={info.reasonCatch}
-              className="aspect-[4/5] w-full rounded-2xl object-cover"
+              className="aspect-[4/5] w-full rounded-2xl object-cover pc:aspect-auto pc:h-full"
             />
           </motion.div>
         </div>
