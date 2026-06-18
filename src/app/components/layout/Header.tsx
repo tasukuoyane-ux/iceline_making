@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { SITE } from "../../data/company";
 import logo from "../../../images/logo.png";
 import { cn } from "../ui/utils";
+import { ed, edImg, txt, img } from "../../lib/editable";
 
 const NAV = [
   { to: "/", label: "TOP" },
@@ -28,7 +29,8 @@ export function Header() {
           aria-label={SITE.name}
         >
           <img
-            src={logo}
+            {...edImg("header:logo", "ロゴ")}
+            src={img("header:logo", logo)}
             alt={SITE.name}
             className="h-9 w-auto pc:h-11"
           />
@@ -36,7 +38,7 @@ export function Header() {
 
         {/* PC nav */}
         <nav className="hidden items-center gap-1 pc:flex">
-          {NAV.map((n) => {
+          {NAV.map((n, i) => {
             const active =
               n.to === "/"
                 ? pathname === "/"
@@ -51,7 +53,7 @@ export function Header() {
                 )}
                 style={{ fontSize: 14 }}
               >
-                {n.label}
+                <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
                 {active && (
                   <span className="absolute inset-x-3 -bottom-px h-0.5 bg-brand" />
                 )}
@@ -63,7 +65,7 @@ export function Header() {
             className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-brand-dark"
             style={{ fontSize: 14 }}
           >
-            採用情報
+            <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
           </Link>
         </nav>
 
@@ -81,7 +83,7 @@ export function Header() {
       {open && (
         <nav className="border-t border-border bg-background pc:hidden">
           <div className="mx-auto flex max-w-[1400px] flex-col px-5 py-2">
-            {NAV.map((n) => (
+            {NAV.map((n, i) => (
               <Link
                 key={n.to}
                 to={n.to}
@@ -89,7 +91,7 @@ export function Header() {
                 className="border-b border-border/60 py-4"
                 style={{ fontSize: 15 }}
               >
-                {n.label}
+                <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
               </Link>
             ))}
             <Link
@@ -97,7 +99,7 @@ export function Header() {
               onClick={() => setOpen(false)}
               className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground"
             >
-              採用情報
+              <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
             </Link>
           </div>
         </nav>

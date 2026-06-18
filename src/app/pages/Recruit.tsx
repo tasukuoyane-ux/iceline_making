@@ -7,7 +7,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
-import { ed, edImg } from "../lib/editable";
+import { ed, edImg, txt, img } from "../lib/editable";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -29,7 +29,7 @@ import {
 function RecruitHero() {
   return (
     <section className="relative flex min-h-[88vh] w-full items-center overflow-hidden bg-ink">
-      <ImageWithFallback src={IMG.team1} alt="採用" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+      <ImageWithFallback src={img("recruit:heroImage", IMG.team1)} alt="採用" className="absolute inset-0 h-full w-full object-cover opacity-45" {...edImg("recruit:heroImage", "採用ヒーロー画像")} />
       <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/70 to-brand/30" />
       <div className="relative mx-auto w-full max-w-[1400px] px-5 py-24 pc:px-8">
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}>
@@ -82,11 +82,11 @@ export function Recruit() {
       <Section heat={HEAT.recruitPhilosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="OUR CREED" jp="企業理念" align="center" />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 23, fontWeight: 700, lineHeight: 1.8 }}>
-            {RECRUIT_PHILOSOPHY.creed}
+          <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 23, fontWeight: 700, lineHeight: 1.8 }} {...ed("recruit:philosophy.creed", "企業理念キャッチ")}>
+            {txt("recruit:philosophy.creed", RECRUIT_PHILOSOPHY.creed)}
           </p>
-          <p className="mx-auto mt-8 max-w-2xl text-center text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }}>
-            {RECRUIT_PHILOSOPHY.body}
+          <p className="mx-auto mt-8 max-w-2xl text-center text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2, whiteSpace: "pre-line" }} {...ed("recruit:philosophy.body", "企業理念本文", { multiline: true })}>
+            {txt("recruit:philosophy.body", RECRUIT_PHILOSOPHY.body)}
           </p>
         </div>
       </Section>
@@ -105,14 +105,15 @@ export function Recruit() {
               className={`grid items-center gap-8 rounded-2xl border border-border bg-card p-8 pc:grid-cols-2 pc:p-12 ${i % 2 ? "pc:[direction:rtl]" : ""}`}
             >
               <div className="[direction:ltr]">
-                <span className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>{b.dept}</span>
-                <h3 className="mt-2 text-brand" style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.4 }}>{b.mission}</h3>
-                <p className="mt-5 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }}>{b.body}</p>
+                <span className="text-brand" style={{ fontSize: 13, fontWeight: 700 }} {...ed(`recruit:biz.${i}.dept`, "事業部門名")}>{txt(`recruit:biz.${i}.dept`, b.dept)}</span>
+                <h3 className="mt-2 text-brand" style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.4 }} {...ed(`recruit:biz.${i}.mission`, "事業ミッション")}>{txt(`recruit:biz.${i}.mission`, b.mission)}</h3>
+                <p className="mt-5 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`recruit:biz.${i}.body`, "事業本文", { multiline: true })}>{txt(`recruit:biz.${i}.body`, b.body)}</p>
               </div>
               <ImageWithFallback
-                src={i % 2 ? IMG.iceMacro : IMG.foodPlate}
+                src={img(`recruit:biz.${i}.image`, i % 2 ? IMG.iceMacro : IMG.foodPlate)}
                 alt={b.mission}
                 className="aspect-[4/3] w-full rounded-2xl object-cover [direction:ltr]"
+                {...edImg(`recruit:biz.${i}.image`, "事業画像")}
               />
             </motion.div>
           ))}
@@ -123,11 +124,11 @@ export function Recruit() {
       <Section heat={HEAT.recruitLocation}>
         <SectionTitle en="LOCATIONS" jp="拠点情報" />
         <div className="mt-10 grid gap-5 tab:grid-cols-3">
-          {RECRUIT_LOCATIONS.map((l) => (
+          {RECRUIT_LOCATIONS.map((l, i) => (
             <div key={l.name} className="rounded-xl border border-border bg-card p-6">
               <MapPin className="text-brand" size={22} />
-              <h3 className="mt-3" style={{ fontSize: 17, fontWeight: 700 }}>{l.name}</h3>
-              <p className="mt-2 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.8 }}>{l.address}</p>
+              <h3 className="mt-3" style={{ fontSize: 17, fontWeight: 700 }} {...ed(`recruit:locations.${i}.name`, "拠点名")}>{txt(`recruit:locations.${i}.name`, l.name)}</h3>
+              <p className="mt-2 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.8 }} {...ed(`recruit:locations.${i}.address`, "拠点住所")}>{txt(`recruit:locations.${i}.address`, l.address)}</p>
             </div>
           ))}
         </div>
@@ -149,8 +150,8 @@ export function Recruit() {
               >
                 <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 48, fontWeight: 700, lineHeight: 1 }}>{c.no}</span>
                 <div>
-                  <h3 style={{ fontSize: 21, fontWeight: 700 }}>{c.title}</h3>
-                  <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }}>{c.body}</p>
+                  <h3 style={{ fontSize: 21, fontWeight: 700 }} {...ed(`recruit:charm.${i}.title`, "仕事の魅力タイトル")}>{txt(`recruit:charm.${i}.title`, c.title)}</h3>
+                  <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`recruit:charm.${i}.body`, "仕事の魅力本文", { multiline: true })}>{txt(`recruit:charm.${i}.body`, c.body)}</p>
                 </div>
               </motion.div>
             ))}
@@ -162,12 +163,12 @@ export function Recruit() {
       <Section heat={HEAT.recruitWork}>
         <SectionTitle en="WORK" jp="業務内容" />
         <div className="mt-10 grid gap-6 tab:grid-cols-2">
-          {RECRUIT_WORK.map((w) => (
+          {RECRUIT_WORK.map((w, wi) => (
             <div key={w.role} className="rounded-2xl border border-border bg-card p-8">
-              <h3 className="text-brand" style={{ fontSize: 19, fontWeight: 700 }}>{w.role}</h3>
+              <h3 className="text-brand" style={{ fontSize: 19, fontWeight: 700 }} {...ed(`recruit:work.${wi}.role`, "業務内容の職種")}>{txt(`recruit:work.${wi}.role`, w.role)}</h3>
               <ul className="mt-5 space-y-3">
                 {w.lines.map((l, i) => (
-                  <li key={i} className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }}>{l}</li>
+                  <li key={i} className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }} {...ed(`recruit:work.${wi}.lines.${i}`, "業務内容")}>{txt(`recruit:work.${wi}.lines.${i}`, l)}</li>
                 ))}
               </ul>
             </div>
@@ -186,8 +187,9 @@ export function Recruit() {
               onClick={() => setDayRole(i)}
               className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
               style={{ fontSize: 13, fontWeight: 700 }}
+              {...ed(`recruit:days.${i}.role`, "職種名")}
             >
-              {d.role}
+              {txt(`recruit:days.${i}.role`, d.role)}
             </button>
           ))}
         </div>
@@ -195,15 +197,15 @@ export function Recruit() {
           {/* 左：選択中の職種のタイムライン */}
           <div>
             <p className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
-              <Clock size={15} className="text-brand" /> {day.note}
+              <Clock size={15} className="text-brand" /> <span {...ed(`recruit:days.${dayRole}.note`, "勤務時間メモ")}>{txt(`recruit:days.${dayRole}.note`, day.note)}</span>
             </p>
             <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
               {day.steps.map((d, i) => (
                 <li key={i} className="relative mb-7 last:mb-0">
                   <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
                   <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
-                    <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
-                    <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
+                    <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }} {...ed(`recruit:days.${dayRole}.steps.${i}.time`, "時刻")}>{txt(`recruit:days.${dayRole}.steps.${i}.time`, d.time)}</span>
+                    <p style={{ fontSize: 15, lineHeight: 1.8 }} {...ed(`recruit:days.${dayRole}.steps.${i}.task`, "業務")}>{txt(`recruit:days.${dayRole}.steps.${i}.task`, d.task)}</p>
                   </div>
                 </li>
               ))}
@@ -212,9 +214,10 @@ export function Recruit() {
           {/* 右：画像（PCのみ・タブごとに切替／下端をol下端に合わせる） */}
           <div className="hidden pc:relative pc:block">
             <ImageWithFallback
-              src={DAY_IMAGES[dayRole]}
+              src={img(`recruit:days.${dayRole}.image`, DAY_IMAGES[dayRole])}
               alt={day.role}
               className="rounded-2xl object-cover pc:absolute pc:inset-0 pc:h-full pc:w-full"
+              {...edImg(`recruit:days.${dayRole}.image`, "一日の流れ画像")}
             />
           </div>
         </div>
@@ -313,9 +316,9 @@ export function Recruit() {
         <div className="mt-10 grid gap-6 tab:grid-cols-2">
           {RECRUIT_JOBS.map((j, i) => (
             <div key={i} className="rounded-xl border border-border bg-card p-7">
-              <span className="text-muted-foreground" style={{ fontSize: 12 }}>{j.dept}</span>
-              <h3 className="mt-1 text-brand" style={{ fontSize: 18, fontWeight: 700 }}>{j.role}</h3>
-              <p className="mt-3 text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }}>{j.body}</p>
+              <span className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`recruit:jobs.${i}.dept`, "募集部門")}>{txt(`recruit:jobs.${i}.dept`, j.dept)}</span>
+              <h3 className="mt-1 text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`recruit:jobs.${i}.role`, "募集職種")}>{txt(`recruit:jobs.${i}.role`, j.role)}</h3>
+              <p className="mt-3 text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`recruit:jobs.${i}.body`, "募集職種本文", { multiline: true })}>{txt(`recruit:jobs.${i}.body`, j.body)}</p>
             </div>
           ))}
         </div>
@@ -326,10 +329,10 @@ export function Recruit() {
         <SectionTitle en="CONDITIONS" jp="諸条件" />
         <table className="mt-8 w-full border-t border-border">
           <tbody>
-            {RECRUIT_TERMS.map((r) => (
+            {RECRUIT_TERMS.map((r, i) => (
               <tr key={r.label} className="border-b border-border align-top">
                 <th className="w-40 bg-secondary px-5 py-4 text-left text-muted-foreground" style={{ fontSize: 14, fontWeight: 500 }}>{r.label}</th>
-                <td className="px-5 py-4" style={{ fontSize: 14, lineHeight: 1.9 }}>{r.value}</td>
+                <td className="px-5 py-4" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`recruit:terms.${i}.value`, "募集要項内容", { multiline: true })}>{txt(`recruit:terms.${i}.value`, r.value)}</td>
               </tr>
             ))}
           </tbody>

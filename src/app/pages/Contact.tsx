@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { ed, txt } from "../lib/editable";
 
 const TOPICS = ["商品について", "お取引について", "採用について", "その他"];
 
@@ -31,8 +32,8 @@ export function Contact() {
     <Section heat={HEAT.contactForm}>
       <div className="mx-auto max-w-2xl">
         <SectionTitle en="CONTACT" jp="お問い合わせ" align="center" />
-        <p className="mx-auto mt-6 max-w-xl text-center text-muted-foreground" style={{ fontSize: 15, lineHeight: 1.9 }}>
-          商品についてのご相談、お取引に関するご質問など、お気軽にお問い合わせください。
+        <p className="mx-auto mt-6 max-w-xl text-center text-muted-foreground" style={{ fontSize: 15, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("contact:intro", "導入文", { multiline: true })}>
+          {txt("contact:intro", "商品についてのご相談、お取引に関するご質問など、お気軽にお問い合わせください。")}
         </p>
 
         <form onSubmit={onSubmit} className="mt-12 space-y-6">
@@ -67,11 +68,11 @@ export function Contact() {
             <Label htmlFor="message">お問い合わせ内容 <span className="text-brand">*</span></Label>
             <Textarea id="message" required rows={6} placeholder="お問い合わせ内容をご記入ください" />
           </div>
-          <Button type="submit" className="w-full bg-brand text-brand-foreground hover:bg-brand-dark" style={{ height: 52 }}>
-            この内容で送信する
+          <Button type="submit" className="w-full bg-brand text-brand-foreground hover:bg-brand-dark" style={{ height: 52 }} {...ed("contact:submit", "送信ボタン")}>
+            {txt("contact:submit", "この内容で送信する")}
           </Button>
-          <p className="text-center text-muted-foreground" style={{ fontSize: 12 }}>
-            ※ これはプロトタイプです。送信内容は保存されません。
+          <p className="text-center text-muted-foreground" style={{ fontSize: 12 }} {...ed("contact:note", "注意書き")}>
+            {txt("contact:note", "※ これはプロトタイプです。送信内容は保存されません。")}
           </p>
         </form>
       </div>

@@ -7,7 +7,7 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, DIVISION_INFO, DIVISION_BIZ, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg } from "../lib/editable";
+import { ed, edImg, txt, img } from "../lib/editable";
 
 const MV: Record<Division, { img: string; lead: string }> = {
   food: { img: IMG.foodPlate, lead: "食の現場に、深く根を張る。" },
@@ -53,15 +53,15 @@ function IcePossibilityFigure() {
                 <b.icon size={20} />
               </span>
               <div>
-                <p style={{ fontSize: 15, fontWeight: 700 }}>{b.label}</p>
-                <p className="mt-0.5 text-muted-foreground" style={{ fontSize: 12 }}>{b.note}</p>
+                <p style={{ fontSize: 15, fontWeight: 700 }} {...ed(`division:ice:possibility.${i}.label`, "可能性ラベル")}>{txt(`division:ice:possibility.${i}.label`, b.label)}</p>
+                <p className="mt-0.5 text-muted-foreground" style={{ fontSize: 12 }} {...ed(`division:ice:possibility.${i}.note`, "可能性の補足")}>{txt(`division:ice:possibility.${i}.note`, b.note)}</p>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
-      <p className="mt-8 text-center text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9 }}>
-        一つの氷から、新たな価値へ。アイスラインは氷の可能性を、絶えず広げ続けています。
+      <p className="mt-8 text-center text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("division:ice:possibilityCaption", "氷の可能性の説明文", { multiline: true })}>
+        {txt("division:ice:possibilityCaption", "一つの氷から、新たな価値へ。アイスラインは氷の可能性を、絶えず広げ続けています。")}
       </p>
     </div>
   );
@@ -89,7 +89,7 @@ export function DivisionPage({ division }: { division: Division }) {
               {division === "food" ? "FOOD DIVISION" : "ICE DIVISION"}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }}>{info.label}</h1>
-            <p className="mt-4 text-white/85" style={{ fontSize: 16 }}>{MV[division].lead}</p>
+            <p className="mt-4 text-white/85" style={{ fontSize: 16 }} {...ed(`division:${division}:mvLead`, "MVリード文")}>{txt(`division:${division}:mvLead`, MV[division].lead)}</p>
           </motion.div>
         </div>
       </section>
@@ -144,9 +144,9 @@ export function DivisionPage({ division }: { division: Division }) {
                 <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
               </div>
               <div className="flex flex-1 flex-col p-6">
-                <span className="text-muted-foreground" style={{ fontSize: 12 }}>{p.genre}</span>
-                <h3 className="mt-1" style={{ fontSize: 18, fontWeight: 700 }}>{p.name}</h3>
-                <p className="mt-2 flex-1 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.8 }}>{p.catch}</p>
+                <span className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`product:${p.id}:genre`, "商品ジャンル")}>{txt(`product:${p.id}:genre`, p.genre)}</span>
+                <h3 className="mt-1" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{txt(`product:${p.id}:name`, p.name)}</h3>
+                <p className="mt-2 flex-1 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{txt(`product:${p.id}:catch`, p.catch)}</p>
                 <span className="mt-4 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
                   詳細を見る <ArrowRight size={14} />
                 </span>

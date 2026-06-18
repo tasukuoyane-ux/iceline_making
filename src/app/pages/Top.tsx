@@ -9,7 +9,7 @@ import { IMG, PRODUCT_IMG } from "../data/images";
 import { SITE, STRENGTHS } from "../data/company";
 import { NEWS } from "../data/news";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
-import { ed, edImg } from "../lib/editable";
+import { ed, edImg, txt, img } from "../lib/editable";
 
 const SLIDES = [
   { img: IMG.iceMacro, alt: "氷のクローズアップ", key: "iceMacro" },
@@ -77,7 +77,7 @@ export function Top() {
       {/* ヒーロー：対象者別3導線 */}
       <Section heat={HEAT.topHero}>
         <div className="grid gap-4 tab:grid-cols-3">
-          {AUDIENCE.map((a) => (
+          {AUDIENCE.map((a, i) => (
             <Link
               key={a.to}
               to={a.to}
@@ -86,8 +86,8 @@ export function Top() {
               <div className="flex items-center gap-4">
                 <a.icon className="text-brand" size={28} />
                 <div>
-                  <p className="text-muted-foreground" style={{ fontSize: 12 }}>{a.note}</p>
-                  <p style={{ fontSize: 15 }}>{a.label}</p>
+                  <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, "導線サブラベル")}>{txt(`top:audience.${i}.note`, a.note)}</p>
+                  <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, "導線ラベル")}>{txt(`top:audience.${i}.label`, a.label)}</p>
                 </div>
               </div>
               <ArrowRight className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
@@ -123,9 +123,8 @@ export function Top() {
       <Section heat={HEAT.topStrength} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="OUR STRENGTH" jp="私たちの強み" />
-          <p className="mt-4 max-w-2xl text-muted-foreground" style={{ fontSize: 16, lineHeight: 2 }}>
-            需要が読めないときも、季節が外れているときも。約束した量を、欠かさず届ける。
-            その積み重ねが、120年のアイスラインです。
+          <p className="mt-4 max-w-2xl text-muted-foreground" style={{ fontSize: 16, lineHeight: 2, whiteSpace: "pre-line" }} {...ed("top:strength.lead", "強み リード文", { multiline: true })}>
+            {txt("top:strength.lead", "需要が読めないときも、季節が外れているときも。約束した量を、欠かさず届ける。\nその積み重ねが、120年のアイスラインです。")}
           </p>
           <div className="mt-12 grid gap-6 pc:grid-cols-3">
             {STRENGTHS.map((s, idx) => (
@@ -137,9 +136,9 @@ export function Top() {
                 transition={{ duration: 0.6, delay: idx * 0.12 }}
                 className="rounded-2xl border border-border bg-card p-8"
               >
-                <div className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700 }}>{s.no}</div>
-                <h3 className="mt-2" style={{ fontSize: 22, fontWeight: 700 }}>{s.title}</h3>
-                <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 2 }}>{s.body}</p>
+                <div className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700 }} {...ed(`top:strength.${idx}.no`, "強み 番号")}>{txt(`top:strength.${idx}.no`, s.no)}</div>
+                <h3 className="mt-2" style={{ fontSize: 22, fontWeight: 700 }} {...ed(`top:strength.${idx}.title`, "強み タイトル")}>{txt(`top:strength.${idx}.title`, s.title)}</h3>
+                <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 2, whiteSpace: "pre-line" }} {...ed(`top:strength.${idx}.body`, "強み 本文", { multiline: true })}>{txt(`top:strength.${idx}.body`, s.body)}</p>
               </motion.div>
             ))}
           </div>
@@ -150,7 +149,7 @@ export function Top() {
       <Section heat={HEAT.topGenre}>
         <SectionTitle en="PRODUCTS" jp="商品ジャンル" />
         <div className="mt-10 grid grid-cols-2 gap-4 tab:grid-cols-3 pc:grid-cols-3">
-          {PRODUCT_GENRES.map((g) => {
+          {PRODUCT_GENRES.map((g, i) => {
             const p = PRODUCTS.find((pr) => pr.genre === g.label);
             return (
               <Link
@@ -168,7 +167,7 @@ export function Top() {
                   )}
                 </div>
                 <div className="absolute inset-0 flex items-end bg-gradient-to-t from-ink/70 to-transparent p-5">
-                  <span className="text-white" style={{ fontSize: 16, fontWeight: 700 }}>{g.label}</span>
+                  <span className="text-white" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`top:genre.${i}.label`, "商品ジャンル名")}>{txt(`top:genre.${i}.label`, g.label)}</span>
                 </div>
               </Link>
             );
