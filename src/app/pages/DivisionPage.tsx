@@ -79,24 +79,17 @@ export function DivisionPage({ division }: { division: Division }) {
 
   return (
     <>
-      {/* メインビジュアル（シズル感） */}
-      <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-ink">
+      {/* メインビジュアル（高さは会社情報ページに合わせる・タイトル中央） */}
+      <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
         <ImageWithFallback src={MV[division].img} alt={info.label} className="h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodPlate" : "images:IMG.iceMacro")} />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-ink/20" />
-        {/* 上部オーバーレイのページタイトル（白文字） */}
-        <div className="absolute inset-x-0 top-0 z-10">
-          <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-5 pt-7 pc:px-8 pc:pt-9">
-            <span className="h-5 w-1 bg-brand" />
-            <span className="text-white" style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em" }}>{info.label}</span>
-          </div>
-        </div>
-        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-16 pc:px-8 pc:pb-24">
+        <div className="absolute inset-0 bg-ink/50" />
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
               {division === "food" ? "FOOD DIVISION" : "ICE DIVISION"}
             </p>
-            <h1 className="text-white" style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.25 }}>{info.label}</h1>
-            <p className="mt-3 text-white/85" style={{ fontSize: 18 }}>{MV[division].lead}</p>
+            <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }}>{info.label}</h1>
+            <p className="mt-4 text-white/85" style={{ fontSize: 16 }}>{MV[division].lead}</p>
           </motion.div>
         </div>
       </section>
