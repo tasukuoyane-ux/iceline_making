@@ -1,7 +1,14 @@
 // 認証共通処理（JWT発行・検証、社員アカウントの照合）。
 // api/ 配下で _ 始まりのフォルダはVercelのエンドポイントにならず、import専用。
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+//
+// 注意: プロジェクトが "type": "module"（ESM）のため、内部で require('crypto') を使う
+// jsonwebtoken 等を通常 import するとVercel(esbuild)バンドル時に
+// 「Dynamic require is not supported」で実行時クラッシュする。
+// createRequire でランタイム読み込みにして回避する。
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const jwt = require("jsonwebtoken") as typeof import("jsonwebtoken");
+const bcrypt = require("bcryptjs") as typeof import("bcryptjs");
 
 export interface ConsoleUser {
   username: string;
