@@ -26,7 +26,7 @@ export default async function handler(req: any, res: any) {
       res.status(401).json({ error: "社員IDまたはパスワードが正しくありません" });
       return;
     }
-    const token = issueToken(user);
+    const token = await issueToken(user);
     res.status(200).json({ token, user: { username: user.username, name: user.name } });
   } catch (err: any) {
     res.status(500).json({ error: err?.message || "ログイン処理でエラーが発生しました" });

@@ -27,25 +27,18 @@ export default async function handler(_req: any, res: any) {
     out.consoleUsers = { parsed: false, error: String(e?.message || e) };
   }
 
-  // import.meta + createRequire が使えるか
+  // 依存(jose/bcryptjs)が静的importでバンドルされているか
   try {
-    const { createRequire } = await import("module");
-    const req = createRequire(import.meta.url);
-    out.createRequire = "ok";
-    try {
-      const jwt: any = req("jsonwebtoken");
-      out.jsonwebtoken = typeof jwt.sign === "function" ? "ok" : "loaded-no-sign";
-    } catch (e: any) {
-      out.jsonwebtoken = "ERROR: " + String(e?.message || e);
-    }
-    try {
-      const bcrypt: any = req("bcryptjs");
-      out.bcryptjs = typeof bcrypt.compare === "function" ? "ok" : "loaded-no-compare";
-    } catch (e: any) {
-      out.bcryptjs = "ERROR: " + String(e?.message || e);
-    }
+    const jose: any = await import("jose");
+    out.jose = typeof jose.SignJWT === "function" ? "ok" : "loaded-no-SignJWT";
   } catch (e: any) {
-    out.createRequire = "ERROR: " + String(e?.message || e);
+    out.jose = "ERROR: " + String(e?.message || e);
+  }
+  try {
+    const bcrypt: any = (await import("bcryptjs")).default;
+    out.bcryptjs = typeof bcrypt.compare === "function" ? "ok" : "loaded-no-compare";
+  } catch (e: any) {
+    out.bcryptjs = "ERROR: " + String(e?.message || e);
   }
 
   res.status(200).json(out);

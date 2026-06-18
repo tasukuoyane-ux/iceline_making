@@ -25,7 +25,7 @@ export default async function handler(req: any, res: any) {
     res.status(405).json({ error: "Method Not Allowed" });
     return;
   }
-  const auth = verifyRequest(req);
+  const auth = await verifyRequest(req);
   if (!auth) {
     res.status(401).json({ error: "認証が必要です。再度ログインしてください。" });
     return;

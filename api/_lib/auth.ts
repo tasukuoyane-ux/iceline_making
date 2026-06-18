@@ -1,14 +1,11 @@
 // 認証共通処理（JWT発行・検証、社員アカウントの照合）。
 // api/ 配下で _ 始まりのフォルダはVercelのエンドポイントにならず、import専用。
 //
-// 注意: プロジェクトが "type": "module"（ESM）のため、内部で require('crypto') を使う
-// jsonwebtoken 等を通常 import するとVercel(esbuild)バンドル時に
-// 「Dynamic require is not supported」で実行時クラッシュする。
-// createRequire でランタイム読み込みにして回避する。
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const jwt = require("jsonwebtoken") as typeof import("jsonwebtoken");
-const bcrypt = require("bcryptjs") as typeof import("bcryptjs");
+// JWTは ESMネイティブの jose を使用（jsonwebtoken は "type":"module" 環境で
+// 内部の require('crypto') によりVercelバンドル時に実行時クラッシュするため不採用）。
+// パスワード照合は bcryptjs（純JS）を静的importでバンドル。
+import { SignJWT, jwtVerify } from "jose";
+import bcrypt from "bcryptjs";
 
 export interface ConsoleUser {
   username: string;
@@ -21,10 +18,10 @@ export interface TokenPayload {
   name: string;
 }
 
-function getSecret(): string {
+function secretKey(): Uint8Array {
   const s = process.env.JWT_SECRET;
   if (!s) throw new Error("JWT_SECRET が未設定です");
-  return s;
+  return new TextEncoder().encode(s);
 }
 
 /**
@@ -50,18 +47,23 @@ export async function verifyCredentials(username: string, password: string): Pro
   return { username: user.username, name: user.name };
 }
 
-export function issueToken(payload: TokenPayload): string {
-  return jwt.sign(payload, getSecret(), { expiresIn: "12h" });
+export async function issueToken(payload: TokenPayload): Promise<string> {
+  return await new SignJWT({ name: payload.name })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(payload.username)
+    .setExpirationTime("12h")
+    .sign(secretKey());
 }
 
 /** Authorization: Bearer <token> を検証。失敗時は null。 */
-export function verifyRequest(req: { headers: Record<string, any> }): TokenPayload | null {
+export async function verifyRequest(req: { headers: Record<string, any> }): Promise<TokenPayload | null> {
   const header = req.headers["authorization"] || req.headers["Authorization"];
   if (!header || typeof header !== "string") return null;
   const m = header.match(/^Bearer\s+(.+)$/i);
   if (!m) return null;
   try {
-    return jwt.verify(m[1], getSecret()) as TokenPayload;
+    const { payload } = await jwtVerify(m[1], secretKey());
+    return { username: String(payload.sub), name: String((payload as any).name ?? "") };
   } catch {
     return null;
   }
