@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import { ChevronLeft } from "lucide-react";
 import { NEWS } from "../data/news";
 import { ed } from "../lib/editable";
+import { BlockContent } from "../components/common/BlockContent";
 
 export function NewsDetail() {
   const { id } = useParams();
@@ -27,7 +28,7 @@ export function NewsDetail() {
       </div>
       <h1 className="mt-4" style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.5 }} {...ed(`news:${n.id}:title`)}>{n.title}</h1>
       <div className="mt-8 border-t border-border pt-8">
-        <p style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`news:${n.id}:body`)}>{n.body}</p>
+        <BlockContent blocks={n.blocks} />
       </div>
     </article>
   );

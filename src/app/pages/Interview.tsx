@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { INTERVIEWS } from "../data/recruit";
 import { ed, edImg } from "../lib/editable";
+import { BlockContent } from "../components/common/BlockContent";
 
 export function Interview() {
   const { id } = useParams();
@@ -36,20 +37,8 @@ export function Interview() {
         <Link to="/recruit" className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
           <ChevronLeft size={16} /> 採用情報へ戻る
         </Link>
-        <div className="mt-8 space-y-7">
-          {iv.paragraphs.map((p, i) => (
-            <motion.p
-              key={i}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              style={{ fontSize: 16, lineHeight: 2.3 }}
-              {...ed(`interviews:${iv.id}:paragraphs.${i}`)}
-            >
-              {p}
-            </motion.p>
-          ))}
+        <div className="mt-8">
+          <BlockContent blocks={iv.blocks} />
         </div>
         <Link to="/recruit" className="mt-12 inline-flex items-center justify-center rounded-full bg-brand px-7 py-3 text-brand-foreground transition-colors hover:bg-brand-dark" style={{ fontSize: 14 }}>
           エントリーする

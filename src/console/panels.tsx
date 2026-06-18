@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 import { Content, NewsItem, VideoItem, InterviewItem, NEWS_CATEGORIES } from "./content";
 import { Field, TextInput, TextArea, Select, Button, Card } from "./ui";
 import { ImageField } from "./ImageField";
+import { BlockEditor } from "./BlockEditor";
 
 function genId(prefix: string): string {
   // 時刻に依存しない簡易ユニークID
@@ -17,7 +18,13 @@ export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v
     onChange(next);
   }
   function add() {
-    const item: NewsItem = { id: genId("n"), date: "2026.01.01", category: "お知らせ", title: "新しいお知らせ", body: "本文を入力してください。" };
+    const item: NewsItem = {
+      id: genId("n"),
+      date: "2026.01.01",
+      category: "お知らせ",
+      title: "新しいお知らせ",
+      blocks: [{ type: "paragraph", text: "本文を入力してください。" }],
+    };
     onChange([item, ...value]);
   }
   function remove(i: number) {
@@ -54,9 +61,8 @@ export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v
               </Field>
             </div>
             <div className="mt-3">
-              <Field label="本文">
-                <TextArea rows={4} value={n.body} onChange={(e) => update(i, { body: e.target.value })} />
-              </Field>
+              <span className="mb-1 block text-[13px] font-medium text-slate-600">本文</span>
+              <BlockEditor value={n.blocks} onChange={(blocks) => update(i, { blocks })} />
             </div>
           </Card>
         </div>
@@ -118,21 +124,18 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
     next[i] = { ...next[i], ...patch };
     onChange(next);
   }
-  function updatePara(i: number, pi: number, text: string) {
-    const paras = value[i].paragraphs.slice();
-    paras[pi] = text;
-    update(i, { paragraphs: paras });
-  }
-  function addPara(i: number) {
-    update(i, { paragraphs: [...value[i].paragraphs, ""] });
-  }
-  function removePara(i: number, pi: number) {
-    update(i, { paragraphs: value[i].paragraphs.filter((_, idx) => idx !== pi) });
-  }
   function add() {
     onChange([
       ...value,
-      { id: genId("iv"), name: "氏名", role: "所属・役職", years: "入社○年", lead: "見出しコピー", paragraphs: ["本文を入力してください。"], image: "" },
+      {
+        id: genId("iv"),
+        name: "氏名",
+        role: "所属・役職",
+        years: "入社○年",
+        lead: "見出しコピー",
+        blocks: [{ type: "paragraph", text: "本文を入力してください。" }],
+        image: "",
+      },
     ]);
   }
   function remove(i: number) {
@@ -160,18 +163,8 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
               <ImageField label="メイン画像" value={iv.image} onChange={(url) => update(i, { image: url })} />
             </div>
             <div className="mt-3">
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-[13px] font-medium text-slate-600">本文（段落）</span>
-                <Button onClick={() => addPara(i)}>＋ 段落を追加</Button>
-              </div>
-              <div className="space-y-2">
-                {iv.paragraphs.map((p, pi) => (
-                  <div key={pi} className="flex gap-2">
-                    <TextArea rows={3} value={p} onChange={(e) => updatePara(i, pi, e.target.value)} />
-                    <Button variant="ghost" onClick={() => removePara(i, pi)}>×</Button>
-                  </div>
-                ))}
-              </div>
+              <span className="mb-1 block text-[13px] font-medium text-slate-600">本文</span>
+              <BlockEditor value={iv.blocks} onChange={(blocks) => update(i, { blocks })} />
             </div>
           </Card>
         </div>

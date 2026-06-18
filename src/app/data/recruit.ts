@@ -2,6 +2,7 @@
 // 一部のコピー・インタビューは src/content/*.json で管理（/console から編集可能）。
 import sections from "../../content/sections.json";
 import interviewsData from "../../content/interviews.json";
+import { Block, toBlocks } from "./blocks";
 
 export const RECRUIT_MV = sections.recruitMv;
 
@@ -149,9 +150,18 @@ export interface Interview {
   role: string;
   years: string;
   lead: string;
-  paragraphs: string[];
+  // 本文はブロック構成（段落/見出し/画像）。旧データ(paragraphs)も後方互換で読む。
+  blocks: Block[];
   /** インタビュー記事のメイン画像URL */
   image: string;
 }
 
-export const INTERVIEWS: Interview[] = interviewsData as Interview[];
+export const INTERVIEWS: Interview[] = (interviewsData as any[]).map((iv) => ({
+  id: iv.id,
+  name: iv.name,
+  role: iv.role,
+  years: iv.years,
+  lead: iv.lead,
+  image: iv.image,
+  blocks: toBlocks(iv.blocks ?? iv.paragraphs),
+}));

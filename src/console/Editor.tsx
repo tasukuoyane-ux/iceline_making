@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AuthUser, clearAuth, publish } from "./api";
-import { Content, baseline, buildOverrides, changedFiles, clone } from "./content";
+import { Content, baseline, buildOverrides, changedFiles, clone, normalizeContent } from "./content";
 import { Button } from "./ui";
 import { PageFields, PageField } from "./PageFields";
 import { NewsPanel, VideosPanel, InterviewsPanel } from "./panels";
@@ -25,9 +25,7 @@ function loadDraft(): Content {
   const raw = localStorage.getItem(DRAFT_KEY);
   if (raw) {
     try {
-      const d = JSON.parse(raw) as Content;
-      if (!d.overrides) d.overrides = {};
-      return d;
+      return normalizeContent(JSON.parse(raw));
     } catch {
       /* fallthrough */
     }

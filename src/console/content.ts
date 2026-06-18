@@ -7,13 +7,16 @@ import interviewsJson from "../content/interviews.json";
 import imagesJson from "../content/images.json";
 import sectionsJson from "../content/sections.json";
 import overridesJson from "../content/overrides.json";
+import { Block, toBlocks } from "../app/data/blocks";
+
+export type { Block };
 
 export interface NewsItem {
   id: string;
   date: string;
   category: "お知らせ" | "製品" | "採用" | "メディア";
   title: string;
-  body: string;
+  blocks: Block[];
 }
 export interface VideoItem {
   id: string;
@@ -28,7 +31,7 @@ export interface InterviewItem {
   role: string;
   years: string;
   lead: string;
-  paragraphs: string[];
+  blocks: Block[];
   image: string;
 }
 export interface ImagesData {
@@ -63,16 +66,40 @@ export function clone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v));
 }
 
-/** ビルド時JSONをベースラインとして取得 */
+/** ビルド時JSONをベースラインとして取得（旧形式は blocks へ正規化） */
 export function baseline(): Content {
-  return clone({
-    news: newsJson as NewsItem[],
-    videos: videosJson as VideoItem[],
-    interviews: interviewsJson as InterviewItem[],
-    images: imagesJson as ImagesData,
-    sections: sectionsJson as any,
-    overrides: overridesJson as Record<string, string>,
-  });
+  return normalizeContent(
+    clone({
+      news: newsJson as any[],
+      videos: videosJson as VideoItem[],
+      interviews: interviewsJson as any[],
+      images: imagesJson as ImagesData,
+      sections: sectionsJson as any,
+      overrides: overridesJson as Record<string, string>,
+    })
+  );
+}
+
+/** 旧形式(body / paragraphs)を blocks へ揃える。localStorageの古い下書き対策にも使う。 */
+export function normalizeContent(c: any): Content {
+  c.news = (c.news || []).map((n: any) => ({
+    id: n.id,
+    date: n.date,
+    category: n.category,
+    title: n.title,
+    blocks: toBlocks(n.blocks ?? n.body),
+  }));
+  c.interviews = (c.interviews || []).map((iv: any) => ({
+    id: iv.id,
+    name: iv.name,
+    role: iv.role,
+    years: iv.years,
+    lead: iv.lead,
+    image: iv.image,
+    blocks: toBlocks(iv.blocks ?? iv.paragraphs),
+  }));
+  if (!c.overrides) c.overrides = {};
+  return c as Content;
 }
 
 /* ============ 汎用パスの取得/設定（ページ単位エディタ用） ============ */
@@ -181,7 +208,7 @@ export function buildOverrides(draft: Content): Record<string, string> {
     o[`news:${n.id}:date`] = n.date;
     o[`news:${n.id}:category`] = n.category;
     o[`news:${n.id}:title`] = n.title;
-    o[`news:${n.id}:body`] = n.body;
+    // 本文は blocks（構造編集のため inline プレビュー対象外）
   });
 
   draft.videos.forEach((v) => {
@@ -193,9 +220,7 @@ export function buildOverrides(draft: Content): Record<string, string> {
   draft.interviews.forEach((iv) => {
     o[`interviews:${iv.id}:lead`] = iv.lead;
     o[`interviews:${iv.id}:image`] = iv.image;
-    iv.paragraphs.forEach((p, i) => {
-      o[`interviews:${iv.id}:paragraphs.${i}`] = p;
-    });
+    // 本文は blocks（構造編集のため inline プレビュー対象外）
   });
 
   (["IMG", "PRODUCT_IMG", "INTERVIEW_IMG"] as const).forEach((group) => {
