@@ -1,7 +1,7 @@
 // POST /api/upload?filename=foo.jpg  (本文 = 画像バイナリ) -> { url }
 // Vercel Blob に保存して公開URLを返す。
 import { put } from "@vercel/blob";
-import { verifyRequest } from "./_lib/auth";
+import { verifyRequest } from "./_lib/auth.js";
 
 // バイナリ本文を取得（@vercel/node が Buffer 化していなければストリームから読む）
 async function readBody(req: any): Promise<Buffer> {

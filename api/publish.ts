@@ -1,6 +1,6 @@
 // POST /api/publish  { files: { "<path>": <jsonValue>, ... }, message }
 // 変更ファイルを GitHub に1コミットでまとめてpush → Vercel が自動でビルド・本番反映。
-import { verifyRequest } from "./_lib/auth";
+import { verifyRequest } from "./_lib/auth.js";
 
 const GH = "https://api.github.com";
 

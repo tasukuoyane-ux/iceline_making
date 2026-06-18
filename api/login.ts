@@ -1,5 +1,5 @@
 // POST /api/login  { username, password } -> { token, user }
-import { verifyCredentials, issueToken, getUsers } from "./_lib/auth";
+import { verifyCredentials, issueToken, getUsers } from "./_lib/auth.js";
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
