@@ -1,11 +1,11 @@
 // 認証共通処理（JWT発行・検証、社員アカウントの照合）。
 // api/ 配下で _ 始まりのフォルダはVercelのエンドポイントにならず、import専用。
 //
-// JWTは ESMネイティブの jose を使用（jsonwebtoken は "type":"module" 環境で
-// 内部の require('crypto') によりVercelバンドル時に実行時クラッシュするため不採用）。
-// パスワード照合は bcryptjs（純JS）を静的importでバンドル。
-import { SignJWT, jwtVerify } from "jose";
-import bcrypt from "bcryptjs";
+// 重要: jose / bcryptjs は「動的import」で読み込む。
+// 静的importにすると Vercel(esbuild) が関数バンドルに同梱し、bcryptjs内部の
+// require('crypto') が ESM環境で「Dynamic require is not supported」となって
+// 関数ロード時にクラッシュ（FUNCTION_INVOCATION_FAILED）する。
+// 動的importなら外部化＋ファイルトレースで同梱され、実行時に正しく解決される。
 
 export interface ConsoleUser {
   username: string;
@@ -42,12 +42,14 @@ export function getUsers(): ConsoleUser[] {
 export async function verifyCredentials(username: string, password: string): Promise<TokenPayload | null> {
   const user = getUsers().find((u) => u.username === username);
   if (!user) return null;
+  const bcrypt = (await import("bcryptjs")).default;
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return null;
   return { username: user.username, name: user.name };
 }
 
 export async function issueToken(payload: TokenPayload): Promise<string> {
+  const { SignJWT } = await import("jose");
   return await new SignJWT({ name: payload.name })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.username)
@@ -62,6 +64,7 @@ export async function verifyRequest(req: { headers: Record<string, any> }): Prom
   const m = header.match(/^Bearer\s+(.+)$/i);
   if (!m) return null;
   try {
+    const { jwtVerify } = await import("jose");
     const { payload } = await jwtVerify(m[1], secretKey());
     return { username: String(payload.sub), name: String((payload as any).name ?? "") };
   } catch {
