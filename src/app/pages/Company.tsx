@@ -28,7 +28,7 @@ export function Company() {
           </div>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-5">
             {CEO_MESSAGE.paragraphs.map((t, i) => (
-              <p key={i} style={{ fontSize: 15, lineHeight: 2.2 }} {...ed(`sections:ceoMessage.paragraphs.${i}`)}>{t}</p>
+              <p key={i} style={{ fontSize: 15, lineHeight: 2.2, whiteSpace: "pre-line" }} {...ed(`sections:ceoMessage.paragraphs.${i}`)}>{t}</p>
             ))}
           </motion.div>
         </div>
@@ -38,7 +38,7 @@ export function Company() {
       <Section heat={HEAT.philosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8 }} {...ed("sections:philosophy.body")}>
+          <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed("sections:philosophy.body")}>
             {PHILOSOPHY.body}
           </p>
         </div>

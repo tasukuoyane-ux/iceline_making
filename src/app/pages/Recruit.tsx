@@ -39,7 +39,7 @@ function RecruitHero() {
           <h1 className="text-white" style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.15, letterSpacing: "0.01em" }}>
             笑顔と、正直さ。<br />ただ、それだけ。
           </h1>
-          <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9 }} {...ed("sections:recruitMv.sub")}>{RECRUIT_MV.sub}</p>
+          <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("sections:recruitMv.sub")}>{RECRUIT_MV.sub}</p>
         </motion.div>
       </div>
     </section>
@@ -71,7 +71,7 @@ export function Recruit() {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
           className="mx-auto max-w-3xl text-center pc:max-w-[90%]"
-          style={{ fontSize: 19, lineHeight: 2.4, fontWeight: 500 }}
+          style={{ fontSize: 19, lineHeight: 2.4, fontWeight: 500, whiteSpace: "pre-line" }}
           {...ed("sections:recruitMv.body")}
         >
           {RECRUIT_MV.body}
@@ -302,7 +302,7 @@ export function Recruit() {
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center">
             <p className="text-brand" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.4 }} {...ed("sections:recruitApply.copy")}>{RECRUIT_APPLY.copy}</p>
-            <p className="mx-auto mt-6 max-w-2xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }} {...ed("sections:recruitApply.body")}>{RECRUIT_APPLY.body}</p>
+            <p className="mx-auto mt-6 max-w-2xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2, whiteSpace: "pre-line" }} {...ed("sections:recruitApply.body")}>{RECRUIT_APPLY.body}</p>
           </motion.div>
         </div>
       </Section>

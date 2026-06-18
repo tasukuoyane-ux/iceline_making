@@ -1,4 +1,5 @@
 // /console 各コンテンツ種別の編集パネル。
+import { createContext, useContext } from "react";
 import { Content, NewsItem, VideoItem, InterviewItem, NEWS_CATEGORIES } from "./content";
 import { Field, TextInput, TextArea, Select, Button, Card } from "./ui";
 import { ImageField } from "./ImageField";
@@ -214,6 +215,29 @@ export function ImagesPanel({ value, onChange }: { value: Content["images"]; onC
 }
 
 /* ===================== セクション文言 ===================== */
+// 注意: フォーカス保持のため Txt はモジュールレベルの安定コンポーネントにする。
+// （描画関数の内部で定義すると毎レンダリングで型が変わり、1文字入力ごとに
+//   再マウントされて入力フォーカスが外れる＝不具合 1-1 の原因）
+const SectionsCtx = createContext<{ get: any; setPath: (p: string, v: string) => void }>({
+  get: {},
+  setPath: () => {},
+});
+
+function Txt({ label, path, area }: { label: string; path: string; area?: boolean }) {
+  const { get, setPath } = useContext(SectionsCtx);
+  let cur: any = get;
+  for (const k of path.split(".")) cur = cur?.[k];
+  return (
+    <Field label={label}>
+      {area ? (
+        <TextArea rows={4} value={cur ?? ""} onChange={(e) => setPath(path, e.target.value)} />
+      ) : (
+        <TextInput value={cur ?? ""} onChange={(e) => setPath(path, e.target.value)} />
+      )}
+    </Field>
+  );
+}
+
 export function SectionsPanel({ value, onChange }: { value: any; onChange: (v: any) => void }) {
   // ドット区切りパスで深い値を更新
   function setPath(path: string, v: string) {
@@ -224,22 +248,9 @@ export function SectionsPanel({ value, onChange }: { value: any; onChange: (v: a
     cur[keys[keys.length - 1]] = v;
     onChange(next);
   }
-  const Txt = ({ label, path, area }: { label: string; path: string; area?: boolean }) => {
-    const keys = path.split(".");
-    let cur: any = value;
-    for (const k of keys) cur = cur?.[k];
-    return (
-      <Field label={label}>
-        {area ? (
-          <TextArea rows={4} value={cur ?? ""} onChange={(e) => setPath(path, e.target.value)} />
-        ) : (
-          <TextInput value={cur ?? ""} onChange={(e) => setPath(path, e.target.value)} />
-        )}
-      </Field>
-    );
-  };
 
   return (
+    <SectionsCtx.Provider value={{ get: value, setPath }}>
     <div className="space-y-4">
       <div data-focus="site">
         <Card title="サイト共通">
@@ -329,5 +340,6 @@ export function SectionsPanel({ value, onChange }: { value: any; onChange: (v: a
         </Card>
       </div>
     </div>
+    </SectionsCtx.Provider>
   );
 }

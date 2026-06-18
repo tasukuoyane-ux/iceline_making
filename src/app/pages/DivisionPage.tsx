@@ -104,14 +104,14 @@ export function DivisionPage({ division }: { division: Division }) {
               <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }} {...ed(`sections:divisionBiz.${division}.copy`)}>
                 {biz.copy}
               </p>
-              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }} {...ed(`sections:divisionBiz.${division}.body`)}>{biz.body}</p>
+              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionBiz.${division}.body`)}>{biz.body}</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
               <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }} {...ed(`sections:divisionInfo.${division}.reasonCatch`)}>
                 {info.reasonCatch}
               </p>
-              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }} {...ed(`sections:divisionInfo.${division}.reasonBody`)}>{info.reasonBody}</p>
+              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionInfo.${division}.reasonBody`)}>{info.reasonBody}</p>
               <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-muted-foreground" style={{ fontSize: 13 }}>
                 <ShieldCheck size={16} className="text-brand" /> FSSC 22000 / ISO 認証取得
               </div>
