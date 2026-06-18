@@ -8,6 +8,7 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { ed, edImg, txt, img } from "../lib/editable";
+import profileSlides from "../../content/profileSlides.json";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -58,7 +59,6 @@ const toggleIndex = (arr: number[], i: number) =>
 
 export function Recruit() {
   const [dayRole, setDayRole] = useState(0);
-  const day = RECRUIT_DAYS[dayRole];
   const [openCond, setOpenCond] = useState<number[]>([]);
   const [openFaq, setOpenFaq] = useState<number[]>([]);
 
@@ -202,34 +202,40 @@ export function Recruit() {
             </button>
           ))}
         </div>
-        <div className="mt-8 grid gap-10 pc:grid-cols-2 pc:items-stretch">
-          {/* 左：選択中の職種のタイムライン */}
-          <div>
-            <p className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
-              <Clock size={15} className="text-brand" /> <span {...ed(`recruit:days.${dayRole}.note`, "勤務時間メモ")}>{txt(`recruit:days.${dayRole}.note`, day.note)}</span>
-            </p>
-            <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
-              {day.steps.map((d, i) => (
-                <li key={i} className="relative mb-7 last:mb-0">
-                  <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
-                  <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
-                    <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }} {...ed(`recruit:days.${dayRole}.steps.${i}.time`, "時刻")}>{txt(`recruit:days.${dayRole}.steps.${i}.time`, d.time)}</span>
-                    <p style={{ fontSize: 15, lineHeight: 1.8 }} {...ed(`recruit:days.${dayRole}.steps.${i}.task`, "業務")}>{txt(`recruit:days.${dayRole}.steps.${i}.task`, d.task)}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+        {/* 全タブをDOMに保持し、非選択タブは hidden（管理コンソールで全タブ編集可能にするため） */}
+        {RECRUIT_DAYS.map((d, di) => (
+          <div
+            key={d.role}
+            className={di === dayRole ? "mt-8 grid gap-10 pc:grid-cols-2 pc:items-stretch" : "hidden"}
+          >
+            {/* 左：その職種のタイムライン */}
+            <div>
+              <p className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
+                <Clock size={15} className="text-brand" /> <span {...ed(`recruit:days.${di}.note`, `勤務メモ（${d.role}）`)}>{txt(`recruit:days.${di}.note`, d.note)}</span>
+              </p>
+              <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
+                {d.steps.map((s, i) => (
+                  <li key={i} className="relative mb-7 last:mb-0">
+                    <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
+                    <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
+                      <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }} {...ed(`recruit:days.${di}.steps.${i}.time`, "時刻")}>{txt(`recruit:days.${di}.steps.${i}.time`, s.time)}</span>
+                      <p style={{ fontSize: 15, lineHeight: 1.8 }} {...ed(`recruit:days.${di}.steps.${i}.task`, "業務")}>{txt(`recruit:days.${di}.steps.${i}.task`, s.task)}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            {/* 右：画像（PCのみ・タブごとに切替／下端をol下端に合わせる） */}
+            <div className="hidden pc:relative pc:block">
+              <ImageWithFallback
+                src={img(`recruit:days.${di}.image`, DAY_IMAGES[di])}
+                alt={d.role}
+                className="rounded-2xl object-cover pc:absolute pc:inset-0 pc:h-full pc:w-full"
+                {...edImg(`recruit:days.${di}.image`, `一日の流れ画像（${d.role}）`)}
+              />
+            </div>
           </div>
-          {/* 右：画像（PCのみ・タブごとに切替／下端をol下端に合わせる） */}
-          <div className="hidden pc:relative pc:block">
-            <ImageWithFallback
-              src={img(`recruit:days.${dayRole}.image`, DAY_IMAGES[dayRole])}
-              alt={day.role}
-              className="rounded-2xl object-cover pc:absolute pc:inset-0 pc:h-full pc:w-full"
-              {...edImg(`recruit:days.${dayRole}.image`, "一日の流れ画像")}
-            />
-          </div>
-        </div>
+        ))}
       </Section>
 
       {/* 数字で見るアイスライン */}
@@ -263,20 +269,26 @@ export function Recruit() {
           スライドを横スクロールでご覧いただけます。
         </p>
         <div className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <div
-              key={n}
-              className="flex aspect-video w-[80%] shrink-0 snap-center flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/50 text-center"
-            >
-              <span className="text-muted-foreground/60" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700 }}>
-                {String(n).padStart(2, "0")}
-              </span>
-              <span className="mt-2 text-muted-foreground" style={{ fontSize: 12 }}>スライド差し替え用プレイスホルダー</span>
-            </div>
-          ))}
+          {(profileSlides as string[]).map((url, i) =>
+            url ? (
+              <div key={i} className="aspect-video w-[80%] shrink-0 snap-center overflow-hidden rounded-xl border border-border bg-secondary/50">
+                <ImageWithFallback src={url} alt={`会社紹介資料 ${i + 1}`} className="h-full w-full object-cover" />
+              </div>
+            ) : (
+              <div
+                key={i}
+                className="flex aspect-video w-[80%] shrink-0 snap-center flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/50 text-center"
+              >
+                <span className="text-muted-foreground/60" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700 }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="mt-2 text-muted-foreground" style={{ fontSize: 12 }}>スライド差し替え用プレイスホルダー</span>
+              </div>
+            )
+          )}
         </div>
         <p className="mt-2 text-muted-foreground/80" style={{ fontSize: 11 }}>
-          ※ パワーポイント資料の画像（16:9）をこの枠に差し込んでください。
+          ※ パワーポイント資料の画像（16:9）を管理コンソールの「会社紹介資料」から追加できます。
         </p>
       </Section>
 
@@ -295,8 +307,10 @@ export function Recruit() {
               </div>
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/85 to-transparent p-7">
                 <p className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>INTERVIEW</p>
-                <h3 className="mt-1 text-white" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }} {...ed(`interviews:${iv.id}:lead`)}>{iv.lead}</h3>
-                <p className="mt-2 text-white/80" style={{ fontSize: 13 }}>{iv.role}｜{iv.name}（{iv.years}）</p>
+                <h3 className="mt-1 text-white" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }} {...ed(`interviews:${iv.id}:lead`, "タイトル")}>{iv.lead}</h3>
+                {iv.subtitle && (
+                  <p className="mt-2 text-white/80" style={{ fontSize: 13, lineHeight: 1.6 }} {...ed(`interviews:${iv.id}:subtitle`, "サブタイトル")}>{iv.subtitle}</p>
+                )}
                 <span className="mt-3 inline-flex items-center gap-1 text-white" style={{ fontSize: 13 }}>
                   記事を読む <ArrowUpRight size={15} />
                 </span>

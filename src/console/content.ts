@@ -7,6 +7,7 @@ import interviewsJson from "../content/interviews.json";
 import imagesJson from "../content/images.json";
 import sectionsJson from "../content/sections.json";
 import overridesJson from "../content/overrides.json";
+import profileSlidesJson from "../content/profileSlides.json";
 import { Block, toBlocks } from "../app/data/blocks";
 
 export type { Block };
@@ -31,6 +32,7 @@ export interface InterviewItem {
   role: string;
   years: string;
   lead: string;
+  subtitle: string;
   blocks: Block[];
   image: string;
 }
@@ -46,6 +48,8 @@ export interface Content {
   interviews: InterviewItem[];
   images: ImagesData;
   sections: any;
+  // 会社紹介資料（採用ページ COMPANY PROFILE のスライド画像URL一覧）
+  profileSlides: string[];
   // 汎用オーバーライド（全ページの文言・画像。編集された値だけを保持）
   overrides: Record<string, string>;
 }
@@ -59,6 +63,7 @@ export const FILE_PATHS: Record<keyof Content, string> = {
   interviews: "src/content/interviews.json",
   images: "src/content/images.json",
   sections: "src/content/sections.json",
+  profileSlides: "src/content/profileSlides.json",
   overrides: "src/content/overrides.json",
 };
 
@@ -75,6 +80,7 @@ export function baseline(): Content {
       interviews: interviewsJson as any[],
       images: imagesJson as ImagesData,
       sections: sectionsJson as any,
+      profileSlides: profileSlidesJson as string[],
       overrides: overridesJson as Record<string, string>,
     })
   );
@@ -95,9 +101,11 @@ export function normalizeContent(c: any): Content {
     role: iv.role,
     years: iv.years,
     lead: iv.lead,
+    subtitle: iv.subtitle ?? "",
     image: iv.image,
     blocks: toBlocks(iv.blocks ?? iv.paragraphs),
   }));
+  if (!Array.isArray(c.profileSlides)) c.profileSlides = [""];
   if (!c.overrides) c.overrides = {};
   return c as Content;
 }
@@ -222,6 +230,7 @@ export function buildOverrides(draft: Content): Record<string, string> {
 
   draft.interviews.forEach((iv) => {
     o[`interviews:${iv.id}:lead`] = iv.lead;
+    o[`interviews:${iv.id}:subtitle`] = iv.subtitle;
     o[`interviews:${iv.id}:image`] = iv.image;
     // 本文は blocks（構造編集のため inline プレビュー対象外）
   });

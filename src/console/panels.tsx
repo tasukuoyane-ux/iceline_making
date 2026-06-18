@@ -1,9 +1,41 @@
 // /console 各コンテンツ種別の編集パネル。
-import { createContext, useContext } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 import { Content, NewsItem, VideoItem, InterviewItem, NEWS_CATEGORIES } from "./content";
 import { Field, TextInput, TextArea, Select, Button, Card } from "./ui";
 import { ImageField } from "./ImageField";
 import { BlockEditor } from "./BlockEditor";
+import { uploadImage } from "./api";
+
+/** 動画ファイル（webm/mp4等）を直接アップロードして公開URLを返すボタン */
+function VideoUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function handle(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setUploading(true);
+    try {
+      const { url } = await uploadImage(file); // 任意のファイル種別に対応（Blobへ保存）
+      onUploaded(url);
+    } catch (err: any) {
+      setError(err.message || "アップロードに失敗しました");
+    } finally {
+      setUploading(false);
+      if (ref.current) ref.current.value = "";
+    }
+  }
+  return (
+    <div className="space-y-1">
+      <input ref={ref} type="file" accept="video/*,.webm,.mp4,.mov,.m4v,.ogv" className="hidden" onChange={handle} />
+      <Button type="button" onClick={() => ref.current?.click()} disabled={uploading}>
+        {uploading ? "アップロード中…" : "動画ファイルをアップロード"}
+      </Button>
+      {error && <p className="text-[12px] text-red-600">{error}</p>}
+    </div>
+  );
+}
 
 function genId(prefix: string): string {
   // 時刻に依存しない簡易ユニークID
@@ -98,8 +130,11 @@ export function VideosPanel({ value, onChange }: { value: VideoItem[]; onChange:
               <TextInput value={v.title} onChange={(e) => update(i, { title: e.target.value })} />
             </Field>
             <div className="mt-3">
-              <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4 等の直リンク。空欄なら「準備中」表示。">
-                <TextInput value={v.videoUrl} onChange={(e) => update(i, { videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
+              <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄なら「準備中」表示。">
+                <div className="space-y-2">
+                  <TextInput value={v.videoUrl} onChange={(e) => update(i, { videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=... または .webm / .mp4" />
+                  <VideoUploadButton onUploaded={(url) => update(i, { videoUrl: url })} />
+                </div>
               </Field>
             </div>
             <div className="mt-3">
@@ -133,6 +168,7 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
         role: "所属・役職",
         years: "入社○年",
         lead: "見出しコピー",
+        subtitle: "サブタイトル",
         blocks: [{ type: "paragraph", text: "本文を入力してください。" }],
         image: "",
       },
@@ -160,6 +196,9 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
               <Field label="見出しコピー（リード）"><TextInput value={iv.lead} onChange={(e) => update(i, { lead: e.target.value })} /></Field>
             </div>
             <div className="mt-3">
+              <Field label="サブタイトル"><TextInput value={iv.subtitle} onChange={(e) => update(i, { subtitle: e.target.value })} /></Field>
+            </div>
+            <div className="mt-3">
               <ImageField label="メイン画像" value={iv.image} onChange={(url) => update(i, { image: url })} />
             </div>
             <div className="mt-3">
@@ -168,6 +207,40 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
             </div>
           </Card>
         </div>
+      ))}
+    </div>
+  );
+}
+
+/* ===================== 会社紹介資料（採用ページ COMPANY PROFILE） ===================== */
+export function ProfileSlidesPanel({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  function update(i: number, url: string) {
+    const next = value.slice();
+    next[i] = url;
+    onChange(next);
+  }
+  function add() {
+    onChange([...value, ""]);
+  }
+  function remove(i: number) {
+    if (!confirm("このスライドを削除しますか？")) return;
+    onChange(value.filter((_, idx) => idx !== i));
+  }
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] text-slate-500">採用ページ「会社紹介資料」に横スクロールで表示されます（16:9 推奨）。</p>
+        <Button variant="primary" onClick={add}>＋ スライドを追加</Button>
+      </div>
+      {value.length === 0 && (
+        <p className="rounded-md border border-dashed border-slate-300 p-6 text-center text-[12px] text-slate-400">
+          スライドがありません。「＋ スライドを追加」から登録してください。
+        </p>
+      )}
+      {value.map((url, i) => (
+        <Card key={i} title={`スライド ${i + 1}`} action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}>
+          <ImageField label="スライド画像" value={url} onChange={(u) => update(i, u)} hint="PowerPointのページを画像（PNG/JPG）にして登録してください。" />
+        </Card>
       ))}
     </div>
   );

@@ -47,6 +47,15 @@ export function Interview() {
             >
               {iv.lead}
             </h1>
+            {iv.subtitle && (
+              <p
+                className="mt-5 max-w-[28em] text-white/80"
+                style={{ fontSize: "clamp(15px, 2vw, 20px)", fontWeight: 500, lineHeight: 1.6 }}
+                {...ed(`${pre}:subtitle`, "サブタイトル")}
+              >
+                {iv.subtitle}
+              </p>
+            )}
             <div className="mt-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-white/85">
               <span style={{ fontSize: 20, fontWeight: 700 }} {...ed(`${pre}:name`, "氏名")}>{iv.name}</span>
               <span className="text-white/55" style={{ fontSize: 13 }} {...ed(`${pre}:role`, "所属・役職")}>{iv.role}</span>

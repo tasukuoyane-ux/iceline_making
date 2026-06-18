@@ -165,6 +165,8 @@ export interface Interview {
   role: string;
   years: string;
   lead: string;
+  /** 記事サブタイトル */
+  subtitle: string;
   // 本文はブロック構成（段落/見出し/画像）。旧データ(paragraphs)も後方互換で読む。
   blocks: Block[];
   /** インタビュー記事のメイン画像URL */
@@ -177,6 +179,7 @@ export const INTERVIEWS: Interview[] = (interviewsData as any[]).map((iv) => ({
   role: iv.role,
   years: iv.years,
   lead: iv.lead,
+  subtitle: iv.subtitle ?? "",
   image: iv.image,
   blocks: toBlocks(iv.blocks ?? iv.paragraphs),
 }));

@@ -5,7 +5,7 @@ import { AuthUser, clearAuth, publish } from "./api";
 import { Content, baseline, buildOverrides, changedFiles, clone, normalizeContent } from "./content";
 import { Button } from "./ui";
 import { PageFields, PageField } from "./PageFields";
-import { NewsPanel, VideosPanel, InterviewsPanel } from "./panels";
+import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 
@@ -33,7 +33,7 @@ function loadDraft(): Content {
   return baseline();
 }
 
-type ManageTab = "news" | "videos" | "interviews";
+type ManageTab = "news" | "videos" | "interviews" | "profileSlides";
 
 export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
   const [draft, setDraft] = useState<Content>(loadDraft);
@@ -44,6 +44,28 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [manage, setManage] = useState<ManageTab | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  // プレビュー / 編集パネルの幅比率（％）。仕切りのドラッグで変更可能。
+  const splitRef = useRef<HTMLDivElement>(null);
+  const [leftPct, setLeftPct] = useState(50);
+  const [dragging, setDragging] = useState(false);
+
+  function startDrag(e: React.MouseEvent) {
+    e.preventDefault();
+    setDragging(true);
+    const onMove = (ev: MouseEvent) => {
+      const rect = splitRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+      setLeftPct(Math.min(80, Math.max(20, pct)));
+    };
+    const onUp = () => {
+      setDragging(false);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }
 
   const changes = useMemo(() => changedFiles(draft, base), [draft, base]);
   const changeCount = Object.keys(changes).length;
@@ -154,10 +176,10 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
         </div>
       </header>
 
-      {/* 本体：左プレビュー / 右エディタ */}
-      <div className="flex min-h-0 flex-1">
+      {/* 本体：左プレビュー / 右エディタ（仕切りをドラッグで幅調整） */}
+      <div ref={splitRef} className="relative flex min-h-0 flex-1">
         {/* 左：ライブプレビュー */}
-        <div className="flex w-1/2 min-w-0 flex-col border-r border-slate-200 bg-white">
+        <div style={{ width: `${leftPct}%` }} className="flex min-w-0 flex-col border-r border-slate-200 bg-white">
           <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-2">
             <span className="text-[12px] text-slate-500">プレビュー：</span>
             <select
@@ -188,8 +210,17 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
           />
         </div>
 
+        {/* ドラッグ可能な仕切り */}
+        <div
+          onMouseDown={startDrag}
+          title="ドラッグして幅を調整"
+          className={`relative z-20 w-1.5 shrink-0 cursor-col-resize transition-colors ${dragging ? "bg-emerald-500" : "bg-slate-200 hover:bg-emerald-400"}`}
+        >
+          <span className="pointer-events-none absolute inset-y-0 -left-1.5 -right-1.5" />
+        </div>
+
         {/* 右：ページ単位エディタ */}
-        <div className="flex w-1/2 min-w-0 flex-col bg-slate-50">
+        <div className="flex min-w-0 flex-1 flex-col bg-slate-50">
           <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2">
             <div>
               <p className="text-[13px] font-semibold text-slate-800">{currentPageLabel} の編集</p>
@@ -207,6 +238,9 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
             />
           </div>
         </div>
+
+        {/* ドラッグ中は iframe 上でもマウス追従できるよう全面オーバーレイ */}
+        {dragging && <div className="absolute inset-0 z-30 cursor-col-resize" />}
       </div>
 
       {/* コンテンツ管理（追加・削除）オーバーレイ */}
@@ -240,6 +274,7 @@ function ManageOverlay({
     { key: "news", label: "お知らせ" },
     { key: "videos", label: "動画" },
     { key: "interviews", label: "社員インタビュー" },
+    { key: "profileSlides", label: "会社紹介資料" },
   ];
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
@@ -269,6 +304,7 @@ function ManageOverlay({
           {tab === "news" && <NewsPanel value={draft.news} onChange={(v) => setSlice("news", v)} />}
           {tab === "videos" && <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />}
           {tab === "interviews" && <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />}
+          {tab === "profileSlides" && <ProfileSlidesPanel value={draft.profileSlides} onChange={(v) => setSlice("profileSlides", v)} />}
         </div>
       </div>
     </div>
