@@ -28,9 +28,14 @@ export const EDIT_MODE: boolean =
 
 type EdOpts = { label?: string; multiline?: boolean };
 
+// 全ページ共通の要素（ヘッダー・フッター）は各ページの編集対象にしない。
+function isCommon(path: string): boolean {
+  return path.startsWith("header:") || path.startsWith("footer:");
+}
+
 /** テキスト編集対象の属性を付与 */
 export function ed(path: string, label?: string, opts?: EdOpts): Record<string, string> {
-  if (!EDIT_MODE) return {};
+  if (!EDIT_MODE || isCommon(path)) return {};
   const a: Record<string, string> = { "data-edit": path };
   if (label) a["data-edit-label"] = label;
   if (opts?.multiline) a["data-edit-multi"] = "1";
@@ -39,7 +44,7 @@ export function ed(path: string, label?: string, opts?: EdOpts): Record<string, 
 
 /** 画像編集対象の属性を付与（ImageWithFallback / img に展開される） */
 export function edImg(path: string, label?: string): Record<string, string> {
-  if (!EDIT_MODE) return {};
+  if (!EDIT_MODE || isCommon(path)) return {};
   const a: Record<string, string> = { "data-edit-img": path };
   if (label) a["data-edit-label"] = label;
   return a;

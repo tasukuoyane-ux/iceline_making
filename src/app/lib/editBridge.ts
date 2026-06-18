@@ -33,6 +33,11 @@ function cssEscape(s: string): string {
   return s.replace(/["\\]/g, "\\$&");
 }
 
+// ヘッダー・フッターは全ページ共通のため、各ページの編集対象から除外する。
+function isExcludedPath(path: string): boolean {
+  return path.startsWith("header:") || path.startsWith("footer:");
+}
+
 function applyOverrides(overrides: Record<string, string>) {
   lastOverrides = overrides;
   for (const [path, value] of Object.entries(overrides)) {
@@ -62,7 +67,7 @@ function scanFields(): PageField[] {
   for (const el of nodes) {
     const isImg = el.hasAttribute("data-edit-img");
     const path = (isImg ? el.getAttribute("data-edit-img") : el.getAttribute("data-edit"))!;
-    if (!path || seen.has(path)) continue;
+    if (!path || seen.has(path) || isExcludedPath(path)) continue;
     seen.add(path);
     let value = "";
     if (isImg) {
@@ -101,8 +106,14 @@ let activeEl: HTMLElement | null = null;
 function findEditable(target: EventTarget | null): { el: HTMLElement; path: string } | null {
   let el = target as HTMLElement | null;
   while (el && el !== document.body) {
-    if (el.hasAttribute?.("data-edit")) return { el, path: el.getAttribute("data-edit")! };
-    if (el.hasAttribute?.("data-edit-img")) return { el, path: el.getAttribute("data-edit-img")! };
+    if (el.hasAttribute?.("data-edit")) {
+      const p = el.getAttribute("data-edit")!;
+      return isExcludedPath(p) ? null : { el, path: p };
+    }
+    if (el.hasAttribute?.("data-edit-img")) {
+      const p = el.getAttribute("data-edit-img")!;
+      return isExcludedPath(p) ? null : { el, path: p };
+    }
     el = el.parentElement;
   }
   return null;
