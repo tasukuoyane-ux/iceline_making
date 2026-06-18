@@ -1,12 +1,14 @@
 // 会社情報・確定コピー（_________.pdf より転記、不足はiceline.co.jp準拠で補完）
+// 一部のコピーは src/content/sections.json で管理（/console から編集可能）。
+import sections from "../../content/sections.json";
 
 export const SITE = {
   name: "株式会社アイスライン",
   nameEn: "ICELINE",
-  tagline: "氷と食で、日々に応える。",
-  subTagline: "今日も、とどこおりなく。",
+  tagline: sections.site.tagline,
+  subTagline: sections.site.subTagline,
   founded: 1905,
-  yearsLabel: "創業120年",
+  yearsLabel: sections.site.yearsLabel,
 };
 
 export const COMPANY_PROFILE: { label: string; value: string }[] = [
@@ -22,21 +24,9 @@ export const COMPANY_PROFILE: { label: string; value: string }[] = [
   { label: "認証", value: "FSSC 22000 / ISO 認証取得" },
 ];
 
-export const PHILOSOPHY = {
-  body: "お客様に愛され信頼される良い会社、社員が胸を張れる良い会社を皆でつくる。",
-};
+export const PHILOSOPHY = sections.philosophy;
 
-export const CEO_MESSAGE = {
-  title: "代表メッセージ",
-  name: "代表取締役社長",
-  paragraphs: [
-    "1905年、北海道の天然氷を岡山で売り始めたところから、アイスラインは始まりました。",
-    "120年という時間は、長いようで、振り返ると一つひとつの積み重ねです。挨拶をきちんとする。お客様の立場で考える。当然のことを、当然のようにやり続ける。そのことを、これからも大切にしていきたいと思っています。",
-    "変化に対して臆病にならず、それでも軸はぶらさない。お客様の現場が変わるたびに、得意なことで応えていく。それがこの会社の姿勢だと考えています。",
-    "お客様の喜びや笑顔に触れるとき、社員一人ひとりが何かを感じ取っています。それが仕事をする意味になり、次への原動力になる。「お客様に愛され信頼される良い会社、社員が胸を張れる良い会社を皆でつくる」——この理念を胸に、日々の仕事に向き合っています。",
-    "創業120年を超えましたが、私たちの挑戦はまだ始まったばかりです。これからも氷と食を通じて、より多くの人の日常に届けていく。その思いを持ち続けながら、歩んでまいります。",
-  ],
-};
+export const CEO_MESSAGE = sections.ceoMessage;
 
 export const HISTORY: { year: string; text: string }[] = [
   { year: "1905", text: "石井好太郎が石井商店（現・アイスライン）を創業。北海道函館五稜郭の天然氷を倉敷市茶屋町で販売開始。" },

@@ -1,10 +1,9 @@
 // 採用サイト・確定コピー（_____.pdf より転記）
+// 一部のコピー・インタビューは src/content/*.json で管理（/console から編集可能）。
+import sections from "../../content/sections.json";
+import interviewsData from "../../content/interviews.json";
 
-export const RECRUIT_MV = {
-  main: "笑顔と、正直さ。ただ、それだけ。",
-  sub: "スキルより、笑顔。経歴より、正直さ。アイスラインが大切にしていることです。",
-  body: "失敗したとき、話せる場所があるかどうか。それが、働く場所を選ぶときに大事なことだと思っています。隠さなくていい場所にいると、人は自然と前を向ける。困ったことを声に出せる。まじめに仕事と向き合える。その環境こそが、いい仕事につながると信じています。その文化を、一歩ずつ根付かせています。ここから先を、一緒につくっていきましょう。",
-};
+export const RECRUIT_MV = sections.recruitMv;
 
 export const RECRUIT_BIZ: { dept: string; mission: string; body: string }[] = [
   {
@@ -110,10 +109,7 @@ export const RECRUIT_WORK: { role: string; lines: string[] }[] = [
   },
 ];
 
-export const RECRUIT_APPLY = {
-  copy: "食品業界の経験は問いません。",
-  body: "私たちが大切にしているのは、笑顔と正直さ。うまくいったことは一緒に喜び、つまずいたことはすぐに話せる。誰もがそう働ける会社でありたいと考えています。一人ひとりのその姿が集まることこそ、会社を動かす原動力です。だからこそ、岡山から全国の市場へ。その挑戦に、本気で挑んでいけるのだと思います。まじめに、まっすぐ働きたい人を、探しています。",
-};
+export const RECRUIT_APPLY = sections.recruitApply;
 
 export const RECRUIT_JOBS: { dept: string; role: string; body: string }[] = [
   {
@@ -154,33 +150,8 @@ export interface Interview {
   years: string;
   lead: string;
   paragraphs: string[];
-  imageQuery: string;
+  /** インタビュー記事のメイン画像URL */
+  image: string;
 }
 
-export const INTERVIEWS: Interview[] = [
-  {
-    id: "fujiwara",
-    name: "藤原",
-    role: "品質管理部門 課長",
-    years: "入社15年",
-    lead: "声に出せる現場が、品質をつくる。",
-    paragraphs: [
-      "品質管理は、間違いを責める仕事ではありません。むしろ、間違いを早く見つけて、早く直せる空気をつくる仕事だと思っています。",
-      "工場を巡回して、検査して、記録する。地味な作業の繰り返しに見えるかもしれません。でも、その一つひとつが、お客様の安心につながっている。表には出ないけれど、確かに誰かの日常を支えている実感があります。",
-      "何かあったら、まず話す。隠さない。それができる現場だから、私はここで長く働けています。",
-    ],
-    imageQuery: "factory worker portrait japan",
-  },
-  {
-    id: "sales-y",
-    name: "山田",
-    role: "食品事業部 営業職",
-    years: "入社8年",
-    lead: "毎日通うから、見えてくる。",
-    paragraphs: [
-      "ルートと営業を兼ねているので、毎日同じ取引先に顔を出します。最初は「配達の人」だったのが、だんだん「相談できる人」に変わっていく。その瞬間が、この仕事のいちばんの面白さです。",
-      "売ることより、必要なものを一緒に考えること。困りごとに先回りできたとき、本当に喜んでもらえる。その積み重ねが、信頼になっていくんだと思います。",
-    ],
-    imageQuery: "japanese salesperson portrait",
-  },
-];
+export const INTERVIEWS: Interview[] = interviewsData as Interview[];

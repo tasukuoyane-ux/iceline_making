@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { INTERVIEWS } from "../data/recruit";
-import { INTERVIEW_IMG } from "../data/images";
+import { ed, edImg } from "../lib/editable";
 
 export function Interview() {
   const { id } = useParams();
@@ -21,12 +21,12 @@ export function Interview() {
   return (
     <article>
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden bg-ink">
-        <ImageWithFallback src={INTERVIEW_IMG[iv.id]} alt={iv.name} className="h-full w-full object-cover opacity-70" />
+        <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover opacity-70" {...edImg(`interviews:${iv.id}:image`)} />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent" />
         <div className="relative mx-auto flex h-full max-w-[1000px] flex-col justify-end px-5 pb-14 pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>INTERVIEW</p>
-            <h1 className="mt-3 text-white" style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.3 }}>{iv.lead}</h1>
+            <h1 className="mt-3 text-white" style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.3 }} {...ed(`interviews:${iv.id}:lead`)}>{iv.lead}</h1>
             <p className="mt-4 text-white/85" style={{ fontSize: 15 }}>{iv.role}｜{iv.name}（{iv.years}）</p>
           </motion.div>
         </div>
@@ -45,6 +45,7 @@ export function Interview() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
               style={{ fontSize: 16, lineHeight: 2.3 }}
+              {...ed(`interviews:${iv.id}:paragraphs.${i}`)}
             >
               {p}
             </motion.p>

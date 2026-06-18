@@ -9,11 +9,12 @@ import { IMG, PRODUCT_IMG } from "../data/images";
 import { SITE, STRENGTHS } from "../data/company";
 import { NEWS } from "../data/news";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
+import { ed, edImg } from "../lib/editable";
 
 const SLIDES = [
-  { img: IMG.iceMacro, alt: "氷のクローズアップ" },
-  { img: IMG.foodPlate, alt: "食の現場" },
-  { img: IMG.icedCoffee, alt: "カップ氷の飲料" },
+  { img: IMG.iceMacro, alt: "氷のクローズアップ", key: "iceMacro" },
+  { img: IMG.foodPlate, alt: "食の現場", key: "foodPlate" },
+  { img: IMG.icedCoffee, alt: "カップ氷の飲料", key: "icedCoffee" },
 ];
 
 const AUDIENCE = [
@@ -36,19 +37,19 @@ function Hero() {
           className="absolute inset-0 transition-opacity duration-1000"
           style={{ opacity: i === idx ? 1 : 0 }}
         >
-          <ImageWithFallback src={s.img} alt={s.alt} className="h-full w-full object-cover" />
+          <ImageWithFallback src={s.img} alt={s.alt} className="h-full w-full object-cover" {...edImg(`images:IMG.${s.key}`)} />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
         </div>
       ))}
       <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-20 pc:px-8 pc:pb-28">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <p className="mb-4 text-white/80" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 13 }}>
-            SINCE 1905 — {SITE.yearsLabel}
+            SINCE 1905 — <span {...ed("sections:site.yearsLabel")}>{SITE.yearsLabel}</span>
           </p>
-          <h1 className="text-white" style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.18 }}>
+          <h1 className="text-white" style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.18 }} {...ed("sections:site.tagline")}>
             {SITE.tagline}
           </h1>
-          <p className="mt-4 text-white/85" style={{ fontSize: 18 }}>
+          <p className="mt-4 text-white/85" style={{ fontSize: 18 }} {...ed("sections:site.subTagline")}>
             {SITE.subTagline}
           </p>
         </motion.div>
@@ -104,9 +105,9 @@ export function Top() {
               {NEWS.slice(0, 4).map((n) => (
                 <li key={n.id}>
                   <Link to={`/news/${n.id}`} className="flex flex-col gap-1 py-4 transition-colors hover:text-brand tab:flex-row tab:items-center tab:gap-6">
-                    <span className="text-muted-foreground" style={{ fontSize: 13 }}>{n.date}</span>
-                    <span className="inline-flex w-fit bg-secondary px-3 py-0.5 text-muted-foreground" style={{ fontSize: 12 }}>{n.category}</span>
-                    <span style={{ fontSize: 15 }}>{n.title}</span>
+                    <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`news:${n.id}:date`)}>{n.date}</span>
+                    <span className="inline-flex w-fit bg-secondary px-3 py-0.5 text-muted-foreground" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{n.category}</span>
+                    <span style={{ fontSize: 15 }} {...ed(`news:${n.id}:title`)}>{n.title}</span>
                   </Link>
                 </li>
               ))}

@@ -1,36 +1,10 @@
-// Unsplash 画像URL（リモート、ImageWithFallbackのsrcへ文字列で渡す）
+// 画像URL。実データは src/content/images.json で管理（/console から差し替え可能）。
+import imagesData from "../../content/images.json";
 
-export const IMG = {
-  iceMacro: "https://images.unsplash.com/photo-1579170714070-e6f684b3d00c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpY2UlMjBjdWJlcyUyMG1hY3JvJTIwY29sZHxlbnwxfHx8fDE3ODE2MTU3Njl8MA&ixlib=rb-4.1.0&q=80&w=1600",
-  iceClose: "https://images.unsplash.com/photo-1769272382082-19d44c4db4c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxpY2UlMjBjdWJlcyUyMG1hY3JvJTIwY29sZHxlbnwxfHx8fDE3ODE2MTU3Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  iceBlue: "https://images.unsplash.com/photo-1777133457338-5c70a010bdb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxpY2UlMjBjdWJlcyUyMG1hY3JvJTIwY29sZHxlbnwxfHx8fDE3ODE2MTU3Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  icedCoffee: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpY2VkJTIwY29mZmVlJTIwc3VtbWVyJTIwZHJpbmt8ZW58MXx8fHwxNzgxNjE1NzcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-  icedLatte: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxpY2VkJTIwY29mZmVlJTIwc3VtbWVyJTIwZHJpbmt8ZW58MXx8fHwxNzgxNjE1NzcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-  foodPlate: "https://images.unsplash.com/photo-1622021142947-da7dedc7c39a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb29kJTIwaW5ncmVkaWVudHMlMjBraXRjaGVuJTIwcmVzdGF1cmFudHxlbnwxfHx8fDE3ODE2MTU3NzF8MA&ixlib=rb-4.1.0&q=80&w=1600",
-  kitchen: "https://images.unsplash.com/photo-1663790776711-9283bf614ac2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmb29kJTIwaW5ncmVkaWVudHMlMjBraXRjaGVuJTIwcmVzdGF1cmFudHxlbnwxfHx8fDE3ODE2MTU3NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  garnish: "https://images.unsplash.com/photo-1503453776591-b4548af666a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmb29kJTIwaW5ncmVkaWVudHMlMjBraXRjaGVuJTIwcmVzdGF1cmFudHxlbnwxfHx8fDE3ODE2MTU3NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  worker1: "https://images.unsplash.com/photo-1609153450348-06f217a09313?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYWN0b3J5JTIwd29ya2VyJTIwdGVhbSUyMGphcGFufGVufDF8fHx8MTc4MTYxNTc3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
-  worker2: "https://images.unsplash.com/photo-1609558931017-52dd29b80076?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYWN0b3J5JTIwd29ya2VyJTIwdGVhbSUyMGphcGFufGVufDF8fHx8MTc4MTYxNTc3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
-  team1: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGRpdmVyc2UlMjB0ZWFtJTIwd29ya2luZyUyMHNtaWxpbmd8ZW58MXx8fHwxNzgxNjE1Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1600",
-  team2: "https://images.unsplash.com/photo-1572021335469-31706a17aaef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxoYXBweSUyMGRpdmVyc2UlMjB0ZWFtJTIwd29ya2luZyUyMHNtaWxpbmd8ZW58MXx8fHwxNzgxNjE1Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-  warehouse: "https://images.unsplash.com/photo-1587293852726-70cdb56c2866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcm96ZW4lMjB3YXJlaG91c2UlMjBjb2xkJTIwc3RvcmFnZSUyMGxvZ2lzdGljc3xlbnwxfHx8fDE3ODE2MTU3Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  waterSplash: "https://images.unsplash.com/photo-1773868288398-cf1dabd4a947?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXRlciUyMHNwbGFzaCUyMGJsdWUlMjBhYnN0cmFjdHxlbnwxfHx8fDE3ODE2MTU3Nzh8MA&ixlib=rb-4.1.0&q=80&w=1600",
-  waterDew: "https://images.unsplash.com/photo-1548580076-4d4f83ca48c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHx3YXRlciUyMHNwbGFzaCUyMGJsdWUlMjBhYnN0cmFjdHxlbnwxfHx8fDE3ODE2MTU3Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  dessert: "https://images.unsplash.com/photo-1715640476091-022c895f4cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNoYXZlZCUyMGljZSUyMGRlc3NlcnR8ZW58MXx8fHwxNzgxNjE1Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-};
+export const IMG: Record<string, string> = imagesData.IMG;
 
 // 商品IDごとの画像割り当て
-export const PRODUCT_IMG: Record<string, string> = {
-  "ice-cube-pro": IMG.iceMacro,
-  "cup-ice-coffee": IMG.icedCoffee,
-  "flavored-ice": IMG.dessert,
-  "dry-ice": IMG.iceBlue,
-  "frozen-foods": IMG.kitchen,
-  "pro-ingredients": IMG.garnish,
-};
+export const PRODUCT_IMG: Record<string, string> = imagesData.PRODUCT_IMG;
 
 // インタビューIDごとの画像
-export const INTERVIEW_IMG: Record<string, string> = {
-  fujiwara: IMG.worker2,
-  "sales-y": IMG.worker1,
-};
+export const INTERVIEW_IMG: Record<string, string> = imagesData.INTERVIEW_IMG;

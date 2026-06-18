@@ -76,7 +76,7 @@ export function Recruit() {
       {/* 会社を知る｜企業理念 */}
       <Section heat={HEAT.recruitPhilosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
-          <SectionTitle en="OUR CREED" jp="会社を知る — 企業理念" align="center" />
+          <SectionTitle en="OUR CREED" jp="企業理念" align="center" />
           <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 23, fontWeight: 700, lineHeight: 1.8 }}>
             {RECRUIT_PHILOSOPHY.creed}
           </p>
@@ -88,7 +88,7 @@ export function Recruit() {
 
       {/* 会社を知る｜事業紹介 */}
       <Section heat={HEAT.recruitBiz}>
-        <SectionTitle en="ABOUT US" jp="会社を知る — 事業紹介" />
+        <SectionTitle en="ABOUT US" jp="事業紹介" />
         <div className="mt-12 space-y-10">
           {RECRUIT_BIZ.map((b, i) => (
             <motion.div
@@ -116,7 +116,7 @@ export function Recruit() {
 
       {/* 会社を知る｜拠点情報 */}
       <Section heat={HEAT.recruitLocation}>
-        <SectionTitle en="LOCATIONS" jp="会社を知る — 拠点情報" />
+        <SectionTitle en="LOCATIONS" jp="拠点情報" />
         <div className="mt-10 grid gap-5 tab:grid-cols-3">
           {RECRUIT_LOCATIONS.map((l) => (
             <div key={l.name} className="rounded-xl border border-border bg-card p-6">
@@ -131,7 +131,7 @@ export function Recruit() {
       {/* 仕事を知る｜仕事の魅力 */}
       <Section heat={HEAT.recruitCharm} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
-          <SectionTitle en="OUR CULTURE" jp="仕事を知る — 仕事の魅力" />
+          <SectionTitle en="OUR CULTURE" jp="仕事の魅力" />
           <div className="mt-12 space-y-6">
             {RECRUIT_CHARM.map((c, i) => (
               <motion.div
@@ -155,7 +155,7 @@ export function Recruit() {
 
       {/* 仕事を知る｜業務内容 */}
       <Section heat={HEAT.recruitWork}>
-        <SectionTitle en="WORK" jp="仕事を知る — 業務内容" />
+        <SectionTitle en="WORK" jp="業務内容" />
         <div className="mt-10 grid gap-6 tab:grid-cols-2">
           {RECRUIT_WORK.map((w) => (
             <div key={w.role} className="rounded-2xl border border-border bg-card p-8">
@@ -170,66 +170,52 @@ export function Recruit() {
         </div>
       </Section>
 
-      {/* 仕事を知る｜一日の流れ（食品営業／アイス製造／品質管理） */}
+      {/* 仕事を知る｜一日の流れ（職種タブ切替・PCは右に画像） */}
       <Section heat={HEAT.recruitDay}>
-        <SectionTitle en="A DAY" jp="仕事を知る — 一日の流れ" />
-
-        {/* モバイル：タブ切替 */}
-        <div className="pc:hidden">
-          <div className="mt-8 flex flex-wrap gap-2">
-            {RECRUIT_DAYS.map((d, i) => (
-              <button
-                key={d.role}
-                type="button"
-                onClick={() => setDayRole(i)}
-                className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
-                style={{ fontSize: 13, fontWeight: 700 }}
-              >
-                {d.role}
-              </button>
-            ))}
-          </div>
-          <p className="mt-4 inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
-            <Clock size={15} className="text-brand" /> {day.note}
-          </p>
-          <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
-            {day.steps.map((d, i) => (
-              <li key={i} className="relative mb-7 last:mb-0">
-                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
-                <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
-                  <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
-                  <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {/* PC：3職種を3列ですべて表示 */}
-        <div className="mt-10 hidden gap-8 pc:grid pc:grid-cols-3">
-          {RECRUIT_DAYS.map((d) => (
-            <div key={d.role} className="rounded-2xl border border-border bg-card p-8">
-              <h3 className="text-brand" style={{ fontSize: 19, fontWeight: 700 }}>{d.role}</h3>
-              <p className="mt-2 inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 13 }}>
-                <Clock size={14} className="text-brand" /> {d.note}
-              </p>
-              <ol className="mt-6 space-y-0 border-l-2 border-brand/30 pl-6">
-                {d.steps.map((s, i) => (
-                  <li key={i} className="relative mb-6 last:mb-0">
-                    <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
-                    <div className="flex flex-col gap-1">
-                      <span className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>{s.time}</span>
-                      <p style={{ fontSize: 14, lineHeight: 1.7 }}>{s.task}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
+        <SectionTitle en="A DAY" jp="一日の流れ" />
+        <div className="mt-8 flex flex-wrap gap-2">
+          {RECRUIT_DAYS.map((d, i) => (
+            <button
+              key={d.role}
+              type="button"
+              onClick={() => setDayRole(i)}
+              className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
+              style={{ fontSize: 13, fontWeight: 700 }}
+            >
+              {d.role}
+            </button>
           ))}
+        </div>
+        <div className="mt-8 grid gap-10 pc:grid-cols-2 pc:items-start">
+          {/* 左：選択中の職種のタイムライン */}
+          <div>
+            <p className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
+              <Clock size={15} className="text-brand" /> {day.note}
+            </p>
+            <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
+              {day.steps.map((d, i) => (
+                <li key={i} className="relative mb-7 last:mb-0">
+                  <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
+                  <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
+                    <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
+                    <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          {/* 右：画像（PCのみ） */}
+          <div className="hidden pc:block">
+            <ImageWithFallback
+              src={IMG.worker1}
+              alt="一日の流れ"
+              className="sticky top-24 aspect-[4/5] w-full rounded-2xl object-cover"
+            />
+          </div>
         </div>
       </Section>
 
-      {/* カンパニーデック */}
+      {/* 数字で見るアイスライン */}
       <Section heat={HEAT.recruitDeck} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <div className="rounded-[2rem] bg-ink p-10 text-white pc:p-16">
@@ -249,31 +235,32 @@ export function Recruit() {
                 </div>
               ))}
             </div>
-
-            {/* 会社紹介資料（PowerPoint）カルーセル：手動スクロールのプレイスホルダー */}
-            <div className="mt-12 border-t border-white/10 pt-10">
-              <p className="text-white/70" style={{ fontSize: 13 }}>
-                会社紹介資料（スライドを横スクロールでご覧いただけます）
-              </p>
-              <div className="mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <div
-                    key={n}
-                    className="flex aspect-video w-[78%] shrink-0 snap-center flex-col items-center justify-center rounded-xl border border-dashed border-white/25 bg-white/5 text-center tab:w-[48%] pc:w-[32%]"
-                  >
-                    <span className="text-white/50" style={{ fontFamily: "var(--font-accent)", fontSize: 32, fontWeight: 700 }}>
-                      {String(n).padStart(2, "0")}
-                    </span>
-                    <span className="mt-2 text-white/40" style={{ fontSize: 12 }}>スライド差し替え用プレイスホルダー</span>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-1 text-white/40" style={{ fontSize: 11 }}>
-                ※ パワーポイント資料の画像（16:9）をこの枠に差し込んでください。
-              </p>
-            </div>
           </div>
         </div>
+      </Section>
+
+      {/* 会社紹介資料（PowerPoint）カルーセル：手動スクロール・各スライド80%幅 */}
+      <Section heat={HEAT.recruitDeck}>
+        <SectionTitle en="COMPANY PROFILE" jp="会社紹介資料" />
+        <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }}>
+          スライドを横スクロールでご覧いただけます。
+        </p>
+        <div className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div
+              key={n}
+              className="flex aspect-video w-[80%] shrink-0 snap-center flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/50 text-center"
+            >
+              <span className="text-muted-foreground/60" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700 }}>
+                {String(n).padStart(2, "0")}
+              </span>
+              <span className="mt-2 text-muted-foreground" style={{ fontSize: 12 }}>スライド差し替え用プレイスホルダー</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-muted-foreground/80" style={{ fontSize: 11 }}>
+          ※ パワーポイント資料の画像（16:9）をこの枠に差し込んでください。
+        </p>
       </Section>
 
       {/* 人を知る｜インタビュー＆動画 */}
@@ -317,7 +304,7 @@ export function Recruit() {
 
       {/* 募集要項｜業務内容 */}
       <Section heat={HEAT.recruitJob}>
-        <SectionTitle en="POSITIONS" jp="募集要項 — 募集職種" />
+        <SectionTitle en="POSITIONS" jp="募集職種" />
         <div className="mt-10 grid gap-6 tab:grid-cols-2">
           {RECRUIT_JOBS.map((j, i) => (
             <div key={i} className="rounded-xl border border-border bg-card p-7">
@@ -331,7 +318,7 @@ export function Recruit() {
 
       {/* 募集要項｜諸条件 */}
       <Section heat={HEAT.recruitTerms}>
-        <SectionTitle en="CONDITIONS" jp="募集要項 — 諸条件" />
+        <SectionTitle en="CONDITIONS" jp="諸条件" />
         <table className="mt-8 w-full border-t border-border">
           <tbody>
             {RECRUIT_TERMS.map((r) => (

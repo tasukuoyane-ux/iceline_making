@@ -1,4 +1,6 @@
 // 商品データ。掲載項目は確定資料に準拠、個別の商品実データはモックで補完。
+// 事業部セクションのコピーは src/content/sections.json で管理（/console から編集可能）。
+import sections from "../../content/sections.json";
 
 export type Division = "food" | "ice";
 
@@ -128,23 +130,14 @@ export const PRODUCTS: Product[] = [
 export const DIVISION_BIZ: Record<
   Division,
   { copy: string; body: string }
-> = {
-  food: {
-    copy: "食の現場に、深く根を張る。",
-    body:
-      "岡山市北区青江の物流センターから、5,000品目を超える商品が、毎日岡山県全域へ届けられています。県内シェアトップ——それは特別な営業力によるものではなく、日々の配送を一日も欠かさず積み重ねてきた結果です。食の選択肢を広げ、お客様の「欲しい」に応えるために、一人一人が日々の仕事と向き合っています。",
-  },
-  ice: {
-    copy: "岡山の氷を、日本の氷に。",
-    body:
-      "取引先は、量販店、テーマパーク、飲食店など多岐にわたります。届けている商品も一つではありません。ロッキーアイス、味付き氷、デザートのメニュー提案を含めた商品など、相手に応じて組み合わせが変わります。透明な氷から始まったアイスラインの歴史は、今も少しずつ広がっています。色のある氷、味のある氷——まだ誰も作っていなかった商品も、ここから生まれています。",
-  },
-};
+> = sections.divisionBiz;
 
-// 氷のレシピ（複数階層）。サイト内で完結する自社レシピコンテンツ。
+// 氷のレシピ。iceline.co.jp/services/ice/recipe/ のレシピメニューを移植。
+const RECIPE_IMG = "https://www.iceline.co.jp/assets/img/services/ice/recipe/index/";
 export interface IceRecipeItem {
+  id: string;
   name: string;
-  note: string;
+  image: string;
   materials: string[];
   steps: string[];
 }
@@ -153,65 +146,138 @@ export const ICE_RECIPES: {
   items: IceRecipeItem[];
 }[] = [
   {
-    category: "かき氷",
+    category: "ソフトドリンク",
     items: [
       {
-        name: "いちごミルク",
-        note: "純氷のふわふわ食感",
-        materials: ["純氷 1個", "いちごソース 適量", "練乳 大さじ2"],
-        steps: ["純氷をふわふわに削る", "いちごソースを回しかける", "仕上げに練乳をかける"],
+        id: "frapperich-matcha-azuki",
+        name: "フラペリッチ抹茶小豆",
+        image: RECIPE_IMG + "drink02.jpg",
+        materials: ["フラペリッチ／抹茶小豆 1袋", "牛乳 140〜160cc"],
+        steps: ["フラペリッチと牛乳を容器に入れ、よく混ぜ合わせる"],
       },
       {
+        id: "frapperich-choco",
+        name: "フラペリッチショコラチョコチップ＆クランチ",
+        image: RECIPE_IMG + "drink03.jpg",
+        materials: ["フラペリッチ／ショコラチョコチップ＆クランチ 1袋", "牛乳 140〜160cc"],
+        steps: ["フラペリッチと牛乳を容器に入れ、よく混ぜ合わせる"],
+      },
+      {
+        id: "ichigo-milk-smoothie",
+        name: "いちごミルクスムージー",
+        image: RECIPE_IMG + "drink04.jpg",
+        materials: ["雪氷／いちご果肉 1袋", "牛乳 140cc"],
+        steps: ["雪氷と牛乳を容器に入れてよく混ぜる", "グラスに注ぐ"],
+      },
+      {
+        id: "ole",
+        name: "オーレ（コーヒー・抹茶・いちご・ココア）",
+        image: RECIPE_IMG + "drink05.jpg",
+        materials: ["氷カフェ／各種 1袋", "牛乳 150cc", "ガムシロップ お好みで"],
+        steps: ["氷カフェをグラスに入れる", "牛乳を注ぐ"],
+      },
+      {
+        id: "matcha-azuki",
         name: "抹茶あずき",
-        note: "宇治抹茶と粒あん",
-        materials: ["純氷 1個", "抹茶シロップ 適量", "粒あん 大さじ2", "白玉 お好みで"],
-        steps: ["純氷を削る", "抹茶シロップをかける", "粒あん・白玉をのせる"],
+        image: RECIPE_IMG + "drink06.jpg",
+        materials: ["氷カフェ／抹茶 1袋", "牛乳 140cc", "ゆであずき 30g"],
+        steps: ["氷カフェをグラスに入れる", "牛乳を注ぐ", "あずきをトッピングする"],
       },
       {
-        name: "マンゴーレモン",
-        note: "果実感たっぷり",
-        materials: ["純氷 1個", "マンゴーピューレ 適量", "レモン果汁 少々"],
-        steps: ["純氷を削る", "マンゴーピューレをかける", "レモン果汁を絞って爽やかに"],
+        id: "vanilla-float",
+        name: "バニラアイスフロート",
+        image: RECIPE_IMG + "drink07.jpg",
+        materials: ["氷カフェ／各種またはカクテル氷 1袋", "牛乳 130cc", "バニラアイス 30g"],
+        steps: ["氷カフェをグラスに入れる", "牛乳を注ぐ", "バニラアイスをのせる"],
+      },
+      {
+        id: "mango-orange",
+        name: "マンゴーオレンジ",
+        image: RECIPE_IMG + "drink08.jpg",
+        materials: ["カクテル氷／マンゴー 1袋", "オレンジジュース 150cc"],
+        steps: ["カクテル氷をグラスに入れる", "オレンジジュースを注ぐ"],
+      },
+      {
+        id: "lychee-grape",
+        name: "ライチグレープ",
+        image: RECIPE_IMG + "drink10.jpg",
+        materials: ["カクテル氷／巨峰 1袋", "ライチジュース 140cc"],
+        steps: ["カクテル氷をグラスに入れる", "ライチジュースを注ぐ"],
+      },
+      {
+        id: "tonyu",
+        name: "豆乳",
+        image: RECIPE_IMG + "drink11.jpg",
+        materials: ["氷カフェ／各種またはカクテル氷 1袋", "豆乳 150cc", "ガムシロップ お好みで"],
+        steps: ["氷カフェをグラスに入れる", "豆乳を注ぐ"],
+      },
+      {
+        id: "tonyu-ichigo-banana",
+        name: "豆乳いちごバナナシェイク",
+        image: RECIPE_IMG + "drink12.jpg",
+        materials: ["氷カフェ／いちご 1袋", "バナナ 100g", "豆乳 50cc", "練乳 小さじ1", "いちごソース 大さじ1", "ミント 1枚"],
+        steps: ["バナナ・豆乳・練乳をなめらかになるまでブレンドする", "氷カフェを加えて軽く混ぜる", "グラスに注ぎ、いちごソースをかけ、ミントを飾る"],
       },
     ],
   },
   {
-    category: "ドリンク",
+    category: "アルコール",
     items: [
       {
-        name: "アイスコーヒー",
-        note: "溶けにくいロック氷",
-        materials: ["ロック氷 2〜3個", "濃いめのコーヒー 150ml", "ガムシロップ お好みで"],
-        steps: ["グラスにロック氷を入れる", "冷やしたコーヒーを注ぐ", "お好みでガムシロップを加える"],
+        id: "kahlua",
+        name: "氷カフェカルーア",
+        image: RECIPE_IMG + "drink13.jpg",
+        materials: ["氷カフェ／コーヒー 1袋", "牛乳 110cc", "コーヒーリキュール 40cc"],
+        steps: ["氷カフェをグラスに入れる", "リキュールを注ぐ", "牛乳を注ぐ"],
       },
       {
-        name: "クラフトレモネード",
-        note: "色付き氷で華やかに",
-        materials: ["色付き氷 2個", "レモン果汁 30ml", "炭酸水 150ml", "はちみつ 大さじ1"],
-        steps: ["はちみつとレモン果汁を混ぜる", "色付き氷を入れる", "炭酸水を注いで完成"],
+        id: "strawberry-cassis",
+        name: "ストロベリーカシス",
+        image: RECIPE_IMG + "drink14.jpg",
+        materials: ["氷カフェ／いちご 1袋", "カシスリキュール 30cc", "トニックウォーター 適量"],
+        steps: ["氷カフェをグラスに入れる", "リキュールを注ぐ", "トニックウォーターを注ぐ"],
       },
       {
-        name: "フルーツソーダ",
-        note: "味付き氷が溶けて変化",
-        materials: ["味付き氷 2個", "カットフルーツ 適量", "炭酸水 180ml"],
-        steps: ["味付き氷とフルーツをグラスへ", "炭酸水を注ぐ", "溶けるごとの味の変化を楽しむ"],
-      },
-    ],
-  },
-  {
-    category: "カクテル",
-    items: [
-      {
-        name: "モヒート",
-        note: "クラッシュアイス",
-        materials: ["クラッシュアイス 適量", "ミント 10枚", "ライム 1/2個", "ラム 45ml", "炭酸水 適量"],
-        steps: ["ミントとライムを潰す", "クラッシュアイスとラムを加える", "炭酸水で満たして軽く混ぜる"],
+        id: "crush-mango-orange",
+        name: "クラッシュマンゴーオレンジ",
+        image: RECIPE_IMG + "drink15.jpg",
+        materials: ["カクテル氷／マンゴー 1袋", "ウォッカ 30cc", "オレンジジュース 140cc"],
+        steps: ["カクテル氷をグラスに入れる", "ウォッカを注ぐ", "オレンジジュースを注ぐ"],
       },
       {
-        name: "ジントニック",
-        note: "大粒の透明氷",
-        materials: ["大粒の透明氷 1個", "ジン 45ml", "トニックウォーター 適量", "ライム 1切れ"],
-        steps: ["グラスに透明氷を入れる", "ジンを注ぐ", "トニックウォーターで満たしライムを添える"],
+        id: "shari-mango-cocktail",
+        name: "シャリシャリマンゴーとどっさり果実のカクテル",
+        image: RECIPE_IMG + "drink16.jpg",
+        materials: ["カクテル氷／マンゴー 1袋", "マンゴーリキュール 30cc", "ソーダ 90cc", "カットフルーツ 適量"],
+        steps: ["フルーツをグラスに入れる", "カクテル氷を加える", "リキュールを注ぐ", "ソーダを注ぐ"],
+      },
+      {
+        id: "double-apple",
+        name: "ダブルアップルカクテル",
+        image: RECIPE_IMG + "drink17.jpg",
+        materials: ["カクテル氷／青りんご 1袋", "青りんごリキュール 30cc", "トニックウォーター 適量"],
+        steps: ["氷をグラスに入れる", "リキュールを注ぐ", "トニックウォーターを注ぐ"],
+      },
+      {
+        id: "lychee-grape-cocktail",
+        name: "ライチグレープカクテル",
+        image: RECIPE_IMG + "drink18.jpg",
+        materials: ["カクテル氷／巨峰 1袋", "カシスリキュール 40cc", "トニックウォーター 適量"],
+        steps: ["氷をグラスに入れる", "リキュールを注ぐ", "トニックウォーターを注ぐ"],
+      },
+      {
+        id: "lemon-sour",
+        name: "レモンサワー",
+        image: RECIPE_IMG + "drink19.jpg",
+        materials: ["カクテル氷／レモン 1袋", "サワー 150cc"],
+        steps: ["氷をグラスに入れる", "サワーをゆっくり注ぐ"],
+      },
+      {
+        id: "frozen-lemon-sour",
+        name: "シャリシャリフローズンレモンサワー",
+        image: RECIPE_IMG + "drink21.jpg",
+        materials: ["雪氷／レモンシチリア産果汁 1袋", "サワー 150cc"],
+        steps: ["グラスにサワーを注ぐ", "雪氷を加える"],
       },
     ],
   },
@@ -219,35 +285,44 @@ export const ICE_RECIPES: {
     category: "デザート",
     items: [
       {
-        name: "フローズンフルーツ",
-        note: "凍らせて即一品",
-        materials: ["お好みのフルーツ 適量"],
-        steps: ["一口大にカットする", "冷凍庫で凍らせる", "半解凍でシャリっと食べる"],
+        id: "kakigori-ichigo-mango",
+        name: "かき氷／いちご・マンゴー",
+        image: RECIPE_IMG + "dessert01.jpg",
+        materials: ["雪氷 1袋", "シロップ 70〜100cc", "冷凍フルーツ お好みで"],
+        steps: ["雪氷を器に盛る", "シロップをかける", "冷凍フルーツをお好みで添える"],
       },
       {
-        name: "アイスフラワー",
-        note: "花を閉じ込めた氷",
-        materials: ["食用花 適量", "純水 適量", "製氷型 1つ"],
-        steps: ["製氷型に食用花を入れる", "純水を注ぐ", "凍らせてドリンクに浮かべる"],
+        id: "kakigori-mango",
+        name: "かき氷／マンゴー果肉入り",
+        image: RECIPE_IMG + "dessert02.jpg",
+        materials: ["雪氷／マンゴー果肉入り 1袋", "練乳 お好みで"],
+        steps: ["雪氷／マンゴー果肉入りを器に盛る", "練乳をお好みでかける"],
+      },
+      {
+        id: "dalmatian",
+        name: "ダルメシアンアイスクリーム",
+        image: RECIPE_IMG + "dessert03.jpg",
+        materials: ["氷カフェ／コーヒー 1袋", "バニラアイス 100cc", "ホイップクリーム 20cc", "クッキーまたはビスケット 1枚", "ミント 1枚"],
+        steps: ["氷カフェとバニラアイスをブレンドする", "ホイップクリームとクッキーと共に盛り付ける", "ミントを飾る"],
+      },
+      {
+        id: "matcha-anmitsu",
+        name: "抹茶あんみつ",
+        image: RECIPE_IMG + "dessert04.jpg",
+        materials: ["氷カフェ／抹茶 1袋", "ゆであずき 30g", "バニラアイス 30g", "白玉 2個", "甘栗 1/2個"],
+        steps: ["氷カフェを器に盛る", "残りの材料をバランスよく飾る"],
       },
     ],
   },
 ];
 
+// 全レシピをフラットに取得（個別ページ用）
+export const ALL_RECIPES: (IceRecipeItem & { category: string })[] = ICE_RECIPES.flatMap(
+  (c) => c.items.map((it) => ({ ...it, category: c.category }))
+);
+export const findRecipe = (id: string) => ALL_RECIPES.find((r) => r.id === id);
+
 export const DIVISION_INFO: Record<
   Division,
   { label: string; reasonCatch: string; reasonBody: string }
-> = {
-  food: {
-    label: "食品事業部",
-    reasonCatch: "現場に通い続けるから、見えることがある。",
-    reasonBody:
-      "担当者はルートと営業を兼務しています。毎日現場に通うからこそ、在庫の変化も、売れ筋の移り変わりも、現場の空気も見えてくる。気になることがあればその場で提案し、依頼を待つのではなく、必要なものを先回りして考える。お客様一社一社の状況を丁寧に把握しながら、長く寄り添える関係を積み上げていきます。",
-  },
-  ice: {
-    label: "アイス事業部",
-    reasonCatch: "氷を、再定義する。",
-    reasonBody:
-      "人気テーマパークのメニューから、コンビニエンスストア、街の喫茶店まで。アイスラインの氷は、全国の食の現場で使われています。選ばれ続けている理由はシンプルです。欠品を出さないことを、最優先にしているから。季節の波があっても、急な需要の変動があっても、営業と製造が動いて在庫を調整する。そして、氷そのものを進化させ続けています。色のある氷、味のある氷——誰も作っていなかった商品を、市場に送り出し続けています。「冷たいものならアイスライン」——そう覚えてもらえるように、岡山から全国へ動いています。",
-  },
-};
+> = sections.divisionInfo;

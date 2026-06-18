@@ -5,10 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "hash-password": "node scripts/hash-password.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
+    "@vercel/blob": "0.27.3",
+    "bcryptjs": "2.4.3",
+    "jsonwebtoken": "9.0.2",
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.5",
     "@mui/material": "7.3.5",
@@ -66,6 +70,9 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
+    "@types/bcryptjs": "2.4.6",
+    "@types/jsonwebtoken": "9.0.7",
+    "@vercel/node": "5.0.0",
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.1.12",
     "vite": "6.3.5"

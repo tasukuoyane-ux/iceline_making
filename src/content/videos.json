@@ -1,0 +1,30 @@
+[
+  {
+    "id": "v1",
+    "title": "氷ができるまで｜製造現場ドキュメント",
+    "duration": "03:24",
+    "thumb": "https://images.unsplash.com/photo-1769272382082-19d44c4db4c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxpY2UlMjBjdWJlcyUyMG1hY3JvJTIwY29sZHxlbnwxfHx8fDE3ODE2MTU3Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "videoUrl": ""
+  },
+  {
+    "id": "v2",
+    "title": "営業の一日｜現場に通うということ",
+    "duration": "04:10",
+    "thumb": "https://images.unsplash.com/photo-1609153450348-06f217a09313?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYWN0b3J5JTIwd29ya2VyJTIwdGVhbSUyMGphcGFufGVufDF8fHx8MTc4MTYxNTc3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+    "videoUrl": ""
+  },
+  {
+    "id": "v3",
+    "title": "120年のあゆみ｜アイスラインの歴史",
+    "duration": "05:42",
+    "thumb": "https://images.unsplash.com/photo-1587293852726-70cdb56c2866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcm96ZW4lMjB3YXJlaG91c2UlMjBjb2xkJTIwc3RvcmFnZSUyMGxvZ2lzdGljc3xlbnwxfHx8fDE3ODE2MTU3Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "videoUrl": ""
+  },
+  {
+    "id": "v4",
+    "title": "フレーバーアイスのつくり方",
+    "duration": "02:38",
+    "thumb": "https://images.unsplash.com/photo-1715640476091-022c895f4cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNoYXZlZCUyMGljZSUyMGRlc3NlcnR8ZW58MXx8fHwxNzgxNjE1Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "videoUrl": ""
+  }
+]

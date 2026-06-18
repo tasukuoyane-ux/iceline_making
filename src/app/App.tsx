@@ -14,6 +14,8 @@ import { NewsDetail } from "./pages/NewsDetail";
 import { Videos } from "./pages/Videos";
 import { Recruit } from "./pages/Recruit";
 import { Interview } from "./pages/Interview";
+import { RecipeDetail } from "./pages/RecipeDetail";
+import { ConsoleApp } from "../console/ConsoleApp";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -23,32 +25,45 @@ function ScrollToTop() {
   return null;
 }
 
+// 公開サイト本体（ヘッダー・フッター付き）
+function Site() {
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <Header />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Top />} />
+          <Route path="/food" element={<DivisionPage division="food" />} />
+          <Route path="/ice" element={<DivisionPage division="ice" />} />
+          <Route path="/ice/recipe/:id" element={<RecipeDetail />} />
+          <Route path="/food/products/:id" element={<ProductDetail />} />
+          <Route path="/ice/products/:id" element={<ProductDetail />} />
+          <Route path="/company" element={<Company />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/videos" element={<Videos />} />
+          <Route path="/recruit" element={<Recruit />} />
+          <Route path="/recruit/interview/:id" element={<Interview />} />
+          <Route path="*" element={<Top />} />
+        </Routes>
+      </main>
+      <Footer />
+      <VideoCta />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Top />} />
-            <Route path="/food" element={<DivisionPage division="food" />} />
-            <Route path="/ice" element={<DivisionPage division="ice" />} />
-            <Route path="/food/products/:id" element={<ProductDetail />} />
-            <Route path="/ice/products/:id" element={<ProductDetail />} />
-            <Route path="/company" element={<Company />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/news/:id" element={<NewsDetail />} />
-            <Route path="/videos" element={<Videos />} />
-            <Route path="/recruit" element={<Recruit />} />
-            <Route path="/recruit/interview/:id" element={<Interview />} />
-            <Route path="*" element={<Top />} />
-          </Routes>
-        </main>
-        <Footer />
-        <VideoCta />
-      </div>
+      <Routes>
+        {/* 社員専用 管理コンソール（ヘッダー・フッターなし） */}
+        <Route path="/console/*" element={<ConsoleApp />} />
+        {/* 公開サイト */}
+        <Route path="/*" element={<Site />} />
+      </Routes>
       <Toaster position="top-center" richColors />
     </BrowserRouter>
   );
