@@ -5,12 +5,21 @@
     "role": "品質管理部門 課長",
     "years": "入社15年",
     "lead": "声に出せる現場が、品質をつくる。",
+    "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_01-WOIjdanjBsttYeyH0ovgRNU1mKx5Bl.jpg",
     "blocks": [
-      { "type": "paragraph", "text": "品質管理は、間違いを責める仕事ではありません。むしろ、間違いを早く見つけて、早く直せる空気をつくる仕事だと思っています。" },
-      { "type": "paragraph", "text": "工場を巡回して、検査して、記録する。地味な作業の繰り返しに見えるかもしれません。でも、その一つひとつが、お客様の安心につながっている。表には出ないけれど、確かに誰かの日常を支えている実感があります。" },
-      { "type": "paragraph", "text": "何かあったら、まず話す。隠さない。それができる現場だから、私はここで長く働けています。\nこれからも頑張ります。" }
-    ],
-    "image": "https://images.unsplash.com/photo-1609558931017-52dd29b80076?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYWN0b3J5JTIwd29ya2VyJTIwdGVhbSUyMGphcGFufGVufDF8fHx8MTc4MTYxNTc3Mnww&ixlib=rb-4.1.0&q=80&w=1080"
+      {
+        "type": "paragraph",
+        "text": "品質管理は、間違いを責める仕事ではありません。むしろ、間違いを早く見つけて、早く直せる空気をつくる仕事だと思っています。"
+      },
+      {
+        "type": "paragraph",
+        "text": "工場を巡回して、検査して、記録する。地味な作業の繰り返しに見えるかもしれません。でも、その一つひとつが、お客様の安心につながっている。表には出ないけれど、確かに誰かの日常を支えている実感があります。"
+      },
+      {
+        "type": "paragraph",
+        "text": "何かあったら、まず話す。隠さない。それができる現場だから、私はここで長く働けています。\nこれからも頑張ります。"
+      }
+    ]
   },
   {
     "id": "sales-y",
@@ -18,10 +27,16 @@
     "role": "食品事業部 営業職",
     "years": "入社8年",
     "lead": "毎日通うから、見えてくる。",
+    "image": "https://images.unsplash.com/photo-1609153450348-06f217a09313?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYWN0b3J5JTIwd29ya2VyJTIwdGVhbSUyMGphcGFufGVufDF8fHx8MTc4MTYxNTc3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
     "blocks": [
-      { "type": "paragraph", "text": "ルートと営業を兼ねているので、毎日同じ取引先に顔を出します。最初は「配達の人」だったのが、だんだん「相談できる人」に変わっていく。その瞬間が、この仕事のいちばんの面白さです。" },
-      { "type": "paragraph", "text": "売ることより、必要なものを一緒に考えること。困りごとに先回りできたとき、本当に喜んでもらえる。その積み重ねが、信頼になっていくんだと思います。" }
-    ],
-    "image": "https://images.unsplash.com/photo-1609153450348-06f217a09313?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYWN0b3J5JTIwd29ya2VyJTIwdGVhbSUyMGphcGFufGVufDF8fHx8MTc4MTYxNTc3Mnww&ixlib=rb-4.1.0&q=80&w=1080"
+      {
+        "type": "paragraph",
+        "text": "ルートと営業を兼ねているので、毎日同じ取引先に顔を出します。最初は「配達の人」だったのが、だんだん「相談できる人」に変わっていく。その瞬間が、この仕事のいちばんの面白さです。"
+      },
+      {
+        "type": "paragraph",
+        "text": "売ることより、必要なものを一緒に考えること。困りごとに先回りできたとき、本当に喜んでもらえる。その積み重ねが、信頼になっていくんだと思います。"
+      }
+    ]
   }
 ]
