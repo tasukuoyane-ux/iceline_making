@@ -1,7 +1,7 @@
 import { useState, FormEvent } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight, MapPin, PlayCircle, Clock } from "lucide-react";
+import { ArrowRight, ArrowUpRight, MapPin, PlayCircle, Clock, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
@@ -46,7 +46,6 @@ function RecruitHero() {
 }
 
 export function Recruit() {
-  const [type, setType] = useState("entry");
   const [dayRole, setDayRole] = useState(0);
   const day = RECRUIT_DAYS[dayRole];
 
@@ -174,33 +173,60 @@ export function Recruit() {
       {/* 仕事を知る｜一日の流れ（食品営業／アイス製造／品質管理） */}
       <Section heat={HEAT.recruitDay}>
         <SectionTitle en="A DAY" jp="仕事を知る — 一日の流れ" />
-        <div className="mt-8 flex flex-wrap gap-2">
-          {RECRUIT_DAYS.map((d, i) => (
-            <button
-              key={d.role}
-              type="button"
-              onClick={() => setDayRole(i)}
-              className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
-              style={{ fontSize: 13, fontWeight: 700 }}
-            >
-              {d.role}
-            </button>
+
+        {/* モバイル：タブ切替 */}
+        <div className="pc:hidden">
+          <div className="mt-8 flex flex-wrap gap-2">
+            {RECRUIT_DAYS.map((d, i) => (
+              <button
+                key={d.role}
+                type="button"
+                onClick={() => setDayRole(i)}
+                className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
+                style={{ fontSize: 13, fontWeight: 700 }}
+              >
+                {d.role}
+              </button>
+            ))}
+          </div>
+          <p className="mt-4 inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
+            <Clock size={15} className="text-brand" /> {day.note}
+          </p>
+          <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
+            {day.steps.map((d, i) => (
+              <li key={i} className="relative mb-7 last:mb-0">
+                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
+                <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
+                  <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
+                  <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* PC：3職種を3列ですべて表示 */}
+        <div className="mt-10 hidden gap-8 pc:grid pc:grid-cols-3">
+          {RECRUIT_DAYS.map((d) => (
+            <div key={d.role} className="rounded-2xl border border-border bg-card p-8">
+              <h3 className="text-brand" style={{ fontSize: 19, fontWeight: 700 }}>{d.role}</h3>
+              <p className="mt-2 inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 13 }}>
+                <Clock size={14} className="text-brand" /> {d.note}
+              </p>
+              <ol className="mt-6 space-y-0 border-l-2 border-brand/30 pl-6">
+                {d.steps.map((s, i) => (
+                  <li key={i} className="relative mb-6 last:mb-0">
+                    <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
+                    <div className="flex flex-col gap-1">
+                      <span className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>{s.time}</span>
+                      <p style={{ fontSize: 14, lineHeight: 1.7 }}>{s.task}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
           ))}
         </div>
-        <p className="mt-4 inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
-          <Clock size={15} className="text-brand" /> {day.note}
-        </p>
-        <ol className="mt-8 space-y-0 border-l-2 border-brand/30 pl-6">
-          {day.steps.map((d, i) => (
-            <li key={i} className="relative mb-7 last:mb-0">
-              <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
-              <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
-                <span className="w-16 text-brand" style={{ fontSize: 14, fontWeight: 700 }}>{d.time}</span>
-                <p style={{ fontSize: 15, lineHeight: 1.8 }}>{d.task}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
       </Section>
 
       {/* カンパニーデック */}
@@ -222,6 +248,29 @@ export function Recruit() {
                   <p className="mt-2 text-white/70" style={{ fontSize: 13 }}>{s.l}</p>
                 </div>
               ))}
+            </div>
+
+            {/* 会社紹介資料（PowerPoint）カルーセル：手動スクロールのプレイスホルダー */}
+            <div className="mt-12 border-t border-white/10 pt-10">
+              <p className="text-white/70" style={{ fontSize: 13 }}>
+                会社紹介資料（スライドを横スクロールでご覧いただけます）
+              </p>
+              <div className="mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <div
+                    key={n}
+                    className="flex aspect-video w-[78%] shrink-0 snap-center flex-col items-center justify-center rounded-xl border border-dashed border-white/25 bg-white/5 text-center tab:w-[48%] pc:w-[32%]"
+                  >
+                    <span className="text-white/50" style={{ fontFamily: "var(--font-accent)", fontSize: 32, fontWeight: 700 }}>
+                      {String(n).padStart(2, "0")}
+                    </span>
+                    <span className="mt-2 text-white/40" style={{ fontSize: 12 }}>スライド差し替え用プレイスホルダー</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-1 text-white/40" style={{ fontSize: 11 }}>
+                ※ パワーポイント資料の画像（16:9）をこの枠に差し込んでください。
+              </p>
             </div>
           </div>
         </div>
@@ -300,22 +349,6 @@ export function Recruit() {
         <div className="mx-auto max-w-2xl px-5">
           <SectionTitle en="ENTRY" jp="エントリー" align="center" />
           <form onSubmit={onSubmit} className="mt-10 space-y-6">
-            <div className="flex justify-center gap-2">
-              {[
-                { v: "entry", l: "本エントリー" },
-                { v: "casual", l: "カジュアル面談" },
-              ].map((o) => (
-                <button
-                  key={o.v}
-                  type="button"
-                  onClick={() => setType(o.v)}
-                  className={`rounded-full border px-5 py-2 transition-colors ${type === o.v ? "border-brand bg-brand text-brand-foreground" : "border-border"}`}
-                  style={{ fontSize: 13 }}
-                >
-                  {o.l}
-                </button>
-              ))}
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="r-name">お名前 <span className="text-brand">*</span></Label>
               <Input id="r-name" required placeholder="山田 太郎" />
@@ -329,6 +362,20 @@ export function Recruit() {
                 <Label htmlFor="r-tel">電話番号</Label>
                 <Input id="r-tel" placeholder="090-0000-0000" />
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="r-resume">履歴書アップロード</Label>
+              <label
+                htmlFor="r-resume"
+                className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-border bg-secondary/40 px-4 py-4 text-muted-foreground transition-colors hover:border-brand"
+              >
+                <Upload size={18} className="shrink-0 text-brand" />
+                <span style={{ fontSize: 13, lineHeight: 1.6 }}>
+                  履歴書・職務経歴書をアップロード
+                  <span className="block text-muted-foreground/80" style={{ fontSize: 11 }}>PDF / Word / 画像（5MBまで）</span>
+                </span>
+              </label>
+              <Input id="r-resume" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" className="hidden" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="r-msg">メッセージ</Label>

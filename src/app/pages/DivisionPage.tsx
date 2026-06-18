@@ -1,11 +1,12 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight, ShieldCheck, Snowflake, Sparkles, Palette, Droplets } from "lucide-react";
+import { ArrowRight, ChevronRight, ShieldCheck, Snowflake, Sparkles, Palette, Droplets, X } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
-import { Division, DIVISION_INFO, DIVISION_BIZ, ICE_RECIPES, PRODUCTS } from "../data/products";
+import { Division, DIVISION_INFO, DIVISION_BIZ, ICE_RECIPES, IceRecipeItem, PRODUCTS } from "../data/products";
 
 const MV: Record<Division, { img: string; lead: string }> = {
   food: { img: IMG.foodPlate, lead: "食の現場に、深く根を張る。" },
@@ -69,7 +70,7 @@ export function DivisionPage({ division }: { division: Division }) {
   const info = DIVISION_INFO[division];
   const biz = DIVISION_BIZ[division];
   const items = PRODUCTS.filter((p) => p.division === division);
-  const bizHeat = division === "food" ? HEAT.foodBiz : HEAT.iceBiz;
+  const [recipe, setRecipe] = useState<IceRecipeItem | null>(null);
   const reasonHeat = division === "food" ? HEAT.foodReason : HEAT.iceReason;
   const listHeat = division === "food" ? HEAT.foodList : HEAT.iceList;
 
@@ -90,49 +91,39 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </section>
 
-      {/* 事業紹介（MV下・コピー＋事業内容） */}
-      <Section heat={bizHeat}>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="mx-auto max-w-3xl text-center"
-        >
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
-            OUR BUSINESS
-          </p>
-          <h2 className="mt-3 text-brand" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.4 }}>
-            {biz.copy}
-          </h2>
-          <p className="mt-6 text-left text-foreground/80 pc:text-center" style={{ fontSize: 15, lineHeight: 2.1 }}>
-            {biz.body}
-          </p>
-        </motion.div>
-        {division === "ice" && <IcePossibilityFigure />}
-      </Section>
-
-      {/* 選ばれる理由（熱量の強化・主語を明確化） */}
+      {/* 事業概要＋選ばれる理由（左に縦並び・右に画像） */}
       <Section heat={reasonHeat}>
         <div className="grid items-center gap-10 pc:grid-cols-2 pc:items-stretch">
-          <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
-            <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }}>
-              {info.reasonCatch}
-            </p>
-            <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }}>{info.reasonBody}</p>
-            <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-muted-foreground" style={{ fontSize: 13 }}>
-              <ShieldCheck size={16} className="text-brand" /> FSSC 22000 / ISO 認証取得
-            </div>
-          </motion.div>
+          {/* 左：OUR BUSINESS → WHY CHOSEN を縦並び */}
+          <div className="space-y-12">
+            <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+              <SectionTitle en="OUR BUSINESS" jp="事業概要" />
+              <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }}>
+                {biz.copy}
+              </p>
+              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }}>{biz.body}</p>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+              <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
+              <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }}>
+                {info.reasonCatch}
+              </p>
+              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1 }}>{info.reasonBody}</p>
+              <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-muted-foreground" style={{ fontSize: 13 }}>
+                <ShieldCheck size={16} className="text-brand" /> FSSC 22000 / ISO 認証取得
+              </div>
+            </motion.div>
+          </div>
+          {/* 右：画像（左列の高さに追従） */}
           <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="pc:h-full">
             <ImageWithFallback
               src={division === "food" ? IMG.kitchen : IMG.iceClose}
               alt={info.reasonCatch}
-              className="aspect-[4/5] w-full rounded-2xl object-cover pc:aspect-auto pc:h-full"
+              className="aspect-[4/5] w-full rounded-2xl object-cover pc:aspect-auto pc:h-full pc:sticky pc:top-24"
             />
           </motion.div>
         </div>
+        {division === "ice" && <IcePossibilityFigure />}
       </Section>
 
       {/* 商品一覧 */}
@@ -161,21 +152,10 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </Section>
 
-      {/* 氷のレシピ（アイス事業部のみ・縦400px以内） */}
+      {/* 氷のレシピ（アイス事業部のみ・縦400px以内／サイト内で完結） */}
       {division === "ice" && (
         <Section heat={HEAT.iceRecipe}>
-          <div className="flex flex-col gap-3 tab:flex-row tab:items-end tab:justify-between">
-            <SectionTitle en="ICE RECIPE" jp="氷のレシピ" />
-            <a
-              href="https://www.iceline.co.jp/services/ice/recipe/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-brand"
-              style={{ fontSize: 13 }}
-            >
-              レシピ一覧を見る <ArrowUpRight size={15} />
-            </a>
-          </div>
+          <SectionTitle en="ICE RECIPE" jp="氷のレシピ" />
           {/* 複数階層（カテゴリ＞レシピ）を横スクロールで縦400px以内に収める */}
           <div className="mt-6 max-h-[400px] overflow-x-auto overflow-y-hidden pb-3">
             <div className="grid auto-cols-[minmax(220px,1fr)] grid-flow-col gap-4 tab:grid-flow-row tab:grid-cols-2 pc:grid-cols-4">
@@ -185,18 +165,17 @@ export function DivisionPage({ division }: { division: Division }) {
                   <ul className="mt-3 space-y-2">
                     {cat.items.map((it) => (
                       <li key={it.name}>
-                        <a
-                          href="https://www.iceline.co.jp/services/ice/recipe/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group flex items-start justify-between gap-2 border-b border-border/60 pb-2 transition-colors hover:text-brand"
+                        <button
+                          type="button"
+                          onClick={() => setRecipe(it)}
+                          className="group flex w-full items-start justify-between gap-2 border-b border-border/60 pb-2 text-left transition-colors hover:text-brand"
                         >
                           <span>
                             <span className="block" style={{ fontSize: 13, fontWeight: 500 }}>{it.name}</span>
                             <span className="block text-muted-foreground" style={{ fontSize: 11 }}>{it.note}</span>
                           </span>
-                          <ArrowUpRight size={13} className="mt-1 shrink-0 text-muted-foreground transition-colors group-hover:text-brand" />
-                        </a>
+                          <ChevronRight size={14} className="mt-1 shrink-0 text-muted-foreground transition-colors group-hover:text-brand" />
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -205,6 +184,53 @@ export function DivisionPage({ division }: { division: Division }) {
             </div>
           </div>
         </Section>
+      )}
+
+      {/* レシピ詳細（サイト内モーダル） */}
+      {recipe && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/60 p-5"
+          onClick={() => setRecipe(null)}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl bg-card p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="閉じる"
+              onClick={() => setRecipe(null)}
+              className="absolute right-4 top-4 text-muted-foreground transition-colors hover:text-brand"
+            >
+              <X size={22} />
+            </button>
+            <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 12 }}>ICE RECIPE</p>
+            <h3 className="mt-2" style={{ fontSize: 24, fontWeight: 700 }}>{recipe.name}</h3>
+            <p className="mt-1 text-muted-foreground" style={{ fontSize: 13 }}>{recipe.note}</p>
+            <div className="mt-6">
+              <p className="text-brand" style={{ fontSize: 14, fontWeight: 700 }}>材料</p>
+              <ul className="mt-2 space-y-1">
+                {recipe.materials.map((m, i) => (
+                  <li key={i} className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.8 }}>・{m}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6">
+              <p className="text-brand" style={{ fontSize: 14, fontWeight: 700 }}>作り方</p>
+              <ol className="mt-2 space-y-2">
+                {recipe.steps.map((s, i) => (
+                  <li key={i} className="flex gap-3 text-foreground/80" style={{ fontSize: 14, lineHeight: 1.7 }}>
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground" style={{ fontSize: 12, fontWeight: 700 }}>{i + 1}</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </motion.div>
+        </div>
       )}
     </>
   );
