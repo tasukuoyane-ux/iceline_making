@@ -185,6 +185,9 @@ const SECTION_FLATTEN_KEYS = [
   "recruitApply",
   "philosophy",
   "ceoMessage",
+  "recruitConditions",
+  "recruitFlow",
+  "recruitFaq",
 ];
 
 function flatten(prefix: string, value: any, out: Record<string, string>) {

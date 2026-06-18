@@ -1,7 +1,7 @@
 import { useState, FormEvent } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight, MapPin, PlayCircle, Clock, Upload } from "lucide-react";
+import { ArrowRight, ArrowUpRight, MapPin, PlayCircle, Clock, Upload, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
@@ -23,6 +23,9 @@ import {
   RECRUIT_APPLY,
   RECRUIT_JOBS,
   RECRUIT_TERMS,
+  RECRUIT_CONDITIONS,
+  RECRUIT_FLOW,
+  RECRUIT_FAQ,
   INTERVIEWS,
 } from "../data/recruit";
 
@@ -49,9 +52,15 @@ function RecruitHero() {
 // 一日の流れ・職種ごとの画像（タブ順：食品営業／アイス製造／品質管理）
 const DAY_IMAGES = [IMG.kitchen, IMG.iceMacro, IMG.worker2];
 
+// 開閉トグル（インデックス配列）
+const toggleIndex = (arr: number[], i: number) =>
+  arr.includes(i) ? arr.filter((x) => x !== i) : [...arr, i];
+
 export function Recruit() {
   const [dayRole, setDayRole] = useState(0);
   const day = RECRUIT_DAYS[dayRole];
+  const [openCond, setOpenCond] = useState<number[]>([]);
+  const [openFaq, setOpenFaq] = useState<number[]>([]);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -324,6 +333,52 @@ export function Recruit() {
         </div>
       </Section>
 
+      {/* 待遇・勤務地（H3アコーディオン） */}
+      <Section heat={HEAT.recruitJob}>
+        <SectionTitle en="BENEFITS" jp="待遇・勤務地" />
+        <p
+          className="mt-6 max-w-3xl text-foreground/80"
+          style={{ fontSize: 15, lineHeight: 2.1 }}
+          {...ed("sections:recruitConditions.lead", "待遇リード", { multiline: true })}
+        >
+          {RECRUIT_CONDITIONS.lead}
+        </p>
+        <div className="mt-8 space-y-3">
+          {RECRUIT_CONDITIONS.groups.map((g, gi) => {
+            const open = openCond.includes(gi);
+            return (
+              <div key={gi} className="overflow-hidden rounded-xl border border-border">
+                <h3>
+                  <button
+                    type="button"
+                    onClick={() => setOpenCond((a) => toggleIndex(a, gi))}
+                    aria-expanded={open}
+                    className="flex w-full items-center justify-between gap-3 bg-card px-6 py-4 text-left transition-colors hover:bg-secondary/60"
+                  >
+                    <span className="text-brand" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`sections:recruitConditions.groups.${gi}.heading`, "見出し")}>
+                      {g.heading}
+                    </span>
+                    <ChevronDown size={20} className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+                  </button>
+                </h3>
+                <dl className={open ? "block divide-y divide-border/60 border-t border-border bg-background px-6" : "hidden"}>
+                  {g.items.map((it, ii) => (
+                    <div key={ii} className="py-4">
+                      <dt style={{ fontSize: 14, fontWeight: 700 }} {...ed(`sections:recruitConditions.groups.${gi}.items.${ii}.term`, "項目")}>
+                        {it.term}
+                      </dt>
+                      <dd className="mt-1 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9 }} {...ed(`sections:recruitConditions.groups.${gi}.items.${ii}.desc`, "説明", { multiline: true })}>
+                        {it.desc}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            );
+          })}
+        </div>
+      </Section>
+
       {/* 募集要項｜諸条件 */}
       <Section heat={HEAT.recruitTerms}>
         <SectionTitle en="CONDITIONS" jp="諸条件" />
@@ -337,6 +392,74 @@ export function Recruit() {
             ))}
           </tbody>
         </table>
+      </Section>
+
+      {/* 選考フロー */}
+      <Section heat={HEAT.recruitDay}>
+        <SectionTitle en="FLOW" jp="選考フロー" />
+        <p
+          className="mt-6 max-w-3xl text-foreground/80"
+          style={{ fontSize: 15, lineHeight: 2.1 }}
+          {...ed("sections:recruitFlow.lead", "選考フローリード", { multiline: true })}
+        >
+          {RECRUIT_FLOW.lead}
+        </p>
+        <ol className="mt-10 border-l-2 border-brand/30 pl-7">
+          {RECRUIT_FLOW.steps.map((s, i) => (
+            <li key={i} className="relative mb-8 last:mb-0">
+              <span
+                className="absolute -left-[34px] top-0 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-brand-foreground"
+                style={{ fontFamily: "var(--font-accent)", fontSize: 10, fontWeight: 700 }}
+              >
+                {s.no}
+              </span>
+              <h3 className="text-brand" style={{ fontSize: 17, fontWeight: 700 }} {...ed(`sections:recruitFlow.steps.${i}.title`, "ステップ名")}>
+                {s.title}
+              </h3>
+              <p className="mt-2 text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }} {...ed(`sections:recruitFlow.steps.${i}.body`, "ステップ説明", { multiline: true })}>
+                {s.body}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      {/* よくある質問（H3アコーディオン） */}
+      <Section heat={HEAT.recruitTerms}>
+        <SectionTitle en="FAQ" jp="よくある質問" />
+        <div className="mt-8 space-y-3">
+          {RECRUIT_FAQ.items.map((f, i) => {
+            const open = openFaq.includes(i);
+            return (
+              <div key={i} className="overflow-hidden rounded-xl border border-border">
+                <h3>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq((a) => toggleIndex(a, i))}
+                    aria-expanded={open}
+                    className="flex w-full items-start justify-between gap-3 bg-card px-6 py-4 text-left transition-colors hover:bg-secondary/60"
+                  >
+                    <span className="flex gap-2">
+                      <span className="text-brand" style={{ fontSize: 15, fontWeight: 700 }}>Q.</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.6 }} {...ed(`sections:recruitFaq.items.${i}.q`, "質問")}>
+                        {f.q}
+                      </span>
+                    </span>
+                    <ChevronDown size={20} className={`mt-0.5 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+                  </button>
+                </h3>
+                <div className={open ? "block border-t border-border bg-background px-6 py-4" : "hidden"}>
+                  <div className="flex gap-2">
+                    <span className="text-brand" style={{ fontSize: 15, fontWeight: 700 }}>A.</span>
+                    <p className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.95 }} {...ed(`sections:recruitFaq.items.${i}.a`, "回答", { multiline: true })}>
+                      {f.a}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Section>
 
       {/* エントリーフォーム */}

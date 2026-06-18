@@ -112,6 +112,21 @@ export const RECRUIT_WORK: { role: string; lines: string[] }[] = [
 
 export const RECRUIT_APPLY = sections.recruitApply;
 
+// 待遇・勤務地（conditions.md より）
+export const RECRUIT_CONDITIONS: {
+  lead: string;
+  groups: { heading: string; items: { term: string; desc: string }[] }[];
+} = sections.recruitConditions;
+
+// 選考フロー（flow.md より）
+export const RECRUIT_FLOW: {
+  lead: string;
+  steps: { no: string; title: string; body: string }[];
+} = sections.recruitFlow;
+
+// よくある質問（faq.md より）
+export const RECRUIT_FAQ: { items: { q: string; a: string }[] } = sections.recruitFaq;
+
 export const RECRUIT_JOBS: { dept: string; role: string; body: string }[] = [
   {
     dept: "食品事業部",
