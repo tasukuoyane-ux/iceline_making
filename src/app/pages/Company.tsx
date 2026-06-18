@@ -4,12 +4,13 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { CEO_MESSAGE, COMPANY_PROFILE, HISTORY, PHILOSOPHY, CSR } from "../data/company";
+import { ed, edImg } from "../lib/editable";
 
 export function Company() {
   return (
     <>
       <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
-        <ImageWithFallback src={IMG.warehouse} alt="会社情報" className="h-full w-full object-cover opacity-70" />
+        <ImageWithFallback src={IMG.warehouse} alt="会社情報" className="h-full w-full object-cover opacity-70" {...edImg("images:IMG.warehouse")} />
         <div className="absolute inset-0 bg-ink/50" />
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-12 pc:px-8">
           <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>COMPANY</p>
@@ -22,12 +23,12 @@ export function Company() {
         <div className="grid items-stretch gap-10 pc:grid-cols-[1fr_1.3fr]">
           <div className="flex flex-col">
             <SectionTitle en="MESSAGE" jp="代表メッセージ" />
-            <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="mt-6 aspect-[4/3] w-full rounded-2xl object-cover pc:aspect-auto pc:min-h-0 pc:flex-1" />
-            <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }}>{CEO_MESSAGE.name}</p>
+            <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="mt-6 aspect-[4/3] w-full rounded-2xl object-cover pc:aspect-auto pc:min-h-0 pc:flex-1" {...edImg("images:IMG.waterDew")} />
+            <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }} {...ed("sections:ceoMessage.name")}>{CEO_MESSAGE.name}</p>
           </div>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-5">
             {CEO_MESSAGE.paragraphs.map((t, i) => (
-              <p key={i} style={{ fontSize: 15, lineHeight: 2.2 }}>{t}</p>
+              <p key={i} style={{ fontSize: 15, lineHeight: 2.2 }} {...ed(`sections:ceoMessage.paragraphs.${i}`)}>{t}</p>
             ))}
           </motion.div>
         </div>
@@ -37,7 +38,7 @@ export function Company() {
       <Section heat={HEAT.philosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8 }}>
+          <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8 }} {...ed("sections:philosophy.body")}>
             {PHILOSOPHY.body}
           </p>
         </div>

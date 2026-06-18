@@ -18,10 +18,20 @@ import { RecipeDetail } from "./pages/RecipeDetail";
 import { ConsoleApp } from "../console/ConsoleApp";
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
+    if (hash) {
+      // ハッシュ付き遷移時は該当セクションへスクロール（描画後に実行）
+      const id = hash.slice(1);
+      requestAnimationFrame(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "auto", block: "start" });
+        else window.scrollTo(0, 0);
+      });
+      return;
+    }
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
 

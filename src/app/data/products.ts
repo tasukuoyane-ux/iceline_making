@@ -133,7 +133,8 @@ export const DIVISION_BIZ: Record<
 > = sections.divisionBiz;
 
 // 氷のレシピ。iceline.co.jp/services/ice/recipe/ のレシピメニューを移植。
-const RECIPE_IMG = "https://www.iceline.co.jp/assets/img/services/ice/recipe/index/";
+// 画像は public/images/recipes/ にローカル保存したものを使用。
+const RECIPE_IMG = "/images/recipes/";
 export interface IceRecipeItem {
   id: string;
   name: string;

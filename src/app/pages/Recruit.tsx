@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
-import { IMG, INTERVIEW_IMG } from "../data/images";
+import { IMG } from "../data/images";
+import { ed, edImg } from "../lib/editable";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -38,12 +39,15 @@ function RecruitHero() {
           <h1 className="text-white" style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.15, letterSpacing: "0.01em" }}>
             笑顔と、正直さ。<br />ただ、それだけ。
           </h1>
-          <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9 }}>{RECRUIT_MV.sub}</p>
+          <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9 }} {...ed("sections:recruitMv.sub")}>{RECRUIT_MV.sub}</p>
         </motion.div>
       </div>
     </section>
   );
 }
+
+// 一日の流れ・職種ごとの画像（タブ順：食品営業／アイス製造／品質管理）
+const DAY_IMAGES = [IMG.kitchen, IMG.iceMacro, IMG.worker2];
 
 export function Recruit() {
   const [dayRole, setDayRole] = useState(0);
@@ -68,6 +72,7 @@ export function Recruit() {
           transition={{ duration: 0.7 }}
           className="mx-auto max-w-3xl text-center pc:max-w-[90%]"
           style={{ fontSize: 19, lineHeight: 2.4, fontWeight: 500 }}
+          {...ed("sections:recruitMv.body")}
         >
           {RECRUIT_MV.body}
         </motion.p>
@@ -186,7 +191,7 @@ export function Recruit() {
             </button>
           ))}
         </div>
-        <div className="mt-8 grid gap-10 pc:grid-cols-2 pc:items-start">
+        <div className="mt-8 grid gap-10 pc:grid-cols-2 pc:items-stretch">
           {/* 左：選択中の職種のタイムライン */}
           <div>
             <p className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: 14 }}>
@@ -204,12 +209,12 @@ export function Recruit() {
               ))}
             </ol>
           </div>
-          {/* 右：画像（PCのみ） */}
-          <div className="hidden pc:block">
+          {/* 右：画像（PCのみ・タブごとに切替／下端をol下端に合わせる） */}
+          <div className="hidden pc:relative pc:block">
             <ImageWithFallback
-              src={IMG.worker1}
-              alt="一日の流れ"
-              className="sticky top-24 aspect-[4/5] w-full rounded-2xl object-cover"
+              src={DAY_IMAGES[dayRole]}
+              alt={day.role}
+              className="rounded-2xl object-cover pc:absolute pc:inset-0 pc:h-full pc:w-full"
             />
           </div>
         </div>
@@ -274,11 +279,11 @@ export function Recruit() {
               className="group relative overflow-hidden rounded-2xl"
             >
               <div className="aspect-[4/3] overflow-hidden bg-secondary">
-                <ImageWithFallback src={INTERVIEW_IMG[iv.id]} alt={iv.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`interviews:${iv.id}:image`)} />
               </div>
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/85 to-transparent p-7">
                 <p className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>INTERVIEW</p>
-                <h3 className="mt-1 text-white" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }}>{iv.lead}</h3>
+                <h3 className="mt-1 text-white" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }} {...ed(`interviews:${iv.id}:lead`)}>{iv.lead}</h3>
                 <p className="mt-2 text-white/80" style={{ fontSize: 13 }}>{iv.role}｜{iv.name}（{iv.years}）</p>
                 <span className="mt-3 inline-flex items-center gap-1 text-white" style={{ fontSize: 13 }}>
                   記事を読む <ArrowUpRight size={15} />
@@ -296,8 +301,8 @@ export function Recruit() {
       <Section heat={HEAT.recruitApply} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center">
-            <p className="text-brand" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.4 }}>{RECRUIT_APPLY.copy}</p>
-            <p className="mx-auto mt-6 max-w-2xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }}>{RECRUIT_APPLY.body}</p>
+            <p className="text-brand" style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.4 }} {...ed("sections:recruitApply.copy")}>{RECRUIT_APPLY.copy}</p>
+            <p className="mx-auto mt-6 max-w-2xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.2 }} {...ed("sections:recruitApply.body")}>{RECRUIT_APPLY.body}</p>
           </motion.div>
         </div>
       </Section>

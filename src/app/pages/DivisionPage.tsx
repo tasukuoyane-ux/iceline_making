@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ChevronRight, ShieldCheck, Snowflake, Sparkles, Palette, Droplets } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronDown, ShieldCheck, Snowflake, Sparkles, Palette, Droplets } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
@@ -70,6 +71,9 @@ export function DivisionPage({ division }: { division: Division }) {
   const info = DIVISION_INFO[division];
   const biz = DIVISION_BIZ[division];
   const items = PRODUCTS.filter((p) => p.division === division);
+  const [openCats, setOpenCats] = useState<string[]>([]);
+  const toggleCat = (c: string) =>
+    setOpenCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   const reasonHeat = division === "food" ? HEAT.foodReason : HEAT.iceReason;
   const listHeat = division === "food" ? HEAT.foodList : HEAT.iceList;
 
@@ -159,36 +163,57 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </Section>
 
-      {/* 氷のレシピ（アイス事業部のみ・縦400px以内／サイト内で完結） */}
+      {/* 氷のレシピ（アイス事業部のみ・カテゴリごとにアコーディオン展開） */}
       {division === "ice" && (
-        <Section heat={HEAT.iceRecipe}>
+        <Section heat={HEAT.iceRecipe} id="ice-recipe">
           <SectionTitle en="ICE RECIPE" jp="氷のレシピ" />
           <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.9 }}>
             氷カフェ・カクテル氷・雪氷を使った、お店でそのまま使えるレシピメニュー。
           </p>
-          <div className="mt-10 space-y-12">
-            {ICE_RECIPES.map((cat) => (
-              <div key={cat.category}>
-                <h3 className="border-b border-border pb-2 text-brand" style={{ fontSize: 18, fontWeight: 700 }}>{cat.category}</h3>
-                <div className="mt-6 grid grid-cols-2 gap-5 tab:grid-cols-3 pc:grid-cols-4">
-                  {cat.items.map((it) => (
-                    <Link
-                      key={it.id}
-                      to={`/ice/recipe/${it.id}`}
-                      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg"
-                    >
-                      <div className="aspect-[4/3] overflow-hidden bg-secondary">
-                        <ImageWithFallback src={it.image} alt={it.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <div className="mt-10 space-y-4">
+            {ICE_RECIPES.map((cat) => {
+              const open = openCats.includes(cat.category);
+              return (
+                <div key={cat.category} className="overflow-hidden rounded-xl border border-border">
+                  <button
+                    type="button"
+                    onClick={() => toggleCat(cat.category)}
+                    aria-expanded={open}
+                    className="flex w-full items-center justify-between gap-3 bg-card px-6 py-5 text-left transition-colors hover:bg-secondary/60"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-brand" style={{ fontSize: 18, fontWeight: 700 }}>{cat.category}</span>
+                      <span className="text-muted-foreground" style={{ fontSize: 12 }}>{cat.items.length}品</span>
+                    </span>
+                    <ChevronDown
+                      size={20}
+                      className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {open && (
+                    <div className="border-t border-border bg-background p-6">
+                      <div className="grid grid-cols-2 gap-5 tab:grid-cols-3 pc:grid-cols-4">
+                        {cat.items.map((it) => (
+                          <Link
+                            key={it.id}
+                            to={`/ice/recipe/${it.id}`}
+                            className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg"
+                          >
+                            <div className="aspect-[4/3] overflow-hidden bg-secondary">
+                              <ImageWithFallback src={it.image} alt={it.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            </div>
+                            <div className="flex flex-1 items-center justify-between gap-2 p-4">
+                              <span style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.5 }}>{it.name}</span>
+                              <ChevronRight size={15} className="shrink-0 text-muted-foreground transition-colors group-hover:text-brand" />
+                            </div>
+                          </Link>
+                        ))}
                       </div>
-                      <div className="flex flex-1 items-center justify-between gap-2 p-4">
-                        <span style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.5 }}>{it.name}</span>
-                        <ChevronRight size={15} className="shrink-0 text-muted-foreground transition-colors group-hover:text-brand" />
-                      </div>
-                    </Link>
-                  ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Section>
       )}

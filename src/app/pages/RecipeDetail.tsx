@@ -19,7 +19,7 @@ export function RecipeDetail() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-12 pc:py-16">
       <Link
-        to="/ice"
+        to="/ice#ice-recipe"
         className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand"
         style={{ fontSize: 13 }}
       >
