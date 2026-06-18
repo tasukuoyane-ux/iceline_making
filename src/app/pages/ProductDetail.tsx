@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { PRODUCTS } from "../data/products";
 import { PRODUCT_IMG } from "../data/images";
+import { ed, edImg, txt, img } from "../lib/editable";
 
 export function ProductDetail() {
   const { id } = useParams();
@@ -17,15 +18,16 @@ export function ProductDetail() {
     );
   }
 
-  const rows: { label: string; value: string }[] = [
-    { label: "商品名", value: p.name },
-    { label: "規格", value: p.spec },
-    { label: "内容量", value: p.netWeight },
-    { label: "原材料", value: p.ingredients },
-    { label: "アレルゲン", value: p.allergens },
-    { label: "保存方法", value: p.storage },
-    { label: "賞味期限", value: p.bestBefore },
-    { label: "認証情報", value: p.certification },
+  const pre = `product:${p.id}`;
+  const rows: { label: string; value: string; key: string }[] = [
+    { label: "商品名", value: p.name, key: "name" },
+    { label: "規格", value: p.spec, key: "spec" },
+    { label: "内容量", value: p.netWeight, key: "netWeight" },
+    { label: "原材料", value: p.ingredients, key: "ingredients" },
+    { label: "アレルゲン", value: p.allergens, key: "allergens" },
+    { label: "保存方法", value: p.storage, key: "storage" },
+    { label: "賞味期限", value: p.bestBefore, key: "bestBefore" },
+    { label: "認証情報", value: p.certification, key: "certification" },
   ];
 
   return (
@@ -35,18 +37,23 @@ export function ProductDetail() {
       </Link>
 
       <div className="mt-6 grid gap-10 pc:grid-cols-2">
-        <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="aspect-square w-full rounded-2xl object-cover" />
+        <ImageWithFallback
+          src={img(`${pre}:image`, PRODUCT_IMG[p.id])}
+          alt={p.name}
+          className="aspect-square w-full rounded-2xl object-cover"
+          {...edImg(`${pre}:image`, "商品画像")}
+        />
         <div>
-          <span className="text-muted-foreground" style={{ fontSize: 13 }}>{p.genre}</span>
-          <h1 className="mt-1" style={{ fontSize: 32, fontWeight: 900 }}>{p.name}</h1>
-          <p className="mt-3 text-brand" style={{ fontSize: 16, fontWeight: 700 }}>{p.catch}</p>
+          <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`${pre}:genre`, "ジャンル")}>{txt(`${pre}:genre`, p.genre)}</span>
+          <h1 className="mt-1" style={{ fontSize: 32, fontWeight: 900 }} {...ed(`${pre}:name`, "商品名")}>{txt(`${pre}:name`, p.name)}</h1>
+          <p className="mt-3 text-brand" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`${pre}:catch`, "キャッチコピー")}>{txt(`${pre}:catch`, p.catch)}</p>
 
           <table className="mt-8 w-full border-t border-border">
             <tbody>
               {rows.map((r) => (
-                <tr key={r.label} className="border-b border-border align-top">
+                <tr key={r.key} className="border-b border-border align-top">
                   <th className="w-32 bg-secondary px-4 py-3 text-left text-muted-foreground" style={{ fontSize: 13, fontWeight: 500 }}>{r.label}</th>
-                  <td className="px-4 py-3" style={{ fontSize: 14, lineHeight: 1.8 }}>{r.value}</td>
+                  <td className="px-4 py-3" style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${pre}:${r.key}`, r.label)}>{txt(`${pre}:${r.key}`, r.value)}</td>
                 </tr>
               ))}
             </tbody>
@@ -55,7 +62,7 @@ export function ProductDetail() {
           {p.recipe && (
             <div className="mt-6 rounded-lg bg-secondary p-5">
               <p className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>活用レシピ（動画連携予定）</p>
-              <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.9 }}>{p.recipe}</p>
+              <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${pre}:recipe`, "活用レシピ")}>{txt(`${pre}:recipe`, p.recipe)}</p>
             </div>
           )}
 

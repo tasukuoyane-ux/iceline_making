@@ -6,6 +6,7 @@ import videosJson from "../content/videos.json";
 import interviewsJson from "../content/interviews.json";
 import imagesJson from "../content/images.json";
 import sectionsJson from "../content/sections.json";
+import overridesJson from "../content/overrides.json";
 
 export interface NewsItem {
   id: string;
@@ -42,6 +43,8 @@ export interface Content {
   interviews: InterviewItem[];
   images: ImagesData;
   sections: any;
+  // 汎用オーバーライド（全ページの文言・画像。編集された値だけを保持）
+  overrides: Record<string, string>;
 }
 
 export const NEWS_CATEGORIES: NewsItem["category"][] = ["お知らせ", "製品", "採用", "メディア"];
@@ -53,6 +56,7 @@ export const FILE_PATHS: Record<keyof Content, string> = {
   interviews: "src/content/interviews.json",
   images: "src/content/images.json",
   sections: "src/content/sections.json",
+  overrides: "src/content/overrides.json",
 };
 
 export function clone<T>(v: T): T {
@@ -67,7 +71,70 @@ export function baseline(): Content {
     interviews: interviewsJson as InterviewItem[],
     images: imagesJson as ImagesData,
     sections: sectionsJson as any,
+    overrides: overridesJson as Record<string, string>,
   });
+}
+
+/* ============ 汎用パスの取得/設定（ページ単位エディタ用） ============ */
+
+function deepGet(obj: any, dotPath: string): any {
+  let cur = obj;
+  for (const k of dotPath.split(".")) cur = cur?.[k];
+  return cur;
+}
+function deepSet(obj: any, dotPath: string, value: any) {
+  const keys = dotPath.split(".");
+  let cur = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (cur[keys[i]] === undefined) cur[keys[i]] = {};
+    cur = cur[keys[i]];
+  }
+  cur[keys[keys.length - 1]] = value;
+}
+
+/** data-edit パスから現在値を取得（draft基準） */
+export function getValueByPath(d: Content, path: string): string | undefined {
+  if (path.startsWith("sections:")) return deepGet(d.sections, path.slice(9));
+  if (path.startsWith("images:")) {
+    const [g, k] = path.slice(7).split(".");
+    return (d.images as any)[g]?.[k];
+  }
+  if (path.startsWith("news:") || path.startsWith("videos:") || path.startsWith("interviews:")) {
+    const colon = path.indexOf(":");
+    const kind = path.slice(0, colon);
+    const rest = path.slice(colon + 1);
+    const sep = rest.indexOf(":");
+    const id = rest.slice(0, sep);
+    const field = rest.slice(sep + 1);
+    const arr: any[] = (d as any)[kind === "news" ? "news" : kind === "videos" ? "videos" : "interviews"];
+    const item = arr.find((x) => x.id === id);
+    return item ? deepGet(item, field) : undefined;
+  }
+  return d.overrides[path];
+}
+
+/** data-edit パスへ値を設定（新しいContentを返す） */
+export function setValueByPath(d: Content, path: string, value: string): Content {
+  const next = clone(d);
+  if (path.startsWith("sections:")) {
+    deepSet(next.sections, path.slice(9), value);
+  } else if (path.startsWith("images:")) {
+    const [g, k] = path.slice(7).split(".");
+    (next.images as any)[g][k] = value;
+  } else if (path.startsWith("news:") || path.startsWith("videos:") || path.startsWith("interviews:")) {
+    const colon = path.indexOf(":");
+    const kind = path.slice(0, colon);
+    const rest = path.slice(colon + 1);
+    const sep = rest.indexOf(":");
+    const id = rest.slice(0, sep);
+    const field = rest.slice(sep + 1);
+    const arr: any[] = (next as any)[kind === "news" ? "news" : kind === "videos" ? "videos" : "interviews"];
+    const item = arr.find((x) => x.id === id);
+    if (item) deepSet(item, field, value);
+  } else {
+    next.overrides[path] = value;
+  }
+  return next;
 }
 
 /** ベース（既定はビルド時JSON）と比較し、変更があったファイルのみ {path: 内容} で返す */
@@ -141,6 +208,11 @@ export function buildOverrides(draft: Content): Record<string, string> {
   SECTION_FLATTEN_KEYS.forEach((k) => flatten(k, draft.sections[k], sectionsFlat));
   Object.entries(sectionsFlat).forEach(([k, v]) => {
     o[`sections:${k}`] = v;
+  });
+
+  // 汎用オーバーライド（全ページの文言・画像）
+  Object.entries(draft.overrides || {}).forEach(([k, v]) => {
+    o[k] = v;
   });
 
   return o;

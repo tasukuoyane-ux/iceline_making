@@ -1,43 +1,33 @@
-// /console エディタ本体：左にライブプレビュー(iframe)、右に編集パネル、上部に更新ボタン。
+// /console エディタ本体：左にライブプレビュー(iframe)、右に「そのページの編集要素一覧」、上部に更新ボタン。
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AuthUser, clearAuth, publish } from "./api";
-import {
-  Content,
-  baseline,
-  buildOverrides,
-  changedFiles,
-  clone,
-} from "./content";
+import { Content, baseline, buildOverrides, changedFiles, clone } from "./content";
 import { Button } from "./ui";
-import { NewsPanel, VideosPanel, InterviewsPanel, ImagesPanel, SectionsPanel } from "./panels";
+import { PageFields, PageField } from "./PageFields";
+import { NewsPanel, VideosPanel, InterviewsPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
-
-type TabKey = "news" | "videos" | "interviews" | "images" | "sections";
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "news", label: "お知らせ" },
-  { key: "videos", label: "動画" },
-  { key: "interviews", label: "社員インタビュー" },
-  { key: "images", label: "画像" },
-  { key: "sections", label: "セクション文言" },
-];
 
 const PAGES: { label: string; path: string }[] = [
   { label: "トップ", path: "/" },
   { label: "食品事業部", path: "/food" },
   { label: "アイス事業部", path: "/ice" },
+  { label: "商品: ドライアイス", path: "/food/products/dry-ice" },
   { label: "お知らせ一覧", path: "/news" },
   { label: "動画で知る", path: "/videos" },
   { label: "採用情報", path: "/recruit" },
   { label: "会社情報", path: "/company" },
+  { label: "お問い合わせ", path: "/contact" },
 ];
 
 function loadDraft(): Content {
   const raw = localStorage.getItem(DRAFT_KEY);
   if (raw) {
     try {
-      return JSON.parse(raw) as Content;
+      const d = JSON.parse(raw) as Content;
+      if (!d.overrides) d.overrides = {};
+      return d;
     } catch {
       /* fallthrough */
     }
@@ -45,82 +35,62 @@ function loadDraft(): Content {
   return baseline();
 }
 
+type ManageTab = "news" | "videos" | "interviews";
+
 export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
   const [draft, setDraft] = useState<Content>(loadDraft);
-  // 公開済みスナップショット（公開後はこれを基準に差分を取る）
   const [base, setBase] = useState<Content>(baseline);
-  const [tab, setTab] = useState<TabKey>("news");
   const [previewPath, setPreviewPath] = useState("/");
   const [publishing, setPublishing] = useState(false);
+  const [fields, setFields] = useState<PageField[]>([]);
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [manage, setManage] = useState<ManageTab | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const changes = useMemo(() => changedFiles(draft, base), [draft, base]);
   const changeCount = Object.keys(changes).length;
 
-  // 下書きをlocalStorageへ自動保存
   useEffect(() => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
   }, [draft]);
 
-  // iframeへプレビュー用オーバーライドを送信
+  const postToFrame = useCallback((msg: any) => {
+    iframeRef.current?.contentWindow?.postMessage({ source: "iceline-console", ...msg }, "*");
+  }, []);
+
   const sendOverrides = useCallback(() => {
-    iframeRef.current?.contentWindow?.postMessage(
-      { source: "iceline-console", type: "draft", overrides: buildOverrides(draft) },
-      "*"
-    );
-  }, [draft]);
+    postToFrame({ type: "draft", overrides: buildOverrides(draft) });
+  }, [draft, postToFrame]);
 
   useEffect(() => {
     sendOverrides();
   }, [sendOverrides]);
 
-  // iframeからのメッセージ（編集対象クリック / 準備完了）
+  // iframeからのメッセージ
   useEffect(() => {
     function onMsg(e: MessageEvent) {
       const msg = e.data;
-      if (!msg) return;
-      if (msg.source === "iceline-live" && msg.type === "ready") {
+      if (!msg || msg.source !== "iceline-live") return;
+      if (msg.type === "ready") {
         sendOverrides();
-      }
-      if (msg.source === "iceline-console" && msg.type === "select") {
-        focusByPath(msg.path as string);
+        postToFrame({ type: "request-fields" });
+      } else if (msg.type === "page-fields") {
+        setFields(msg.fields || []);
+      } else if (msg.type === "select") {
+        setSelectedPath(msg.path);
+        setTimeout(() => {
+          const el = document.querySelector(`#fields-scroll [data-fieldpath="${cssEscape(msg.path)}"]`);
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 60);
       }
     }
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
-  }, [sendOverrides]);
+  }, [sendOverrides, postToFrame]);
 
-  function focusByPath(path: string) {
-    const colon = path.indexOf(":");
-    const kind = path.slice(0, colon);
-    const rest = path.slice(colon + 1);
-    let nextTab: TabKey = "sections";
-    let focusKey = "";
-    if (kind === "news") {
-      nextTab = "news";
-      focusKey = rest.split(":")[0];
-    } else if (kind === "videos") {
-      nextTab = "videos";
-      focusKey = rest.split(":")[0];
-    } else if (kind === "interviews") {
-      nextTab = "interviews";
-      focusKey = rest.split(":")[0];
-    } else if (kind === "images") {
-      nextTab = "images";
-      focusKey = rest; // 例: IMG.iceMacro
-    } else if (kind === "sections") {
-      nextTab = "sections";
-      focusKey = rest.split(".")[0];
-    }
-    setTab(nextTab);
-    setTimeout(() => {
-      const el = document.querySelector(`#console-panel [data-focus="${cssEscape(focusKey)}"]`);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.classList.add("ring-2", "ring-emerald-500", "rounded-lg");
-        setTimeout(() => el.classList.remove("ring-2", "ring-emerald-500", "rounded-lg"), 1600);
-      }
-    }, 120);
+  function onFocusField(path: string) {
+    setSelectedPath(path);
+    postToFrame({ type: "scroll-to", path });
   }
 
   function setSlice<K extends keyof Content>(key: K, value: Content[K]) {
@@ -143,8 +113,8 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
     try {
       const res = await publish(changes, `コンテンツ更新（${user.name}）`);
       if (res.ok) {
-        setBase(clone(draft)); // 以後はこの状態を基準に差分計算
-        toast.success("公開しました。本番サイトへの反映まで数十秒〜1分ほどお待ちください。");
+        setBase(clone(draft));
+        toast.success("公開しました。本番反映まで数十秒〜1分ほどお待ちください。");
       } else {
         toast.error("公開に失敗しました");
       }
@@ -161,6 +131,7 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   }
 
   const previewSrc = `${previewPath}${previewPath.includes("?") ? "&" : "?"}__edit=1`;
+  const currentPageLabel = PAGES.find((p) => p.path === previewPath)?.label || previewPath;
 
   return (
     <div className="flex h-screen flex-col bg-slate-100">
@@ -176,6 +147,7 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
         </div>
         <div className="flex items-center gap-2">
           <span className="hidden text-[13px] text-slate-500 sm:inline">{user.name} さん</span>
+          <Button onClick={() => setManage("news")}>コンテンツ管理</Button>
           <Button onClick={discard} disabled={changeCount === 0}>変更を破棄</Button>
           <Button variant="primary" onClick={onPublish} disabled={publishing || changeCount === 0}>
             {publishing ? "公開中…" : "更新（本番へ公開）"}
@@ -192,14 +164,18 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
             <span className="text-[12px] text-slate-500">プレビュー：</span>
             <select
               value={previewPath}
-              onChange={(e) => setPreviewPath(e.target.value)}
+              onChange={(e) => {
+                setPreviewPath(e.target.value);
+                setFields([]);
+                setSelectedPath(null);
+              }}
               className="rounded border border-slate-300 bg-white px-2 py-1 text-[13px] outline-none"
             >
               {PAGES.map((p) => (
                 <option key={p.path} value={p.path}>{p.label}</option>
               ))}
             </select>
-            <span className="ml-auto text-[11px] text-slate-400">要素をクリックすると右側で編集できます</span>
+            <span className="ml-auto text-[11px] text-slate-400">要素をクリックすると右で編集できます</span>
           </div>
           <iframe
             ref={iframeRef}
@@ -207,33 +183,94 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
             src={previewSrc}
             title="ライブプレビュー"
             className="min-h-0 flex-1 bg-white"
-            onLoad={sendOverrides}
+            onLoad={() => {
+              sendOverrides();
+              postToFrame({ type: "request-fields" });
+            }}
           />
         </div>
 
-        {/* 右：エディタ */}
+        {/* 右：ページ単位エディタ */}
         <div className="flex w-1/2 min-w-0 flex-col bg-slate-50">
-          <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 py-1.5">
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={
-                  "shrink-0 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors " +
-                  (tab === t.key ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-100")
-                }
-              >
-                {t.label}
-              </button>
-            ))}
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2">
+            <div>
+              <p className="text-[13px] font-semibold text-slate-800">{currentPageLabel} の編集</p>
+              <p className="text-[11px] text-slate-400">このページに表示される要素が上から順に並んでいます</p>
+            </div>
+            <span className="text-[11px] text-slate-400">{fields.length} 項目</span>
           </div>
-          <div id="console-panel" className="min-h-0 flex-1 overflow-y-auto p-4">
-            {tab === "news" && <NewsPanel value={draft.news} onChange={(v) => setSlice("news", v)} />}
-            {tab === "videos" && <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />}
-            {tab === "interviews" && <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />}
-            {tab === "images" && <ImagesPanel value={draft.images} onChange={(v) => setSlice("images", v)} />}
-            {tab === "sections" && <SectionsPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />}
+          <div id="fields-scroll" className="min-h-0 flex-1 overflow-y-auto p-4">
+            <PageFields
+              fields={fields}
+              draft={draft}
+              onChange={setDraft}
+              selectedPath={selectedPath}
+              onFocusField={onFocusField}
+            />
           </div>
+        </div>
+      </div>
+
+      {/* コンテンツ管理（追加・削除）オーバーレイ */}
+      {manage && (
+        <ManageOverlay
+          tab={manage}
+          setTab={setManage}
+          draft={draft}
+          setSlice={setSlice}
+          onClose={() => setManage(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ManageOverlay({
+  tab,
+  setTab,
+  draft,
+  setSlice,
+  onClose,
+}: {
+  tab: ManageTab;
+  setTab: (t: ManageTab) => void;
+  draft: Content;
+  setSlice: <K extends keyof Content>(key: K, value: Content[K]) => void;
+  onClose: () => void;
+}) {
+  const TABS: { key: ManageTab; label: string }[] = [
+    { key: "news", label: "お知らせ" },
+    { key: "videos", label: "動画" },
+    { key: "interviews", label: "社員インタビュー" },
+  ];
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
+      <div className="flex h-full w-full max-w-2xl flex-col bg-slate-50 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[14px] font-bold text-slate-800">コンテンツ管理</span>
+            <span className="text-[11px] text-slate-400">記事・動画・インタビューの追加／削除</span>
+          </div>
+          <Button variant="ghost" onClick={onClose}>閉じる</Button>
+        </div>
+        <div className="flex shrink-0 gap-1 border-b border-slate-200 bg-white px-3 py-1.5">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={
+                "rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors " +
+                (tab === t.key ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-100")
+              }
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {tab === "news" && <NewsPanel value={draft.news} onChange={(v) => setSlice("news", v)} />}
+          {tab === "videos" && <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />}
+          {tab === "interviews" && <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />}
         </div>
       </div>
     </div>
