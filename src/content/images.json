@@ -15,7 +15,8 @@
     "warehouse": "https://images.unsplash.com/photo-1587293852726-70cdb56c2866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcm96ZW4lMjB3YXJlaG91c2UlMjBjb2xkJTIwc3RvcmFnZSUyMGxvZ2lzdGljc3xlbnwxfHx8fDE3ODE2MTU3Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "waterSplash": "https://images.unsplash.com/photo-1773868288398-cf1dabd4a947?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXRlciUyMHNwbGFzaCUyMGJsdWUlMjBhYnN0cmFjdHxlbnwxfHx8fDE3ODE2MTU3Nzh8MA&ixlib=rb-4.1.0&q=80&w=1600",
     "waterDew": "https://images.unsplash.com/photo-1548580076-4d4f83ca48c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHx3YXRlciUyMHNwbGFzaCUyMGJsdWUlMjBhYnN0cmFjdHxlbnwxfHx8fDE3ODE2MTU3Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    "dessert": "https://images.unsplash.com/photo-1715640476091-022c895f4cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNoYXZlZCUyMGljZSUyMGRlc3NlcnR8ZW58MXx8fHwxNzgxNjE1Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+    "dessert": "https://images.unsplash.com/photo-1715640476091-022c895f4cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNoYXZlZCUyMGljZSUyMGRlc3NlcnR8ZW58MXx8fHwxNzgxNjE1Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    "foodNetwork": "/images/food-network.jpg"
   },
   "PRODUCT_IMG": {
     "rocky-ice": "/images/products/imgIce01.jpg",

@@ -106,6 +106,17 @@ export function DivisionPage({ division }: { division: Division }) {
               </p>
               <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionBiz.${division}.body`)}>{biz.body}</p>
             </motion.div>
+            {/* OUR BUSINESS と WHY CHOSEN の間・差し替え可能な画像（食品事業部のみ） */}
+            {division === "food" && (
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+                <ImageWithFallback
+                  src={IMG.foodNetwork}
+                  alt="岡山県内物流ネットワーク"
+                  className="w-full rounded-2xl border border-border object-cover"
+                  {...edImg("images:IMG.foodNetwork", "事業部 中間画像")}
+                />
+              </motion.div>
+            )}
             <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
               <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }} {...ed(`sections:divisionInfo.${division}.reasonCatch`)}>
