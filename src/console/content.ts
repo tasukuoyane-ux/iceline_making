@@ -8,6 +8,7 @@ import imagesJson from "../content/images.json";
 import sectionsJson from "../content/sections.json";
 import overridesJson from "../content/overrides.json";
 import profileSlidesJson from "../content/profileSlides.json";
+import contactJson from "../content/contact.json";
 import { Block, toBlocks } from "../app/data/blocks";
 
 export type { Block };
@@ -50,6 +51,8 @@ export interface Content {
   sections: any;
   // 会社紹介資料（採用ページ COMPANY PROFILE のスライド画像URL一覧）
   profileSlides: string[];
+  // お問い合わせ設定（送信先メールアドレス）
+  contact: { recipient: string };
   // 汎用オーバーライド（全ページの文言・画像。編集された値だけを保持）
   overrides: Record<string, string>;
 }
@@ -64,6 +67,7 @@ export const FILE_PATHS: Record<keyof Content, string> = {
   images: "src/content/images.json",
   sections: "src/content/sections.json",
   profileSlides: "src/content/profileSlides.json",
+  contact: "src/content/contact.json",
   overrides: "src/content/overrides.json",
 };
 
@@ -81,6 +85,7 @@ export function baseline(): Content {
       images: imagesJson as ImagesData,
       sections: sectionsJson as any,
       profileSlides: profileSlidesJson as string[],
+      contact: contactJson as { recipient: string },
       overrides: overridesJson as Record<string, string>,
     })
   );
@@ -106,6 +111,8 @@ export function normalizeContent(c: any): Content {
     blocks: toBlocks(iv.blocks ?? iv.paragraphs),
   }));
   if (!Array.isArray(c.profileSlides)) c.profileSlides = [""];
+  if (!c.contact || typeof c.contact !== "object") c.contact = { recipient: "" };
+  if (typeof c.contact.recipient !== "string") c.contact.recipient = "";
   if (!c.overrides) c.overrides = {};
   return c as Content;
 }

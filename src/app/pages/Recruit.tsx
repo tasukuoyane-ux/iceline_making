@@ -295,12 +295,13 @@ export function Recruit() {
       {/* 人を知る｜インタビュー＆動画 */}
       <Section heat={HEAT.recruitPeople}>
         <SectionTitle en="PEOPLE" jp="人を知る" />
-        <div className="mt-10 grid gap-6 tab:grid-cols-2">
+        {/* 公開済みの記事をすべて横スクロールのカルーセルで表示（カードデザインは現状維持） */}
+        <div className="mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4">
           {INTERVIEWS.map((iv) => (
             <Link
               key={iv.id}
               to={`/recruit/interview/${iv.id}`}
-              className="group relative overflow-hidden rounded-2xl"
+              className="group relative w-[80%] shrink-0 snap-start overflow-hidden rounded-2xl tab:w-[360px] pc:w-[400px]"
             >
               <div className="aspect-[4/3] overflow-hidden bg-secondary">
                 <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`interviews:${iv.id}:image`)} />

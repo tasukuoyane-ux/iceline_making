@@ -23,6 +23,7 @@ const COLS = [
     links: [
       { to: "/recruit", label: "採用情報" },
       { to: "/contact", label: "お問い合わせ" },
+      { to: "/privacy", label: "プライバシーポリシー" },
     ],
   },
 ];

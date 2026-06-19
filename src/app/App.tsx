@@ -4,6 +4,7 @@ import { Toaster } from "./components/ui/sonner";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 import { VideoCta } from "./components/layout/VideoCta";
+import { CookieConsent } from "./components/layout/CookieConsent";
 import { Top } from "./pages/Top";
 import { DivisionPage } from "./pages/DivisionPage";
 import { ProductDetail } from "./pages/ProductDetail";
@@ -15,6 +16,7 @@ import { Videos } from "./pages/Videos";
 import { Recruit } from "./pages/Recruit";
 import { Interview } from "./pages/Interview";
 import { RecipeDetail } from "./pages/RecipeDetail";
+import { Privacy } from "./pages/Privacy";
 import { ConsoleApp } from "../console/ConsoleApp";
 
 function ScrollToTop() {
@@ -55,11 +57,13 @@ function Site() {
           <Route path="/videos" element={<Videos />} />
           <Route path="/recruit" element={<Recruit />} />
           <Route path="/recruit/interview/:id" element={<Interview />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<Top />} />
         </Routes>
       </main>
       <Footer />
       <VideoCta />
+      <CookieConsent />
     </div>
   );
 }

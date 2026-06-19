@@ -246,6 +246,26 @@ export function ProfileSlidesPanel({ value, onChange }: { value: string[]; onCha
   );
 }
 
+/* ===================== お問い合わせ設定 ===================== */
+export function ContactSettingsPanel({ value, onChange }: { value: { recipient: string }; onChange: (v: { recipient: string }) => void }) {
+  return (
+    <div className="space-y-4">
+      <p className="text-[12px] text-slate-500">
+        お問い合わせフォームから送信された内容の通知先メールアドレスを設定します。「更新（本番へ公開）」後に反映されます。
+      </p>
+      <Card title="お問い合わせメール送信先">
+        <Field label="送信先メールアドレス" hint="例: info@iceline.co.jp。空欄の場合はサーバー設定（環境変数）が使用されます。">
+          <TextInput
+            value={value.recipient}
+            onChange={(e) => onChange({ ...value, recipient: e.target.value })}
+            placeholder="info@example.com"
+          />
+        </Field>
+      </Card>
+    </div>
+  );
+}
+
 /* ===================== 画像 ===================== */
 const IMAGE_GROUP_LABELS: Record<string, string> = {
   IMG: "共通画像（トップ・各ページで使用）",

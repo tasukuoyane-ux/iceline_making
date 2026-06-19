@@ -5,7 +5,7 @@ import { AuthUser, clearAuth, publish } from "./api";
 import { Content, baseline, buildOverrides, changedFiles, clone, normalizeContent } from "./content";
 import { Button } from "./ui";
 import { PageFields, PageField } from "./PageFields";
-import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel } from "./panels";
+import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 
@@ -33,7 +33,7 @@ function loadDraft(): Content {
   return baseline();
 }
 
-type ManageTab = "news" | "videos" | "interviews" | "profileSlides";
+type ManageTab = "news" | "videos" | "interviews" | "profileSlides" | "contact";
 
 export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
   const [draft, setDraft] = useState<Content>(loadDraft);
@@ -275,6 +275,7 @@ function ManageOverlay({
     { key: "videos", label: "動画" },
     { key: "interviews", label: "社員インタビュー" },
     { key: "profileSlides", label: "会社紹介資料" },
+    { key: "contact", label: "お問い合わせ設定" },
   ];
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
@@ -305,6 +306,7 @@ function ManageOverlay({
           {tab === "videos" && <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />}
           {tab === "interviews" && <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />}
           {tab === "profileSlides" && <ProfileSlidesPanel value={draft.profileSlides} onChange={(v) => setSlice("profileSlides", v)} />}
+          {tab === "contact" && <ContactSettingsPanel value={draft.contact} onChange={(v) => setSlice("contact", v)} />}
         </div>
       </div>
     </div>

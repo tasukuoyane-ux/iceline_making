@@ -18,9 +18,9 @@ const SLIDES = [
 ];
 
 const AUDIENCE = [
-  { icon: Building2, label: "業務用の氷・食品をお探しの方へ", note: "B2B 顧客向け", to: "/food" },
-  { icon: ShoppingBag, label: "オンラインショップはこちら", note: "B2C 消費者向け", to: "/ice" },
-  { icon: Users, label: "採用情報・エントリーはこちら", note: "求職者向け", to: "/recruit" },
+  { icon: Building2, label: "業務用の氷・食品をお探しの方へ", note: "B2B 顧客向け", to: "/food", external: false },
+  { icon: ShoppingBag, label: "オンラインショップはこちら", note: "B2C 消費者向け", to: "https://www.dry-ice.jp/", external: true },
+  { icon: Users, label: "採用情報・エントリーはこちら", note: "求職者向け", to: "/recruit", external: false },
 ];
 
 function Hero() {
@@ -77,22 +77,30 @@ export function Top() {
       {/* ヒーロー：対象者別3導線 */}
       <Section heat={HEAT.topHero}>
         <div className="grid gap-4 tab:grid-cols-3">
-          {AUDIENCE.map((a, i) => (
-            <Link
-              key={a.to}
-              to={a.to}
-              className="group flex items-center justify-between border border-border bg-card p-6 transition-colors hover:border-brand"
-            >
-              <div className="flex items-center gap-4">
-                <a.icon className="text-brand" size={28} />
-                <div>
-                  <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, "導線サブラベル")}>{txt(`top:audience.${i}.note`, a.note)}</p>
-                  <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, "導線ラベル")}>{txt(`top:audience.${i}.label`, a.label)}</p>
+          {AUDIENCE.map((a, i) => {
+            const cls = "group flex items-center justify-between border border-border bg-card p-6 transition-colors hover:border-brand";
+            const inner = (
+              <>
+                <div className="flex items-center gap-4">
+                  <a.icon className="text-brand" size={28} />
+                  <div>
+                    <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, "導線サブラベル")}>{txt(`top:audience.${i}.note`, a.note)}</p>
+                    <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, "導線ラベル")}>{txt(`top:audience.${i}.label`, a.label)}</p>
+                  </div>
                 </div>
-              </div>
-              <ArrowRight className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
-            </Link>
-          ))}
+                <ArrowRight className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
+              </>
+            );
+            return a.external ? (
+              <a key={a.to} href={a.to} target="_blank" rel="noopener noreferrer" className={cls}>
+                {inner}
+              </a>
+            ) : (
+              <Link key={a.to} to={a.to} className={cls}>
+                {inner}
+              </Link>
+            );
+          })}
         </div>
       </Section>
 

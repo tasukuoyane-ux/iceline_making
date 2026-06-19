@@ -18,10 +18,13 @@
     "dessert": "https://images.unsplash.com/photo-1715640476091-022c895f4cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNoYXZlZCUyMGljZSUyMGRlc3NlcnR8ZW58MXx8fHwxNzgxNjE1Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080"
   },
   "PRODUCT_IMG": {
-    "ice-cube-pro": "https://images.unsplash.com/photo-1579170714070-e6f684b3d00c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpY2UlMjBjdWJlcyUyMG1hY3JvJTIwY29sZHxlbnwxfHx8fDE3ODE2MTU3Njl8MA&ixlib=rb-4.1.0&q=80&w=1600",
-    "cup-ice-coffee": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpY2VkJTIwY29mZmVlJTIwc3VtbWVyJTIwZHJpbmt8ZW58MXx8fHwxNzgxNjE1NzcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    "flavored-ice": "https://images.unsplash.com/photo-1715640476091-022c895f4cd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xvcmZ1bCUyMHNoYXZlZCUyMGljZSUyMGRlc3NlcnR8ZW58MXx8fHwxNzgxNjE1Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    "dry-ice": "https://images.unsplash.com/photo-1777133457338-5c70a010bdb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxpY2UlMjBjdWJlcyUyMG1hY3JvJTIwY29sZHxlbnwxfHx8fDE3ODE2MTU3Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    "rocky-ice": "/images/products/imgIce01.jpg",
+    "snow-ice": "/images/products/imgIce04.jpg",
+    "ice-cafe": "/images/products/imgIceCafe01.jpg",
+    "cocktail-ice": "/images/products/imgIceCafe02.jpg",
+    "frappe-rich": "/images/products/imgIceCafe05.jpg",
+    "carbonated-ice": "/images/products/imgSodaIce01.jpg",
+    "dry-ice": "/images/products/dryice_phMain.jpg",
     "frozen-foods": "https://images.unsplash.com/photo-1663790776711-9283bf614ac2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmb29kJTIwaW5ncmVkaWVudHMlMjBraXRjaGVuJTIwcmVzdGF1cmFudHxlbnwxfHx8fDE3ODE2MTU3NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
     "pro-ingredients": "https://images.unsplash.com/photo-1503453776591-b4548af666a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmb29kJTIwaW5ncmVkaWVudHMlMjBraXRjaGVuJTIwcmVzdGF1cmFudHxlbnwxfHx8fDE3ODE2MTU3NzF8MA&ixlib=rb-4.1.0&q=80&w=1080"
   },
