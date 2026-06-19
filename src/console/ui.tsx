@@ -23,17 +23,20 @@ export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      {...props}
-      className={
-        "w-full rounded-md border border-slate-300 px-3 py-2 text-[14px] leading-relaxed outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 " +
-        (props.className || "")
-      }
-    />
-  );
-}
+export const TextArea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  function TextArea(props, ref) {
+    return (
+      <textarea
+        ref={ref}
+        {...props}
+        className={
+          "w-full rounded-md border border-slate-300 px-3 py-2 text-[14px] leading-relaxed outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 " +
+          (props.className || "")
+        }
+      />
+    );
+  }
+);
 
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
@@ -63,6 +66,38 @@ export function Button({
       {...props}
       className={`inline-flex items-center justify-center gap-1.5 rounded-md px-3.5 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed ${styles[variant]} ${className}`}
     />
+  );
+}
+
+/** 折りたたみ可能なカード（既定は閉。記事が増えても一覧しやすいように） */
+export function Collapsible({
+  title,
+  action,
+  defaultOpen = false,
+  children,
+}: {
+  title: React.ReactNode;
+  action?: React.ReactNode;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex flex-1 items-center gap-2 text-left"
+          aria-expanded={open}
+        >
+          <span className={"text-[11px] text-slate-400 transition-transform " + (open ? "rotate-90" : "")}>▶</span>
+          <span className="text-[14px] font-semibold text-slate-800">{title}</span>
+        </button>
+        {action}
+      </div>
+      {open && <div className="border-t border-slate-100 p-4">{children}</div>}
+    </div>
   );
 }
 

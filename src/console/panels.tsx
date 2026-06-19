@@ -1,7 +1,7 @@
 // /console 各コンテンツ種別の編集パネル。
 import { createContext, useContext, useRef, useState } from "react";
 import { Content, NewsItem, VideoItem, InterviewItem, NEWS_CATEGORIES } from "./content";
-import { Field, TextInput, TextArea, Select, Button, Card } from "./ui";
+import { Field, TextInput, TextArea, Select, Button, Card, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { BlockEditor } from "./BlockEditor";
 import { uploadImage } from "./api";
@@ -71,7 +71,7 @@ export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v
       </div>
       {value.map((n, i) => (
         <div key={n.id} data-focus={n.id}>
-          <Card
+          <Collapsible
             title={n.title || "（無題）"}
             action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}
           >
@@ -96,7 +96,7 @@ export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v
               <span className="mb-1 block text-[13px] font-medium text-slate-600">本文</span>
               <BlockEditor value={n.blocks} onChange={(blocks) => update(i, { blocks })} />
             </div>
-          </Card>
+          </Collapsible>
         </div>
       ))}
     </div>
@@ -125,7 +125,7 @@ export function VideosPanel({ value, onChange }: { value: VideoItem[]; onChange:
       </div>
       {value.map((v, i) => (
         <div key={v.id} data-focus={v.id}>
-          <Card title={v.title || "（無題）"} action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}>
+          <Collapsible title={v.title || "（無題）"} action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}>
             <Field label="タイトル">
               <TextInput value={v.title} onChange={(e) => update(i, { title: e.target.value })} />
             </Field>
@@ -145,7 +145,7 @@ export function VideosPanel({ value, onChange }: { value: VideoItem[]; onChange:
             <div className="mt-3">
               <ImageField label="サムネイル画像" value={v.thumb} onChange={(url) => update(i, { thumb: url })} />
             </div>
-          </Card>
+          </Collapsible>
         </div>
       ))}
     </div>
@@ -186,7 +186,7 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
       </div>
       {value.map((iv, i) => (
         <div key={iv.id} data-focus={iv.id}>
-          <Card title={`${iv.name}（${iv.role}）`} action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}>
+          <Collapsible title={`${iv.name}（${iv.role}）`} action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}>
             <div className="grid gap-3 sm:grid-cols-3">
               <Field label="氏名"><TextInput value={iv.name} onChange={(e) => update(i, { name: e.target.value })} /></Field>
               <Field label="所属・役職"><TextInput value={iv.role} onChange={(e) => update(i, { role: e.target.value })} /></Field>
@@ -205,7 +205,7 @@ export function InterviewsPanel({ value, onChange }: { value: InterviewItem[]; o
               <span className="mb-1 block text-[13px] font-medium text-slate-600">本文</span>
               <BlockEditor value={iv.blocks} onChange={(blocks) => update(i, { blocks })} />
             </div>
-          </Card>
+          </Collapsible>
         </div>
       ))}
     </div>

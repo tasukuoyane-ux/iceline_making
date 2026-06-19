@@ -2,6 +2,33 @@
 import { Block } from "../../data/blocks";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 
+// マーカー（蛍光ペン）：文字の下1/3から2px下にアクセントカラーを添える。
+// 行高に左右されないよう、ベースライン基準の太い下線で表現。
+const MARKER_STYLE: React.CSSProperties = {
+  textDecorationLine: "underline",
+  textDecorationColor: "rgba(230,0,18,0.38)",
+  textDecorationThickness: "0.3em",
+  textUnderlineOffset: "-0.18em",
+  textDecorationSkipInk: "none",
+} as React.CSSProperties;
+
+// 段落テキスト内の **太字** と ==マーカー== を React ノードへ変換。
+function renderInline(text: string) {
+  const out: (string | JSX.Element)[] = [];
+  const re = /\*\*([^*]+)\*\*|==([^=]+)==/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m[1] !== undefined) out.push(<strong key={key++}>{m[1]}</strong>);
+    else if (m[2] !== undefined) out.push(<span key={key++} style={MARKER_STYLE}>{m[2]}</span>);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
 export function BlockContent({ blocks, className = "" }: { blocks: Block[]; className?: string }) {
   return (
     <div className={"space-y-6 " + className}>
@@ -48,7 +75,7 @@ export function BlockContent({ blocks, className = "" }: { blocks: Block[]; clas
         // paragraph
         return (
           <p key={i} style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }}>
-            {b.text}
+            {renderInline(b.text)}
           </p>
         );
       })}

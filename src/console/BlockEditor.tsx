@@ -1,5 +1,6 @@
 // 記事本文のブロック編集（段落 / 見出しH2 / 見出しH3 / 画像[リンク可]）。
 // 追加・並べ替え・削除に対応。お知らせ・社員インタビューで共通利用。
+import { useRef } from "react";
 import { Block } from "./content";
 import { Field, TextInput, TextArea, Button } from "./ui";
 import { ImageField } from "./ImageField";
@@ -10,6 +11,41 @@ const TYPE_LABEL: Record<Block["type"], string> = {
   h3: "見出し（中）",
   image: "画像",
 };
+
+// 段落エディタ：選択範囲を **太字** / ==マーカー== で囲む。
+function ParagraphEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  function wrap(mark: string) {
+    const ta = ref.current;
+    if (!ta) return;
+    const start = ta.selectionStart ?? value.length;
+    const end = ta.selectionEnd ?? value.length;
+    const sel = value.slice(start, end);
+    const next = value.slice(0, start) + mark + sel + mark + value.slice(end);
+    onChange(next);
+    requestAnimationFrame(() => {
+      ta.focus();
+      // 選択ありは中身を選択維持、選択なしはマーク間にカーソル
+      const a = start + mark.length;
+      const b = end + mark.length;
+      ta.setSelectionRange(sel ? a : a, sel ? b : a);
+    });
+  }
+
+  return (
+    <div>
+      <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+        <Button onClick={() => wrap("**")}><span className="font-bold">B</span> 太字</Button>
+        <Button onClick={() => wrap("==")}>
+          <span style={{ textDecorationLine: "underline", textDecorationColor: "rgba(230,0,18,0.5)", textDecorationThickness: "0.3em", textUnderlineOffset: "-0.12em" }}>M</span> マーカー
+        </Button>
+        <span className="text-[11px] text-slate-400">文字を選択して適用</span>
+      </div>
+      <TextArea ref={ref as any} rows={4} value={value} onChange={(e) => onChange(e.target.value)} placeholder="段落の本文" />
+    </div>
+  );
+}
 
 export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v: Block[]) => void }) {
   const blocks = value || [];
@@ -63,7 +99,7 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
                 </Field>
               </div>
             ) : b.type === "paragraph" ? (
-              <TextArea rows={4} value={b.text} onChange={(e) => update(i, { text: e.target.value })} placeholder="段落の本文" />
+              <ParagraphEditor value={b.text} onChange={(text) => update(i, { text })} />
             ) : (
               <TextInput value={b.text} onChange={(e) => update(i, { text: e.target.value })} placeholder={b.type === "h2" ? "大見出し" : "中見出し"} />
             )}
