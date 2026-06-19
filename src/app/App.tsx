@@ -5,7 +5,7 @@ import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 import { VideoCta } from "./components/layout/VideoCta";
 import { CookieConsent } from "./components/layout/CookieConsent";
-import { Top } from "./pages/Top";
+import { Top, Top2 } from "./pages/Top";
 import { DivisionPage } from "./pages/DivisionPage";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Company } from "./pages/Company";
@@ -45,6 +45,7 @@ function Site() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Top />} />
+          <Route path="/top2" element={<Top2 />} />
           <Route path="/food" element={<DivisionPage division="food" />} />
           <Route path="/ice" element={<DivisionPage division="ice" />} />
           <Route path="/ice/recipe/:id" element={<RecipeDetail />} />

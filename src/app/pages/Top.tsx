@@ -23,19 +23,28 @@ const AUDIENCE = [
   { icon: Users, label: "採用情報・エントリーはこちら", note: "求職者向け", to: "/recruit", external: false },
 ];
 
-function Hero() {
+function Hero({ variant = "a" }: { variant?: "a" | "b" }) {
+  // variant "b"（TOP-2）: スライドショーなし・1枚目固定・PC時は高さ半分
+  const single = variant === "b";
   const [i, setI] = useState(0);
   useEffect(() => {
+    if (single) return;
     const t = setInterval(() => setI((v) => (v + 1) % SLIDES.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [single]);
+  const slides = single ? [SLIDES[0]] : SLIDES;
   return (
-    <section className="relative h-[78vh] min-h-[520px] w-full overflow-hidden bg-ink">
-      {SLIDES.map((s, idx) => (
+    <section
+      className={
+        "relative w-full overflow-hidden bg-ink " +
+        (single ? "h-[78vh] min-h-[520px] pc:h-[39vh] pc:min-h-[300px]" : "h-[78vh] min-h-[520px]")
+      }
+    >
+      {slides.map((s, idx) => (
         <div
           key={s.img}
           className="absolute inset-0 transition-opacity duration-1000"
-          style={{ opacity: i === idx ? 1 : 0 }}
+          style={{ opacity: single || i === idx ? 1 : 0 }}
         >
           <ImageWithFallback src={s.img} alt={s.alt} className="h-full w-full object-cover" {...edImg(`images:IMG.${s.key}`)} />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent" />
@@ -54,25 +63,27 @@ function Hero() {
           </p>
         </motion.div>
       </div>
-      <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
-        {SLIDES.map((s, idx) => (
-          <button
-            key={s.img}
-            aria-label={`スライド${idx + 1}`}
-            onClick={() => setI(idx)}
-            className="h-1.5 rounded-full transition-all"
-            style={{ width: i === idx ? 28 : 10, background: i === idx ? "var(--brand)" : "rgba(255,255,255,.5)" }}
-          />
-        ))}
-      </div>
+      {!single && (
+        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
+          {SLIDES.map((s, idx) => (
+            <button
+              key={s.img}
+              aria-label={`スライド${idx + 1}`}
+              onClick={() => setI(idx)}
+              className="h-1.5 rounded-full transition-all"
+              style={{ width: i === idx ? 28 : 10, background: i === idx ? "var(--brand)" : "rgba(255,255,255,.5)" }}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
-export function Top() {
+export function Top({ variant = "a" }: { variant?: "a" | "b" }) {
   return (
     <>
-      <Hero />
+      <Hero variant={variant} />
 
       {/* ヒーロー：対象者別3導線 */}
       <Section heat={HEAT.topHero}>
@@ -184,4 +195,9 @@ export function Top() {
       </Section>
     </>
   );
+}
+
+// トップページのコピー版（社内ABテスト用・TOP-2）
+export function Top2() {
+  return <Top variant="b" />;
 }

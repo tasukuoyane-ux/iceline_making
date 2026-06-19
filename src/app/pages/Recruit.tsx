@@ -20,7 +20,6 @@ import {
   RECRUIT_LOCATIONS,
   RECRUIT_CHARM,
   RECRUIT_DAYS,
-  RECRUIT_WORK,
   RECRUIT_APPLY,
   RECRUIT_JOBS,
   RECRUIT_TERMS,
@@ -73,7 +72,7 @@ export function Recruit() {
       <RecruitHero />
 
       {/* 採用メッセージ（MV本文） */}
-      <Section heat={HEAT.recruitMv}>
+      <Section heat={HEAT.recruitMv} className="!bg-[#666666]">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -168,23 +167,6 @@ export function Recruit() {
         </div>
       </Section>
 
-      {/* 仕事を知る｜業務内容 */}
-      <Section heat={HEAT.recruitWork}>
-        <SectionTitle en="WORK" jp="業務内容" />
-        <div className="mt-10 grid gap-6 tab:grid-cols-2">
-          {RECRUIT_WORK.map((w, wi) => (
-            <div key={w.role} className="rounded-2xl border border-border bg-card p-8">
-              <h3 className="text-brand" style={{ fontSize: 19, fontWeight: 700 }} {...ed(`recruit:work.${wi}.role`, "業務内容の職種")}>{txt(`recruit:work.${wi}.role`, w.role)}</h3>
-              <ul className="mt-5 space-y-3">
-                {w.lines.map((l, i) => (
-                  <li key={i} className="text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9 }} {...ed(`recruit:work.${wi}.lines.${i}`, "業務内容")}>{txt(`recruit:work.${wi}.lines.${i}`, l)}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </Section>
-
       {/* 仕事を知る｜一日の流れ（職種タブ切替・PCは右に画像） */}
       <Section heat={HEAT.recruitDay}>
         <SectionTitle en="A DAY" jp="一日の流れ" />
@@ -241,7 +223,7 @@ export function Recruit() {
       {/* 数字で見るアイスライン */}
       <Section heat={HEAT.recruitDeck} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
-          <div className="rounded-[2rem] bg-ink p-10 text-white pc:p-16">
+          <div className="rounded-[2rem] bg-[#666666] p-10 text-white pc:p-16">
             <SectionTitle en="COMPANY DECK" jp="数字で見るアイスライン" invert />
             <div className="mt-10 grid grid-cols-2 gap-8 pc:grid-cols-4">
               {[

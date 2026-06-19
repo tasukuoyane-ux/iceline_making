@@ -8,6 +8,7 @@ import { ed, edImg, txt, img } from "../../lib/editable";
 
 const NAV = [
   { to: "/", label: "TOP" },
+  { to: "/top2", label: "TOP2" },
   { to: "/food", label: "食品事業部" },
   { to: "/ice", label: "アイス事業部" },
   { to: "/company", label: "会社情報" },

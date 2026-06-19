@@ -32,7 +32,7 @@ export function Footer() {
   const addr = COMPANY_PROFILE.find((p) => p.label === "所在地")?.value;
   const tel = COMPANY_PROFILE.find((p) => p.label === "TEL")?.value;
   return (
-    <footer className="bg-ink text-white">
+    <footer className="bg-[#666666] text-white">
       <div className="mx-auto grid max-w-[1400px] gap-10 px-5 py-14 pc:grid-cols-[1.4fr_2fr] pc:px-8 pc:py-20">
         <div>
           <div {...ed("footer:brand", "ブランド表記")} style={{ fontFamily: "var(--font-accent)", fontSize: 30, letterSpacing: "0.06em" }}>{txt("footer:brand", "ICELINE")}</div>
