@@ -10,8 +10,8 @@ import { Division, DIVISION_INFO, DIVISION_DETAIL, ICE_RECIPES, PRODUCTS } from 
 import { ed, edImg, txt, img } from "../lib/editable";
 
 const MV: Record<Division, { img: string; lead: string }> = {
-  food: { img: IMG.foodPlate, lead: "食の現場に、深く根を張る。" },
-  ice: { img: IMG.iceMacro, lead: "冷たいものなら、アイスライン。" },
+  food: { img: IMG.foodMv, lead: "食の現場に、深く根を張る。" },
+  ice: { img: IMG.iceMv, lead: "冷たいものなら、アイスライン。" },
 };
 
 // ＋画像の差し替え可能なプレースホルダー（編集前に表示するグレー枠）
@@ -36,7 +36,7 @@ export function DivisionPage({ division }: { division: Division }) {
     <>
       {/* メインビジュアル（高さは会社情報ページに合わせる・タイトル中央） */}
       <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
-        <ImageWithFallback src={MV[division].img} alt={info.label} className="absolute inset-0 h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodPlate" : "images:IMG.iceMacro")} />
+        <ImageWithFallback src={MV[division].img} alt={info.label} className="absolute inset-0 h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像")} />
         <div className="absolute inset-0 bg-ink/50" />
         <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
