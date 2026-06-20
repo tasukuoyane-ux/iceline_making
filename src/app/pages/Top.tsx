@@ -10,11 +10,8 @@ import { NEWS } from "../data/news";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
 import { ed, edImg, txt, img } from "../lib/editable";
 
-const SLIDES = [
-  { img: IMG.iceMacro, alt: "氷のクローズアップ", key: "iceMacro" },
-  { img: IMG.foodPlate, alt: "食の現場", key: "foodPlate" },
-  { img: IMG.icedCoffee, alt: "カップ氷の飲料", key: "icedCoffee" },
-];
+// トップページ メインビジュアル（TOP専用キーで編集対象を明確化）
+const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュアル", key: "topMv" };
 
 const AUDIENCE = [
   { icon: Building2, label: "業務用の氷・食品をお探しの方へ", note: "B2B 顧客向け", to: "/food", external: false },
@@ -23,11 +20,11 @@ const AUDIENCE = [
 ];
 
 function Hero() {
-  // メインビジュアル：1枚目の画像をトリミングせず全体表示（PC・SP共通）
-  const s = SLIDES[0];
+  // メインビジュアル：トリミングせず全体表示（PC・SP共通）
+  const s = TOP_MV;
   return (
     <section className="relative w-full overflow-hidden bg-ink">
-      <ImageWithFallback src={s.img} alt={s.alt} className="block w-full" {...edImg(`images:IMG.${s.key}`)} />
+      <ImageWithFallback src={s.img} alt={s.alt} className="block w-full" {...edImg(`images:IMG.${s.key}`, "トップ メインビジュアル")} />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/15 to-transparent" />
       <div className="absolute inset-0">
         <div className="mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-6 pc:px-8 pc:pb-14">
