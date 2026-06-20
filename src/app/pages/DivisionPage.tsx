@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ChevronRight, ChevronDown, ShieldCheck, Snowflake, Sparkles, Palette, Droplets } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronDown } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
-import { Division, DIVISION_INFO, DIVISION_BIZ, ICE_RECIPES, PRODUCTS } from "../data/products";
+import { Division, DIVISION_INFO, DIVISION_DETAIL, ICE_RECIPES, PRODUCTS } from "../data/products";
 import { ed, edImg, txt, img } from "../lib/editable";
 
 const MV: Record<Division, { img: string; lead: string }> = {
@@ -14,66 +14,21 @@ const MV: Record<Division, { img: string; lead: string }> = {
   ice: { img: IMG.iceMacro, lead: "冷たいものなら、アイスライン。" },
 };
 
-// 新たな氷の可能性が広がっていくことを表現した図
-function IcePossibilityFigure() {
-  const branches = [
-    { icon: Palette, label: "色のある氷", note: "視覚で楽しむ" },
-    { icon: Sparkles, label: "味のある氷", note: "溶けて広がる香り" },
-    { icon: Droplets, label: "機能性の氷", note: "溶けにくい・形状自在" },
-    { icon: Snowflake, label: "用途別の氷", note: "業務用からレジャーまで" },
-  ];
-  return (
-    <div className="mt-12 rounded-2xl border border-border bg-card p-8 pc:p-12">
-      <div className="grid items-center gap-8 pc:grid-cols-[200px_1fr]">
-        {/* 中心：氷 */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto flex aspect-square w-40 flex-col items-center justify-center rounded-full bg-ink text-center text-white"
-        >
-          <Snowflake className="text-brand" size={36} />
-          <span className="mt-2" style={{ fontSize: 18, fontWeight: 700 }}>岡山の氷</span>
-          <span className="text-white/60" style={{ fontSize: 11 }}>ICELINE</span>
-        </motion.div>
-        {/* 枝：広がる可能性 */}
-        <div className="grid gap-4 tab:grid-cols-2">
-          {branches.map((b, i) => (
-            <motion.div
-              key={b.label}
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative flex items-start gap-3 rounded-xl border border-border bg-background p-4"
-            >
-              <span className="absolute -left-4 top-1/2 hidden h-px w-4 -translate-y-1/2 bg-brand/40 pc:block" />
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-                <b.icon size={20} />
-              </span>
-              <div>
-                <p style={{ fontSize: 15, fontWeight: 700 }} {...ed(`division:ice:possibility.${i}.label`, "可能性ラベル")}>{txt(`division:ice:possibility.${i}.label`, b.label)}</p>
-                <p className="mt-0.5 text-muted-foreground" style={{ fontSize: 12 }} {...ed(`division:ice:possibility.${i}.note`, "可能性の補足")}>{txt(`division:ice:possibility.${i}.note`, b.note)}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-      <p className="mt-8 text-center text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("division:ice:possibilityCaption", "氷の可能性の説明文", { multiline: true })}>
-        {txt("division:ice:possibilityCaption", "一つの氷から、新たな価値へ。アイスラインは氷の可能性を、絶えず広げ続けています。")}
-      </p>
-    </div>
+// ＋画像の差し替え可能なプレースホルダー（編集前に表示するグレー枠）
+const IMG_PLACEHOLDER =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#f1f1f3"/><text x="50%" y="50%" font-size="30" fill="#bcbcc2" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">＋ 画像</text></svg>'
   );
-}
 
 export function DivisionPage({ division }: { division: Division }) {
   const info = DIVISION_INFO[division];
-  const biz = DIVISION_BIZ[division];
+  const detail = DIVISION_DETAIL[division];
   const items = PRODUCTS.filter((p) => p.division === division);
   const [openCats, setOpenCats] = useState<string[]>([]);
   const toggleCat = (c: string) =>
     setOpenCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  const bizHeat = division === "food" ? HEAT.foodBiz : HEAT.iceBiz;
   const reasonHeat = division === "food" ? HEAT.foodReason : HEAT.iceReason;
   const listHeat = division === "food" ? HEAT.foodList : HEAT.iceList;
 
@@ -94,51 +49,110 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </section>
 
-      {/* 事業概要＋選ばれる理由（左に縦並び・右に画像） */}
-      <Section heat={reasonHeat}>
-        <div className="grid items-center gap-10 pc:grid-cols-2 pc:items-stretch">
-          {/* 左：OUR BUSINESS → WHY CHOSEN を縦並び */}
-          <div className="space-y-12">
-            <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <SectionTitle en="OUR BUSINESS" jp="事業概要" />
-              <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }} {...ed(`sections:divisionBiz.${division}.copy`)}>
-                {biz.copy}
-              </p>
-              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionBiz.${division}.body`)}>{biz.body}</p>
-            </motion.div>
-            {/* OUR BUSINESS と WHY CHOSEN の間・差し替え可能な画像（食品事業部のみ） */}
-            {division === "food" && (
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-                <ImageWithFallback
-                  src={IMG.foodNetwork}
-                  alt="岡山県内物流ネットワーク"
-                  className="w-full rounded-2xl border border-border object-cover"
-                  {...edImg("images:IMG.foodNetwork", "事業部 中間画像")}
-                />
-              </motion.div>
-            )}
-            <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
-              <p className="mt-6 text-brand" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.4 }} {...ed(`sections:divisionInfo.${division}.reasonCatch`)}>
-                {info.reasonCatch}
-              </p>
-              <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionInfo.${division}.reasonBody`)}>{info.reasonBody}</p>
-              <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-muted-foreground" style={{ fontSize: 13 }}>
-                <ShieldCheck size={16} className="text-brand" /> FSSC 22000 / ISO 認証取得
-              </div>
-            </motion.div>
-          </div>
-          {/* 右：画像（下端をWHY CHOSENセクション下端に合わせる） */}
-          <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="pc:relative pc:h-full">
-            <ImageWithFallback
-              src={division === "food" ? IMG.kitchen : IMG.iceClose}
-              alt={info.reasonCatch}
-              className="aspect-[4/5] w-full rounded-2xl object-cover pc:absolute pc:inset-0 pc:aspect-auto pc:h-full pc:w-full"
-              {...edImg(division === "food" ? "images:IMG.kitchen" : "images:IMG.iceClose")}
-            />
-          </motion.div>
+      {/* 事業概要 */}
+      <Section heat={bizHeat}>
+        <div className="mx-auto max-w-3xl text-center">
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" />
+          <p className="mt-6 text-left text-foreground/80 pc:text-center" style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionDetail.${division}.overview`, "事業概要", { multiline: true })}>
+            {detail.overview}
+          </p>
         </div>
-        {division === "ice" && <IcePossibilityFigure />}
+      </Section>
+
+      {/* サプライチェーン */}
+      <Section heat={listHeat}>
+        <SectionTitle en="SUPPLY CHAIN" jp="サプライチェーン" />
+        <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionDetail.${division}.supplyChain`, "サプライチェーン", { multiline: true })}>
+          {detail.supplyChain}
+        </p>
+        {division === "food" && (
+          <div className="mt-8">
+            <ImageWithFallback
+              src={img("division:food.supplyChain.image", IMG.foodNetwork || IMG_PLACEHOLDER)}
+              alt="サプライチェーン"
+              className="w-full rounded-2xl border border-border object-cover"
+              {...edImg("division:food.supplyChain.image", "サプライチェーン画像")}
+            />
+          </div>
+        )}
+      </Section>
+
+      {/* 事業の特色 */}
+      <Section heat={reasonHeat}>
+        <SectionTitle en="FEATURES" jp="事業の特色" />
+        <div className="mt-12 space-y-16">
+          {detail.features.map((g, gi) => (
+            <div key={gi}>
+              <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`sections:divisionDetail.${division}.features.${gi}.heading`, "特色の見出し")}>
+                {g.heading}
+              </h3>
+              <div className="mt-8 space-y-10">
+                {g.items.map((it, ii) =>
+                  it.image ? (
+                    <motion.div
+                      key={ii}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5 }}
+                      className={`grid items-center gap-8 pc:grid-cols-2 ${(gi + ii) % 2 ? "pc:[direction:rtl]" : ""}`}
+                    >
+                      <div className="[direction:ltr]">
+                        {it.title && (
+                          <h4 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`sections:divisionDetail.${division}.features.${gi}.items.${ii}.title`, "小見出し")}>
+                            {it.title}
+                          </h4>
+                        )}
+                        <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`sections:divisionDetail.${division}.features.${gi}.items.${ii}.body`, "本文", { multiline: true })}>
+                          {it.body}
+                        </p>
+                      </div>
+                      {/* ＋画像（差し替え可能なプレースホルダー） */}
+                      <ImageWithFallback
+                        src={img(`division:${division}.feat.${gi}.${ii}.image`, IMG_PLACEHOLDER)}
+                        alt={it.title || g.heading}
+                        className="aspect-[4/3] w-full rounded-2xl border border-border object-cover [direction:ltr]"
+                        {...edImg(`division:${division}.feat.${gi}.${ii}.image`, `${it.title || g.heading} 画像`)}
+                      />
+                    </motion.div>
+                  ) : (
+                    <div key={ii} className="max-w-3xl">
+                      {it.title && (
+                        <h4 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`sections:divisionDetail.${division}.features.${gi}.items.${ii}.title`, "小見出し")}>
+                          {it.title}
+                        </h4>
+                      )}
+                      <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`sections:divisionDetail.${division}.features.${gi}.items.${ii}.body`, "本文", { multiline: true })}>
+                        {it.body}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* 選ばれる理由 */}
+      <Section heat={bizHeat}>
+        <SectionTitle en="WHY CHOSEN" jp="選ばれる理由" />
+        <div className="mt-10 grid gap-6 pc:grid-cols-3">
+          {detail.reasons.map((r, ri) => (
+            <motion.div
+              key={ri}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: ri * 0.1 }}
+              className="rounded-2xl border border-border bg-card p-8"
+            >
+              <div className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700, lineHeight: 1 }}>{r.no}</div>
+              <h3 className="mt-3" style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.5 }} {...ed(`sections:divisionDetail.${division}.reasons.${ri}.title`, "選ばれる理由タイトル")}>{r.title}</h3>
+              <p className="mt-4 text-foreground/80" style={{ fontSize: 14, lineHeight: 2, whiteSpace: "pre-line" }} {...ed(`sections:divisionDetail.${division}.reasons.${ri}.body`, "選ばれる理由本文", { multiline: true })}>{r.body}</p>
+            </motion.div>
+          ))}
+        </div>
       </Section>
 
       {/* 商品一覧 */}

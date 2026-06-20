@@ -196,6 +196,7 @@ const SECTION_FLATTEN_KEYS = [
   "videosIntro",
   "divisionBiz",
   "divisionInfo",
+  "divisionDetail",
   "recruitMv",
   "recruitApply",
   "philosophy",

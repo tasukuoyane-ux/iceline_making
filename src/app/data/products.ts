@@ -375,3 +375,18 @@ export const DIVISION_INFO: Record<
   Division,
   { label: string; reasonCatch: string; reasonBody: string }
 > = sections.divisionInfo;
+
+// 事業部ページ詳細（事業概要 / サプライチェーン / 事業の特色 / 選ばれる理由）。
+// 文言は src/content/sections.json で管理（/console から編集可能）。
+export interface DivisionFeatureItem {
+  title: string;
+  body: string;
+  image: boolean;
+}
+export interface DivisionDetail {
+  overview: string;
+  supplyChain: string;
+  features: { heading: string; items: DivisionFeatureItem[] }[];
+  reasons: { no: string; title: string; body: string }[];
+}
+export const DIVISION_DETAIL: Record<Division, DivisionDetail> = sections.divisionDetail;
