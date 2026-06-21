@@ -109,6 +109,19 @@ export function healDraft(stored: any): Content {
   return normalizeContent(deepMerge(baseline(), stored));
 }
 
+/**
+ * ビルド同梱コンテンツ（＝現在の本番公開状態）の署名。
+ * デプロイでコンテンツが変わると署名も変わる。これを下書きに紐付けることで、
+ * 「本番が更新されたあとに残っている古いローカル下書き」を検出・破棄できる。
+ * （古い下書きをそのまま公開して本番を巻き戻す事故を防ぐ）
+ */
+export function baselineSig(): string {
+  const s = JSON.stringify(baseline());
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = (((h << 5) + h) + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
 /** ビルド時JSONをベースラインとして取得（旧形式は blocks へ正規化） */
 export function baseline(): Content {
   return normalizeContent(

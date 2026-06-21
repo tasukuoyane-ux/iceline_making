@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AuthUser, clearAuth, publish } from "./api";
-import { Content, baseline, buildOverrides, changedFiles, clone, healDraft } from "./content";
+import { Content, baseline, baselineSig, buildOverrides, changedFiles, clone, healDraft } from "./content";
 import { Button } from "./ui";
 import { PageFields, PageField } from "./PageFields";
 import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel } from "./panels";
@@ -21,13 +21,22 @@ const PAGES: { label: string; path: string }[] = [
   { label: "お問い合わせ", path: "/contact" },
 ];
 
+// 下書きが破棄されたかを画面側に伝えるためのフラグ（読込後にトーストで通知）。
+export let draftDiscarded = false;
+
 function loadDraft(): Content {
   const raw = localStorage.getItem(DRAFT_KEY);
   if (raw) {
     try {
-      // 古い下書きでも、コード側の最新ベースライン構造で補完してから読み込む
-      // （構造キー欠落による事業部ページの真っ白化を防ぐ）。
-      return healDraft(JSON.parse(raw));
+      const parsed = JSON.parse(raw);
+      // 新形式 { sig, content } のみ復元対象。署名が現在の本番（ベースライン）と一致する
+      // ＝この下書きは現在の公開状態から派生したもの、とみなして復元する。
+      // 署名が違う（デプロイで本番が更新された）／旧形式（署名なし）の下書きは
+      // 古いデータで本番を巻き戻す恐れがあるため破棄し、現在の本番状態から編集を始める。
+      if (parsed && typeof parsed === "object" && parsed.sig === baselineSig() && parsed.content) {
+        return healDraft(parsed.content);
+      }
+      draftDiscarded = true;
     } catch {
       /* fallthrough */
     }
@@ -73,8 +82,17 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   const changeCount = Object.keys(changes).length;
 
   useEffect(() => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    // 下書きには現在の本番署名を添えて保存する（次回読込時の鮮度判定に使う）。
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ sig: baselineSig(), content: draft }));
   }, [draft]);
+
+  // 起動時、本番更新により古い下書きを破棄した場合は一度だけ通知する。
+  useEffect(() => {
+    if (draftDiscarded) {
+      draftDiscarded = false;
+      toast.info("本番が更新されていたため、未公開の古い下書きは破棄し、最新の公開状態を読み込みました。");
+    }
+  }, []);
 
   const postToFrame = useCallback((msg: any) => {
     iframeRef.current?.contentWindow?.postMessage({ source: "iceline-console", ...msg }, "*");
