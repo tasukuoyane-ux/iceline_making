@@ -11,8 +11,11 @@
   "top:audience.1.label": "オンラインショップ",
   "top:audience.2.note": "新卒・中途",
   "top:audience.2.label": "採用情報・エントリー",
-  "top:strength.0.body": "アイスラインが選ばれる理由は「欠かさない」。需要が読めないときでも、季節が外れているときでも、営業・製造・物流が動いて約束した量を届ける。それを積み重ねてきた120年があります。\nFSSC・ISO認証に裏打ちされた品質と、5,000品目を超える商品ラインアップで、これからも食を支え続けます。",
+  "top:strength.0.body": "アイスラインが選ばれる理由は「欠かさない」から。需要が読めないときでも、季節が外れているときでも、営業・製造・物流が動いて約束した量を届ける。それを積み重ねてきた120年があります。\nFSSC22000認証に裏打ちされた品質と、5,000品目を超える商品ラインアップで、これからも食を支え続けます。",
   "top:strength.1.body": "お客様の現場で何かが変わったとき、最も早く動けることが私たちの強みです。配送と営業を兼務した担当者が、日々の納品の中で課題を察知し、その場で提案できる体制があります。\nいざというとき、まず頼っていただける存在を目指し続けています。",
   "top:strength.2.body": "商品を届けるだけでなく、お客様の課題に向き合い、最適な答えを一緒に考える。それがアイスラインの提案です。\n現場を熟知した担当者が、お客様の状況を丁寧に把握。現場が本当に必要な提案を見極めながら、多くのお客様と長期的な信頼関係を築いています。",
-  "recruit:days.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_03-0DQbKz0N5qBMwdVxOiur90VSSWKAen.jpg"
+  "recruit:days.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_03-0DQbKz0N5qBMwdVxOiur90VSSWKAen.jpg",
+  "division:food.supplyChain.image": "",
+  "recruit:charm.0.title": "失敗を隠さなくていい",
+  "recruit:charm.1.title": "続けることが形になる"
 }
