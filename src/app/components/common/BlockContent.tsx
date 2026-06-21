@@ -1,6 +1,7 @@
-// 記事本文ブロックの公開側レンダラー（段落 / H2 / H3 / 画像[リンク可]）。
+// 記事本文ブロックの公開側レンダラー（段落 / H2 / H3 / 画像[リンク可] / 動画）。
 import { Block } from "../../data/blocks";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { toEmbed } from "../../lib/video";
 
 // マーカー（蛍光ペン）：文字の下1/3から2px下にアクセントカラーを添える。
 // 行高に左右されないよう、ベースライン基準の太い下線で表現。
@@ -67,6 +68,35 @@ export function BlockContent({ blocks, className = "" }: { blocks: Block[]; clas
               {b.alt && (
                 <figcaption className="mt-2 text-center text-muted-foreground" style={{ fontSize: 12 }}>
                   {b.alt}
+                </figcaption>
+              )}
+            </figure>
+          );
+        }
+        if (b.type === "video") {
+          const embed = toEmbed(b.src);
+          return (
+            <figure key={i} className="my-2">
+              <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                {embed?.type === "iframe" ? (
+                  <iframe
+                    src={embed.src}
+                    title={b.caption || "動画"}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : embed?.type === "video" ? (
+                  <video src={embed.src} controls playsInline className="h-full w-full" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-white/70" style={{ fontSize: 14 }}>
+                    動画は準備中です。
+                  </div>
+                )}
+              </div>
+              {b.caption && (
+                <figcaption className="mt-2 text-center text-muted-foreground" style={{ fontSize: 12 }}>
+                  {b.caption}
                 </figcaption>
               )}
             </figure>

@@ -3,8 +3,10 @@ import { motion } from "motion/react";
 import { ArrowRight, ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { INTERVIEWS } from "../data/recruit";
+import { hasVideo } from "../data/blocks";
 import { ed, edImg } from "../lib/editable";
 import { BlockContent } from "../components/common/BlockContent";
+import { MovieBadge } from "../components/common/MovieBadge";
 
 export function Interview() {
   const { id } = useParams();
@@ -33,6 +35,7 @@ export function Interview() {
         >
           <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover opacity-80" {...edImg(`${pre}:image`, "メイン画像")} />
         </motion.div>
+        {hasVideo(iv.blocks) && <MovieBadge className="!right-5 !top-5" />}
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/45 to-ink/10" />
 
         <div className="relative mx-auto w-full max-w-[1100px] px-5 pb-16 pc:px-8 pc:pb-24">

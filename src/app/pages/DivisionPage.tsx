@@ -95,9 +95,9 @@ export function DivisionPage({ division }: { division: Division }) {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
-                      className={`grid items-center gap-8 pc:grid-cols-2 ${(gi + ii) % 2 ? "pc:[direction:rtl]" : ""}`}
+                      className={`grid items-center gap-8 pc:grid-cols-[2fr_3fr] ${(gi + ii) % 2 ? "pc:[direction:rtl]" : ""}`}
                     >
-                      <div className="[direction:ltr]">
+                      <div className="[direction:ltr] pc:px-12">
                         {it.title && (
                           <h4 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`sections:divisionDetail.${division}.features.${gi}.items.${ii}.title`, "小見出し")}>
                             {it.title}

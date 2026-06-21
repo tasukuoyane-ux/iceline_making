@@ -6,8 +6,10 @@ import logo from "../../../images/logo.png";
 import { cn } from "../ui/utils";
 import { ed, edImg, txt, img } from "../../lib/editable";
 
-const NAV = [
-  { to: "/", label: "TOP" },
+// ロゴクリックで / へ遷移できるため「TOP」はナビから除外。
+// 旧「TOP」の位置に外部ショップ（SHOP）リンクを配置。
+const NAV: { to: string; label: string; external?: boolean }[] = [
+  { to: "https://www.dry-ice.jp/", label: "SHOP", external: true },
   { to: "/food", label: "食品事業部" },
   { to: "/ice", label: "アイス事業部" },
   { to: "/company", label: "会社情報" },
@@ -39,10 +41,21 @@ export function Header() {
         {/* PC nav */}
         <nav className="hidden items-center gap-1 pc:flex">
           {NAV.map((n, i) => {
-            const active =
-              n.to === "/"
-                ? pathname === "/"
-                : pathname.startsWith(n.to);
+            if (n.external) {
+              return (
+                <a
+                  key={n.to}
+                  href={n.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative px-3 py-2 text-foreground transition-colors hover:text-brand"
+                  style={{ fontSize: 14 }}
+                >
+                  <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
+                </a>
+              );
+            }
+            const active = pathname.startsWith(n.to);
             return (
               <Link
                 key={n.to}
@@ -83,17 +96,31 @@ export function Header() {
       {open && (
         <nav className="border-t border-border bg-background pc:hidden">
           <div className="mx-auto flex max-w-[1400px] flex-col px-5 py-2">
-            {NAV.map((n, i) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                onClick={() => setOpen(false)}
-                className="border-b border-border/60 py-4"
-                style={{ fontSize: 15 }}
-              >
-                <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
-              </Link>
-            ))}
+            {NAV.map((n, i) =>
+              n.external ? (
+                <a
+                  key={n.to}
+                  href={n.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                  className="border-b border-border/60 py-4"
+                  style={{ fontSize: 15 }}
+                >
+                  <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
+                </a>
+              ) : (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={() => setOpen(false)}
+                  className="border-b border-border/60 py-4"
+                  style={{ fontSize: 15 }}
+                >
+                  <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
+                </Link>
+              )
+            )}
             <Link
               to="/recruit"
               onClick={() => setOpen(false)}

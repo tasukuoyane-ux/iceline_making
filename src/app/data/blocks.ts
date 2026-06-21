@@ -5,7 +5,13 @@ export type Block =
   | { type: "paragraph"; text: string }
   | { type: "h2"; text: string }
   | { type: "h3"; text: string }
-  | { type: "image"; src: string; href?: string; alt?: string };
+  | { type: "image"; src: string; href?: string; alt?: string }
+  | { type: "video"; src: string; caption?: string };
+
+/** ブロック配列に動画ブロックが含まれるか（記事一覧の +MOVIE バッジ判定に使用） */
+export function hasVideo(blocks: Block[]): boolean {
+  return blocks.some((b) => b.type === "video" && !!(b as { src?: string }).src);
+}
 
 /** 文字列1つ、または文字列配列を段落ブロックへ変換（旧データの後方互換用） */
 export function toBlocks(input: unknown): Block[] {

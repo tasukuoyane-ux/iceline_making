@@ -5,17 +5,8 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { VIDEOS, VideoItem } from "../data/news";
 import { ed, edImg, EDIT_MODE } from "../lib/editable";
+import { toEmbed } from "../lib/video";
 import sections from "../../content/sections.json";
-
-// YouTube/Vimeo の共有URLを埋め込みURLへ変換。それ以外はそのまま（mp4等の直リンク想定）。
-function toEmbed(url: string): { type: "iframe" | "video"; src: string } | null {
-  if (!url) return null;
-  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
-  if (yt) return { type: "iframe", src: `https://www.youtube.com/embed/${yt[1]}` };
-  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (vimeo) return { type: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
-  return { type: "video", src: url };
-}
 
 export function Videos() {
   const [playing, setPlaying] = useState<VideoItem | null>(null);

@@ -1,16 +1,49 @@
 // 記事本文のブロック編集（段落 / 見出しH2 / 見出しH3 / 画像[リンク可]）。
 // 追加・並べ替え・削除に対応。お知らせ・社員インタビューで共通利用。
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Block } from "./content";
 import { Field, TextInput, TextArea, Button } from "./ui";
 import { ImageField } from "./ImageField";
+import { uploadImage } from "./api";
 
 const TYPE_LABEL: Record<Block["type"], string> = {
   paragraph: "段落",
   h2: "見出し（大）",
   h3: "見出し（中）",
   image: "画像",
+  video: "動画",
 };
+
+// 動画ファイル（mov/mp4/webm等）を直接アップロードして公開URLを返すボタン
+function VideoUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function handle(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setUploading(true);
+    try {
+      const { url } = await uploadImage(file); // 任意のファイル種別に対応（Blobへ保存）
+      onUploaded(url);
+    } catch (err: any) {
+      setError(err.message || "アップロードに失敗しました");
+    } finally {
+      setUploading(false);
+      if (ref.current) ref.current.value = "";
+    }
+  }
+  return (
+    <div className="space-y-1">
+      <input ref={ref} type="file" accept="video/*,.webm,.mp4,.mov,.m4v,.ogv" className="hidden" onChange={handle} />
+      <Button type="button" onClick={() => ref.current?.click()} disabled={uploading}>
+        {uploading ? "アップロード中…" : "動画ファイルをアップロード"}
+      </Button>
+      {error && <p className="text-[12px] text-red-600">{error}</p>}
+    </div>
+  );
+}
 
 // 段落エディタ：選択範囲を **太字** / ==マーカー== で囲む。
 function ParagraphEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -68,7 +101,11 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
   }
   function add(type: Block["type"]) {
     const block: Block =
-      type === "image" ? { type: "image", src: "", href: "", alt: "" } : { type, text: "" };
+      type === "image"
+        ? { type: "image", src: "", href: "", alt: "" }
+        : type === "video"
+        ? { type: "video", src: "", caption: "" }
+        : { type, text: "" };
     onChange([...blocks, block]);
   }
 
@@ -98,6 +135,16 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
                   <TextInput value={b.alt ?? ""} onChange={(e) => update(i, { alt: e.target.value })} />
                 </Field>
               </div>
+            ) : b.type === "video" ? (
+              <div className="space-y-2">
+                <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。">
+                  <TextInput value={b.src} onChange={(e) => update(i, { src: e.target.value })} placeholder="https://… または .mp4 / .webm / .mov" />
+                </Field>
+                <VideoUploadButton onUploaded={(url) => update(i, { src: url })} />
+                <Field label="キャプション（任意）">
+                  <TextInput value={b.caption ?? ""} onChange={(e) => update(i, { caption: e.target.value })} />
+                </Field>
+              </div>
             ) : b.type === "paragraph" ? (
               <ParagraphEditor value={b.text} onChange={(text) => update(i, { text })} />
             ) : (
@@ -117,6 +164,7 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
         <Button onClick={() => add("h2")}>＋ 見出し（大）</Button>
         <Button onClick={() => add("h3")}>＋ 見出し（中）</Button>
         <Button onClick={() => add("image")}>＋ 画像</Button>
+        <Button onClick={() => add("video")}>＋ 動画</Button>
       </div>
     </div>
   );

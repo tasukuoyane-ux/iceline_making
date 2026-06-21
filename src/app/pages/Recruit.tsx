@@ -8,7 +8,11 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { ed, edImg, txt, img } from "../lib/editable";
+import { toEmbed } from "../lib/video";
+import { hasVideo } from "../data/blocks";
+import { MovieBadge } from "../components/common/MovieBadge";
 import profileSlides from "../../content/profileSlides.json";
+import sectionsJson from "../../content/sections.json";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -36,13 +40,13 @@ function RecruitHero() {
       <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/70 to-brand/30" />
       <div className="relative mx-auto w-full max-w-[1400px] px-5 py-24 pc:px-8">
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}>
-          <p className="mb-6 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 14 }}>
-            RECRUIT 2027
+          <p className="mb-6 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 14 }} {...ed("recruit:mv.eyebrow", "ラベル（英字）")}>
+            {txt("recruit:mv.eyebrow", "RECRUIT 2027")}
           </p>
-          <h1 className="text-white" style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.15, letterSpacing: "0.01em" }}>
-            笑顔と、正直さ。<br />ただ、それだけ。
+          <h1 className="text-white" style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.15, letterSpacing: "0.01em", whiteSpace: "pre-line" }} {...ed("sections:recruitMv.main", "メインコピー", { multiline: true })}>
+            {RECRUIT_MV.main}
           </h1>
-          <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("sections:recruitMv.sub")}>{RECRUIT_MV.sub}</p>
+          <p className="mt-8 max-w-xl text-white/85" style={{ fontSize: 17, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("sections:recruitMv.sub", "サブコピー", { multiline: true })}>{RECRUIT_MV.sub}</p>
         </motion.div>
       </div>
     </section>
@@ -60,6 +64,10 @@ export function Recruit() {
   const [dayRole, setDayRole] = useState(0);
   const [openCond, setOpenCond] = useState<number[]>([]);
   const [openFaq, setOpenFaq] = useState<number[]>([]);
+
+  // 事業紹介の前に埋め込む紹介動画（管理コンソールの「採用ページ 紹介動画」で設定）
+  const introVideo = ((sectionsJson as any).recruitIntroVideo as string) || "";
+  const introEmbed = toEmbed(introVideo);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -98,6 +106,26 @@ export function Recruit() {
           </p>
         </div>
       </Section>
+
+      {/* 紹介動画（事業紹介の前・任意の動画を埋め込み可能） */}
+      {introVideo && introEmbed && (
+        <Section heat={HEAT.recruitBiz}>
+          <SectionTitle en="MOVIE" jp="紹介動画" />
+          <div className="mt-8 aspect-video w-full overflow-hidden rounded-2xl bg-black">
+            {introEmbed.type === "iframe" ? (
+              <iframe
+                src={introEmbed.src}
+                title="紹介動画"
+                className="h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video src={introEmbed.src} controls playsInline className="h-full w-full" />
+            )}
+          </div>
+        </Section>
+      )}
 
       {/* 会社を知る｜事業紹介 */}
       <Section heat={HEAT.recruitBiz}>
@@ -288,6 +316,7 @@ export function Recruit() {
               <div className="aspect-[4/3] overflow-hidden bg-secondary">
                 <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`interviews:${iv.id}:image`)} />
               </div>
+              {hasVideo(iv.blocks) && <MovieBadge />}
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/85 to-transparent p-7">
                 <p className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>INTERVIEW</p>
                 <h3 className="mt-1 text-white" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.4 }} {...ed(`interviews:${iv.id}:lead`, "タイトル")}>{iv.lead}</h3>
