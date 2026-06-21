@@ -42,6 +42,33 @@ function genId(prefix: string): string {
   return `${prefix}-${Math.floor(performance.now() * 1000).toString(36)}${Math.floor(performance.now()).toString(36)}`;
 }
 
+/* ===================== 採用ページ 紹介動画 ===================== */
+// 採用ページのヒーローメッセージ〜事業紹介の間に表示する紹介動画のURLを設定する。
+// 値は sections.json の recruitIntroVideo に保存。空欄ならページ側でセクション自体を非表示にする。
+export function RecruitVideoPanel({ value, onChange }: { value: any; onChange: (v: any) => void }) {
+  const url: string = value?.recruitIntroVideo ?? "";
+  const setUrl = (v: string) => onChange({ ...value, recruitIntroVideo: v });
+  return (
+    <div className="space-y-4">
+      <Card title="採用ページ 紹介動画（ヒーローメッセージと事業紹介の間に表示）">
+        <Field
+          label="動画URL"
+          hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄ならセクション自体を非表示。"
+        >
+          <div className="space-y-2">
+            <TextInput
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://… または .mp4 / .webm / .mov"
+            />
+            <VideoUploadButton onUploaded={setUrl} />
+          </div>
+        </Field>
+      </Card>
+    </div>
+  );
+}
+
 /* ===================== お知らせ ===================== */
 export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v: NewsItem[]) => void }) {
   function update(i: number, patch: Partial<NewsItem>) {
