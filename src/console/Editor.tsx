@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AuthUser, clearAuth, publish } from "./api";
-import { Content, baseline, buildOverrides, changedFiles, clone, normalizeContent } from "./content";
+import { Content, baseline, buildOverrides, changedFiles, clone, healDraft } from "./content";
 import { Button } from "./ui";
 import { PageFields, PageField } from "./PageFields";
 import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel } from "./panels";
@@ -25,7 +25,9 @@ function loadDraft(): Content {
   const raw = localStorage.getItem(DRAFT_KEY);
   if (raw) {
     try {
-      return normalizeContent(JSON.parse(raw));
+      // 古い下書きでも、コード側の最新ベースライン構造で補完してから読み込む
+      // （構造キー欠落による事業部ページの真っ白化を防ぐ）。
+      return healDraft(JSON.parse(raw));
     } catch {
       /* fallthrough */
     }

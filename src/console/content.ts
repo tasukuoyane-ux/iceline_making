@@ -75,6 +75,40 @@ export function clone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v));
 }
 
+function isPlainObject(v: any): boolean {
+  return v != null && typeof v === "object" && !Array.isArray(v);
+}
+
+/**
+ * プレーンオブジェクト同士のみ再帰的にマージする。配列・プリミティブは source を優先し、
+ * source 側にキーが無ければ target（＝コード同梱のベースライン）の値を残す。
+ *
+ * 目的: CMSの古いローカル下書きには、コード側で後から追加された構造キー
+ * （例: sections.divisionDetail）が欠けていることがある。これをそのまま公開すると
+ * 事業部ページが真っ白になる不具合が起きるため、公開・編集前にベースライン構造で補完する。
+ */
+export function deepMerge<T>(target: T, source: any): T {
+  if (!isPlainObject(target) || !isPlainObject(source)) {
+    return (source === undefined ? target : source) as T;
+  }
+  const out: any = { ...target };
+  for (const key of Object.keys(source)) {
+    const sv = source[key];
+    const tv = out[key];
+    if (isPlainObject(tv) && isPlainObject(sv)) out[key] = deepMerge(tv, sv);
+    else if (sv !== undefined) out[key] = sv;
+  }
+  return out as T;
+}
+
+/**
+ * 保存済み下書き（localStorage等）を、現行コードのベースライン構造へ補完して正規化する。
+ * 編集者が手を加えていない構造キーが欠落しても、公開時に失われないようにする。
+ */
+export function healDraft(stored: any): Content {
+  return normalizeContent(deepMerge(baseline(), stored));
+}
+
 /** ビルド時JSONをベースラインとして取得（旧形式は blocks へ正規化） */
 export function baseline(): Content {
   return normalizeContent(
@@ -182,9 +216,13 @@ export function setValueByPath(d: Content, path: string, value: string): Content
 /** ベース（既定はビルド時JSON）と比較し、変更があったファイルのみ {path: 内容} で返す */
 export function changedFiles(draft: Content, base: Content = baseline()): Record<string, unknown> {
   const out: Record<string, unknown> = {};
+  // コード同梱の完全な構造。sections の構造キー欠落（divisionDetail等）を公開時に補完するための保険。
+  const full = baseline();
   (Object.keys(FILE_PATHS) as (keyof Content)[]).forEach((key) => {
     if (JSON.stringify(draft[key]) !== JSON.stringify(base[key])) {
-      out[FILE_PATHS[key]] = draft[key];
+      // sections はオブジェクト構造。欠落キーがあるとページが壊れるため必ず完全構造へマージして出力する。
+      out[FILE_PATHS[key]] =
+        key === "sections" ? deepMerge(clone(full.sections), draft.sections) : draft[key];
     }
   });
   return out;

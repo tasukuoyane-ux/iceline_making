@@ -374,7 +374,7 @@ export const findRecipe = (id: string) => ALL_RECIPES.find((r) => r.id === id);
 export const DIVISION_INFO: Record<
   Division,
   { label: string; reasonCatch: string; reasonBody: string }
-> = sections.divisionInfo;
+> = (sections.divisionInfo || {}) as any;
 
 // 事業部ページ詳細（事業概要 / サプライチェーン / 事業の特色 / 選ばれる理由）。
 // 文言は src/content/sections.json で管理（/console から編集可能）。
@@ -389,4 +389,4 @@ export interface DivisionDetail {
   features: { heading: string; items: DivisionFeatureItem[] }[];
   reasons: { no: string; title: string; body: string }[];
 }
-export const DIVISION_DETAIL: Record<Division, DivisionDetail> = sections.divisionDetail;
+export const DIVISION_DETAIL: Record<Division, DivisionDetail> = (sections.divisionDetail || {}) as any;
