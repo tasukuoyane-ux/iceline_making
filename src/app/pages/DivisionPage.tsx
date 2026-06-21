@@ -67,16 +67,18 @@ export function DivisionPage({ division }: { division: Division }) {
         <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`sections:divisionDetail.${division}.supplyChain`, "サプライチェーン", { multiline: true })}>
           {detail?.supplyChain}
         </p>
-        {division === "food" && (
-          <div className="mt-8">
-            <ImageWithFallback
-              src={img("division:food.supplyChain.image", IMG.foodNetwork || IMG_PLACEHOLDER)}
-              alt="サプライチェーン"
-              className="w-full rounded-2xl border border-border object-cover"
-              {...edImg("division:food.supplyChain.image", "サプライチェーン画像")}
-            />
-          </div>
-        )}
+        {/* サプライチェーン画像（食品・アイス両事業部で差し替え可能） */}
+        <div className="mt-8">
+          <ImageWithFallback
+            src={img(
+              `division:${division}.supplyChain.image`,
+              division === "food" ? IMG.foodNetwork || IMG_PLACEHOLDER : IMG_PLACEHOLDER
+            )}
+            alt="サプライチェーン"
+            className="w-full rounded-2xl border border-border object-cover"
+            {...edImg(`division:${division}.supplyChain.image`, "サプライチェーン画像")}
+          />
+        </div>
       </Section>
 
       {/* 事業の特色 */}

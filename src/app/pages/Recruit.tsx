@@ -206,7 +206,7 @@ export function Recruit() {
               onClick={() => setDayRole(i)}
               className={`rounded-full border px-5 py-2 transition-colors ${dayRole === i ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"}`}
               style={{ fontSize: 13, fontWeight: 700 }}
-              {...ed(`recruit:days.${i}.role`, "職種名")}
+              {...ed(`recruit:days.${i}.role`, "職種名", { clickThrough: true })}
             >
               {txt(`recruit:days.${i}.role`, d.role)}
             </button>

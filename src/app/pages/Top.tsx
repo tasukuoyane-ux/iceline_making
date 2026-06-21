@@ -102,8 +102,8 @@ export function Top() {
         </div>
       </Section>
 
-      {/* 私たちの強み（画像＋テキスト：記事と同様のH2/H3/p構成・左右逆レイアウト・背景#d3d3d3） */}
-      <Section heat={HEAT.topStrength} className="!bg-[#d3d3d3]">
+      {/* 私たちの強み（画像＋テキスト：記事と同様のH2/H3/p構成・左右逆レイアウト・背景は白） */}
+      <Section heat={HEAT.topStrength}>
         <div className="mb-2 text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 13, letterSpacing: "0.18em" }}>
           OUR STRENGTH
         </div>

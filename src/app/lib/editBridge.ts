@@ -131,8 +131,12 @@ export function initEditBridge() {
     (e) => {
       const hit = findEditable(e.target);
       if (!hit) return;
-      e.preventDefault();
-      e.stopPropagation();
+      // クリックスルー対象（タブ等）は選択ハイライトだけ行い、
+      // 既定動作（Reactのonclickによるタブ切替など）はそのまま通す。
+      if (!hit.el.hasAttribute("data-edit-clickthrough")) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       if (activeEl) activeEl.classList.remove("iceline-edit-active");
       activeEl = hit.el;
       activeEl.classList.add("iceline-edit-active");

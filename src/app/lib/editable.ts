@@ -26,7 +26,7 @@ export const EDIT_MODE: boolean =
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).has("__edit");
 
-type EdOpts = { label?: string; multiline?: boolean };
+type EdOpts = { label?: string; multiline?: boolean; clickThrough?: boolean };
 
 // 全ページ共通の要素（ヘッダー・フッター）は各ページの編集対象にしない。
 function isCommon(path: string): boolean {
@@ -39,6 +39,8 @@ export function ed(path: string, label?: string, opts?: EdOpts): Record<string, 
   const a: Record<string, string> = { "data-edit": path };
   if (label) a["data-edit-label"] = label;
   if (opts?.multiline) a["data-edit-multi"] = "1";
+  // クリックスルー：選択（編集対象化）しつつ、要素本来のクリック動作（タブ切替など）も活かす
+  if (opts?.clickThrough) a["data-edit-clickthrough"] = "1";
   return a;
 }
 
