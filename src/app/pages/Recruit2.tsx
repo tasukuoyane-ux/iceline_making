@@ -70,21 +70,31 @@ const MV_DEFAULT =
     "</svg>"
   );
 
-// MVアニメーション用スタイル（低速の背景ループ＋中速のICELINE切り抜き）
+// ICELINEの文字型に「切り抜かれた」ビビッドカラーの帯（文字部分が透明の穴＝背後の画像が覗く）
+const ICE_KNOCK = (() => {
+  const w = 1360;
+  const h = 300;
+  const color = "#1ec8dd";
+  const svg =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='" + w + "' height='" + h + "' viewBox='0 0 " + w + " " + h + "'>" +
+      "<defs><mask id='k'>" +
+        "<rect width='" + w + "' height='" + h + "' fill='white'/>" +
+        "<text x='" + w / 2 + "' y='" + h / 2 + "' fill='black' font-family='Arial Black, Arial, sans-serif' font-weight='900' font-size='220' letter-spacing='-4' text-anchor='middle' dominant-baseline='central'>ICELINE</text>" +
+      "</mask></defs>" +
+      "<rect width='" + w + "' height='" + h + "' fill='" + color + "' mask='url(#k)'/>" +
+    "</svg>";
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+})();
+
+// MVアニメーション用スタイル（画像＝低速 / 切り抜き帯＝高速、どちらも右→左ループ）
 function R2Styles() {
   return (
     <style>{`
-      .r2-marquee { animation: r2-marquee 55s linear infinite; will-change: transform; }
-      @keyframes r2-marquee { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
-      .r2-iceline {
-        background-image: repeating-linear-gradient(118deg,#ff414d 0 34px,#ff8a3d 34px 68px,#1aa6b7 68px 102px,#f56a79 102px 136px);
-        -webkit-background-clip: text; background-clip: text;
-        -webkit-text-fill-color: transparent; color: transparent;
-        animation: r2-iceline 9s linear infinite; will-change: background-position;
-      }
-      @keyframes r2-iceline { from { background-position: 0 0; } to { background-position: -544px 0; } }
+      .r2-slow { animation: r2-scroll 60s linear infinite; will-change: transform; }
+      .r2-fast { animation: r2-scroll 20s linear infinite; will-change: transform; }
+      @keyframes r2-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
       @media (prefers-reduced-motion: reduce) {
-        .r2-marquee, .r2-iceline { animation: none; }
+        .r2-slow, .r2-fast { animation: none; }
       }
     `}</style>
   );
@@ -155,49 +165,39 @@ function Sec({ children, className = "" }: { children: React.ReactNode; classNam
 }
 
 function Hero() {
-  // 低速で右→左にスクロールループする背景画像（差し替え可）
+  // 背後の画像（差し替え可）。ICELINEの穴からこの画像が覗く。
   const bg = img("recruit2:mv.bgImage", MV_DEFAULT);
   return (
-    <header className="relative flex h-[88vh] min-h-[520px] items-center justify-center overflow-hidden">
-      {/* レイヤー1：低速スクロールする背景画像（同一画像を2枚並べてループ） */}
+    <header className="relative flex h-[88vh] min-h-[520px] items-center justify-center overflow-hidden" style={{ background: PAL.blue }}>
+      {/* レイヤー1（下）：画像。低速で右→左スクロールループ */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="r2-marquee flex h-full" style={{ width: "200%" }}>
-          <img
-            {...edImg("recruit2:mv.bgImage", "MV背景画像")}
-            src={bg}
-            alt=""
-            className="h-full w-1/2 object-cover"
-          />
-          <img
-            {...edImg("recruit2:mv.bgImage", "MV背景画像")}
-            src={bg}
-            alt=""
-            aria-hidden
-            className="h-full w-1/2 object-cover"
-          />
+        <div className="r2-slow flex h-full" style={{ width: "200%" }}>
+          <img {...edImg("recruit2:mv.bgImage", "MV背景画像")} src={bg} alt="" className="h-full w-1/2 object-cover" />
+          <img {...edImg("recruit2:mv.bgImage", "MV背景画像")} src={bg} alt="" aria-hidden className="h-full w-1/2 object-cover" />
         </div>
       </div>
 
-      {/* コントラスト用の暗幕 */}
-      <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(9,26,33,0.34)" }} />
+      {/* 画像に薄いティントを重ね、切り抜きの視認性を上げる */}
+      <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(15,42,51,0.30)" }} />
 
-      {/* レイヤー2：企業名の形（ICELINE）で切り抜かれた中速スクロール要素＋キャッチコピー */}
-      <div className="relative z-10 px-6 text-center">
-        <div
-          className="r2-iceline mx-auto select-none"
-          aria-label="ICELINE"
-          style={{ fontFamily: "var(--font-accent)", fontWeight: 900, fontSize: "clamp(58px, 17vw, 240px)", lineHeight: 0.92, letterSpacing: "-0.02em" }}
-        >
-          ICELINE
+      {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。高速で右→左スクロールループ */}
+      <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
+        <div className="r2-fast flex h-full items-center" style={{ width: "max-content" }}>
+          <img src={ICE_KNOCK} alt="ICELINE" className="h-full w-auto" />
+          <img src={ICE_KNOCK} alt="" aria-hidden className="h-full w-auto" />
         </div>
+      </div>
+
+      {/* キャッチコピー（MV内のコンテンツは上記＋これのみ） */}
+      <div className="relative z-10 px-6 text-center">
         <Ed
           as="p"
           path="recruit2:mv.title"
           def={RECRUIT_MV.main}
           label="キャッチコピー"
           multiline
-          className="mx-auto mt-6 max-w-[20em] text-white"
-          style={{ fontSize: "clamp(18px, 3vw, 34px)", fontWeight: 800, lineHeight: 1.5, whiteSpace: "pre-line", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}
+          className="mx-auto max-w-[20em]"
+          style={{ color: "#0b2530", fontSize: "clamp(24px, 4.4vw, 56px)", fontWeight: 900, lineHeight: 1.4, whiteSpace: "pre-line", textShadow: "0 2px 22px rgba(255,255,255,0.6)" }}
         />
       </div>
     </header>
