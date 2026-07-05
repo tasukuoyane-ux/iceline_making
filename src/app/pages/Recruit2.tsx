@@ -40,12 +40,55 @@ const PH =
     "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#eef4f7'/><text x='50%' y='50%' font-size='30' fill='#9fb6c0' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>＋ 画像</text></svg>"
   );
 
-// うっすらグレインがかった背景（全体を貫通）
-const GRAIN =
+// 全体を貫通する固定背景：ビビッドカラーのパキっとした抽象デザイン
+const VIVID_BG =
   "data:image/svg+xml;charset=utf-8," +
   encodeURIComponent(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(#n)' opacity='0.5'/></svg>"
+    "<svg xmlns='http://www.w3.org/2000/svg' width='1440' height='1024' viewBox='0 0 1440 1024' preserveAspectRatio='xMidYMid slice'>" +
+      "<rect width='1440' height='1024' fill='#f3fbfd'/>" +
+      "<circle cx='150' cy='150' r='290' fill='#ff414d'/>" +
+      "<circle cx='1290' cy='250' r='190' fill='#1aa6b7'/>" +
+      "<path d='M640 1024 L1010 590 L1380 1024 Z' fill='#f56a79'/>" +
+      "<rect x='40' y='780' width='360' height='150' rx='75' fill='#1aa6b7'/>" +
+      "<circle cx='1180' cy='880' r='120' fill='#ffd23f'/>" +
+      "<circle cx='560' cy='110' r='64' fill='#ffd23f'/>" +
+      "<path d='M-20 545 Q 360 400 740 545 T 1480 520' stroke='#ff414d' stroke-width='16' fill='none'/>" +
+    "</svg>"
   );
+
+// MV背景画像の既定（差し替え可能）。ビビッドな抽象パターン。
+const MV_DEFAULT =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'>" +
+      "<rect width='1200' height='800' fill='#12333d'/>" +
+      "<circle cx='210' cy='210' r='230' fill='#ff414d'/>" +
+      "<circle cx='620' cy='560' r='160' fill='#1aa6b7'/>" +
+      "<circle cx='980' cy='250' r='130' fill='#f56a79'/>" +
+      "<circle cx='1080' cy='620' r='80' fill='#ffd23f'/>" +
+      "<circle cx='430' cy='430' r='70' fill='#ffd23f'/>" +
+    "</svg>"
+  );
+
+// MVアニメーション用スタイル（低速の背景ループ＋中速のICELINE切り抜き）
+function R2Styles() {
+  return (
+    <style>{`
+      .r2-marquee { animation: r2-marquee 55s linear infinite; will-change: transform; }
+      @keyframes r2-marquee { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+      .r2-iceline {
+        background-image: repeating-linear-gradient(118deg,#ff414d 0 34px,#ff8a3d 34px 68px,#1aa6b7 68px 102px,#f56a79 102px 136px);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+        animation: r2-iceline 9s linear infinite; will-change: background-position;
+      }
+      @keyframes r2-iceline { from { background-position: 0 0; } to { background-position: -544px 0; } }
+      @media (prefers-reduced-motion: reduce) {
+        .r2-marquee, .r2-iceline { animation: none; }
+      }
+    `}</style>
+  );
+}
 
 /** インライン編集可能なテキスト要素 */
 function Ed({
@@ -112,54 +155,50 @@ function Sec({ children, className = "" }: { children: React.ReactNode; classNam
 }
 
 function Hero() {
+  // 低速で右→左にスクロールループする背景画像（差し替え可）
+  const bg = img("recruit2:mv.bgImage", MV_DEFAULT);
   return (
-    <header className="relative overflow-hidden">
-      {/* 遊びのある立方体・球体（曇ったイメージ） */}
-      <div className="pointer-events-none absolute inset-0 -z-0">
-        <div className="absolute -left-10 top-10 h-56 w-56 rounded-full blur-2xl" style={{ background: PAL.coral, opacity: 0.35 }} />
-        <div className="absolute right-8 top-24 h-40 w-40 rounded-[2rem] blur-xl" style={{ background: PAL.teal, opacity: 0.3, transform: "rotate(18deg)" }} />
-        <div className="absolute bottom-6 left-1/3 h-48 w-48 rounded-full blur-2xl" style={{ background: PAL.red, opacity: 0.22 }} />
-        <div className="absolute -right-6 bottom-16 h-28 w-28 rounded-2xl blur-lg" style={{ background: PAL.blue, opacity: 0.6, transform: "rotate(-12deg)" }} />
+    <header className="relative flex h-[88vh] min-h-[520px] items-center justify-center overflow-hidden">
+      {/* レイヤー1：低速スクロールする背景画像（同一画像を2枚並べてループ） */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="r2-marquee flex h-full" style={{ width: "200%" }}>
+          <img
+            {...edImg("recruit2:mv.bgImage", "MV背景画像")}
+            src={bg}
+            alt=""
+            className="h-full w-1/2 object-cover"
+          />
+          <img
+            {...edImg("recruit2:mv.bgImage", "MV背景画像")}
+            src={bg}
+            alt=""
+            aria-hidden
+            className="h-full w-1/2 object-cover"
+          />
+        </div>
       </div>
 
-      <div className="relative mx-auto max-w-[1200px] px-6 pb-24 pt-20 pc:px-12 pc:pb-28 pc:pt-28">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-          <Ed
-            as="p"
-            path="recruit2:mv.eyebrow"
-            def="RECRUIT"
-            label="MVラベル"
-            className="inline-block rounded-full px-5 py-1.5 text-white"
-            style={{ background: PAL.red, fontFamily: "var(--font-accent)", fontSize: 13, letterSpacing: "0.2em" }}
-          />
-          <Ed
-            as="h1"
-            path="recruit2:mv.title"
-            def={RECRUIT_MV.main}
-            label="MVメインコピー"
-            multiline
-            className="mt-6 max-w-[16em]"
-            style={{ fontSize: "clamp(34px, 6vw, 68px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.18, whiteSpace: "pre-line" }}
-          />
-          <Ed
-            as="p"
-            path="recruit2:mv.sub"
-            def={RECRUIT_MV.sub}
-            label="MVサブコピー"
-            multiline
-            className="mt-6 max-w-xl"
-            style={{ fontSize: "clamp(15px, 2vw, 19px)", lineHeight: 1.9, color: PAL.teal, fontWeight: 700, whiteSpace: "pre-line" }}
-          />
-          <Ed
-            as="p"
-            path="recruit2:mv.body"
-            def={RECRUIT_MV.body}
-            label="MV本文"
-            multiline
-            className="mt-6 max-w-2xl"
-            style={{ fontSize: 15, lineHeight: 2.1, color: "#334", whiteSpace: "pre-line" }}
-          />
-        </motion.div>
+      {/* コントラスト用の暗幕 */}
+      <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(9,26,33,0.34)" }} />
+
+      {/* レイヤー2：企業名の形（ICELINE）で切り抜かれた中速スクロール要素＋キャッチコピー */}
+      <div className="relative z-10 px-6 text-center">
+        <div
+          className="r2-iceline mx-auto select-none"
+          aria-label="ICELINE"
+          style={{ fontFamily: "var(--font-accent)", fontWeight: 900, fontSize: "clamp(58px, 17vw, 240px)", lineHeight: 0.92, letterSpacing: "-0.02em" }}
+        >
+          ICELINE
+        </div>
+        <Ed
+          as="p"
+          path="recruit2:mv.title"
+          def={RECRUIT_MV.main}
+          label="キャッチコピー"
+          multiline
+          className="mx-auto mt-6 max-w-[20em] text-white"
+          style={{ fontSize: "clamp(18px, 3vw, 34px)", fontWeight: 800, lineHeight: 1.5, whiteSpace: "pre-line", textShadow: "0 2px 18px rgba(0,0,0,0.45)" }}
+        />
       </div>
     </header>
   );
@@ -442,9 +481,10 @@ function EntryForm() {
 
 export function Recruit2() {
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ background: `linear-gradient(180deg, ${PAL.blue} 0%, #ffffff 22%, #fdeef0 55%, #e8f6f8 100%)` }}>
-      {/* グレイン（全体を貫通） */}
-      <div className="pointer-events-none fixed inset-0 -z-10" style={{ backgroundImage: `url(${GRAIN})`, opacity: 0.35, mixBlendMode: "multiply" }} />
+    <div className="relative min-h-screen overflow-hidden">
+      <R2Styles />
+      {/* 全体を貫通する固定背景：ビビッドな抽象デザイン */}
+      <div className="pointer-events-none fixed inset-0 -z-10" style={{ backgroundImage: `url(${VIVID_BG})`, backgroundSize: "cover", backgroundPosition: "center" }} />
       <Hero />
       <Biz />
       <Philosophy />
