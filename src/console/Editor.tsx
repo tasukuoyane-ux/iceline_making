@@ -17,6 +17,7 @@ const PAGES: { label: string; path: string }[] = [
   { label: "お知らせ一覧", path: "/news" },
   { label: "動画で知る", path: "/videos" },
   { label: "採用情報", path: "/recruit" },
+  { label: "採用情報2", path: "/recruit2" },
   { label: "会社情報", path: "/company" },
   { label: "お問い合わせ", path: "/contact" },
 ];

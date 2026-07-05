@@ -14,6 +14,7 @@ import { News } from "./pages/News";
 import { NewsDetail } from "./pages/NewsDetail";
 import { Videos } from "./pages/Videos";
 import { Recruit } from "./pages/Recruit";
+import { Recruit2 } from "./pages/Recruit2";
 import { Interview } from "./pages/Interview";
 import { RecipeDetail } from "./pages/RecipeDetail";
 import { Privacy } from "./pages/Privacy";
@@ -56,6 +57,7 @@ function Site() {
           <Route path="/news/:id" element={<NewsDetail />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/recruit" element={<Recruit />} />
+          <Route path="/recruit2" element={<Recruit2 />} />
           <Route path="/recruit/interview/:id" element={<Interview />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<Top />} />

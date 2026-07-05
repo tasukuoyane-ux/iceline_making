@@ -442,6 +442,20 @@ export function SectionsPanel({ value, onChange }: { value: any; onChange: (v: a
           </Field>
         </Card>
       </div>
+      <div data-focus="recruit2Video">
+        <Card title="採用2 紹介動画（「人を知る」に表示）">
+          <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄なら非表示。">
+            <div className="space-y-2">
+              <TextInput
+                value={value.recruit2Video ?? ""}
+                onChange={(e) => setPath("recruit2Video", e.target.value)}
+                placeholder="https://… または .mp4 / .webm / .mov"
+              />
+              <VideoUploadButton onUploaded={(url) => setPath("recruit2Video", url)} />
+            </div>
+          </Field>
+        </Card>
+      </div>
       <div data-focus="recruitApply">
         <Card title="採用ページ 応募セクション">
           <div className="space-y-3">

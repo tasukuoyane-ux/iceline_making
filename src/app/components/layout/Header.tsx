@@ -15,6 +15,7 @@ const NAV: { to: string; label: string; external?: boolean }[] = [
   { to: "/company", label: "会社情報" },
   { to: "/news", label: "お知らせ" },
   { to: "/contact", label: "お問い合わせ" },
+  { to: "/recruit2", label: "採用2" },
 ];
 
 export function Header() {
