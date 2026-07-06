@@ -221,11 +221,12 @@ function Hero() {
       {/* 画像に薄いティントを重ね、切り抜きの視認性を上げる */}
       <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(15,42,51,0.30)" }} />
 
-      {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。文字自体の高さ＝88vh。高速で右→左ループ */}
+      {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。帯・文字の高さ＝背景画像の高さ（88vh）。
+          横方向は画面に収まらなくてよいので maxWidth:none で自然幅のまま右→左ループ。 */}
       <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
         <div className="r2-fast flex items-center" style={{ width: "max-content", height: "88vh" }}>
-          <img src={ICE_KNOCK} alt="ICELINE" className="w-auto" style={{ height: "88vh" }} />
-          <img src={ICE_KNOCK} alt="" aria-hidden className="w-auto" style={{ height: "88vh" }} />
+          <img src={ICE_KNOCK} alt="ICELINE" style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
+          <img src={ICE_KNOCK} alt="" aria-hidden style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
         </div>
       </div>
 
