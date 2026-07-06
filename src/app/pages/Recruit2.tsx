@@ -382,23 +382,35 @@ function Locations() {
   );
 }
 
+// 仕事の魅力の各ブロックのリード（既定・編集可）
+const CHARM_LEADS = ["何かあったら、まず話す。", "毎日の約束が、信頼になる。", "食のすべてに、そっと関わる。"];
+
 function Charm() {
+  // 画像1のレイアウト：横長ヒーロー画像の上にタイトル、その下にリード＋本文。
   return (
     <Sec>
       <Head base="recruit2:charm" en="OUR CULTURE" jp="仕事の魅力" />
-      <div className="mt-12 grid gap-6 pc:grid-cols-3">
+      <div className="mt-12 space-y-16">
         {RECRUIT_CHARM.map((c, i) => (
           <motion.div
             key={c.no}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            className="rounded-[1.75rem] bg-white/80 p-8 shadow-sm ring-1 ring-black/5 backdrop-blur"
+            transition={{ duration: 0.5 }}
           >
-            <Ed as="div" path={`recruit2:charm.${i}.no`} def={c.no} label="番号" style={{ fontFamily: "var(--font-accent)", fontSize: 44, fontWeight: 800, color: ACCENTS[i % ACCENTS.length], lineHeight: 1 }} />
-            <Ed as="h3" path={`recruit2:charm.${i}.title`} def={c.title} label="タイトル" className="mt-3" style={{ fontSize: 20, fontWeight: 800, color: PAL.ink }} />
-            <Ed as="p" path={`recruit2:charm.${i}.body`} def={c.body} label="本文" multiline className="mt-3" style={{ fontSize: 14, lineHeight: 2, color: "#445", whiteSpace: "pre-line" }} />
+            {/* 横長ヒーロー画像＋タイトル（オーバーレイの色ボックス） */}
+            <div className="relative overflow-hidden rounded-[1.5rem] shadow-[0_18px_40px_rgba(15,42,51,0.14)]">
+              <EdImg path={`recruit2:charm.${i}.image`} label="ヒーロー画像" alt={c.title} className="aspect-[16/6] w-full object-cover" />
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4">
+                <Ed as="span" path={`recruit2:charm.${i}.title`} def={c.title} label="タイトル" className="inline-block rounded-md px-6 py-3 text-center text-white" style={{ background: ACCENTS[i % ACCENTS.length], fontSize: "clamp(17px, 2.4vw, 26px)", fontWeight: 900, lineHeight: 1.3 }} />
+              </div>
+            </div>
+            {/* リード＋本文 */}
+            <div className="mx-auto mt-8 max-w-2xl text-center">
+              <Ed as="p" path={`recruit2:charm.${i}.lead`} def={CHARM_LEADS[i] || c.title} label="リード" multiline style={{ fontSize: "clamp(20px, 2.8vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.6, whiteSpace: "pre-line" }} />
+              <Ed as="p" path={`recruit2:charm.${i}.body`} def={c.body} label="本文" multiline className="mt-5" style={{ fontSize: 15, lineHeight: 2.1, color: "#1c2b30", whiteSpace: "pre-line" }} />
+            </div>
           </motion.div>
         ))}
       </div>
@@ -435,18 +447,101 @@ function Day() {
   );
 }
 
+// キャリアパス（既定・編集可）。一日の流れと同じデザイン。
+const CAREER_STEPS = [
+  { time: "1年目", task: "先輩に同行しながら基礎を習得。担当業務を一つずつ覚える。" },
+  { time: "2〜3年目", task: "自分の担当を持って独り立ち。後輩のサポートも始める。" },
+  { time: "4〜5年目", task: "チームのまとめ役として、計画・調整を担う。" },
+  { time: "6年目〜", task: "リーダー・管理職として部門を牽引する。" },
+];
+
+function CareerPath() {
+  return (
+    <Sec>
+      <Head base="recruit2:career" en="CAREER PATH" jp="キャリアパス" />
+      <div className="mt-10 grid gap-10 pc:grid-cols-[1fr_1fr] pc:items-start">
+        <div>
+          <p className="inline-flex items-center gap-2" style={{ fontSize: 14, color: PAL.teal, fontWeight: 700 }}>
+            <Clock size={16} />
+            <Ed as="span" path="recruit2:career.note" def="入社後のステップアップ例" label="メモ" />
+          </p>
+          <ol className="mt-8 space-y-0 border-l-2 pl-6" style={{ borderColor: PAL.coral }}>
+            {CAREER_STEPS.map((s, i) => (
+              <li key={i} className="relative mb-7 last:mb-0">
+                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full" style={{ background: PAL.red }} />
+                <div className="flex flex-col gap-1 tab:flex-row tab:gap-5">
+                  <Ed as="span" path={`recruit2:career.step.${i}.time`} def={s.time} label="時期" className="w-24 shrink-0" style={{ fontSize: 14, fontWeight: 800, color: PAL.teal }} />
+                  <Ed as="p" path={`recruit2:career.step.${i}.task`} def={s.task} label="内容" multiline style={{ fontSize: 15, lineHeight: 1.8, color: "#334", whiteSpace: "pre-line" }} />
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <EdImg path="recruit2:career.image" label="キャリアパス画像" alt="キャリアパス" className="aspect-[4/3] w-full rounded-[1.5rem] object-cover" />
+      </div>
+    </Sec>
+  );
+}
+
+/**
+ * 画像2レイアウトの行：赤ラベル＋青リード＋黒本文＋横に画像。
+ * 画像の左右は console のテキスト項目「画像の位置（left / right）」で切り替え。
+ */
+function Image2Row({ base, red, blue, black, defaultSide, imgLabel = "画像" }: { base: string; red: string; blue: string; black: string; defaultSide: "left" | "right"; imgLabel?: string }) {
+  const side = (txt(`${base}.side`, defaultSide) || defaultSide).trim().toLowerCase();
+  const imageLeft = side === "left";
+  return (
+    <div className="grid items-center gap-8 rounded-[1.75rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:grid-cols-2 pc:gap-10 pc:p-9">
+      <div className={imageLeft ? "pc:order-1" : "pc:order-2"}>
+        <EdImg path={`${base}.image`} label={imgLabel} alt={blue} className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
+      </div>
+      <div className={imageLeft ? "pc:order-2" : "pc:order-1"}>
+        <Ed as="p" path={`${base}.red`} def={red} label="赤ラベル" style={{ color: PAL.red, fontWeight: 800, fontSize: 15, letterSpacing: "0.02em" }} />
+        <Ed as="h3" path={`${base}.blue`} def={blue} label="青リード" className="mt-2" style={{ color: PAL.teal, fontWeight: 900, fontSize: "clamp(20px, 2.6vw, 26px)", lineHeight: 1.45 }} />
+        <Ed as="p" path={`${base}.black`} def={black} label="本文（黒）" multiline className="mt-4" style={{ color: "#1c2b30", fontSize: 15, lineHeight: 2.0, whiteSpace: "pre-line" }} />
+        {/* 画像の左右位置（console で left / right を入力） */}
+        <Ed as="span" path={`${base}.side`} def={defaultSide} label="画像の位置（left / right）" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }} />
+      </div>
+    </div>
+  );
+}
+
 function Jobs() {
+  // 画像2のレイアウト：赤タイトル・青リード・黒本文・横に画像（左右は console 切替）
   return (
     <Sec>
       <Head base="recruit2:job" en="POSITIONS" jp="業務内容" />
-      <div className="mt-12 grid gap-6 tab:grid-cols-2">
+      <div className="mt-12 space-y-8">
         {RECRUIT_JOBS.map((j, i) => (
-          <div key={i} className="rounded-[1.5rem] bg-white/80 p-7 shadow-sm ring-1 ring-black/5 backdrop-blur">
-            <Ed as="span" path={`recruit2:job.${i}.dept`} def={j.dept} label="部門" style={{ fontSize: 12, color: "#889", fontWeight: 700 }} />
-            <Ed as="h3" path={`recruit2:job.${i}.role`} def={j.role} label="職種" className="mt-1" style={{ fontSize: 19, fontWeight: 800, color: ACCENTS[i % ACCENTS.length] }} />
-            <Ed as="p" path={`recruit2:job.${i}.body`} def={j.body} label="本文" multiline className="mt-3" style={{ fontSize: 14, lineHeight: 1.95, color: "#445", whiteSpace: "pre-line" }} />
-          </div>
+          <Image2Row
+            key={i}
+            base={`recruit2:job.${i}`}
+            red={j.dept}
+            blue={j.role}
+            black={j.body}
+            defaultSide={i % 2 === 0 ? "right" : "left"}
+            imgLabel="業務画像"
+          />
         ))}
+      </div>
+    </Sec>
+  );
+}
+
+function CeoMessage() {
+  // 業務内容と同じ画像2レイアウト
+  return (
+    <Sec>
+      <Head base="recruit2:ceo" en="MESSAGE" jp="代表者メッセージ" />
+      <div className="mt-12">
+        <Image2Row
+          base="recruit2:ceo"
+          red="代表取締役メッセージ"
+          blue="誠実さを、いちばんの力に。"
+          black={"お客様に愛され、社員が胸を張れる。その二つを同時に目指してきました。\n特別な才能より、約束を守り続けられること。目の前の一人に、誠実に向き合えること。\nその積み重ねが、アイスラインの信頼をつくってきました。次は、あなたと一緒に。"}
+          defaultSide="right"
+          imgLabel="代表者画像"
+        />
       </div>
     </Sec>
   );
@@ -505,16 +600,18 @@ function People() {
           )}
         </div>
       )}
+      {/* 画像3のデザイン：画像の下に白いボックスでテキスト */}
       <div className="mt-10 grid gap-6 tab:grid-cols-2 pc:grid-cols-3">
         {INTERVIEWS.map((iv, i) => (
-          <Link key={iv.id} to={`/recruit/interview/${iv.id}`} className="group relative overflow-hidden rounded-[1.5rem] shadow-sm ring-1 ring-black/5">
+          <Link key={iv.id} to={`/recruit/interview/${iv.id}`} className="group flex flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-[0_16px_36px_rgba(15,42,51,0.12)]">
             <div className="aspect-[4/3] overflow-hidden bg-secondary">
               <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`interviews:${iv.id}:image`)} />
             </div>
-            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent p-6">
+            <div className="flex flex-1 flex-col p-6">
               <span className="w-fit rounded-full px-2.5 py-0.5 text-white" style={{ background: ACCENTS[i % ACCENTS.length], fontSize: 11, fontWeight: 700 }}>INTERVIEW</span>
-              <h3 className="mt-2 text-white" style={{ fontSize: 19, fontWeight: 800, lineHeight: 1.4 }} {...ed(`interviews:${iv.id}:lead`, "タイトル")}>{iv.lead}</h3>
-              <span className="mt-2 inline-flex items-center gap-1 text-white/90" style={{ fontSize: 13 }}>記事を読む <ArrowRight size={14} /></span>
+              <h3 className="mt-3" style={{ fontSize: 19, fontWeight: 800, lineHeight: 1.4, color: PAL.ink }} {...ed(`interviews:${iv.id}:lead`, "タイトル")}>{iv.lead}</h3>
+              <p className="mt-2" style={{ fontSize: 13, color: "#55707a" }}>{iv.name}</p>
+              <span className="mt-4 inline-flex items-center gap-1" style={{ fontSize: 13, color: PAL.teal, fontWeight: 700 }}>記事を読む <ArrowRight size={14} /></span>
             </div>
           </Link>
         ))}
@@ -612,9 +709,11 @@ export function Recruit2() {
       <Hero />
       <Biz />
       <Philosophy />
+      <CeoMessage />
       <Locations />
       <Charm />
       <Day />
+      <CareerPath />
       <Jobs />
       <Deck />
       <People />
