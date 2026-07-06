@@ -9,7 +9,7 @@ import { motion } from "motion/react";
 import { ArrowRight, MapPin, Clock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
 import { toEmbed } from "../lib/video";
 import {
   RECRUIT_MV,
@@ -56,45 +56,61 @@ const VIVID_BG =
     "</svg>"
   );
 
-// MV背景画像の既定（差し替え可能）。ビビッドな抽象パターン。
-const MV_DEFAULT =
+// MV背景スライドの既定（差し替え可能）。pronets風に複数の画像が継ぎ足されながら流れる。
+// 各スライドはビビッドカラーの抽象パターンを既定にし、管理コンソールから個別に差し替え可能。
+const MV_SLIDE_DEFAULTS = [
+  ["#12333d", "#ff414d", "#ffd23f"],
+  ["#0f2a33", "#1aa6b7", "#f56a79"],
+  ["#132e36", "#f56a79", "#1ec8dd"],
+  ["#0d2730", "#ffd23f", "#ff414d"],
+].map(([base, c1, c2], i) =>
   "data:image/svg+xml;charset=utf-8," +
   encodeURIComponent(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'>" +
-      "<rect width='1200' height='800' fill='#12333d'/>" +
-      "<circle cx='210' cy='210' r='230' fill='#ff414d'/>" +
-      "<circle cx='620' cy='560' r='160' fill='#1aa6b7'/>" +
-      "<circle cx='980' cy='250' r='130' fill='#f56a79'/>" +
-      "<circle cx='1080' cy='620' r='80' fill='#ffd23f'/>" +
-      "<circle cx='430' cy='430' r='70' fill='#ffd23f'/>" +
+    "<svg xmlns='http://www.w3.org/2000/svg' width='900' height='1200' viewBox='0 0 900 1200'>" +
+      "<rect width='900' height='1200' fill='" + base + "'/>" +
+      "<circle cx='" + (200 + i * 60) + "' cy='320' r='330' fill='" + c1 + "'/>" +
+      "<circle cx='640' cy='860' r='220' fill='" + c2 + "'/>" +
+      "<circle cx='720' cy='260' r='120' fill='" + c1 + "'/>" +
+      "<circle cx='300' cy='980' r='90' fill='" + c2 + "'/>" +
     "</svg>"
-  );
+  )
+);
 
-// ICELINEの文字型に「切り抜かれた」ビビッドカラーの帯（文字部分が透明の穴＝背後の画像が覗く）
+// MVスライド枚数（既定と同数。差し替えは recruit2:mv.slide.{i}）
+const MV_SLIDE_COUNT = MV_SLIDE_DEFAULTS.length;
+
+// ICELINEの文字型に「切り抜かれた」ビビッドカラーの帯（文字部分が透明の穴＝背後の画像が覗く）。
+// 字面（cap height）を帯の高さと一致させ、帯を 88vh で描画すると「文字自体が 88vh」になる。
 const ICE_KNOCK = (() => {
-  const w = 1360;
-  const h = 300;
+  const h = 240;               // 帯の高さ＝文字（cap height）の高さ
+  const fontSize = 336;        // Arial Black の cap height ≒ 0.716em → h とほぼ一致（＝帯いっぱい）
+  const w = 1720;              // ICELINE 1語＋左右の余白（帯連結時の語間になる）
   const color = "#1ec8dd";
   const svg =
     "<svg xmlns='http://www.w3.org/2000/svg' width='" + w + "' height='" + h + "' viewBox='0 0 " + w + " " + h + "'>" +
       "<defs><mask id='k'>" +
         "<rect width='" + w + "' height='" + h + "' fill='white'/>" +
-        "<text x='" + w / 2 + "' y='" + h / 2 + "' fill='black' font-family='Arial Black, Arial, sans-serif' font-weight='900' font-size='220' letter-spacing='-4' text-anchor='middle' dominant-baseline='central'>ICELINE</text>" +
+        "<text x='" + w / 2 + "' y='" + h / 2 + "' fill='black' font-family='Arial Black, Arial, sans-serif' font-weight='900' font-size='" + fontSize + "' letter-spacing='-6' text-anchor='middle' dominant-baseline='central'>ICELINE</text>" +
       "</mask></defs>" +
       "<rect width='" + w + "' height='" + h + "' fill='" + color + "' mask='url(#k)'/>" +
     "</svg>";
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 })();
 
-// MVアニメーション用スタイル（画像＝低速 / 切り抜き帯＝高速、どちらも右→左ループ）
+// MVアニメーション用スタイル（画像マーキー＝低速 / 切り抜き帯＝高速、どちらも右→左ループ。
+// スクロールインジケーターは右下で縦に流れる）
 function R2Styles() {
   return (
     <style>{`
-      .r2-slow { animation: r2-scroll 60s linear infinite; will-change: transform; }
-      .r2-fast { animation: r2-scroll 20s linear infinite; will-change: transform; }
+      .r2-marquee { animation: r2-scroll 50s linear infinite; will-change: transform; }
+      .r2-fast { animation: r2-scroll 24s linear infinite; will-change: transform; }
       @keyframes r2-scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+      .r2-scrollline { position: relative; width: 1px; height: 64px; background: rgba(11,37,48,0.35); overflow: hidden; }
+      .r2-scrollline::after { content: ""; position: absolute; inset: 0; transform: translateY(-100%); background: #ff414d; animation: r2-scrolldown 1.8s cubic-bezier(.76,0,.24,1) infinite; }
+      @keyframes r2-scrolldown { 0% { transform: translateY(-100%); } 60%,100% { transform: translateY(100%); } }
       @media (prefers-reduced-motion: reduce) {
-        .r2-slow, .r2-fast { animation: none; }
+        .r2-marquee, .r2-fast { animation: none; }
+        .r2-scrollline::after { animation: none; }
       }
     `}</style>
   );
@@ -165,26 +181,47 @@ function Sec({ children, className = "" }: { children: React.ReactNode; classNam
 }
 
 function Hero() {
-  // 背後の画像（差し替え可）。ICELINEの穴からこの画像が覗く。
-  const bg = img("recruit2:mv.bgImage", MV_DEFAULT);
+  // 背後のスライド画像（差し替え可・4枚）。複数枚が継ぎ足されながら流れ、ICELINEの穴から覗く。
+  const slides = Array.from({ length: MV_SLIDE_COUNT }, (_, i) =>
+    img(`recruit2:mv.slide.${i}`, MV_SLIDE_DEFAULTS[i])
+  );
   return (
-    <header className="relative flex h-[88vh] min-h-[520px] items-center justify-center overflow-hidden" style={{ background: PAL.blue }}>
-      {/* レイヤー1（下）：画像。低速で右→左スクロールループ */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="r2-slow flex h-full" style={{ width: "200%" }}>
-          <img {...edImg("recruit2:mv.bgImage", "MV背景画像")} src={bg} alt="" className="h-full w-1/2 object-cover" />
-          <img {...edImg("recruit2:mv.bgImage", "MV背景画像")} src={bg} alt="" aria-hidden className="h-full w-1/2 object-cover" />
+    <header className="relative flex h-[88vh] min-h-[560px] items-center justify-center overflow-hidden" style={{ background: PAL.blue }}>
+      {/* レイヤー1（下）：4枚の画像スライド。
+          通常時 … 継ぎ足されながら右→左へ流れ続けるマーキー（pronets風）。
+          編集時 … 全4枚を静止した横1行（4列）で表示し、コンソールから1枚ずつ差し替え可能にする。 */}
+      {EDIT_MODE ? (
+        <div className="absolute inset-0 grid grid-cols-4 grid-rows-1">
+          {slides.map((src, i) => (
+            <img
+              key={i}
+              {...edImg(`recruit2:mv.slide.${i}`, `MVスライド画像${i + 1}`)}
+              src={src}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="pointer-events-none absolute inset-0 flex items-stretch overflow-hidden">
+          <div className="r2-marquee flex h-full items-stretch" style={{ width: "max-content" }}>
+            {[...slides, ...slides].map((src, i) => (
+              <div key={i} className="h-full w-[56vw] shrink-0 tab:w-[36vw] pc:w-[27vw]" aria-hidden={i >= slides.length}>
+                <img src={src} alt="" className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 画像に薄いティントを重ね、切り抜きの視認性を上げる */}
       <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(15,42,51,0.30)" }} />
 
-      {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。高速で右→左スクロールループ */}
+      {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。文字自体の高さ＝88vh。高速で右→左ループ */}
       <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
-        <div className="r2-fast flex h-full items-center" style={{ width: "max-content" }}>
-          <img src={ICE_KNOCK} alt="ICELINE" className="h-full w-auto" />
-          <img src={ICE_KNOCK} alt="" aria-hidden className="h-full w-auto" />
+        <div className="r2-fast flex items-center" style={{ width: "max-content", height: "88vh" }}>
+          <img src={ICE_KNOCK} alt="ICELINE" className="w-auto" style={{ height: "88vh" }} />
+          <img src={ICE_KNOCK} alt="" aria-hidden className="w-auto" style={{ height: "88vh" }} />
         </div>
       </div>
 
@@ -199,6 +236,23 @@ function Hero() {
           className="mx-auto max-w-[20em]"
           style={{ color: "#0b2530", fontSize: "clamp(24px, 4.4vw, 56px)", fontWeight: 900, lineHeight: 1.4, whiteSpace: "pre-line", textShadow: "0 2px 22px rgba(255,255,255,0.6)" }}
         />
+      </div>
+
+      {/* スクロールインジケーター（右下・縦書き＋流れる縦線） */}
+      <div className="pointer-events-none absolute bottom-6 right-4 z-20 flex flex-col items-center gap-3 pc:right-6">
+        <span
+          style={{
+            writingMode: "vertical-rl",
+            fontFamily: "var(--font-accent)",
+            fontSize: 12,
+            letterSpacing: "0.24em",
+            fontWeight: 700,
+            color: "#0b2530",
+          }}
+        >
+          Scroll
+        </span>
+        <span className="r2-scrollline" aria-hidden />
       </div>
     </header>
   );
