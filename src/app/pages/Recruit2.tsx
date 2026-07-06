@@ -6,7 +6,7 @@
 import { useState, FormEvent } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, MapPin, Clock, PlayCircle } from "lucide-react";
+import { ArrowRight, Clock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
@@ -40,23 +40,10 @@ const PH =
     "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#eef4f7'/><text x='50%' y='50%' font-size='30' fill='#9fb6c0' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>＋ 画像</text></svg>"
   );
 
-// 全体を貫通する固定背景：ビビッドカラーのパキっとした抽象デザイン
-const VIVID_BG =
-  "data:image/svg+xml;charset=utf-8," +
-  encodeURIComponent(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='1440' height='1024' viewBox='0 0 1440 1024' preserveAspectRatio='xMidYMid slice'>" +
-      "<rect width='1440' height='1024' fill='#f3fbfd'/>" +
-      "<circle cx='150' cy='150' r='290' fill='#ff414d'/>" +
-      "<circle cx='1290' cy='250' r='190' fill='#1aa6b7'/>" +
-      "<path d='M640 1024 L1010 590 L1380 1024 Z' fill='#f56a79'/>" +
-      "<rect x='40' y='780' width='360' height='150' rx='75' fill='#1aa6b7'/>" +
-      "<circle cx='1180' cy='880' r='120' fill='#ffd23f'/>" +
-      "<circle cx='560' cy='110' r='64' fill='#ffd23f'/>" +
-      "<path d='M-20 545 Q 360 400 740 545 T 1480 520' stroke='#ff414d' stroke-width='16' fill='none'/>" +
-    "</svg>"
-  );
+// ICELINE切り抜き帯の色。事業紹介セクション以下の全体背景にも使用する。
+const BG_TEAL = "#1ec8dd";
 
-// MV背景スライドの既定（差し替え可能）。pronets風に複数の画像が継ぎ足されながら流れる。
+// MV背景スライドの既定（差し替え可能・縦横比 9:16 の縦長）。pronets風に複数の画像が継ぎ足されながら流れる。
 // 各スライドはビビッドカラーの抽象パターンを既定にし、管理コンソールから個別に差し替え可能。
 const MV_SLIDE_DEFAULTS = [
   ["#12333d", "#ff414d", "#ffd23f"],
@@ -66,12 +53,12 @@ const MV_SLIDE_DEFAULTS = [
 ].map(([base, c1, c2], i) =>
   "data:image/svg+xml;charset=utf-8," +
   encodeURIComponent(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='900' height='1200' viewBox='0 0 900 1200'>" +
-      "<rect width='900' height='1200' fill='" + base + "'/>" +
-      "<circle cx='" + (200 + i * 60) + "' cy='320' r='330' fill='" + c1 + "'/>" +
-      "<circle cx='640' cy='860' r='220' fill='" + c2 + "'/>" +
-      "<circle cx='720' cy='260' r='120' fill='" + c1 + "'/>" +
-      "<circle cx='300' cy='980' r='90' fill='" + c2 + "'/>" +
+    "<svg xmlns='http://www.w3.org/2000/svg' width='900' height='1600' viewBox='0 0 900 1600'>" +
+      "<rect width='900' height='1600' fill='" + base + "'/>" +
+      "<circle cx='" + (200 + i * 60) + "' cy='430' r='330' fill='" + c1 + "'/>" +
+      "<circle cx='640' cy='1120' r='240' fill='" + c2 + "'/>" +
+      "<circle cx='720' cy='340' r='120' fill='" + c1 + "'/>" +
+      "<circle cx='300' cy='1300' r='110' fill='" + c2 + "'/>" +
     "</svg>"
   )
 );
@@ -210,7 +197,8 @@ function Hero() {
         <div className="pointer-events-none absolute inset-0 flex items-stretch overflow-hidden">
           <div className="r2-marquee flex h-full items-stretch" style={{ width: "max-content" }}>
             {[...slides, ...slides].map((src, i) => (
-              <div key={i} className="h-full w-[56vw] shrink-0 tab:w-[36vw] pc:w-[27vw]" aria-hidden={i >= slides.length}>
+              // 各スライドは縦横比 9:16（高さ88vh基準）の縦長
+              <div key={i} className="h-full shrink-0" style={{ width: "calc(88vh * 9 / 16)" }} aria-hidden={i >= slides.length}>
                 <img src={src} alt="" className="h-full w-full object-cover" />
               </div>
             ))}
@@ -263,22 +251,47 @@ function Hero() {
   );
 }
 
+/** 大きな英字見出し＋小さな日本語（Toda / pronets 風） */
+function BigHead({ base, en, jp, center }: { base: string; en: string; jp: string; center?: boolean }) {
+  return (
+    <div className={center ? "text-center" : ""}>
+      <Ed
+        as="h2"
+        path={`${base}.en`}
+        def={en}
+        label="英字見出し"
+        style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.02 }}
+      />
+      <Ed
+        as="p"
+        path={`${base}.jp`}
+        def={jp}
+        label="見出し（日本語）"
+        className="mt-3"
+        style={{ fontSize: 15, fontWeight: 700, color: PAL.ink, letterSpacing: "0.08em" }}
+      />
+    </div>
+  );
+}
+
 function Biz() {
   return (
     <Sec>
-      <Head base="recruit2:biz" en="ABOUT US" jp="事業紹介" />
-      <div className="mt-14 space-y-14">
+      {/* 画像1のレイアウト：見出し ＋ 2事業部のボックスを中央寄せ（本文は非表示） */}
+      <BigHead base="recruit2:biz" en="Our Business" jp="事業内容を知る" center />
+      <div className="mt-14 flex flex-wrap items-start justify-center gap-8 pc:gap-10">
         {RECRUIT_BIZ.map((b, i) => (
-          <div
-            key={b.dept}
-            className={`grid items-center gap-8 rounded-[2rem] bg-white/70 p-6 shadow-sm ring-1 ring-black/5 backdrop-blur pc:grid-cols-2 pc:p-10 ${i % 2 ? "pc:[direction:rtl]" : ""}`}
-          >
-            <div className="px-2 [direction:ltr] pc:px-6">
+          <div key={b.dept} className="w-full max-w-[420px] rounded-[1.75rem] bg-white p-4 shadow-[0_18px_40px_rgba(15,42,51,0.12)] tab:w-[42%]">
+            <EdImg
+              path={`recruit2:biz.${i}.image`}
+              label="事業画像"
+              alt={b.mission}
+              className="aspect-[4/5] w-full rounded-[1.25rem] object-cover"
+            />
+            <div className="px-2 pb-2 pt-5 text-center">
               <Ed as="span" path={`recruit2:biz.${i}.dept`} def={b.dept} label="部門名" className="inline-block rounded-full px-3 py-1 text-white" style={{ background: ACCENTS[i % ACCENTS.length], fontSize: 12, fontWeight: 700 }} />
-              <Ed as="h3" path={`recruit2:biz.${i}.mission`} def={b.mission} label="ミッション" className="mt-4" style={{ fontSize: 28, fontWeight: 900, color: PAL.ink, lineHeight: 1.4 }} />
-              <Ed as="p" path={`recruit2:biz.${i}.body`} def={b.body} label="本文" multiline className="mt-5" style={{ fontSize: 15, lineHeight: 2.1, color: "#334", whiteSpace: "pre-line" }} />
+              <Ed as="h3" path={`recruit2:biz.${i}.mission`} def={b.mission} label="ミッション" className="mt-4" style={{ fontSize: 22, fontWeight: 900, color: PAL.ink, lineHeight: 1.4 }} />
             </div>
-            <EdImg path={`recruit2:biz.${i}.image`} label="事業画像" alt={b.mission} className="aspect-[4/3] w-full rounded-[1.5rem] object-cover [direction:ltr]" />
           </div>
         ))}
       </div>
@@ -287,29 +300,81 @@ function Biz() {
 }
 
 function Philosophy() {
+  // 画像2のデザイン：ティール背景に、随所へ白いソフト領域。中央に大きな理念テキスト（pronets風）。
   return (
-    <Sec>
-      <div className="rounded-[2.5rem] px-6 py-16 text-center pc:px-16 pc:py-20" style={{ background: PAL.blue }}>
-        <Head base="recruit2:philo" en="OUR CREED" jp="企業理念" center />
-        <Ed as="p" path="recruit2:philo.creed" def={RECRUIT_PHILOSOPHY.creed} label="理念キャッチ" multiline className="mx-auto mt-8 max-w-3xl" style={{ fontSize: "clamp(19px, 2.6vw, 26px)", fontWeight: 800, color: PAL.red, lineHeight: 1.8, whiteSpace: "pre-line" }} />
-        <Ed as="p" path="recruit2:philo.body" def={RECRUIT_PHILOSOPHY.body} label="理念本文" multiline className="mx-auto mt-8 max-w-2xl" style={{ fontSize: 15, lineHeight: 2.2, color: "#2b3b40", whiteSpace: "pre-line" }} />
+    <section className="relative overflow-hidden px-6 py-24 pc:py-32">
+      {/* 白いソフト領域（pronets風の白抜き） */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-[70%] w-[46%] -translate-x-1/2 -translate-y-1/2 rounded-[2rem]" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0))" }} />
+        <div className="absolute right-[8%] top-[12%] h-40 w-40 rounded-3xl bg-white/70" />
+        <div className="absolute left-[6%] bottom-[10%] h-52 w-52 rounded-3xl bg-white/50" />
       </div>
-    </Sec>
+
+      <div className="relative z-10 mx-auto max-w-3xl text-center">
+        <Ed
+          as="p"
+          path="recruit2:philo.en"
+          def="Our Creed"
+          label="英字ラベル"
+          style={{ fontFamily: "var(--font-accent)", fontSize: 13, fontWeight: 800, letterSpacing: "0.18em", color: PAL.red }}
+        />
+        <Ed
+          as="p"
+          path="recruit2:philo.creed"
+          def={RECRUIT_PHILOSOPHY.creed}
+          label="理念キャッチ"
+          multiline
+          className="mt-8"
+          style={{ fontSize: "clamp(20px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 2.0, whiteSpace: "pre-line" }}
+        />
+        <Ed
+          as="p"
+          path="recruit2:philo.body"
+          def={RECRUIT_PHILOSOPHY.body}
+          label="理念本文"
+          multiline
+          className="mx-auto mt-10 max-w-2xl"
+          style={{ fontSize: "clamp(15px, 1.7vw, 18px)", lineHeight: 2.4, color: PAL.ink, whiteSpace: "pre-line" }}
+        />
+      </div>
+    </section>
+  );
+}
+
+/** 装飾の三角形（Toda / pronets 風のカラフルな飾り） */
+function Deco({ className, color, rotate = 0 }: { className?: string; color: string; rotate?: number }) {
+  return (
+    <span
+      className={"pointer-events-none absolute " + (className || "")}
+      style={{ width: 34, height: 30, background: color, clipPath: "polygon(50% 0, 100% 100%, 0 100%)", transform: `rotate(${rotate}deg)` }}
+      aria-hidden
+    />
   );
 }
 
 function Locations() {
+  // 画像3のデザイン：中央見出し＋装飾、拠点カード（画像＋ラベル）。画像は差し替え可能。
   return (
     <Sec>
-      <Head base="recruit2:loc" en="LOCATIONS" jp="拠点情報" />
-      <div className="mt-12 grid gap-6 tab:grid-cols-3">
+      <div className="relative text-center">
+        <Deco className="left-[18%] top-0" color={PAL.teal} rotate={-18} />
+        <Deco className="left-[26%] top-8" color={PAL.red} rotate={20} />
+        <Deco className="right-[20%] top-1" color={PAL.red} rotate={12} />
+        <Deco className="right-[27%] top-9" color={PAL.teal} rotate={-24} />
+        <BigHead base="recruit2:loc" en="Locations" jp="拠点情報" center />
+      </div>
+
+      <div className="mt-14 flex flex-wrap justify-center gap-8 tab:gap-10">
         {RECRUIT_LOCATIONS.map((l, i) => (
-          <div key={l.name} className="rounded-[1.5rem] bg-white/70 p-7 shadow-sm ring-1 ring-black/5 backdrop-blur">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white" style={{ background: ACCENTS[i % ACCENTS.length] }}>
-              <MapPin size={20} />
-            </span>
-            <Ed as="h3" path={`recruit2:loc.${i}.name`} def={l.name} label="拠点名" className="mt-4" style={{ fontSize: 18, fontWeight: 800, color: PAL.ink }} />
-            <Ed as="p" path={`recruit2:loc.${i}.address`} def={l.address} label="住所" multiline className="mt-2" style={{ fontSize: 14, lineHeight: 1.8, color: "#556" }} />
+          <div key={l.name} className="w-full max-w-[360px] text-center tab:w-[30%]">
+            <EdImg
+              path={`recruit2:loc.${i}.image`}
+              label="拠点画像"
+              alt={l.name}
+              className="aspect-[4/3] w-full rounded-[1.5rem] object-cover shadow-[0_16px_36px_rgba(15,42,51,0.14)]"
+            />
+            <Ed as="h3" path={`recruit2:loc.${i}.name`} def={l.name} label="拠点名" className="mt-5" style={{ fontSize: 18, fontWeight: 800, color: PAL.ink }} />
+            <Ed as="p" path={`recruit2:loc.${i}.address`} def={l.address} label="住所" multiline className="mt-2" style={{ fontSize: 14, lineHeight: 1.8, color: "#0d323b" }} />
           </div>
         ))}
       </div>
@@ -542,8 +607,8 @@ export function Recruit2() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <R2Styles />
-      {/* 全体を貫通する固定背景：ビビッドな抽象デザイン */}
-      <div className="pointer-events-none fixed inset-0 -z-10" style={{ backgroundImage: `url(${VIVID_BG})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+      {/* 全体を貫通する固定背景：ICELINE帯と同じティール（事業紹介以下の背景） */}
+      <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: BG_TEAL }} />
       <Hero />
       <Biz />
       <Philosophy />
