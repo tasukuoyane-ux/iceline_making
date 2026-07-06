@@ -82,15 +82,19 @@ const MV_SLIDE_COUNT = MV_SLIDE_DEFAULTS.length;
 // ICELINEの文字型に「切り抜かれた」ビビッドカラーの帯（文字部分が透明の穴＝背後の画像が覗く）。
 // 字面（cap height）を帯の高さと一致させ、帯を 88vh で描画すると「文字自体が 88vh」になる。
 const ICE_KNOCK = (() => {
-  const h = 240;               // 帯の高さ＝文字（cap height）の高さ
-  const fontSize = 336;        // Arial Black の cap height ≒ 0.716em → h とほぼ一致（＝帯いっぱい）
-  const w = 1720;              // ICELINE 1語＋左右の余白（帯連結時の語間になる）
+  const h = 240;               // 帯の高さ＝ビューポート高（88vh で描画）
+  // 文字の cap height が帯より少し大きくなるフォントサイズにし、上下を帯でクリップ。
+  // → 各文字が帯（＝ビューポート）の高さを上端から下端まで埋める。
+  const fontSize = 384;        // cap height ≒ 0.716em × 384 ≈ 275 > h(240) → 帯いっぱいに充填
+  const cap = fontSize * 0.716; // 大文字の高さ（近似）
+  const baselineY = h / 2 + cap / 2; // 字面を帯の中央に置く（上下対称にはみ出してクリップ）
+  const w = 1960;              // ICELINE 1語＋左右の余白（帯連結時の語間になる）
   const color = "#1ec8dd";
   const svg =
     "<svg xmlns='http://www.w3.org/2000/svg' width='" + w + "' height='" + h + "' viewBox='0 0 " + w + " " + h + "'>" +
       "<defs><mask id='k'>" +
         "<rect width='" + w + "' height='" + h + "' fill='white'/>" +
-        "<text x='" + w / 2 + "' y='" + h / 2 + "' fill='black' font-family='Arial Black, Arial, sans-serif' font-weight='900' font-size='" + fontSize + "' letter-spacing='-6' text-anchor='middle' dominant-baseline='central'>ICELINE</text>" +
+        "<text x='" + w / 2 + "' y='" + baselineY + "' fill='black' font-family='Arial Black, Arial, sans-serif' font-weight='900' font-size='" + fontSize + "' letter-spacing='-6' text-anchor='middle'>ICELINE</text>" +
       "</mask></defs>" +
       "<rect width='" + w + "' height='" + h + "' fill='" + color + "' mask='url(#k)'/>" +
     "</svg>";
