@@ -24,6 +24,7 @@ import {
   INTERVIEWS,
 } from "../data/recruit";
 import sectionsJson from "../../content/sections.json";
+import profileSlides from "../../content/profileSlides.json";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -447,38 +448,69 @@ function Day() {
   );
 }
 
-// キャリアパス（既定・編集可）。一日の流れと同じデザイン。
-const CAREER_STEPS = [
+// キャリアパス（既定・編集可）。タブで最大4種類を切り替え。各タブは一日の流れと同じデザイン。
+const CAREER_STEPS_DEFAULT = [
   { time: "1年目", task: "先輩に同行しながら基礎を習得。担当業務を一つずつ覚える。" },
   { time: "2〜3年目", task: "自分の担当を持って独り立ち。後輩のサポートも始める。" },
   { time: "4〜5年目", task: "チームのまとめ役として、計画・調整を担う。" },
   { time: "6年目〜", task: "リーダー・管理職として部門を牽引する。" },
 ];
+const CAREER_PATHS = [
+  { label: "営業職", note: "食品事業部 営業職のステップ例" },
+  { label: "製造職", note: "アイス事業部 製造職のステップ例" },
+  { label: "品質管理", note: "品質管理部門のステップ例" },
+  { label: "総合職", note: "総合職のステップ例" },
+];
 
 function CareerPath() {
+  const [tab, setTab] = useState(0);
   return (
     <Sec>
       <Head base="recruit2:career" en="CAREER PATH" jp="キャリアパス" />
-      <div className="mt-10 grid gap-10 pc:grid-cols-[1fr_1fr] pc:items-start">
-        <div>
-          <p className="inline-flex items-center gap-2" style={{ fontSize: 14, color: PAL.teal, fontWeight: 700 }}>
-            <Clock size={16} />
-            <Ed as="span" path="recruit2:career.note" def="入社後のステップアップ例" label="メモ" />
-          </p>
-          <ol className="mt-8 space-y-0 border-l-2 pl-6" style={{ borderColor: PAL.coral }}>
-            {CAREER_STEPS.map((s, i) => (
-              <li key={i} className="relative mb-7 last:mb-0">
-                <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full" style={{ background: PAL.red }} />
-                <div className="flex flex-col gap-1 tab:flex-row tab:gap-5">
-                  <Ed as="span" path={`recruit2:career.step.${i}.time`} def={s.time} label="時期" className="w-24 shrink-0" style={{ fontSize: 14, fontWeight: 800, color: PAL.teal }} />
-                  <Ed as="p" path={`recruit2:career.step.${i}.task`} def={s.task} label="内容" multiline style={{ fontSize: 15, lineHeight: 1.8, color: "#334", whiteSpace: "pre-line" }} />
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <EdImg path="recruit2:career.image" label="キャリアパス画像" alt="キャリアパス" className="aspect-[4/3] w-full rounded-[1.5rem] object-cover" />
+
+      {/* タブ（最大4種類） */}
+      <div className="mt-8 flex flex-wrap gap-2">
+        {CAREER_PATHS.map((p, pi) => {
+          const active = pi === tab;
+          return (
+            <button
+              key={pi}
+              type="button"
+              onClick={() => setTab(pi)}
+              className="rounded-full px-5 py-2 transition-colors"
+              style={{ background: active ? PAL.teal : "rgba(255,255,255,0.65)", color: active ? "#fff" : PAL.ink, fontWeight: 700, fontSize: 14 }}
+            >
+              <Ed as="span" path={`recruit2:career.${pi}.label`} def={p.label} label={`タブ名${pi + 1}`} />
+            </button>
+          );
+        })}
       </div>
+
+      {/* 各タブのコンテンツ（全タブをDOMに保持し、非アクティブは非表示＝consoleで全て編集可） */}
+      {CAREER_PATHS.map((p, pi) => (
+        <div key={pi} className={pi === tab ? "" : "hidden"}>
+          <div className="mt-8 grid gap-10 pc:grid-cols-[1fr_1fr] pc:items-start">
+            <div>
+              <p className="inline-flex items-center gap-2" style={{ fontSize: 14, color: PAL.teal, fontWeight: 700 }}>
+                <Clock size={16} />
+                <Ed as="span" path={`recruit2:career.${pi}.note`} def={p.note} label="メモ" />
+              </p>
+              <ol className="mt-8 space-y-0 border-l-2 pl-6" style={{ borderColor: PAL.coral }}>
+                {CAREER_STEPS_DEFAULT.map((s, i) => (
+                  <li key={i} className="relative mb-7 last:mb-0">
+                    <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full" style={{ background: PAL.red }} />
+                    <div className="flex flex-col gap-1 tab:flex-row tab:gap-5">
+                      <Ed as="span" path={`recruit2:career.${pi}.step.${i}.time`} def={s.time} label="時期" className="w-24 shrink-0" style={{ fontSize: 14, fontWeight: 800, color: PAL.teal }} />
+                      <Ed as="p" path={`recruit2:career.${pi}.step.${i}.task`} def={s.task} label="内容" multiline style={{ fontSize: 15, lineHeight: 1.8, color: "#334", whiteSpace: "pre-line" }} />
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <EdImg path={`recruit2:career.${pi}.image`} label="キャリアパス画像" alt="キャリアパス" className="aspect-[4/3] w-full rounded-[1.5rem] object-cover" />
+          </div>
+        </div>
+      ))}
     </Sec>
   );
 }
@@ -547,39 +579,57 @@ function CeoMessage() {
   );
 }
 
-const DECK_STATS = [
-  { n: "120", u: "年", l: "創業からの歴史" },
-  { n: "5,000", u: "品目超", l: "商品ラインアップ" },
-  { n: "47", u: "都道府県", l: "氷が届く範囲" },
-  { n: "FSSC", u: "/ISO", l: "認証取得" },
-];
-
-function Deck() {
+// 会社紹介資料（カンパニーデック）。従来の採用ページと同じ profileSlides.json を共有。
+function CompanyProfile() {
+  const slides = [...(profileSlides as string[])];
+  while (slides.length < 3) slides.push(""); // 未設定でも最低3枚のプレースホルダーを表示
   return (
     <Sec>
-      <div className="overflow-hidden rounded-[2.5rem] px-6 py-16 pc:px-16 pc:py-20" style={{ background: PAL.ink }}>
-        <div className="text-center">
-          <Ed as="span" path="recruit2:deck.en" def="COMPANY DECK" label="英字ラベル" className="inline-block rounded-full px-4 py-1 text-white" style={{ background: PAL.red, fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.16em" }} />
-          <Ed as="h2" path="recruit2:deck.jp" def="数字で見るアイスライン" label="見出し" className="mt-4 text-white" style={{ fontSize: "clamp(24px, 3.6vw, 38px)", fontWeight: 900 }} />
-        </div>
-        <div className="mt-12 grid grid-cols-2 gap-8 pc:grid-cols-4">
-          {DECK_STATS.map((s, i) => (
-            <div key={s.l} className="text-center">
-              <div style={{ fontFamily: "var(--font-accent)", fontSize: 44, fontWeight: 800, lineHeight: 1, color: ACCENTS[i % ACCENTS.length] }}>
-                <Ed as="span" path={`recruit2:deck.stat.${i}.n`} def={s.n} label="数値" />
-                <Ed as="span" path={`recruit2:deck.stat.${i}.u`} def={s.u} label="単位" className="text-white/70" style={{ fontSize: 18 }} />
-              </div>
-              <Ed as="p" path={`recruit2:deck.stat.${i}.l`} def={s.l} label="ラベル" className="mt-2 text-white/70" style={{ fontSize: 13 }} />
+      <Head base="recruit2:profile" en="COMPANY PROFILE" jp="会社紹介資料" />
+      <p className="mt-4" style={{ fontSize: 14, color: PAL.ink }}>スライドを横スクロールでご覧いただけます。</p>
+      <div className="mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
+        {slides.map((url, i) =>
+          url ? (
+            <div key={i} className="aspect-video w-[80%] shrink-0 snap-center overflow-hidden rounded-xl bg-white shadow-[0_16px_36px_rgba(15,42,51,0.12)] tab:w-[60%]">
+              <ImageWithFallback src={url} alt={`会社紹介資料 ${i + 1}`} className="h-full w-full object-cover" />
             </div>
-          ))}
-        </div>
-        {/* 従前コンテンツの詳細（会社紹介資料スライド：差し替え可能プレースホルダー） */}
-        <div className="mt-12 grid gap-5 tab:grid-cols-3">
-          {[0, 1, 2].map((i) => (
-            <EdImg key={i} path={`recruit2:deck.slide.${i}`} label={`会社紹介スライド${i + 1}`} className="aspect-video w-full rounded-2xl object-cover" />
-          ))}
-        </div>
+          ) : (
+            <div key={i} className="flex aspect-video w-[80%] shrink-0 snap-center flex-col items-center justify-center rounded-xl bg-white/80 text-center tab:w-[60%]">
+              <span className="text-[#9fb6c0]" style={{ fontFamily: "var(--font-accent)", fontSize: 40, fontWeight: 700 }}>{String(i + 1).padStart(2, "0")}</span>
+              <span className="mt-2 text-[#6b8790]" style={{ fontSize: 12 }}>スライド差し替え用プレイスホルダー</span>
+            </div>
+          )
+        )}
       </div>
+      <p className="mt-2" style={{ fontSize: 11, color: "#0d323b" }}>
+        ※ パワーポイント資料の画像（16:9）を管理コンソールの「会社紹介資料」から追加できます。
+      </p>
+    </Sec>
+  );
+}
+
+// カンパニーデック直下の動画埋め込みセクション（URLは console のテキスト項目で設定）
+function DeckVideo() {
+  const url = txt("recruit2:movie.url", "");
+  const embed = url ? toEmbed(url) : null;
+  return (
+    <Sec>
+      <Head base="recruit2:movie" en="MOVIE" jp="動画で知る" />
+      <div className="mt-10 aspect-video w-full overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_36px_rgba(15,42,51,0.14)]">
+        {embed ? (
+          embed.type === "iframe" ? (
+            <iframe src={embed.src} title="動画" className="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+          ) : (
+            <video src={embed.src} controls playsInline className="h-full w-full" />
+          )
+        ) : (
+          <div className="flex h-full w-full items-center justify-center" style={{ background: "#0d2730", color: "rgba(255,255,255,0.7)", fontSize: 14 }}>
+            動画URLを設定してください（console の「動画URL」項目）
+          </div>
+        )}
+      </div>
+      {/* console 用：動画URL（テキスト項目。YouTube / Vimeo / mp4 等） */}
+      <span {...ed("recruit2:movie.url", "動画URL（YouTube / Vimeo / mp4）")} style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>{url}</span>
     </Sec>
   );
 }
@@ -715,7 +765,8 @@ export function Recruit2() {
       <Day />
       <CareerPath />
       <Jobs />
-      <Deck />
+      <CompanyProfile />
+      <DeckVideo />
       <People />
       <ApplyCta />
       <Conditions />
