@@ -750,12 +750,47 @@ function EntryForm() {
   );
 }
 
+/** ページ背景：MVの帯色（ティール）→白へ縦グラデーション＋ぼかした幾何フォーム（Pinterest参考） */
+function PageBg() {
+  // ぼかしフォーム（画像1のパレット：ティール / コーラル / レッド / ライトブルー）
+  const shapes: { top: string; side: "left" | "right"; off: string; size: number; color: string; op: number; blur: number; radius: string }[] = [
+    { top: "14%", side: "left", off: "-6%", size: 340, color: PAL.coral, op: 0.28, blur: 64, radius: "34%" },
+    { top: "32%", side: "right", off: "-5%", size: 380, color: PAL.teal, op: 0.24, blur: 72, radius: "38%" },
+    { top: "52%", side: "left", off: "3%", size: 300, color: PAL.red, op: 0.18, blur: 66, radius: "32%" },
+    { top: "70%", side: "right", off: "4%", size: 320, color: PAL.blue, op: 0.55, blur: 60, radius: "40%" },
+    { top: "86%", side: "left", off: "-4%", size: 260, color: PAL.teal, op: 0.16, blur: 60, radius: "36%" },
+  ];
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      style={{ background: `linear-gradient(180deg, ${BG_TEAL} 0%, ${BG_TEAL} 10%, #ffffff 90%)` }}
+    >
+      {shapes.map((s, i) => (
+        <div
+          key={i}
+          className="absolute"
+          style={{
+            top: s.top,
+            [s.side]: s.off,
+            width: s.size,
+            height: s.size,
+            background: s.color,
+            opacity: s.op,
+            filter: `blur(${s.blur}px)`,
+            borderRadius: s.radius,
+          } as React.CSSProperties}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function Recruit2() {
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative isolate min-h-screen overflow-hidden">
       <R2Styles />
-      {/* 全体を貫通する固定背景：ICELINE帯と同じティール（事業紹介以下の背景） */}
-      <div className="pointer-events-none fixed inset-0 -z-10" style={{ background: BG_TEAL }} />
+      {/* 背景：ティール→白のグラデーション＋ぼかし要素 */}
+      <PageBg />
       <Hero />
       <Biz />
       <Philosophy />
