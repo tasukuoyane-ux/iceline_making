@@ -3,7 +3,7 @@
 // 全体を貫通するグレイン背景、文章は左右に余白）。
 // すべての文言・画像は recruit2: プレフィックスの汎用オーバーライドで
 // 管理コンソールからインライン編集でき、画像は差し替え用プレースホルダーを配置。
-import { useState, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, Clock, PlayCircle } from "lucide-react";
@@ -25,6 +25,7 @@ import {
 } from "../data/recruit";
 import sectionsJson from "../../content/sections.json";
 import profileSlides from "../../content/profileSlides.json";
+import bgImage2 from "../../images/ICELINE_background_2.png";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -40,9 +41,6 @@ const PH =
   encodeURIComponent(
     "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#eef4f7'/><text x='50%' y='50%' font-size='30' fill='#9fb6c0' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>＋ 画像</text></svg>"
   );
-
-// ICELINE切り抜き帯の色。事業紹介セクション以下の全体背景にも使用する。
-const BG_TEAL = "#1ec8dd";
 
 // MV背景スライドの既定（差し替え可能・縦横比 9:16 の縦長）。pronets風に複数の画像が継ぎ足されながら流れる。
 // 各スライドはビビッドカラーの抽象パターンを既定にし、管理コンソールから個別に差し替え可能。
@@ -750,37 +748,43 @@ function EntryForm() {
   );
 }
 
-/** ページ背景：MVの帯色（ティール）→白へ縦グラデーション＋ぼかした幾何フォーム（Pinterest参考） */
+/**
+ * ページ背景：指定画像を全幅で敷き、スクロールに合わせてゆっくり縦パララックス。
+ * ページ最上部で画像の上端、ページ最下端で画像の下端がビューポートに合う。
+ */
 function PageBg() {
-  // ぼかしフォーム（画像1のパレット：ティール / コーラル / レッド / ライトブルー）
-  const shapes: { top: string; side: "left" | "right"; off: string; size: number; color: string; op: number; blur: number; radius: string }[] = [
-    { top: "14%", side: "left", off: "-6%", size: 340, color: PAL.coral, op: 0.28, blur: 64, radius: "34%" },
-    { top: "32%", side: "right", off: "-5%", size: 380, color: PAL.teal, op: 0.24, blur: 72, radius: "38%" },
-    { top: "52%", side: "left", off: "3%", size: 300, color: PAL.red, op: 0.18, blur: 66, radius: "32%" },
-    { top: "70%", side: "right", off: "4%", size: 320, color: PAL.blue, op: 0.55, blur: 60, radius: "40%" },
-    { top: "86%", side: "left", off: "-4%", size: 260, color: PAL.teal, op: 0.16, blur: 60, radius: "36%" },
-  ];
+  const imgRef = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const doc = document.documentElement;
+      const maxScroll = doc.scrollHeight - window.innerHeight;
+      const progress = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
+      const ratio = img.naturalWidth ? img.naturalHeight / img.naturalWidth : 1.79;
+      const rendered = window.innerWidth * ratio; // 全幅表示時の画像の高さ
+      const pan = Math.max(0, rendered - window.innerHeight); // パン可能量
+      img.style.transform = `translate3d(0, ${-(progress * pan)}px, 0)`;
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update);
+    img.addEventListener("load", update);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", update);
+      img.removeEventListener("load", update);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
   return (
-    <div
-      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      style={{ background: `linear-gradient(180deg, ${BG_TEAL} 0%, ${BG_TEAL} 10%, #ffffff 90%)` }}
-    >
-      {shapes.map((s, i) => (
-        <div
-          key={i}
-          className="absolute"
-          style={{
-            top: s.top,
-            [s.side]: s.off,
-            width: s.size,
-            height: s.size,
-            background: s.color,
-            opacity: s.op,
-            filter: `blur(${s.blur}px)`,
-            borderRadius: s.radius,
-          } as React.CSSProperties}
-        />
-      ))}
+    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" style={{ background: "#f6efef" }}>
+      <img ref={imgRef} src={bgImage2} alt="" className="absolute left-0 top-0 w-full" style={{ willChange: "transform" }} />
     </div>
   );
 }
