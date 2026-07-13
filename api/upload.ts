@@ -19,7 +19,8 @@ export default async function handler(req: any, res: any) {
     return;
   }
   try {
-    const body = req.body as HandleUploadBody;
+    // このランタイムでは req.body が文字列で来ることがあるため、他エンドポイントと同様にパースする
+    const body = (typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}) as HandleUploadBody;
     const jsonResponse = await handleUpload({
       body,
       request: req,
