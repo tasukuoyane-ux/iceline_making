@@ -57,17 +57,23 @@ export async function issueToken(payload: TokenPayload): Promise<string> {
     .sign(secretKey());
 }
 
+/** JWT文字列を検証。失敗時は null。 */
+export async function verifyToken(token: string | null | undefined): Promise<TokenPayload | null> {
+  if (!token || typeof token !== "string") return null;
+  try {
+    const { jwtVerify } = await import("jose");
+    const { payload } = await jwtVerify(token, secretKey());
+    return { username: String(payload.sub), name: String((payload as any).name ?? "") };
+  } catch {
+    return null;
+  }
+}
+
 /** Authorization: Bearer <token> を検証。失敗時は null。 */
 export async function verifyRequest(req: { headers: Record<string, any> }): Promise<TokenPayload | null> {
   const header = req.headers["authorization"] || req.headers["Authorization"];
   if (!header || typeof header !== "string") return null;
   const m = header.match(/^Bearer\s+(.+)$/i);
   if (!m) return null;
-  try {
-    const { jwtVerify } = await import("jose");
-    const { payload } = await jwtVerify(m[1], secretKey());
-    return { username: String(payload.sub), name: String((payload as any).name ?? "") };
-  } catch {
-    return null;
-  }
+  return verifyToken(m[1]);
 }

@@ -55,18 +55,24 @@ export async function login(username: string, password: string): Promise<{ token
   return parse(res);
 }
 
-/** 画像をアップロードして公開URLを返す */
+/**
+ * 画像・動画をアップロードして公開URLを返す。
+ * Vercel Blob の「クライアント直接アップロード」を使い、ファイル本体はブラウザから
+ * Blob へ直接送る。これにより関数のリクエストボディ上限（約4.5MB）に縛られず、
+ * 大きな動画もアップロードできる（認証は clientPayload のトークンで行う）。
+ */
 export async function uploadImage(file: File): Promise<{ url: string }> {
   const token = getToken();
-  const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": file.type || "application/octet-stream",
-    },
-    body: file,
+  const { upload } = await import("@vercel/blob/client");
+  const clean = (file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
+  const blob = await upload(`uploads/${clean}`, file, {
+    access: "public",
+    handleUploadUrl: "/api/upload",
+    contentType: file.type || undefined,
+    clientPayload: token, // サーバの onBeforeGenerateToken で検証
+    multipart: file.size > 20 * 1024 * 1024, // 大きいファイルは分割アップロード
   });
-  return parse(res);
+  return { url: blob.url };
 }
 
 /** 変更ファイル群をコミットして本番デプロイをトリガーする */
