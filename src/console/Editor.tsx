@@ -18,6 +18,7 @@ const PAGES: { label: string; path: string }[] = [
   { label: "動画で知る", path: "/videos" },
   { label: "採用情報", path: "/recruit" },
   { label: "採用情報2", path: "/recruit2" },
+  { label: "採用情報3", path: "/recruit3" },
   { label: "会社情報", path: "/company" },
   { label: "お問い合わせ", path: "/contact" },
 ];
