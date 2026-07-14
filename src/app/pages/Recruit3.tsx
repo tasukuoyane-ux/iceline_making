@@ -201,20 +201,20 @@ export function Recruit3() {
                 <stop key={s.off} offset={s.off} stopColor={s.color} />
               ))}
             </linearGradient>
-            <filter id="r3-wisp" x="-80%" y="-20%" width="260%" height="140%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.01" numOctaves={3} seed={7} result="n">
-                <animate attributeName="baseFrequency" dur="30s" values="0.006 0.01;0.009 0.014;0.006 0.01" repeatCount="indefinite" />
+            <filter id="r3-wisp" x="-200%" y="-30%" width="500%" height="160%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.005 0.008" numOctaves={3} seed={7} result="n">
+                <animate attributeName="baseFrequency" dur="30s" values="0.005 0.008;0.008 0.012;0.005 0.008" repeatCount="indefinite" />
               </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={40} />
-              <feGaussianBlur stdDeviation={10} />
+              <feDisplacementMap in="SourceGraphic" in2="n" scale={70} />
+              <feGaussianBlur stdDeviation={16} />
             </filter>
           </defs>
-          {/* 幅広で柔らかい煙：太いストローク＋強いぼかしを重ねる（鋭い芯線は作らない） */}
+          {/* 幅広で柔らかい煙：太いストローク＋強いぼかしを重ねる（鋭い芯線は作らない・全体幅3倍） */}
           <g filter="url(#r3-wisp)" fill="none" stroke="url(#r3-smoke)" strokeLinecap="round" strokeLinejoin="round">
-            <path d={smoke.d} strokeWidth={220} opacity={0.1} style={{ filter: "blur(60px)" }} />
-            <path d={smoke.d} strokeWidth={150} opacity={0.16} style={{ filter: "blur(38px)" }} />
-            <path d={smoke.d} strokeWidth={92} opacity={0.24} style={{ filter: "blur(22px)" }} />
-            <path d={smoke.d} strokeWidth={48} opacity={0.32} style={{ filter: "blur(11px)" }} />
+            <path d={smoke.d} strokeWidth={660} opacity={0.08} style={{ filter: "blur(160px)" }} />
+            <path d={smoke.d} strokeWidth={450} opacity={0.12} style={{ filter: "blur(100px)" }} />
+            <path d={smoke.d} strokeWidth={276} opacity={0.18} style={{ filter: "blur(60px)" }} />
+            <path d={smoke.d} strokeWidth={144} opacity={0.26} style={{ filter: "blur(30px)" }} />
           </g>
         </svg>
       )}
@@ -295,10 +295,16 @@ export function Recruit3() {
           );
         })}
 
-        {/* 最下部：ドライアイス（煙の発生源）／全幅・枠なし */}
-        <section ref={dryIceRef} className="relative w-full pt-10">
+        {/* エントリー（ドライアイス画像の上） */}
+        <section className="mx-auto max-w-5xl px-6 pt-16">
+          <Heading si={SECTIONS.length - 1} en="ENTRY" />
+          <EntryForm si={SECTIONS.length - 1} />
+        </section>
+
+        {/* 最下部：ドライアイス（煙の発生源）／全幅・枠なし・境界をぼかしてシームレス */}
+        <section ref={dryIceRef} className="relative w-full pt-16">
           {/* 立ち上る湯気 */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex h-40 justify-center">
+          <div className="pointer-events-none absolute inset-x-0 top-8 z-20 flex h-40 justify-center">
             {[0, 1, 2, 3, 4].map((i) => (
               <span
                 key={i}
@@ -313,19 +319,18 @@ export function Recruit3() {
               />
             ))}
           </div>
+          {/* mask で上下端を背景へフェード → 境界をぼかしてシームレスに馴染ませる */}
           <ImageWithFallback
             src={img("recruit3:dryice", DRYICE_SRC)}
             alt="ドライアイス"
             className="block w-full object-cover"
+            style={{
+              WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
+              maskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
+            }}
             {...edImg("recruit3:dryice", "ドライアイス画像")}
           />
-        </section>
-
-        {/* エントリー（ドライアイス画像の下） */}
-        <section className="mx-auto max-w-5xl px-6 pb-28 pt-16">
-          <Heading si={SECTIONS.length - 1} en="ENTRY" />
-          <EntryForm si={SECTIONS.length - 1} />
-          <p className="mt-10 text-center text-xs text-slate-500">
+          <p className="mx-auto mt-2 max-w-5xl px-6 pb-28 text-center text-xs text-slate-500">
             ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
           </p>
         </section>
