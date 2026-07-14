@@ -208,20 +208,35 @@ export function Recruit3() {
                 <stop key={s.off} offset={s.off} stopColor={s.color} />
               ))}
             </linearGradient>
-            <filter id="r3-wisp" x="-200%" y="-30%" width="500%" height="160%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.005 0.008" numOctaves={3} seed={7} result="n">
-                <animate attributeName="baseFrequency" dur="30s" values="0.005 0.008;0.008 0.012;0.005 0.008" repeatCount="indefinite" />
+            {/* リアルな煙：フラクタルノイズで輪郭をちぎり（変位）、
+                粗いノイズを密度マスクにして濃淡・穴・ちぎれを作る（＝一様ぼかしの帯に見えないように） */}
+            <filter id="r3-smoke-fx" x="-120%" y="-40%" width="340%" height="180%" colorInterpolationFilters="sRGB">
+              {/* 細かいノイズ＝輪郭のちぎれ用 */}
+              <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves={4} seed={11} result="fine">
+                <animate attributeName="baseFrequency" dur="26s" values="0.012 0.02;0.017 0.026;0.012 0.02" repeatCount="indefinite" />
               </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={70} />
-              <feGaussianBlur stdDeviation={16} />
+              {/* 粗いノイズ＝もくもくした密度ムラ用 */}
+              <feTurbulence type="fractalNoise" baseFrequency="0.004 0.005" numOctaves={2} seed={4} result="coarse">
+                <animate attributeName="baseFrequency" dur="34s" values="0.004 0.005;0.006 0.007;0.004 0.005" repeatCount="indefinite" />
+              </feTurbulence>
+              {/* ストロークを細かいノイズで変位＝ふわっとした輪郭に */}
+              <feDisplacementMap in="SourceGraphic" in2="fine" scale={80} result="wispy" />
+              {/* 粗いノイズの明度→アルファに変換し密度マスクを作る */}
+              <feColorMatrix in="coarse" type="matrix"
+                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.2 0 0 0 -0.15" result="density" />
+              {/* 変位した煙を密度マスクで抜く＝濃い所/薄い所/穴ができる */}
+              <feComposite in="wispy" in2="density" operator="in" result="carved" />
+              <feGaussianBlur in="carved" stdDeviation={5} />
             </filter>
           </defs>
-          {/* 幅広で柔らかい煙：太いストローク＋強いぼかしを重ねる（鋭い芯線は作らない・全体幅3倍） */}
-          <g filter="url(#r3-wisp)" fill="none" stroke="url(#r3-smoke)" strokeLinecap="round" strokeLinejoin="round" opacity={0.5}>
-            <path d={smoke.d} strokeWidth={660} opacity={0.08} style={{ filter: "blur(160px)" }} />
-            <path d={smoke.d} strokeWidth={450} opacity={0.12} style={{ filter: "blur(100px)" }} />
-            <path d={smoke.d} strokeWidth={276} opacity={0.18} style={{ filter: "blur(60px)" }} />
-            <path d={smoke.d} strokeWidth={144} opacity={0.26} style={{ filter: "blur(30px)" }} />
+          {/* 幅とうねりは維持。カラーグロー（幅出し）＋テクスチャのある煙本体を重ねる */}
+          <g fill="none" stroke="url(#r3-smoke)" strokeLinecap="round" strokeLinejoin="round">
+            {/* 柔らかいカラーグロー（幅を保つ・テクスチャなし） */}
+            <path d={smoke.d} strokeWidth={460} opacity={0.1} style={{ filter: "blur(80px)" }} />
+            <path d={smoke.d} strokeWidth={300} opacity={0.14} style={{ filter: "blur(46px)" }} />
+            {/* テクスチャのある煙本体（もくもく） */}
+            <path d={smoke.d} strokeWidth={320} opacity={0.42} filter="url(#r3-smoke-fx)" />
+            <path d={smoke.d} strokeWidth={170} opacity={0.5} filter="url(#r3-smoke-fx)" />
           </g>
         </svg>
       )}
