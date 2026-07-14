@@ -211,49 +211,44 @@ export function Recruit3() {
                 <stop key={s.off} offset={s.off} stopColor={s.color} />
               ))}
             </linearGradient>
-            {/* 自然な煙（細い筋状）：2段変位（複合ワープ）でランダムな拡散・渦を強化し、
-                アルファを削って繊維・隙間・ちぎれを作る。太い一様な帯にしない。 */}
-            <filter id="r3-smoke-a" x="-260%" y="-120%" width="620%" height="340%" colorInterpolationFilters="sRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.018 0.04" numOctaves={6} seed={11} result="n1">
-                <animate attributeName="baseFrequency" dur="22s" values="0.018 0.04;0.026 0.052;0.018 0.04" repeatCount="indefinite" />
+            {/* ふわっとした煙：ノイズを「滑らかな密度マスク」として使い、変位は控えめ＋大きめのぼかし。
+                ジャギー（PS1的な階段状）を出さないため、急峻なアルファ処理と巨大変位は使わない。 */}
+            {/* 粗い雲＝ふわっとした量感 */}
+            <filter id="r3-cloud" x="-100%" y="-60%" width="300%" height="220%" colorInterpolationFilters="linearRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.008" numOctaves={5} seed={7} result="n">
+                <animate attributeName="baseFrequency" dur="40s" values="0.0045 0.008;0.006 0.011;0.0045 0.008" repeatCount="indefinite" />
               </feTurbulence>
-              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.01" numOctaves={3} seed={23} result="n2">
-                <animate attributeName="baseFrequency" dur="37s" values="0.006 0.01;0.009 0.015;0.006 0.01" repeatCount="indefinite" />
-              </feTurbulence>
-              {/* 1段目：大きく変位／2段目：別周波数でさらに変位＝より不規則な拡散 */}
-              <feDisplacementMap in="SourceGraphic" in2="n2" scale={320} result="w1" />
-              <feDisplacementMap in="w1" in2="n1" scale={150} result="w2" />
-              <feComponentTransfer in="w2" result="t">
-                <feFuncA type="gamma" amplitude={1.5} exponent={2.4} offset={-0.28} />
-              </feComponentTransfer>
-              <feGaussianBlur in="t" stdDeviation={1.4} />
+              {/* ノイズ輝度 → なめらかな密度（しきい値なし＝ソフト） */}
+              <feColorMatrix in="n" type="matrix"
+                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.34 0.34 0.34 0 -0.04" result="density" />
+              {/* 少しだけ揺らす（大変位はしない） */}
+              <feDisplacementMap in="SourceGraphic" in2="n" scale={34} result="disp" />
+              {/* 密度でマスク → ふわっと濃淡 */}
+              <feComposite in="disp" in2="density" operator="in" result="m" />
+              <feGaussianBlur in="m" stdDeviation={14} />
             </filter>
-            {/* もう少し粗い、大きく渦巻く層（こちらも2段変位） */}
-            <filter id="r3-smoke-b" x="-260%" y="-120%" width="620%" height="340%" colorInterpolationFilters="sRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.007 0.014" numOctaves={5} seed={4} result="n1">
-                <animate attributeName="baseFrequency" dur="30s" values="0.007 0.014;0.011 0.02;0.007 0.014" repeatCount="indefinite" />
+            {/* 細かい筋＝ゆらめくディテール */}
+            <filter id="r3-wisp" x="-100%" y="-60%" width="300%" height="220%" colorInterpolationFilters="linearRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves={5} seed={11} result="n">
+                <animate attributeName="baseFrequency" dur="26s" values="0.012 0.02;0.016 0.026;0.012 0.02" repeatCount="indefinite" />
               </feTurbulence>
-              <feTurbulence type="fractalNoise" baseFrequency="0.003 0.005" numOctaves={2} seed={15} result="n2">
-                <animate attributeName="baseFrequency" dur="44s" values="0.003 0.005;0.005 0.008;0.003 0.005" repeatCount="indefinite" />
-              </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="n2" scale={420} result="w1" />
-              <feDisplacementMap in="w1" in2="n1" scale={220} result="w2" />
-              <feComponentTransfer in="w2" result="t">
-                <feFuncA type="gamma" amplitude={1.3} exponent={1.8} offset={-0.14} />
-              </feComponentTransfer>
-              <feGaussianBlur in="t" stdDeviation={2.6} />
+              <feColorMatrix in="n" type="matrix"
+                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.42 0.42 0.42 0 -0.12" result="density" />
+              <feDisplacementMap in="SourceGraphic" in2="n" scale={26} result="disp" />
+              <feComposite in="disp" in2="density" operator="in" result="m" />
+              <feGaussianBlur in="m" stdDeviation={5} />
             </filter>
           </defs>
-          {/* うねり（パス）は維持。細く透けた煙の筋を重ねて自然な立ち上りに（不透明度は濃いめに戻す） */}
+          {/* うねり（パス）は維持。ソフトな雲層＋ゆらめく筋を同色で重ね、一体感のある煙に */}
           <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-            {/* ごく薄い量感のためのヘイズ（帯にならない程度に） */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={120} opacity={0.06} style={{ filter: "blur(46px)" }} />
-            {/* 大きく渦巻く層 */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={110} opacity={0.5} filter="url(#r3-smoke-b)" />
-            {/* 主となる細い筋 */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={64} opacity={0.66} filter="url(#r3-smoke-a)" />
-            {/* 明るい細フィラメント */}
-            <path d={smoke.d} stroke="#f3f9fb" strokeWidth={26} opacity={0.62} filter="url(#r3-smoke-a)" />
+            {/* ふわっとした量感（広め・ソフト） */}
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={260} opacity={0.4} filter="url(#r3-cloud)" />
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={150} opacity={0.5} filter="url(#r3-cloud)" />
+            {/* ゆらめく筋（ディテール） */}
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={120} opacity={0.5} filter="url(#r3-wisp)" />
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={56} opacity={0.5} filter="url(#r3-wisp)" />
+            {/* 明るい芯のディテール */}
+            <path d={smoke.d} stroke="#f5fafc" strokeWidth={28} opacity={0.34} filter="url(#r3-wisp)" />
           </g>
         </svg>
       )}
@@ -261,7 +256,7 @@ export function Recruit3() {
       {/* 3) コンテンツ（最上層） */}
       <div className="relative z-10">
         {/* ヒーロー（暗部の最上部） */}
-        <header className="mx-auto flex min-h-[70vh] max-w-4xl flex-col items-center justify-center px-6 py-24 text-center">
+        <header className="mx-auto flex min-h-[70vh] max-w-[1400px] flex-col items-center justify-center px-6 py-24 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-400">RECRUIT — PLAYGROUND</p>
           <h1
             className="mt-6 text-4xl font-bold leading-tight text-white pc:text-6xl"
@@ -284,7 +279,7 @@ export function Recruit3() {
           // エントリーはドライアイス画像の下に移動するため、ここでは描画しない
           if (s.en === "ENTRY") return null;
           return (
-            <section key={si} className="mx-auto max-w-5xl px-6 py-16">
+            <section key={si} className="mx-auto max-w-[1400px] px-6 py-16 pc:px-10">
               <Heading si={si} en={s.en} />
 
               <div className="space-y-16">
@@ -299,7 +294,7 @@ export function Recruit3() {
                         <div
                           key={k}
                           className={
-                            "flex flex-col items-center gap-6 tab:flex-row tab:items-center " +
+                            "flex flex-col items-center gap-8 tab:flex-row tab:items-center tab:gap-12 " +
                             (right ? "tab:flex-row-reverse" : "")
                           }
                         >
@@ -327,7 +322,7 @@ export function Recruit3() {
                     }
                     // 画像なしの本文ブロック（中央寄せ）
                     return (
-                      <Body key={k} path={`recruit3:s${si}.body${k}`} className="mx-auto max-w-2xl text-center" />
+                      <Body key={k} path={`recruit3:s${si}.body${k}`} className="mx-auto max-w-3xl text-center" />
                     );
                   })}
               </div>
@@ -370,7 +365,7 @@ export function Recruit3() {
           </div>
         </section>
 
-        <p className="mx-auto max-w-5xl px-6 pb-28 pt-6 text-center text-xs text-slate-500">
+        <p className="mx-auto max-w-[1400px] px-6 pb-28 pt-6 text-center text-xs text-slate-500">
           ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
         </p>
       </div>
