@@ -54,12 +54,12 @@ const SECTIONS: { en: string; images: number; bodies: number }[] = [
   { en: "ENTRY", images: 0, bodies: 1 },
 ];
 
-// 煙グラデーションの停止色（上=赤 → 下=水色）。自然な煙に見せるため白寄りの淡い色に。
+// 煙グラデーションの停止色（上=赤 → 下=水色）。原色から白へ50%寄せた淡いトーン。
 const SMOKE_STOPS = [
-  { off: 0, color: "#ff8a80" },
-  { off: 0.3, color: "#ffe6a3" },
+  { off: 0, color: "#ff9d97" },
+  { off: 0.3, color: "#ffe99d" },
   { off: 0.62, color: "#ffffff" },
-  { off: 1, color: "#d6f0f7" },
+  { off: 1, color: "#dff2f8" },
 ];
 
 type Pt = { x: number; y: number };
@@ -185,17 +185,20 @@ export function Recruit3() {
   let imgSeq = 0;
 
   return (
-    <div
-      ref={pageRef}
-      className="relative isolate overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #333 0%, #5f5f5f 28%, #9a9a9a 60%, #cfcfcf 85%, #dedede 100%)" }}
-    >
+    <div ref={pageRef} className="relative isolate overflow-hidden">
       <Styles />
 
-      {/* 煙レイヤー（背景・実測パス） */}
+      {/* z順（下→上）：1) 背景色 */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{ background: "linear-gradient(180deg, #333 0%, #5f5f5f 28%, #9a9a9a 60%, #cfcfcf 85%, #dedede 100%)" }}
+        aria-hidden
+      />
+
+      {/* 2) 煙レイヤー（背景色の上・コンテンツの下・実測パス） */}
       {smoke.d && (
         <svg
-          className="pointer-events-none absolute left-0 top-0 z-0"
+          className="pointer-events-none absolute left-0 top-0 z-[1]"
           width={smoke.w}
           height={smoke.h}
           viewBox={`0 0 ${smoke.w} ${smoke.h}`}
@@ -208,47 +211,54 @@ export function Recruit3() {
                 <stop key={s.off} offset={s.off} stopColor={s.color} />
               ))}
             </linearGradient>
-            {/* 自然な煙（細い筋状）：細いストロークを高周波ノイズで大きく変位し、
+            {/* 自然な煙（細い筋状）：2段変位（複合ワープ）でランダムな拡散・渦を強化し、
                 アルファを削って繊維・隙間・ちぎれを作る。太い一様な帯にしない。 */}
-            <filter id="r3-smoke-a" x="-180%" y="-80%" width="460%" height="260%" colorInterpolationFilters="sRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.02 0.045" numOctaves={5} seed={11} result="n">
-                <animate attributeName="baseFrequency" dur="24s" values="0.02 0.045;0.026 0.055;0.02 0.045" repeatCount="indefinite" />
+            <filter id="r3-smoke-a" x="-260%" y="-120%" width="620%" height="340%" colorInterpolationFilters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.018 0.04" numOctaves={6} seed={11} result="n1">
+                <animate attributeName="baseFrequency" dur="22s" values="0.018 0.04;0.026 0.052;0.018 0.04" repeatCount="indefinite" />
               </feTurbulence>
-              {/* 大きく変位＝細いストロークが煙の筋に伸びる */}
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={170} result="w" />
-              {/* アルファを急峻にして細い筋・隙間を作る */}
-              <feComponentTransfer in="w" result="t">
+              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.01" numOctaves={3} seed={23} result="n2">
+                <animate attributeName="baseFrequency" dur="37s" values="0.006 0.01;0.009 0.015;0.006 0.01" repeatCount="indefinite" />
+              </feTurbulence>
+              {/* 1段目：大きく変位／2段目：別周波数でさらに変位＝より不規則な拡散 */}
+              <feDisplacementMap in="SourceGraphic" in2="n2" scale={320} result="w1" />
+              <feDisplacementMap in="w1" in2="n1" scale={150} result="w2" />
+              <feComponentTransfer in="w2" result="t">
                 <feFuncA type="gamma" amplitude={1.5} exponent={2.4} offset={-0.28} />
               </feComponentTransfer>
               <feGaussianBlur in="t" stdDeviation={1.4} />
             </filter>
-            {/* もう少し粗い、大きく渦巻く層 */}
-            <filter id="r3-smoke-b" x="-180%" y="-80%" width="460%" height="260%" colorInterpolationFilters="sRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.016" numOctaves={4} seed={4} result="n">
-                <animate attributeName="baseFrequency" dur="32s" values="0.008 0.016;0.011 0.021;0.008 0.016" repeatCount="indefinite" />
+            {/* もう少し粗い、大きく渦巻く層（こちらも2段変位） */}
+            <filter id="r3-smoke-b" x="-260%" y="-120%" width="620%" height="340%" colorInterpolationFilters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.007 0.014" numOctaves={5} seed={4} result="n1">
+                <animate attributeName="baseFrequency" dur="30s" values="0.007 0.014;0.011 0.02;0.007 0.014" repeatCount="indefinite" />
               </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={230} result="w" />
-              <feComponentTransfer in="w" result="t">
+              <feTurbulence type="fractalNoise" baseFrequency="0.003 0.005" numOctaves={2} seed={15} result="n2">
+                <animate attributeName="baseFrequency" dur="44s" values="0.003 0.005;0.005 0.008;0.003 0.005" repeatCount="indefinite" />
+              </feTurbulence>
+              <feDisplacementMap in="SourceGraphic" in2="n2" scale={420} result="w1" />
+              <feDisplacementMap in="w1" in2="n1" scale={220} result="w2" />
+              <feComponentTransfer in="w2" result="t">
                 <feFuncA type="gamma" amplitude={1.3} exponent={1.8} offset={-0.14} />
               </feComponentTransfer>
               <feGaussianBlur in="t" stdDeviation={2.6} />
             </filter>
           </defs>
-          {/* うねり（パス）は維持。細く透けた煙の筋を重ねて自然な立ち上りに */}
+          {/* うねり（パス）は維持。細く透けた煙の筋を重ねて自然な立ち上りに（不透明度は濃いめに戻す） */}
           <g fill="none" strokeLinecap="round" strokeLinejoin="round">
             {/* ごく薄い量感のためのヘイズ（帯にならない程度に） */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={120} opacity={0.04} style={{ filter: "blur(46px)" }} />
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={120} opacity={0.06} style={{ filter: "blur(46px)" }} />
             {/* 大きく渦巻く層 */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={110} opacity={0.34} filter="url(#r3-smoke-b)" />
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={110} opacity={0.5} filter="url(#r3-smoke-b)" />
             {/* 主となる細い筋 */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={64} opacity={0.44} filter="url(#r3-smoke-a)" />
+            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={64} opacity={0.66} filter="url(#r3-smoke-a)" />
             {/* 明るい細フィラメント */}
-            <path d={smoke.d} stroke="#eef6f8" strokeWidth={26} opacity={0.5} filter="url(#r3-smoke-a)" />
+            <path d={smoke.d} stroke="#f3f9fb" strokeWidth={26} opacity={0.62} filter="url(#r3-smoke-a)" />
           </g>
         </svg>
       )}
 
-      {/* コンテンツ */}
+      {/* 3) コンテンツ（最上層） */}
       <div className="relative z-10">
         {/* ヒーロー（暗部の最上部） */}
         <header className="mx-auto flex min-h-[70vh] max-w-4xl flex-col items-center justify-center px-6 py-24 text-center">
