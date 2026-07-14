@@ -201,18 +201,20 @@ export function Recruit3() {
                 <stop key={s.off} offset={s.off} stopColor={s.color} />
               ))}
             </linearGradient>
-            <filter id="r3-wisp" x="-30%" y="-10%" width="160%" height="120%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.016" numOctaves={2} seed={7} result="n">
-                <animate attributeName="baseFrequency" dur="26s" values="0.008 0.016;0.012 0.022;0.008 0.016" repeatCount="indefinite" />
+            <filter id="r3-wisp" x="-80%" y="-20%" width="260%" height="140%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.01" numOctaves={3} seed={7} result="n">
+                <animate attributeName="baseFrequency" dur="30s" values="0.006 0.01;0.009 0.014;0.006 0.01" repeatCount="indefinite" />
               </feTurbulence>
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={24} />
-              <feGaussianBlur stdDeviation={2} />
+              <feDisplacementMap in="SourceGraphic" in2="n" scale={40} />
+              <feGaussianBlur stdDeviation={10} />
             </filter>
           </defs>
+          {/* 幅広で柔らかい煙：太いストローク＋強いぼかしを重ねる（鋭い芯線は作らない） */}
           <g filter="url(#r3-wisp)" fill="none" stroke="url(#r3-smoke)" strokeLinecap="round" strokeLinejoin="round">
-            <path d={smoke.d} strokeWidth={56} opacity={0.16} style={{ filter: "blur(10px)" }} />
-            <path d={smoke.d} strokeWidth={24} opacity={0.4} style={{ filter: "blur(3px)" }} />
-            <path d={smoke.d} strokeWidth={7} opacity={0.85} />
+            <path d={smoke.d} strokeWidth={220} opacity={0.1} style={{ filter: "blur(60px)" }} />
+            <path d={smoke.d} strokeWidth={150} opacity={0.16} style={{ filter: "blur(38px)" }} />
+            <path d={smoke.d} strokeWidth={92} opacity={0.24} style={{ filter: "blur(22px)" }} />
+            <path d={smoke.d} strokeWidth={48} opacity={0.32} style={{ filter: "blur(11px)" }} />
           </g>
         </svg>
       )}
@@ -240,15 +242,13 @@ export function Recruit3() {
         {/* 各セクション */}
         {SECTIONS.map((s, si) => {
           const rows = Math.max(s.images, s.bodies);
-          const isEntry = s.en === "ENTRY";
+          // エントリーはドライアイス画像の下に移動するため、ここでは描画しない
+          if (s.en === "ENTRY") return null;
           return (
             <section key={si} className="mx-auto max-w-5xl px-6 py-16">
               <Heading si={si} en={s.en} />
 
-              {isEntry ? (
-                <EntryForm si={si} />
-              ) : (
-                <div className="space-y-16">
+              <div className="space-y-16">
                   {Array.from({ length: rows }).map((_, k) => {
                     const hasImg = k < s.images;
                     const hasBody = k < s.bodies;
@@ -290,39 +290,42 @@ export function Recruit3() {
                       <Body key={k} path={`recruit3:s${si}.body${k}`} className="mx-auto max-w-2xl text-center" />
                     );
                   })}
-                </div>
-              )}
+              </div>
             </section>
           );
         })}
 
-        {/* 最下部：ドライアイス（煙の発生源） */}
-        <section className="relative mx-auto max-w-3xl px-6 pb-28 pt-10">
+        {/* 最下部：ドライアイス（煙の発生源）／全幅・枠なし */}
+        <section ref={dryIceRef} className="relative w-full pt-10">
           {/* 立ち上る湯気 */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 mx-auto flex h-40 max-w-3xl justify-center">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex h-40 justify-center">
             {[0, 1, 2, 3, 4].map((i) => (
               <span
                 key={i}
                 className="r3-steam absolute bottom-0 rounded-full bg-white/60 blur-md"
                 style={{
-                  left: `${34 + i * 8}%`,
-                  width: 34,
-                  height: 60,
+                  left: `${38 + i * 6}%`,
+                  width: 40,
+                  height: 70,
                   animationDelay: `${i * 1.1}s`,
                 }}
                 aria-hidden
               />
             ))}
           </div>
-          <div ref={dryIceRef} className="relative overflow-hidden rounded-3xl bg-white/70 p-3 shadow-xl backdrop-blur-sm">
-            <ImageWithFallback
-              src={img("recruit3:dryice", DRYICE_SRC)}
-              alt="ドライアイス"
-              className="aspect-[16/10] w-full rounded-2xl object-cover"
-              {...edImg("recruit3:dryice", "ドライアイス画像")}
-            />
-          </div>
-          <p className="mt-6 text-center text-xs text-slate-500">
+          <ImageWithFallback
+            src={img("recruit3:dryice", DRYICE_SRC)}
+            alt="ドライアイス"
+            className="block w-full object-cover"
+            {...edImg("recruit3:dryice", "ドライアイス画像")}
+          />
+        </section>
+
+        {/* エントリー（ドライアイス画像の下） */}
+        <section className="mx-auto max-w-5xl px-6 pb-28 pt-16">
+          <Heading si={SECTIONS.length - 1} en="ENTRY" />
+          <EntryForm si={SECTIONS.length - 1} />
+          <p className="mt-10 text-center text-xs text-slate-500">
             ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
           </p>
         </section>
