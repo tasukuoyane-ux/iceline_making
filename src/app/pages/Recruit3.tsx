@@ -217,7 +217,7 @@ export function Recruit3() {
             </filter>
           </defs>
           {/* 幅広で柔らかい煙：太いストローク＋強いぼかしを重ねる（鋭い芯線は作らない・全体幅3倍） */}
-          <g filter="url(#r3-wisp)" fill="none" stroke="url(#r3-smoke)" strokeLinecap="round" strokeLinejoin="round">
+          <g filter="url(#r3-wisp)" fill="none" stroke="url(#r3-smoke)" strokeLinecap="round" strokeLinejoin="round" opacity={0.5}>
             <path d={smoke.d} strokeWidth={660} opacity={0.08} style={{ filter: "blur(160px)" }} />
             <path d={smoke.d} strokeWidth={450} opacity={0.12} style={{ filter: "blur(100px)" }} />
             <path d={smoke.d} strokeWidth={276} opacity={0.18} style={{ filter: "blur(60px)" }} />
