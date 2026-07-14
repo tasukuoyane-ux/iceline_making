@@ -138,6 +138,7 @@ export function Recruit3() {
   const pageRef = useRef<HTMLDivElement>(null);
   const imgRefs = useRef<(HTMLElement | null)[]>([]);
   const dryIceRef = useRef<HTMLDivElement>(null);
+  const imgSides = useRef<number[]>([]); // 各画像の左右符号（-1=左 / +1=右）
   const [smoke, setSmoke] = useState<{ d: string; w: number; h: number }>({ d: "", w: 0, h: 0 });
 
   // DOM を実測し、各画像の中心とドライアイスを通る煙パスを生成
@@ -148,11 +149,17 @@ export function Recruit3() {
       const pr = page.getBoundingClientRect();
       const W = page.clientWidth;
       const H = page.scrollHeight;
+      // 横の振れ幅（ビューポート比）。PCでは中心±40%＝全幅の80%を横断する。
+      const amp = W >= 1024 ? 0.4 : W >= 768 ? 0.32 : 0.2;
       const pts: Pt[] = [{ x: W / 2, y: 0 }];
-      imgRefs.current.forEach((el) => {
+      imgRefs.current.forEach((el, i) => {
         if (!el) return;
         const r = el.getBoundingClientRect();
-        pts.push({ x: r.left - pr.left + r.width / 2, y: r.top - pr.top + r.height / 2 });
+        const cy = r.top - pr.top + r.height / 2;
+        const measuredX = r.left - pr.left + r.width / 2;
+        // 左右符号は配置に合わせる。折れ目を大きくするため x を増幅する。
+        const sign = imgSides.current[i] ?? (measuredX < W / 2 ? -1 : 1);
+        pts.push({ x: W / 2 + sign * W * amp, y: cy });
       });
       if (dryIceRef.current) {
         const r = dryIceRef.current.getBoundingClientRect();
@@ -255,6 +262,7 @@ export function Recruit3() {
                     if (hasImg) {
                       const seq = imgSeq++;
                       const right = seq % 2 === 1; // 折れ目を左右交互に
+                      imgSides.current[seq] = right ? 1 : -1;
                       return (
                         <div
                           key={k}
@@ -295,45 +303,44 @@ export function Recruit3() {
           );
         })}
 
-        {/* エントリー（ドライアイス画像の上） */}
-        <section className="mx-auto max-w-5xl px-6 pt-16">
-          <Heading si={SECTIONS.length - 1} en="ENTRY" />
-          <EntryForm si={SECTIONS.length - 1} />
+        {/* 最下部：ドライアイス画像とフォームを同一グリッドセルで重ねる
+            （画像＝背景レイヤー / フォーム＝その上に z 重ね・Y軸で重なる） */}
+        <section ref={dryIceRef} className="relative grid w-full pt-16">
+          {/* 画像レイヤー（全幅・枠なし・上下端をマスクで背景へフェード） */}
+          <div className="relative col-start-1 row-start-1 self-center">
+            {/* 立ち上る湯気 */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-40 justify-center">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span
+                  key={i}
+                  className="r3-steam absolute bottom-0 rounded-full bg-white/60 blur-md"
+                  style={{ left: `${38 + i * 6}%`, width: 40, height: 70, animationDelay: `${i * 1.1}s` }}
+                  aria-hidden
+                />
+              ))}
+            </div>
+            <ImageWithFallback
+              src={img("recruit3:dryice", DRYICE_SRC)}
+              alt="ドライアイス"
+              className="block w-full object-cover"
+              style={{
+                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
+                maskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
+              }}
+              {...edImg("recruit3:dryice", "ドライアイス画像")}
+            />
+          </div>
+
+          {/* フォームレイヤー（画像の上に z 重ね） */}
+          <div className="relative z-30 col-start-1 row-start-1 w-full max-w-3xl justify-self-center self-center px-6 py-16">
+            <Heading si={SECTIONS.length - 1} en="ENTRY" />
+            <EntryForm si={SECTIONS.length - 1} />
+          </div>
         </section>
 
-        {/* 最下部：ドライアイス（煙の発生源）／全幅・枠なし・境界をぼかしてシームレス */}
-        <section ref={dryIceRef} className="relative w-full pt-16">
-          {/* 立ち上る湯気 */}
-          <div className="pointer-events-none absolute inset-x-0 top-8 z-20 flex h-40 justify-center">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <span
-                key={i}
-                className="r3-steam absolute bottom-0 rounded-full bg-white/60 blur-md"
-                style={{
-                  left: `${38 + i * 6}%`,
-                  width: 40,
-                  height: 70,
-                  animationDelay: `${i * 1.1}s`,
-                }}
-                aria-hidden
-              />
-            ))}
-          </div>
-          {/* mask で上下端を背景へフェード → 境界をぼかしてシームレスに馴染ませる */}
-          <ImageWithFallback
-            src={img("recruit3:dryice", DRYICE_SRC)}
-            alt="ドライアイス"
-            className="block w-full object-cover"
-            style={{
-              WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
-              maskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
-            }}
-            {...edImg("recruit3:dryice", "ドライアイス画像")}
-          />
-          <p className="mx-auto mt-2 max-w-5xl px-6 pb-28 text-center text-xs text-slate-500">
-            ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
-          </p>
-        </section>
+        <p className="mx-auto max-w-5xl px-6 pb-28 pt-6 text-center text-xs text-slate-500">
+          ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
+        </p>
       </div>
     </div>
   );
