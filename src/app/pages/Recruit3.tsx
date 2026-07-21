@@ -3,15 +3,17 @@
 // （見出し=13セクション + ヒーロー、画像=24、本文≈32）。
 //
 // ■ ビジュアルコンセプト
-//  - ページ全体を貫く「煙」がくねりながら上→下へ連なる。その折れ目に画像を配置する。
-//  - 煙の色は最上部=赤 → 黄 → 白 → 最下部=薄い水色のグラデーション。
-//  - 背景色は最上部 #333 → 最下部 #dedede のグラデーション。
-//  - 最下部にドライアイス画像があり、そこから煙（湯気）が立ち上っているように見せる。
-//  - 煙のパスは DOM を実測して各画像の中心を通す（＝折れ目に画像が乗る）。レスポンシブ対応。
+//  - ページ全体の背景に「スクロール追随の動画」を敷く（最大5本／管理コンソールで設定）。
+//    ページ最上部＝1本目の先頭フレーム、最後の文字コンテンツ＝最終本の最終フレーム。
+//    スクロール位置をそのまま再生位置に写す（自動再生ではないので上下どちらにも追随する）。
+//  - 動画とコンテンツの前後関係もコンソールから切替可能（既定＝動画が背面）。
+//    「前面」の場合は動画レイヤーに mix-blend-mode:difference を掛け、文字を反転で浮かび上がらせる。
+//  - 背景色は最上部 #333 → 最下部 #dedede のグラデーション（動画未設定時の下地）。
 //
 // ■ 編集
 //  - 文言・画像は recruit3: プレフィックスの汎用オーバーライドで管理コンソールから編集可能。
-import { FormEvent, useLayoutEffect, useRef, useState } from "react";
+//  - 背景動画は sections.json の recruit3Bg（コンソール「コンテンツ管理 → 採用3 背景動画」）。
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -20,6 +22,7 @@ import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
+import sectionsJson from "../../content/sections.json";
 
 // ── ダミーテキスト ─────────────────────────────────────────
 const DUMMY_BODY =
@@ -33,11 +36,18 @@ const PH =
     "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#e7ebee'/><text x='50%' y='50%' font-size='30' fill='#9aa4ad' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>＋ 画像</text></svg>"
   );
 
-// ドライアイス画像（public 配下）
-const DRYICE_SRC = "/images/products/dryice_phMain.jpg";
+// ── 背景動画の設定（sections.json / コンソールで編集） ──────────
+// キー欠落・型崩れに耐えるフォールバック付きで読む（古い公開JSONでも落ちないように）。
+const BG_MAX = 5;
+const BG_RAW: any = (sectionsJson as any).recruit3Bg ?? {};
+const BG_VIDEOS: string[] = (Array.isArray(BG_RAW.videos) ? BG_RAW.videos : [])
+  .filter((v: any) => typeof v === "string" && v.trim() !== "")
+  .slice(0, BG_MAX);
+// "front" = 動画がコンテンツの前面（文字は difference 合成）／既定は "back"
+const BG_LAYER: "back" | "front" = BG_RAW.layer === "front" ? "front" : "back";
 
 // ── セクション定義（個数は採用2に対応。すべてダミー） ──────────
-// images: 折れ目に置く画像の枚数 / bodies: 本文ブロックの数
+// images: 画像の枚数 / bodies: 本文ブロックの数
 const SECTIONS: { en: string; images: number; bodies: number }[] = [
   { en: "BUSINESS", images: 2, bodies: 2 },
   { en: "PHILOSOPHY", images: 0, bodies: 2 },
@@ -54,48 +64,133 @@ const SECTIONS: { en: string; images: number; bodies: number }[] = [
   { en: "ENTRY", images: 0, bodies: 1 },
 ];
 
-// 煙グラデーションの停止色（上=赤 → 下=水色）。原色から白へ50%寄せた淡いトーン。
-const SMOKE_STOPS = [
-  { off: 0, color: "#ff9d97" },
-  { off: 0.3, color: "#ffe99d" },
-  { off: 0.62, color: "#ffffff" },
-  { off: 1, color: "#dff2f8" },
-];
+// ── 背景動画レイヤー ──────────────────────────────────────
+// スクロール量 p∈[0,1] を動画本数で等分し、i 番目の動画の再生位置に写す。
+//  - p=0 … 1本目の先頭フレーム（ページ最上部）
+//  - p=1 … 最終本の最終フレーム（最後の文字コンテンツが画面下端に達した位置）
+// 自動再生はせず currentTime を直接動かすため、下スクロール／上スクロールの両方に追随する。
+function BgVideos({
+  urls,
+  layer,
+  pageRef,
+  endRef,
+}: {
+  urls: string[];
+  layer: "back" | "front";
+  pageRef: React.RefObject<HTMLDivElement>;
+  endRef: React.RefObject<HTMLElement>;
+}) {
+  const vids = useRef<(HTMLVideoElement | null)[]>([]);
+  const [active, setActive] = useState(0);
+  // metadata 読込完了時にも位置を合わせ直すため、計算関数を ref で共有する
+  const syncRef = useRef<() => void>(() => {});
 
-type Pt = { x: number; y: number };
+  useEffect(() => {
+    if (urls.length === 0) return;
+    let queued = false;
+    let raf = 0;
 
-// 通過点を滑らかにつなぐパス（Catmull-Rom → ベジェ）
-function smoothPath(pts: Pt[]): string {
-  if (pts.length < 2) return "";
-  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[i + 2] || p2;
-    const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
-    const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
-    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
-  }
-  return d;
+    const sync = () => {
+      queued = false;
+      const page = pageRef.current;
+      if (!page) return;
+      const y = window.scrollY;
+      // ページ先頭のドキュメント座標
+      const start = y + page.getBoundingClientRect().top;
+      // 「最後の文字コンテンツ」の下端が画面下端に来た時点を終端とする
+      const endEl = endRef.current;
+      const endBottom = endEl
+        ? y + endEl.getBoundingClientRect().bottom
+        : start + page.scrollHeight;
+      const finish = Math.max(start + 1, endBottom - window.innerHeight);
+      const p = Math.min(1, Math.max(0, (y - start) / (finish - start)));
+
+      const n = urls.length;
+      // p=1 でも最終動画のインデックスに収まるよう、わずかに内側へ丸める
+      const scaled = Math.min(p * n, n - 1e-6);
+      const idx = Math.floor(scaled);
+      const local = scaled - idx;
+      setActive(idx);
+
+      vids.current.forEach((v, i) => {
+        if (!v) return;
+        const d = v.duration;
+        if (!isFinite(d) || d <= 0) return;
+        // 通過済み=最終フレーム / これから=先頭フレーム / 再生中=按分
+        const t = i < idx ? d : i > idx ? 0 : local * d;
+        const clamped = Math.min(Math.max(t, 0), Math.max(0, d - 0.05));
+        // 1フレーム未満の差では seek しない（過剰なシークで再生がガタつくため）
+        if (Math.abs(v.currentTime - clamped) > 1 / 30) {
+          try {
+            v.currentTime = clamped;
+          } catch {
+            /* seek 不可（未バッファ）なら次フレームで再試行される */
+          }
+        }
+      });
+    };
+    syncRef.current = sync;
+
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      raf = requestAnimationFrame(sync);
+    };
+
+    sync();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    // 画像読込やフォント適用で高さが変わると終端位置もずれるため再計算する
+    const ro = new ResizeObserver(onScroll);
+    if (pageRef.current) ro.observe(pageRef.current);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      ro.disconnect();
+    };
+  }, [urls.length, pageRef, endRef]);
+
+  if (urls.length === 0) return null;
+
+  return (
+    <div
+      className={
+        "pointer-events-none fixed inset-0 " + (layer === "front" ? "z-20" : "z-[1]")
+      }
+      // 前面配置時：動画をコンテンツへ difference 合成し、下の文字を反転色で浮かび上がらせる
+      style={layer === "front" ? { mixBlendMode: "difference" } : undefined}
+      aria-hidden
+    >
+      {urls.map((src, i) => (
+        <video
+          key={src + i}
+          ref={(el) => {
+            vids.current[i] = el;
+          }}
+          src={src}
+          muted
+          playsInline
+          preload="auto"
+          // 表示は現在の区間のみ。切替時のちらつきを避けるため他は透明にして残す
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
+          style={{ opacity: i === active ? 1 : 0 }}
+          onLoadedMetadata={() => syncRef.current()}
+          onLoadedData={(e) => {
+            // 一部ブラウザは一度再生しないとデコーダが起きず seek が効かないため空打ちする
+            const v = e.currentTarget;
+            v.play()
+              .then(() => v.pause())
+              .catch(() => {})
+              .finally(() => syncRef.current());
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 // ── 部品 ──────────────────────────────────────────────────
-function Styles() {
-  return (
-    <style>{`
-      @keyframes r3-rise {
-        0% { transform: translateY(20px) scale(0.9); opacity: 0; }
-        30% { opacity: 0.55; }
-        100% { transform: translateY(-120px) scale(1.4); opacity: 0; }
-      }
-      .r3-steam { animation: r3-rise 6s ease-in infinite; will-change: transform, opacity; }
-      @media (prefers-reduced-motion: reduce) { .r3-steam { animation: none; opacity: 0.3; } }
-    `}</style>
-  );
-}
 
 // セクション見出し（英字＋日本語・中央寄せ・すりガラスのチップ）
 function Heading({ si, en }: { si: number; en: string }) {
@@ -136,124 +231,25 @@ function Body({ path, className = "" }: { path: string; className?: string }) {
 
 export function Recruit3() {
   const pageRef = useRef<HTMLDivElement>(null);
-  const imgRefs = useRef<(HTMLElement | null)[]>([]);
-  const dryIceRef = useRef<HTMLDivElement>(null);
-  const imgSides = useRef<number[]>([]); // 各画像の左右符号（-1=左 / +1=右）
-  const [smoke, setSmoke] = useState<{ d: string; w: number; h: number }>({ d: "", w: 0, h: 0 });
+  // 「最後の文字コンテンツ」＝背景動画の終端を決める基準要素
+  const endRef = useRef<HTMLParagraphElement>(null);
 
-  // DOM を実測し、各画像の中心とドライアイスを通る煙パスを生成
-  useLayoutEffect(() => {
-    const page = pageRef.current;
-    if (!page) return;
-    const compute = () => {
-      const pr = page.getBoundingClientRect();
-      const W = page.clientWidth;
-      const H = page.scrollHeight;
-      // 横の振れ幅（ビューポート比）。PCでは中心±40%＝全幅の80%を横断する。
-      const amp = W >= 1024 ? 0.4 : W >= 768 ? 0.32 : 0.2;
-      const pts: Pt[] = [{ x: W / 2, y: 0 }];
-      imgRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const cy = r.top - pr.top + r.height / 2;
-        const measuredX = r.left - pr.left + r.width / 2;
-        // 左右符号は配置に合わせる。折れ目を大きくするため x を増幅する。
-        const sign = imgSides.current[i] ?? (measuredX < W / 2 ? -1 : 1);
-        pts.push({ x: W / 2 + sign * W * amp, y: cy });
-      });
-      if (dryIceRef.current) {
-        const r = dryIceRef.current.getBoundingClientRect();
-        pts.push({ x: r.left - pr.left + r.width / 2, y: r.top - pr.top + r.height * 0.28 });
-      } else {
-        pts.push({ x: W / 2, y: H });
-      }
-      setSmoke({ d: smoothPath(pts), w: W, h: H });
-    };
-    compute();
-    const ro = new ResizeObserver(compute);
-    ro.observe(page);
-    window.addEventListener("resize", compute);
-    // フォント読込後にも再計算（高さがずれるため）
-    (document as any).fonts?.ready?.then(compute).catch(() => {});
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", compute);
-    };
-  }, []);
-
-  // 画像の通し番号（折れ目の左右交互配置に使用）
+  // 画像の通し番号（左右交互配置に使用）
   let imgSeq = 0;
 
   return (
     <div ref={pageRef} className="relative isolate overflow-hidden">
-      <Styles />
-
-      {/* z順（下→上）：1) 背景色 */}
+      {/* z順（下→上）：1) 背景色（動画未設定時の下地） */}
       <div
         className="absolute inset-0 z-0"
         style={{ background: "linear-gradient(180deg, #333 0%, #5f5f5f 28%, #9a9a9a 60%, #cfcfcf 85%, #dedede 100%)" }}
         aria-hidden
       />
 
-      {/* 2) 煙レイヤー（背景色の上・コンテンツの下・実測パス） */}
-      {smoke.d && (
-        <svg
-          className="pointer-events-none absolute left-0 top-0 z-[1]"
-          width={smoke.w}
-          height={smoke.h}
-          viewBox={`0 0 ${smoke.w} ${smoke.h}`}
-          preserveAspectRatio="none"
-          aria-hidden
-        >
-          <defs>
-            <linearGradient id="r3-smoke" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={smoke.h}>
-              {SMOKE_STOPS.map((s) => (
-                <stop key={s.off} offset={s.off} stopColor={s.color} />
-              ))}
-            </linearGradient>
-            {/* ふわっとした煙：ノイズを「滑らかな密度マスク」として使い、変位は控えめ＋大きめのぼかし。
-                ジャギー（PS1的な階段状）を出さないため、急峻なアルファ処理と巨大変位は使わない。 */}
-            {/* 粗い雲＝ふわっとした量感 */}
-            <filter id="r3-cloud" x="-100%" y="-60%" width="300%" height="220%" colorInterpolationFilters="linearRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.008" numOctaves={5} seed={7} result="n">
-                <animate attributeName="baseFrequency" dur="40s" values="0.0045 0.008;0.006 0.011;0.0045 0.008" repeatCount="indefinite" />
-              </feTurbulence>
-              {/* ノイズ輝度 → なめらかな密度（しきい値なし＝ソフト） */}
-              <feColorMatrix in="n" type="matrix"
-                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.34 0.34 0.34 0 -0.04" result="density" />
-              {/* 少しだけ揺らす（大変位はしない） */}
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={34} result="disp" />
-              {/* 密度でマスク → ふわっと濃淡 */}
-              <feComposite in="disp" in2="density" operator="in" result="m" />
-              <feGaussianBlur in="m" stdDeviation={14} />
-            </filter>
-            {/* 細かい筋＝ゆらめくディテール */}
-            <filter id="r3-wisp" x="-100%" y="-60%" width="300%" height="220%" colorInterpolationFilters="linearRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves={5} seed={11} result="n">
-                <animate attributeName="baseFrequency" dur="26s" values="0.012 0.02;0.016 0.026;0.012 0.02" repeatCount="indefinite" />
-              </feTurbulence>
-              <feColorMatrix in="n" type="matrix"
-                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.42 0.42 0.42 0 -0.12" result="density" />
-              <feDisplacementMap in="SourceGraphic" in2="n" scale={26} result="disp" />
-              <feComposite in="disp" in2="density" operator="in" result="m" />
-              <feGaussianBlur in="m" stdDeviation={5} />
-            </filter>
-          </defs>
-          {/* うねり（パス）は維持。ソフトな雲層＋ゆらめく筋を同色で重ね、一体感のある煙に */}
-          <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-            {/* ふわっとした量感（広め・ソフト） */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={260} opacity={0.4} filter="url(#r3-cloud)" />
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={150} opacity={0.5} filter="url(#r3-cloud)" />
-            {/* ゆらめく筋（ディテール） */}
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={120} opacity={0.5} filter="url(#r3-wisp)" />
-            <path d={smoke.d} stroke="url(#r3-smoke)" strokeWidth={56} opacity={0.5} filter="url(#r3-wisp)" />
-            {/* 明るい芯のディテール */}
-            <path d={smoke.d} stroke="#f5fafc" strokeWidth={28} opacity={0.34} filter="url(#r3-wisp)" />
-          </g>
-        </svg>
-      )}
+      {/* 2) 背景動画（背面指定なら z-[1]／前面指定なら z-20 + difference 合成） */}
+      <BgVideos urls={BG_VIDEOS} layer={BG_LAYER} pageRef={pageRef} endRef={endRef} />
 
-      {/* 3) コンテンツ（最上層） */}
+      {/* 3) コンテンツ */}
       <div className="relative z-10">
         {/* ヒーロー（暗部の最上部） */}
         <header className="mx-auto flex min-h-[70vh] max-w-[1400px] flex-col items-center justify-center px-6 py-24 text-center">
@@ -276,7 +272,7 @@ export function Recruit3() {
         {/* 各セクション */}
         {SECTIONS.map((s, si) => {
           const rows = Math.max(s.images, s.bodies);
-          // エントリーはドライアイス画像の下に移動するため、ここでは描画しない
+          // エントリーは専用セクションとして最後に描画するため、ここでは描画しない
           if (s.en === "ENTRY") return null;
           return (
             <section key={si} className="mx-auto max-w-[1400px] px-6 py-16 pc:px-10">
@@ -288,8 +284,7 @@ export function Recruit3() {
                     const hasBody = k < s.bodies;
                     if (hasImg) {
                       const seq = imgSeq++;
-                      const right = seq % 2 === 1; // 折れ目を左右交互に
-                      imgSides.current[seq] = right ? 1 : -1;
+                      const right = seq % 2 === 1; // 左右交互に
                       return (
                         <div
                           key={k}
@@ -298,9 +293,8 @@ export function Recruit3() {
                             (right ? "tab:flex-row-reverse" : "")
                           }
                         >
-                          {/* 画像（折れ目に乗る＝煙パスの通過点） */}
+                          {/* 画像 */}
                           <div
-                            ref={(el) => { imgRefs.current[seq] = el; }}
                             className={
                               "w-[86%] shrink-0 rounded-2xl bg-white/80 p-2 shadow-lg backdrop-blur-sm tab:w-1/2 " +
                               (right ? "self-end tab:self-auto" : "self-start tab:self-auto")
@@ -330,42 +324,16 @@ export function Recruit3() {
           );
         })}
 
-        {/* 最下部：ドライアイス画像とフォームを同一グリッドセルで重ねる
-            （画像＝背景レイヤー / フォーム＝その上に z 重ね・Y軸で重なる） */}
-        <section ref={dryIceRef} className="relative grid w-full pt-16">
-          {/* 画像レイヤー（全幅・枠なし・上下端をマスクで背景へフェード） */}
-          <div className="relative col-start-1 row-start-1 self-center">
-            {/* 立ち上る湯気 */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-40 justify-center">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <span
-                  key={i}
-                  className="r3-steam absolute bottom-0 rounded-full bg-white/60 blur-md"
-                  style={{ left: `${38 + i * 6}%`, width: 40, height: 70, animationDelay: `${i * 1.1}s` }}
-                  aria-hidden
-                />
-              ))}
-            </div>
-            <ImageWithFallback
-              src={img("recruit3:dryice", DRYICE_SRC)}
-              alt="ドライアイス"
-              className="block w-full object-cover"
-              style={{
-                WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
-                maskImage: "linear-gradient(to bottom, transparent 0%, #000 20%, #000 88%, transparent 100%)",
-              }}
-              {...edImg("recruit3:dryice", "ドライアイス画像")}
-            />
-          </div>
-
-          {/* フォームレイヤー（画像の上に z 重ね） */}
-          <div className="relative z-30 col-start-1 row-start-1 w-full max-w-3xl justify-self-center self-center px-6 py-16">
-            <Heading si={SECTIONS.length - 1} en="ENTRY" />
-            <EntryForm si={SECTIONS.length - 1} />
-          </div>
+        {/* 最下部：エントリー */}
+        <section className="mx-auto w-full max-w-3xl px-6 py-16">
+          <Heading si={SECTIONS.length - 1} en="ENTRY" />
+          <EntryForm si={SECTIONS.length - 1} />
         </section>
 
-        <p className="mx-auto max-w-[1400px] px-6 pb-28 pt-6 text-center text-xs text-slate-500">
+        <p
+          ref={endRef}
+          className="mx-auto max-w-[1400px] px-6 pb-28 pt-6 text-center text-xs text-slate-500"
+        >
           ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
         </p>
       </div>

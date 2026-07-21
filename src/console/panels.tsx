@@ -69,6 +69,113 @@ export function RecruitVideoPanel({ value, onChange }: { value: any; onChange: (
   );
 }
 
+/* ===================== 採用3 背景動画 ===================== */
+// 採用3ページの背景に敷く動画（最大5本）と、コンテンツとの前後関係を設定する。
+// 値は sections.json の recruit3Bg に保存: { videos: string[], layer: "back" | "front" }。
+// ページ側はスクロール量に応じて 1本目の先頭フレーム 〜 最終本の最終フレームを再生位置として割り当てる。
+export const R3_BG_MAX = 5;
+
+type R3Bg = { videos: string[]; layer: "back" | "front" };
+
+/** sections から採用3背景動画の設定を安全に取り出す（キー欠落・型違いに耐える） */
+export function readR3Bg(sections: any): R3Bg {
+  const raw = sections?.recruit3Bg ?? {};
+  const videos = (Array.isArray(raw.videos) ? raw.videos : [])
+    .filter((v: any) => typeof v === "string")
+    .slice(0, R3_BG_MAX);
+  return { videos, layer: raw.layer === "front" ? "front" : "back" };
+}
+
+export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v: any) => void }) {
+  const cfg = readR3Bg(value);
+  const set = (patch: Partial<R3Bg>) =>
+    onChange({ ...value, recruit3Bg: { ...cfg, ...patch } });
+  const setVideo = (i: number, url: string) => {
+    const next = cfg.videos.slice();
+    next[i] = url;
+    set({ videos: next });
+  };
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= cfg.videos.length) return;
+    const next = cfg.videos.slice();
+    [next[i], next[j]] = [next[j], next[i]];
+    set({ videos: next });
+  };
+  const remove = (i: number) => {
+    if (!confirm(`背景動画 ${i + 1} を削除しますか？`)) return;
+    set({ videos: cfg.videos.filter((_, idx) => idx !== i) });
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-[12px] text-slate-500">
+        採用3ページの背景に敷く動画です（最大 {R3_BG_MAX} 本）。ページ最上部が1本目の先頭フレーム、
+        最後の文字コンテンツが最終本の最終フレームになるよう、スクロールに追随して再生位置が変わります。
+        上から順に再生されます。設定はプレビューには即時反映されません（「更新（本番へ公開）」後に反映されます）。
+      </p>
+
+      <Card title="コンテンツとの前後関係">
+        <Field
+          label="背景動画の重なり順"
+          hint="「前面」にすると動画がコンテンツの上に重なり、文字は difference 合成（色反転）で浮かび上がります。"
+        >
+          <Select value={cfg.layer} onChange={(e) => set({ layer: e.target.value as R3Bg["layer"] })}>
+            <option value="back">動画を背面に置く（既定）</option>
+            <option value="front">動画を前面に置く（文字は difference 合成で表示）</option>
+          </Select>
+        </Field>
+      </Card>
+
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] text-slate-500">{cfg.videos.length} / {R3_BG_MAX} 本</p>
+        <Button
+          variant="primary"
+          onClick={() => set({ videos: [...cfg.videos, ""] })}
+          disabled={cfg.videos.length >= R3_BG_MAX}
+        >
+          ＋ 背景動画を追加
+        </Button>
+      </div>
+
+      {cfg.videos.length === 0 && (
+        <p className="rounded-md border border-dashed border-slate-300 p-6 text-center text-[12px] text-slate-400">
+          背景動画がありません。「＋ 背景動画を追加」から登録してください。
+          （0本の場合、背景はグラデーションのみになります）
+        </p>
+      )}
+
+      {cfg.videos.map((url, i) => (
+        <Card
+          key={i}
+          title={`背景動画 ${i + 1}`}
+          action={
+            <div className="flex gap-1">
+              <Button onClick={() => move(i, -1)} disabled={i === 0}>↑</Button>
+              <Button onClick={() => move(i, 1)} disabled={i === cfg.videos.length - 1}>↓</Button>
+              <Button variant="danger" onClick={() => remove(i)}>削除</Button>
+            </div>
+          }
+        >
+          <Field
+            label="動画URL"
+            hint="mp4・webm 等の直リンク（同一オリジン or CORS 許可が必要）。下のボタンから動画ファイルを直接アップロードもできます。YouTube・Vimeo の共有URLはスクロール追随できないため使用できません。"
+          >
+            <div className="space-y-2">
+              <TextInput
+                value={url}
+                onChange={(e) => setVideo(i, e.target.value)}
+                placeholder="https://… .mp4 / .webm"
+              />
+              <VideoUploadButton onUploaded={(u) => setVideo(i, u)} />
+            </div>
+          </Field>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 /* ===================== お知らせ ===================== */
 export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v: NewsItem[]) => void }) {
   function update(i: number, patch: Partial<NewsItem>) {
