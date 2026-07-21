@@ -23,6 +23,21 @@ async function gh(path: string, token: string, init?: RequestInit) {
   });
   if (!res.ok) {
     const text = await res.text();
+    // 401/403 は GITHUB_TOKEN の失効・権限不足であることがほとんど。
+    // 生のGitHub応答だけでは対処が分からないため、何をすべきかを添える。
+    if (res.status === 401) {
+      throw new Error(
+        "GitHubの認証に失敗しました（Bad credentials）。公開用アクセストークン（GITHUB_TOKEN）の" +
+          "有効期限が切れているか、無効化されています。GitHubで新しいトークンを発行し、" +
+          "Vercelの環境変数 GITHUB_TOKEN を更新して再デプロイしてください。"
+      );
+    }
+    if (res.status === 403) {
+      throw new Error(
+        "GitHubへの書き込みが拒否されました（403）。GITHUB_TOKEN にこのリポジトリへの" +
+          "contents:write 権限があるか確認してください。"
+      );
+    }
     throw new Error(`GitHub API エラー (${res.status}): ${text}`);
   }
   return res.json();
