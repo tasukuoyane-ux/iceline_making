@@ -70,12 +70,14 @@ export function RecruitVideoPanel({ value, onChange }: { value: any; onChange: (
 }
 
 /* ===================== 採用3 背景動画 ===================== */
-// 採用3ページの背景に敷く動画（最大5本）と、コンテンツとの前後関係を設定する。
-// 値は sections.json の recruit3Bg に保存: { videos: string[], layer: "back" | "front" }。
+// 採用3ページの背景に敷く動画（最大5本）を設定する。
+// 値は sections.json の recruit3Bg に保存: { videos: string[] }。
+// コンテンツとの前後関係はセクション単位で、ページ単位エディタ（プレビューの要素クリック）から
+// recruit3:layer.* の汎用オーバーライドとして編集する。
 // ページ側はスクロール量に応じて 1本目の先頭フレーム 〜 最終本の最終フレームを再生位置として割り当てる。
 export const R3_BG_MAX = 5;
 
-type R3Bg = { videos: string[]; layer: "back" | "front" };
+type R3Bg = { videos: string[] };
 
 /** sections から採用3背景動画の設定を安全に取り出す（キー欠落・型違いに耐える） */
 export function readR3Bg(sections: any): R3Bg {
@@ -83,7 +85,7 @@ export function readR3Bg(sections: any): R3Bg {
   const videos = (Array.isArray(raw.videos) ? raw.videos : [])
     .filter((v: any) => typeof v === "string")
     .slice(0, R3_BG_MAX);
-  return { videos, layer: raw.layer === "front" ? "front" : "back" };
+  return { videos };
 }
 
 export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v: any) => void }) {
@@ -115,17 +117,11 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
         上から順に再生されます。設定はプレビューには即時反映されません（「更新（本番へ公開）」後に反映されます）。
       </p>
 
-      <Card title="コンテンツとの前後関係">
-        <Field
-          label="背景動画の重なり順"
-          hint="「前面」にすると動画がコンテンツの上に重なり、文字は difference 合成（色反転）で浮かび上がります。"
-        >
-          <Select value={cfg.layer} onChange={(e) => set({ layer: e.target.value as R3Bg["layer"] })}>
-            <option value="back">動画を背面に置く（既定）</option>
-            <option value="front">動画を前面に置く（文字は difference 合成で表示）</option>
-          </Select>
-        </Field>
-      </Card>
+      <p className="rounded-md border border-slate-200 bg-white p-3 text-[12px] text-slate-500">
+        コンテンツとの<strong className="font-semibold text-slate-700">前後関係はセクション単位</strong>で設定します。
+        左のプレビューで対象のセクションをクリックすると、右パネルにそのセクションの
+        「背景動画との前後関係」が表示されます（既定は「動画の背面」）。
+      </p>
 
       <div className="flex items-center justify-between">
         <p className="text-[12px] text-slate-500">{cfg.videos.length} / {R3_BG_MAX} 本</p>

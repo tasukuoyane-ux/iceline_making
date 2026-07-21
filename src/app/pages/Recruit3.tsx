@@ -6,18 +6,24 @@
 //  - ページ全体の背景に「スクロール追随の動画」を敷く（最大5本／管理コンソールで設定）。
 //    ページ最上部＝1本目の先頭フレーム、最後の文字コンテンツ＝最終本の最終フレーム。
 //    スクロール位置をそのまま再生位置に写す（自動再生ではないので上下どちらにも追随する）。
-//  - 動画とコンテンツの前後関係もコンソールから切替可能（既定＝動画が背面）。
-//    「前面」の場合は動画レイヤーに mix-blend-mode:difference を掛け、文字を反転で浮かび上がらせる。
-//  - 背景色は最上部 #333 → 最下部 #dedede のグラデーション（動画未設定時の下地）。
+//  - 動画とコンテンツの前後関係は「セクション単位」で切替可能（既定＝コンテンツが動画の背面）。
+//    プレビューでセクションをクリックすると、右パネルにそのセクションの前後関係が出る。
+//  - 背面のコンテンツは動画レイヤーの mix-blend-mode:difference によって反転色で浮かび上がる。
+//    このとき動画自体が変色しないよう、下地は黒にしている（difference の相手が黒＝無変化のため）。
+//    動画が1本も無い場合は従来どおりグラデーション（#333→#dedede）を下地にする。
+//
+// ■ z順（下→上）
+//    0: 下地（黒 or グラデーション） → 1: 背面セクション → 5: 背景動画(difference) → 10: 前面セクション
 //
 // ■ 編集
 //  - 文言・画像は recruit3: プレフィックスの汎用オーバーライドで管理コンソールから編集可能。
+//  - 前後関係は recruit3:layer.* の汎用オーバーライド（プレビューの要素クリックから編集）。
 //  - 背景動画は sections.json の recruit3Bg（コンソール「コンテンツ管理 → 採用3 背景動画」）。
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, edSel, txt, img } from "../lib/editable";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -43,8 +49,30 @@ const BG_RAW: any = (sectionsJson as any).recruit3Bg ?? {};
 const BG_VIDEOS: string[] = (Array.isArray(BG_RAW.videos) ? BG_RAW.videos : [])
   .filter((v: any) => typeof v === "string" && v.trim() !== "")
   .slice(0, BG_MAX);
-// "front" = 動画がコンテンツの前面（文字は difference 合成）／既定は "back"
-const BG_LAYER: "back" | "front" = BG_RAW.layer === "front" ? "front" : "back";
+const HAS_BG = BG_VIDEOS.length > 0;
+
+// ── コンテンツと背景動画の前後関係（セクション単位） ──────────
+// 値は recruit3:layer.<key> の汎用オーバーライド（"back" | "front"）。既定は "back"（動画の背面）。
+const LAYER_OPTS = [
+  { value: "back", label: "動画の背面（文字は反転合成で浮かび上がる）" },
+  { value: "front", label: "動画の前面（そのまま重ねて表示）" },
+];
+const Z_BACK = 1;
+const Z_FRONT = 10;
+
+function layerOf(key: string): "back" | "front" {
+  return txt(`recruit3:layer.${key}`, "back") === "front" ? "front" : "back";
+}
+
+/** セクションに付ける前後関係の属性一式（z-index と、コンソール編集用の data 属性） */
+function layerProps(key: string, label: string) {
+  const cur = layerOf(key);
+  return {
+    "data-r3-sec": "",
+    style: { zIndex: cur === "front" ? Z_FRONT : Z_BACK },
+    ...edSel(`recruit3:layer.${key}`, `${label}：背景動画との前後関係`, LAYER_OPTS, cur),
+  };
+}
 
 // ── セクション定義（個数は採用2に対応。すべてダミー） ──────────
 // images: 画像の枚数 / bodies: 本文ブロックの数
@@ -71,12 +99,10 @@ const SECTIONS: { en: string; images: number; bodies: number }[] = [
 // 自動再生はせず currentTime を直接動かすため、下スクロール／上スクロールの両方に追随する。
 function BgVideos({
   urls,
-  layer,
   pageRef,
   endRef,
 }: {
   urls: string[];
-  layer: "back" | "front";
   pageRef: React.RefObject<HTMLDivElement>;
   endRef: React.RefObject<HTMLElement>;
 }) {
@@ -155,11 +181,11 @@ function BgVideos({
 
   return (
     <div
-      className={
-        "pointer-events-none fixed inset-0 " + (layer === "front" ? "z-20" : "z-[1]")
-      }
-      // 前面配置時：動画をコンテンツへ difference 合成し、下の文字を反転色で浮かび上がらせる
-      style={layer === "front" ? { mixBlendMode: "difference" } : undefined}
+      className="pointer-events-none fixed inset-0"
+      // 背面セクション（z=1）より上、前面セクション（z=10）より下に置く。
+      // difference 合成により、背面に置かれた文字が反転色で浮かび上がる。
+      // 下地は黒なので、文字の無い部分では動画がそのままの色で見える。
+      style={{ zIndex: 5, mixBlendMode: "difference" }}
       aria-hidden
     >
       {urls.map((src, i) => (
@@ -239,20 +265,35 @@ export function Recruit3() {
 
   return (
     <div ref={pageRef} className="relative isolate overflow-hidden">
-      {/* z順（下→上）：1) 背景色（動画未設定時の下地） */}
+      {/* コンソールで前後関係を切り替えた瞬間にプレビューへ反映するための規則。
+          編集ブリッジが data-edit-selected を書き込むので、それを z-index に写す。 */}
+      <style>{`
+        [data-r3-sec][data-edit-selected="back"] { z-index: ${Z_BACK} !important; }
+        [data-r3-sec][data-edit-selected="front"] { z-index: ${Z_FRONT} !important; }
+      `}</style>
+
+      {/* z=0) 下地。動画がある場合は黒（difference の相手を黒にして動画の色を保つ）。 */}
       <div
         className="absolute inset-0 z-0"
-        style={{ background: "linear-gradient(180deg, #333 0%, #5f5f5f 28%, #9a9a9a 60%, #cfcfcf 85%, #dedede 100%)" }}
+        style={{
+          background: HAS_BG
+            ? "#000"
+            : "linear-gradient(180deg, #333 0%, #5f5f5f 28%, #9a9a9a 60%, #cfcfcf 85%, #dedede 100%)",
+        }}
         aria-hidden
       />
 
-      {/* 2) 背景動画（背面指定なら z-[1]／前面指定なら z-20 + difference 合成） */}
-      <BgVideos urls={BG_VIDEOS} layer={BG_LAYER} pageRef={pageRef} endRef={endRef} />
+      {/* z=5) 背景動画（difference 合成）。背面セクションと前面セクションの間に入る。 */}
+      <BgVideos urls={BG_VIDEOS} pageRef={pageRef} endRef={endRef} />
 
-      {/* 3) コンテンツ */}
-      <div className="relative z-10">
-        {/* ヒーロー（暗部の最上部） */}
-        <header className="mx-auto flex min-h-[70vh] max-w-[1400px] flex-col items-center justify-center px-6 py-24 text-center">
+      {/* コンテンツ。前後関係はセクションごとの z-index で決まるため、
+          このラッパーには z-index を付けない（付けると重ね合わせ文脈ができて動画と交差できない）。 */}
+      <div>
+        {/* ヒーロー（最上部） */}
+        <header
+          className="relative mx-auto flex min-h-[70vh] max-w-[1400px] flex-col items-center justify-center px-6 py-24 text-center"
+          {...layerProps("hero", "ヒーロー")}
+        >
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-400">RECRUIT — PLAYGROUND</p>
           <h1
             className="mt-6 text-4xl font-bold leading-tight text-white pc:text-6xl"
@@ -275,7 +316,11 @@ export function Recruit3() {
           // エントリーは専用セクションとして最後に描画するため、ここでは描画しない
           if (s.en === "ENTRY") return null;
           return (
-            <section key={si} className="mx-auto max-w-[1400px] px-6 py-16 pc:px-10">
+            <section
+              key={si}
+              className="relative mx-auto max-w-[1400px] px-6 py-16 pc:px-10"
+              {...layerProps(`s${si}`, s.en)}
+            >
               <Heading si={si} en={s.en} />
 
               <div className="space-y-16">
@@ -325,14 +370,18 @@ export function Recruit3() {
         })}
 
         {/* 最下部：エントリー */}
-        <section className="mx-auto w-full max-w-3xl px-6 py-16">
+        <section
+          className="relative mx-auto w-full max-w-3xl px-6 py-16"
+          {...layerProps("entry", "エントリー")}
+        >
           <Heading si={SECTIONS.length - 1} en="ENTRY" />
           <EntryForm si={SECTIONS.length - 1} />
         </section>
 
         <p
           ref={endRef}
-          className="mx-auto max-w-[1400px] px-6 pb-28 pt-6 text-center text-xs text-slate-500"
+          className="relative mx-auto max-w-[1400px] px-6 pb-28 pt-6 text-center text-xs text-slate-500"
+          {...layerProps("note", "注記")}
         >
           ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
         </p>

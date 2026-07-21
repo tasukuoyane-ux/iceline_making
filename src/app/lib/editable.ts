@@ -52,6 +52,27 @@ export function edImg(path: string, label?: string): Record<string, string> {
   return a;
 }
 
+/**
+ * 選択式（プルダウン）の編集対象。値は汎用オーバーライドに文字列として保存される。
+ * 例：背景動画とコンテンツの前後関係の切替。
+ *   {...edSel("recruit3:layer.s3", "前後関係", OPTS, cur)}
+ * data-edit-options は "値:表示名" を | 区切りで並べたもの。
+ */
+export function edSel(
+  path: string,
+  label: string,
+  options: { value: string; label: string }[],
+  current: string
+): Record<string, string> {
+  if (!EDIT_MODE || isCommon(path)) return {};
+  return {
+    "data-edit-select": path,
+    "data-edit-label": label,
+    "data-edit-options": options.map((o) => `${o.value}:${o.label}`).join("|"),
+    "data-edit-value": current,
+  };
+}
+
 /** 汎用オーバーライドのテキスト値（編集済みなら override、無ければ既定値） */
 export function txt(path: string, def: string): string {
   const v = OVERRIDES[path];

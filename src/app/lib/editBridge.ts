@@ -13,8 +13,8 @@ function injectStyle() {
   const style = document.createElement("style");
   style.id = OUTLINE_STYLE_ID;
   style.textContent = `
-    [data-edit], [data-edit-img] { cursor: pointer; }
-    [data-edit]:hover, [data-edit-img]:hover {
+    [data-edit], [data-edit-img], [data-edit-select] { cursor: pointer; }
+    [data-edit]:hover, [data-edit-img]:hover, [data-edit-select]:hover {
       outline: 2px dashed #16a34a !important;
       outline-offset: 2px;
       background-color: rgba(22,163,74,0.06);
@@ -48,37 +48,72 @@ function applyOverrides(overrides: Record<string, string>) {
       const im = el.tagName === "IMG" ? (el as HTMLImageElement) : el.querySelector("img");
       if (im && im.getAttribute("src") !== value) im.setAttribute("src", value);
     });
+    // 選択式：選択値を属性として書き戻す。ページ側は CSS でこの属性に反応させることで、
+    // 再ビルドなしにプレビューへ即時反映できる（例：前後関係の z-index 切替）。
+    document.querySelectorAll<HTMLElement>(`[data-edit-select="${cssEscape(path)}"]`).forEach((el) => {
+      if (el.getAttribute("data-edit-selected") !== value) el.setAttribute("data-edit-selected", value);
+    });
   }
 }
 
 interface PageField {
   path: string;
-  kind: "text" | "image";
+  kind: "text" | "image" | "select";
   value: string;
   label: string;
   multiline: boolean;
+  options?: { value: string; label: string }[];
+}
+
+/** data-edit-options（"値:表示名" を | 区切り）をパースする */
+function parseOptions(raw: string | null): { value: string; label: string }[] {
+  if (!raw) return [];
+  return raw
+    .split("|")
+    .map((s) => {
+      const i = s.indexOf(":");
+      return i < 0 ? { value: s, label: s } : { value: s.slice(0, i), label: s.slice(i + 1) };
+    })
+    .filter((o) => o.value !== "");
 }
 
 /** 現在ページの編集可能要素をDOM順で収集 */
 function scanFields(): PageField[] {
-  const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-edit],[data-edit-img]"));
+  const nodes = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-edit],[data-edit-img],[data-edit-select]")
+  );
   const seen = new Set<string>();
   const fields: PageField[] = [];
   for (const el of nodes) {
     const isImg = el.hasAttribute("data-edit-img");
-    const path = (isImg ? el.getAttribute("data-edit-img") : el.getAttribute("data-edit"))!;
+    const isSel = el.hasAttribute("data-edit-select");
+    const path = (isSel
+      ? el.getAttribute("data-edit-select")
+      : isImg
+      ? el.getAttribute("data-edit-img")
+      : el.getAttribute("data-edit"))!;
     if (!path || seen.has(path) || isExcludedPath(path)) continue;
     seen.add(path);
     let value = "";
-    if (isImg) {
+    if (isSel) {
+      // 現在の選択値（親からの反映済み属性 → ページ側の既定値 の順で拾う）
+      value = el.getAttribute("data-edit-selected") || el.getAttribute("data-edit-value") || "";
+    } else if (isImg) {
       const im = el.tagName === "IMG" ? (el as HTMLImageElement) : el.querySelector("img");
       value = im?.getAttribute("src") || "";
     } else {
       value = el.textContent || "";
     }
     const label = el.getAttribute("data-edit-label") || autoLabel(path);
-    const multiline = el.hasAttribute("data-edit-multi") || (!isImg && value.length > 40);
-    fields.push({ path, kind: isImg ? "image" : "text", value, label, multiline });
+    const multiline = !isSel && (el.hasAttribute("data-edit-multi") || (!isImg && value.length > 40));
+    fields.push({
+      path,
+      kind: isSel ? "select" : isImg ? "image" : "text",
+      value,
+      label,
+      multiline,
+      ...(isSel ? { options: parseOptions(el.getAttribute("data-edit-options")) } : {}),
+    });
   }
   return fields;
 }
@@ -112,6 +147,10 @@ function findEditable(target: EventTarget | null): { el: HTMLElement; path: stri
     }
     if (el.hasAttribute?.("data-edit-img")) {
       const p = el.getAttribute("data-edit-img")!;
+      return isExcludedPath(p) ? null : { el, path: p };
+    }
+    if (el.hasAttribute?.("data-edit-select")) {
+      const p = el.getAttribute("data-edit-select")!;
       return isExcludedPath(p) ? null : { el, path: p };
     }
     el = el.parentElement;
@@ -156,7 +195,10 @@ export function initEditBridge() {
     }
     if (msg.type === "request-fields") postFields();
     if (msg.type === "scroll-to") {
-      const el = document.querySelector<HTMLElement>(`[data-edit="${cssEscape(msg.path)}"],[data-edit-img="${cssEscape(msg.path)}"]`);
+      const p = cssEscape(msg.path);
+      const el = document.querySelector<HTMLElement>(
+        `[data-edit="${p}"],[data-edit-img="${p}"],[data-edit-select="${p}"]`
+      );
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         if (activeEl) activeEl.classList.remove("iceline-edit-active");
