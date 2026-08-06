@@ -81,8 +81,9 @@ export function Header() {
               </Link>
             );
           })}
+          {/* 採用情報は採用3（採用2踏襲＋動画背景）を表示する */}
           <Link
-            to="/recruit"
+            to="/recruit3"
             className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-brand-dark"
             style={{ fontSize: 14 }}
           >
@@ -130,7 +131,7 @@ export function Header() {
               )
             )}
             <Link
-              to="/recruit"
+              to="/recruit3"
               onClick={() => setOpen(false)}
               className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground"
             >
