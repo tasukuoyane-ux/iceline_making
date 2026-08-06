@@ -15,7 +15,14 @@ import {
 } from "../components/ui/select";
 import { ed, txt } from "../lib/editable";
 
-const TOPICS = ["商品について", "お取引について", "採用について", "その他"];
+const TOPICS = [
+  "氷・雪氷・氷カフェ・フラペリッチ",
+  "業務用食材",
+  "ドライアイス",
+  "低温物流センター",
+  "採用について",
+  "その他",
+];
 
 export function Contact() {
   const [type, setType] = useState("");

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowRight, Building2, ShoppingBag, Users } from "lucide-react";
+import { ArrowRight, Building2, ShoppingBag, Snowflake } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
@@ -7,7 +7,7 @@ import { IMG, PRODUCT_IMG } from "../data/images";
 import { NEWS } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
 import { InlineMovieTag } from "../components/common/MovieBadge";
 
 // トップページ メインビジュアル（TOP専用キーで編集対象を明確化）
@@ -33,10 +33,11 @@ const SERVICES: { to: string; en: string; title: string; lead: string; imgKey?: 
   { to: "/dryice", en: "DRY ICE", title: "ドライアイスの販売", lead: "必要なとき、必要な量を。", imgKey: "service:dryice.mv.image" },
 ];
 
+// MV下の導線。label が1行目、note が2行目（括弧内の補足。無い導線は空文字）。
 const AUDIENCE = [
-  { icon: Building2, label: "業務用の氷・食品をお探しの方へ", note: "B2B 顧客向け", to: "/food", external: false },
-  { icon: ShoppingBag, label: "オンラインショップはこちら", note: "B2C 消費者向け", to: "https://www.dry-ice.jp/", external: true },
-  { icon: Users, label: "採用情報・エントリーはこちら", note: "求職者向け", to: "/recruit3", external: false },
+  { icon: Building2, label: "お取引企業様", note: "氷/氷菓・食材・ドライアイス・倉庫", to: "/contact", external: false },
+  { icon: Snowflake, label: "一般のお客様", note: "氷/氷菓", to: "/ice", external: false },
+  { icon: ShoppingBag, label: "ドライアイスオンラインショップ", note: "", to: "https://www.dry-ice.jp/", external: true },
 ];
 
 function Hero() {
@@ -65,8 +66,11 @@ export function Top() {
                 <div className="flex items-center gap-4">
                   <a.icon className="text-brand" size={28} />
                   <div>
-                    <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, "導線サブラベル")}>{txt(`top:audience.${i}.note`, a.note)}</p>
                     <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, "導線ラベル")}>{txt(`top:audience.${i}.label`, a.label)}</p>
+                    {/* 2行目（括弧内の補足）。空の導線では表示しない */}
+                    {(txt(`top:audience.${i}.note`, a.note) || EDIT_MODE) && (
+                      <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, "導線サブラベル")}>{txt(`top:audience.${i}.note`, a.note)}</p>
+                    )}
                   </div>
                 </div>
                 <ArrowRight className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
