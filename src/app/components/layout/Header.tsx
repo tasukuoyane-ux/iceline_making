@@ -7,17 +7,21 @@ import { cn } from "../ui/utils";
 import { ed, edImg, txt, img } from "../../lib/editable";
 
 // ロゴクリックで / へ遷移できるため「TOP」はナビから除外。
-// 構成: SHOP（ボタン状・少し離す）→ サービス4項目 → 会社情報 → お知らせ → 採用情報CTA。
-// shop: 外部ショップ。ボタン状の見た目で、隣のナビから少し離して配置する。
-const NAV: { to: string; label: string; external?: boolean; shop?: boolean }[] = [
-  { to: "https://www.dry-ice.jp/", label: "SHOP", external: true, shop: true },
-  // サービス（概念上のグループ。「サービス」というメニュー自体は置かない）
+// 構成: SHOP（ボタン状・少し離す）→ サービス4項目（ひとかたまりのピル）→
+//       会社情報 → お知らせ → お問い合わせ → 採用情報CTA。
+const SHOP_URL = "https://www.dry-ice.jp/";
+// サービス（概念上のグループ。「サービス」というメニュー自体は置かず、
+// 4項目を角丸の下地でひとかたまりに見せる）
+const SERVICE_NAV: { to: string; label: string }[] = [
   { to: "/ice", label: "氷・氷菓" },
   { to: "/food", label: "業務用食材" },
   { to: "/warehouse", label: "倉庫事業" },
   { to: "/dryice", label: "ドライアイス" },
+];
+const NAV: { to: string; label: string }[] = [
   { to: "/company", label: "会社情報" },
   { to: "/news", label: "お知らせ" },
+  { to: "/contact", label: "お問い合わせ" },
 ];
 
 export function Header() {
@@ -43,26 +47,40 @@ export function Header() {
 
         {/* PC nav */}
         <nav className="hidden items-center gap-1 pc:flex">
-          {NAV.map((n, i) => {
-            if (n.external) {
+          {/* SHOP（ボタン状・隣のナビから少しだけ離す） */}
+          <a
+            href={SHOP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mr-4 rounded-full border border-brand px-4 py-1.5 text-brand transition-colors hover:bg-brand hover:text-brand-foreground"
+            style={{ fontSize: 14 }}
+          >
+            <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "SHOP")}</span>
+          </a>
+
+          {/* サービス4項目：角丸の下地でひとかたまりに。アクティブ項目は白チップ */}
+          <div className="mr-2 flex items-center rounded-full bg-secondary p-1">
+            {SERVICE_NAV.map((n, i) => {
+              const active = pathname.startsWith(n.to);
               return (
-                <a
+                <Link
                   key={n.to}
-                  href={n.to}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  to={n.to}
                   className={cn(
-                    "relative px-3 py-2 text-foreground transition-colors hover:text-brand",
-                    // SHOP はボタン状の見た目にし、隣のナビから少しだけ離す
-                    n.shop &&
-                      "mr-4 rounded-full border border-brand px-4 py-1.5 text-brand hover:bg-brand hover:text-brand-foreground"
+                    "rounded-full px-3.5 py-1.5 transition-colors",
+                    active
+                      ? "bg-background text-brand shadow-sm"
+                      : "text-foreground hover:text-brand",
                   )}
                   style={{ fontSize: 14 }}
                 >
-                  <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
-                </a>
+                  <span {...ed(`header:svc.${i}.label`, "サービスナビ項目")}>{txt(`header:svc.${i}.label`, n.label)}</span>
+                </Link>
               );
-            }
+            })}
+          </div>
+
+          {NAV.map((n, i) => {
             const active = pathname.startsWith(n.to);
             return (
               <Link
@@ -104,32 +122,48 @@ export function Header() {
       {/* Mobile menu */}
       {open && (
         <nav className="border-t border-border bg-background pc:hidden">
-          <div className="mx-auto flex max-w-[1400px] flex-col px-5 py-2">
-            {NAV.map((n, i) =>
-              n.external ? (
-                <a
-                  key={n.to}
-                  href={n.to}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className="border-b border-border/60 py-4"
-                  style={{ fontSize: 15 }}
-                >
-                  <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
-                </a>
-              ) : (
+          <div className="mx-auto flex max-w-[1400px] flex-col px-5 py-4">
+            {/* SHOP（ボタン状） */}
+            <a
+              href={SHOP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="inline-flex w-fit rounded-full border border-brand px-5 py-2 text-brand"
+              style={{ fontSize: 14 }}
+            >
+              <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "SHOP")}</span>
+            </a>
+
+            {/* サービス4項目：角丸の下地でひとかたまりに */}
+            <div className="mt-4 rounded-2xl bg-secondary px-4 py-1">
+              {SERVICE_NAV.map((n, i) => (
                 <Link
                   key={n.to}
                   to={n.to}
                   onClick={() => setOpen(false)}
-                  className="border-b border-border/60 py-4"
+                  className="block border-b border-border/60 py-3.5 last:border-0"
+                  style={{ fontSize: 15 }}
+                >
+                  <span {...ed(`header:svc.${i}.label`, "サービスナビ項目")}>{txt(`header:svc.${i}.label`, n.label)}</span>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-2">
+              {NAV.map((n, i) => (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={() => setOpen(false)}
+                  className="block border-b border-border/60 py-4"
                   style={{ fontSize: 15 }}
                 >
                   <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
                 </Link>
-              )
-            )}
+              ))}
+            </div>
+
             <Link
               to="/recruit3"
               onClick={() => setOpen(false)}
