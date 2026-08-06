@@ -8,6 +8,7 @@ import { CookieConsent } from "./components/layout/CookieConsent";
 import { Top } from "./pages/Top";
 import { DivisionPage } from "./pages/DivisionPage";
 import { ServicePage } from "./pages/ServicePage";
+import { PackagePage } from "./pages/PackagePage";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Company } from "./pages/Company";
 import { Contact } from "./pages/Contact";
@@ -52,6 +53,7 @@ function Site() {
           <Route path="/ice" element={<DivisionPage division="ice" />} />
           <Route path="/ice/recipe/:id" element={<RecipeDetail />} />
           <Route path="/food/products/:id" element={<ProductDetail />} />
+          <Route path="/food/packages/:id" element={<PackagePage />} />
           <Route path="/ice/products/:id" element={<ProductDetail />} />
           <Route path="/warehouse" element={<ServicePage service="warehouse" />} />
           <Route path="/dryice" element={<ServicePage service="dryice" />} />

@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ChevronRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronDown, Search } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
+import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
 const MV: Record<Division, { img: string; en: string; title: string; lead: string }> = {
@@ -23,15 +24,19 @@ const IMG_PLACEHOLDER =
   );
 
 // ─────────────────────────────────────────────────────────
-// 「取り扱い商品」より上のコンテンツ。内容確定スプレッドシートの
-// 「氷・氷菓の製造販売」「業務用食材の販売」シートに準拠
-// （「〇〇（要確認）」の未確定箇所は掲載せず、確定後にコンソールから追記できる）。
+// コンテンツは内容確定スプレッドシートの「氷・氷菓の製造販売」「業務用食材の販売」
+// シートに準拠。セクション名もシート通り。
+// シート上で「〇〇（要確認）」となっている箇所は pending スロットとして実装し、
+// 公開ページでは未入力の間は非表示、コンソール（編集モード）では入力枠を表示する。
 // 文言・画像は division:{division}. プレフィックスの汎用オーバーライドで編集可能。
-// imgKey は旧レイアウトでアップロード済みの実写真を引き継ぐための明示キー。
 // ─────────────────────────────────────────────────────────
+const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
+
 interface DetailItem {
   title?: string;
-  body: string;
+  body?: string;
+  /** true なら要確認スロット（既定は空。入力されるまで公開ページでは非表示） */
+  pending?: boolean;
   /** true なら画像＋テキストの交互レイアウトで表示 */
   image?: boolean;
   /** 既存アップロード画像を引き継ぐ場合の明示キー */
@@ -42,15 +47,21 @@ interface DetailSection {
   jp: string;
   items: DetailItem[];
 }
+interface FaqItem {
+  q: string;
+  a?: string;
+  pending?: boolean;
+}
 
 const OVERVIEW: Record<Division, string> = {
   food:
     "岡山県内において、外食産業向け食品商社としてトップシェアを持つ事業です。国内外200社以上の仕入れ先から調達した5,000品目を超える商品を取り扱い、ホテル・レストランをはじめとする飲食店・食品メーカーへ届けています。食用油・輸入鶏肉をはじめとする定番品から、世界中の食材まで幅広く対応しています。",
   ice:
-    "アイスラインは、1905年の創業以来、氷の製造・販売を中核事業として展開してきました。西大寺物流センター（営業部・製造部）を拠点に、業務用かち割り氷から独自開発の味付き氷・氷菓まで、幅広いラインナップを全国の飲食店・量販店・テーマパークなどに供給しています。国際食品安全認証FSSC22000を取得し、製造から出荷までの全工程において品質管理を徹底しています。",
+    "アイスラインは、1905年の創業以来、氷の製造・販売を中核事業として展開してきました。西大寺物流センター（営業部・製造部）を拠点に、業務用かち割り氷から独自開発の味付き氷・氷菓まで、幅広いラインナップを全国の飲食店・量販店・テーマパークなどに供給しています。国際食品安全認証FSSC22000を取得し、製造から出荷までの全工程において品質管理を徹底しています。"
 };
 
-const DETAIL: Record<Division, DetailSection[]> = {
+// 商品一覧（製品ラインナップ／取り扱い商品カテゴリ）より上のセクション
+const DETAIL_PRE: Record<Division, DetailSection[]> = {
   food: [
     {
       en: "FEATURES",
@@ -62,6 +73,7 @@ const DETAIL: Record<Division, DetailSection[]> = {
             "食品には必ず賞味期限があります。1品目でも管理を誤れば廃棄になり、欠品すれば取引先の現場が止まります。5,000品目以上を扱う以上、その管理を誤らないための体制を、日々整えています。\nアイスラインの5,000品目は、単なる取扱品目数ではありません。長年の販売データをもとに抽出した、お客様が実際に必要としている在庫のある商品群です。毎月の棚卸しと受発注管理システムによる在庫管理を組み合わせ、動いている商品・動いていない商品の動向をリアルタイムで把握できる仕組みを整えています。冷凍品・チルド品の賞味期限チェックを徹底し、フードロスを極力抑えた運用を実現しています。",
           image: true,
         },
+        { title: "変化の激しい食品市場への対応", pending: true },
         {
           title: "現場に通い続けるから、見えることがある",
           body:
@@ -121,6 +133,7 @@ const DETAIL: Record<Division, DetailSection[]> = {
           body:
             "物流センター内は常に整理整頓された状態を維持しています。通路に物を置かず棚に収めるというルールを全従業員が徹底し、安全で衛生的な保管・出荷環境を確保しています。",
         },
+        { pending: true },
       ],
     },
   ],
@@ -141,6 +154,7 @@ const DETAIL: Record<Division, DetailSection[]> = {
             "製氷方法は、工場と製品によって異なります。\n二日市工場ではカングリット製法を採用しています。135kgの大きな氷の塊からカットして加工していく方法で、かち割り氷や小さな氷など多様なサイズに対応できることが特徴です。製氷に時間を要しますが、大型の氷から精密に加工できる点が強みです。\n西大寺工場ではターボ製氷（氷柱方式）を採用しています。90〜120分という短いサイクルで製氷できるため、需要の変動に柔軟に対応できる生産体制を整えています。\n氷の品質は、不純物をどれだけ取り除けるかで決まります。水の純度が高いほど透明で硬く、溶けにくい氷になります。ロッキーアイスが「硬く透明で溶けにくい」のは、原料水の純度を高め、低温でじっくり凍らせる工程を徹底しているからです。",
           image: true,
         },
+        { title: "製造能力・設備", pending: true },
       ],
     },
     {
@@ -151,21 +165,377 @@ const DETAIL: Record<Division, DetailSection[]> = {
           body:
             "国際食品安全認証「FSSC22000」を取得しています。食品安全マネジメントシステムの国際規格に基づき、原料の受け入れから製造・検査・出荷までの全工程において、定められた基準に沿った管理を行っています。",
         },
+        { pending: true },
+      ],
+    },
+    {
+      en: "PROCESS",
+      jp: "氷ができるまで",
+      items: [
+        { body: "氷カフェ（コーヒー）を例に、製造工程をご紹介します。" },
+        { pending: true },
       ],
     },
   ],
 };
 
+// 商品一覧より下のセクション（お客様の声・環境など）
+const DETAIL_POST: Record<Division, DetailSection[]> = {
+  food: [
+    { en: "VOICES", jp: "お客様の声・導入事例", items: [{ pending: true }] },
+    { en: "ENVIRONMENT", jp: "環境への取り組み", items: [{ pending: true }] },
+  ],
+  ice: [
+    { en: "VOICES", jp: "お客様の声・導入事例", items: [{ pending: true }] },
+    {
+      en: "ENVIRONMENT",
+      jp: "環境への取り組み",
+      items: [
+        {
+          body:
+            "2022年竣工の西大寺物流センターでは、自然冷媒を使用した冷却設備を導入しています。自然冷媒はオゾン層破壊係数がゼロで、代替フロンと比べて地球温暖化係数が大幅に低く、環境負荷を抑えた製造・保管を実現しています。",
+        },
+        { pending: true },
+      ],
+    },
+  ],
+};
+
+const FAQ: Record<Division, FaqItem[]> = {
+  food: [
+    { q: "取引を始めるにはどうすればよいですか？", a: "まずはお問い合わせフォームまたはお電話にてご連絡ください。" },
+    { q: "取り扱い商品のリストは確認できますか？", pending: true },
+    { q: "最小発注ロットはどのくらいですか？", pending: true },
+    { q: "配送エリアはどこまで対応していますか？", a: "岡山県全域への配送に対応しています。" },
+    { q: "前日注文した商品はいつ届きますか？", a: "翌日の配送でお届けしています。" },
+    { q: "アレルギー情報は確認できますか？", pending: true },
+  ],
+  ice: [
+    { q: "最小発注ロットはどのくらいですか？", pending: true },
+    { q: "配送エリアはどこまで対応していますか？", pending: true },
+    { q: "OEM・PB対応は可能ですか？", pending: true },
+    { q: "サンプルの取り寄せは可能ですか？", pending: true },
+    { q: "FSSC22000以外の認証取得状況を教えてください。", pending: true },
+  ],
+};
+
+// ─────────────────────────────────────────────────────────
+// 氷・氷菓の製品ラインナップ（シートのカテゴリ分け通り）。
+// products は既存の商品詳細ページ（/ice/products/:id）との対応。
+// 炭酸氷はシート未掲載だが、既存詳細ページを残すため氷カフェ・カクテル用アイスに含める。
+// ─────────────────────────────────────────────────────────
+const ICE_CATEGORIES: { name: string; desc: string; skus: string; products: string[] }[] = [
+  {
+    name: "製氷（ロッキーアイスシリーズ）",
+    desc:
+      "純度の高い原料水を低温でじっくり凍らせた、硬く透明で溶けにくい業務用かち割り氷です。溶けても飲み物の味を損なわず、食品本来のおいしさをそのままお届けします。",
+    skus:
+      "・ロッキーアイス チャック付き（1kg×12）\n・ロッキーアイス 2kg（2kg×6）\n・ロッキーアイス 3kg（3kg×4）\n・ROCKY650（650g×18）\n・プレミアムな氷 オンザロックICE（6個×8×2台）オンザロック専用\n・アイス平（1.7kg×6）板状アイス\n・ブロックアイス（3.75kg×4）\n・ROCKYカップ 130g（130g×12×4合）\n・ROCKYカップ 180g（180g×12×3合）",
+    products: ["rocky-ice"],
+  },
+  {
+    name: "雪氷・雪氷果肉入り",
+    desc:
+      "かき氷用に削った氷を個包装した商品です。氷削り機やブレンダーマシンなしで、かき氷・スムージーを作ることができます。一袋使い切りタイプで衛生的に使用することができ、原価計算も容易です。",
+    skus:
+      "・雪氷（200g）\n・雪氷果肉入り いちご（100g×18袋）\n・雪氷果肉入り マンゴー（100g×18袋）\n・雪氷果肉入り レモン（100g×18袋）",
+    products: ["snow-ice"],
+  },
+  {
+    name: "氷カフェ・カクテル用アイス",
+    desc:
+      "通常の氷をドリンクに入れると、時間とともに飲み物が薄くなってしまいます。氷カフェはそんな飲食店の長年の課題に応えた商品です。コーヒーや果汁などを凍らせてチップアイス状にクラッシュしているため、氷が溶けるほどに味が深まっていきます。グラスに入れて牛乳を注ぐだけでアイスカフェラテを作ることができ、特別な機械も技術も必要ありません。一袋使い切りの個包装なので衛生的に使用でき、原価の計算もしやすく、人手不足の飲食現場でもすぐに導入しやすい商品です。",
+    skus:
+      "氷カフェ（60g×20袋）\n・コーヒー\n・抹茶\n・いちご\n・ほうじ茶\n\nカクテル用アイス（80g×20袋）\n・マンゴー\n・巨峰\n・青りんご\n・レモン",
+    products: ["ice-cafe", "cocktail-ice", "carbonated-ice"],
+  },
+  {
+    name: "フラペリッチ",
+    desc:
+      "抹茶やコーヒーの氷を細かく削り、小豆やチョコチップとクランチをあらかじめ混ぜ込んで個包装しています。牛乳を注ぐだけでスムージーを作ることができ、ブレンダーも専門の技術も事前の仕込みも必要ありません。ドリンク1杯あたりのコストが明確になるため、原価管理もしやすくなります。設備投資なしに新メニューを導入できる点が、多くの飲食店に選ばれている理由です。",
+    skus: "・フラペリッチ 宇治抹茶小豆入り（100g×18袋）\n・フラペリッチ コーヒー",
+    products: ["frappe-rich"],
+  },
+];
+
+// 活用提案・メニューレシピ（シート準拠の確定原稿）
+const ICE_RECIPE_STORY =
+  "通常の氷をドリンクに入れると、溶けるにつれて飲み物の味が薄くなっていきます。これは飲食店にとって長年の課題でした。氷カフェはその発想を逆転させた商品です。氷そのものをコーヒーや果汁にすることで、溶けるほどに味が深まっていく。牛乳を注ぐだけでアイスカフェラテを作ることができ、特別な機械は不要です。アイスラインの氷菓は、透明・無味・無臭という「普通の氷」の常識にとどまらず、氷そのものを素材として捉え直した商品群です。";
+
+// ─────────────────────────────────────────────────────────
+// 業務用食材の検索モックアップ。
+// 今後 5,000 品目の食品データベースに接続した検索機能を実装予定。
+// ここではその UI イメージとして約30品目のモックデータで動作する。
+// ─────────────────────────────────────────────────────────
+interface FoodDbItem {
+  name: string;
+  category: string;
+  temp: "常温" | "冷蔵" | "冷凍";
+  spec: string;
+  /** 既存の商品詳細ページがある場合のリンク先 */
+  to?: string;
+}
+const FOOD_DB: FoodDbItem[] = [
+  { name: "大豆白絞油", category: "食用油", temp: "常温", spec: "16.5kg缶" },
+  { name: "晴れの国 大豆白絞油（PB）", category: "食用油", temp: "常温", spec: "16.5kg缶" },
+  { name: "キャノーラ油", category: "食用油", temp: "常温", spec: "16.5kg缶" },
+  { name: "ピュアオリーブオイル", category: "食用油", temp: "常温", spec: "5L" },
+  { name: "純正ごま油", category: "食用油", temp: "常温", spec: "1,650g" },
+  { name: "輸入鶏もも肉", category: "鶏肉・畜肉", temp: "冷凍", spec: "2kg×6" },
+  { name: "輸入鶏むね肉", category: "鶏肉・畜肉", temp: "冷凍", spec: "2kg×6" },
+  { name: "若鶏手羽先", category: "鶏肉・畜肉", temp: "冷凍", spec: "2kg" },
+  { name: "豚バラスライス", category: "鶏肉・畜肉", temp: "冷凍", spec: "1kg" },
+  { name: "牛カルビスライス", category: "鶏肉・畜肉", temp: "冷凍", spec: "1kg" },
+  { name: "えびフライ", category: "冷凍食品", temp: "冷凍", spec: "10尾×10" },
+  { name: "鶏から揚げ", category: "冷凍食品", temp: "冷凍", spec: "1kg" },
+  { name: "フライドポテト シューストリング", category: "冷凍食品", temp: "冷凍", spec: "1kg×10" },
+  { name: "焼餃子", category: "冷凍食品", temp: "冷凍", spec: "50個入" },
+  { name: "ミックスベジタブル", category: "冷凍食品", temp: "冷凍", spec: "1kg" },
+  { name: "ホテル・レストラン向け冷凍食品（各種）", category: "冷凍食品", temp: "冷凍", spec: "規格多数", to: "/food/products/frozen-foods" },
+  { name: "濃口醤油", category: "調味料", temp: "常温", spec: "1.8L×6" },
+  { name: "本みりん", category: "調味料", temp: "常温", spec: "1.8L×6" },
+  { name: "業務用マヨネーズ", category: "調味料", temp: "冷蔵", spec: "1kg" },
+  { name: "トマトケチャップ", category: "調味料", temp: "常温", spec: "1kg" },
+  { name: "がらスープの素", category: "調味料", temp: "常温", spec: "1kg" },
+  { name: "薄力小麦粉", category: "乾物・粉類", temp: "常温", spec: "1kg×15" },
+  { name: "パン粉", category: "乾物・粉類", temp: "常温", spec: "1kg×10" },
+  { name: "片栗粉", category: "乾物・粉類", temp: "常温", spec: "1kg×15" },
+  { name: "業務用精米", category: "乾物・粉類", temp: "常温", spec: "10kg" },
+  { name: "冷凍ホイップ", category: "デザート・乳製品", temp: "冷凍", spec: "1L×12" },
+  { name: "バニラアイス", category: "デザート・乳製品", temp: "冷凍", spec: "2L" },
+  { name: "シュレッドチーズ", category: "デザート・乳製品", temp: "冷蔵", spec: "1kg" },
+  { name: "むきえび", category: "水産品", temp: "冷凍", spec: "1kg" },
+  { name: "ドライアイス", category: "その他", temp: "冷凍", spec: "ご要望に応じてカット", to: "/food/products/dry-ice" },
+  { name: "業務用食材（その他）", category: "その他", temp: "常温", spec: "5,000品目以上", to: "/food/products/pro-ingredients" },
+];
+const FOOD_TEMPS = ["すべて", "常温", "冷蔵", "冷凍"] as const;
+
+function FoodSearchMock() {
+  const [query, setQuery] = useState("");
+  const [cat, setCat] = useState("すべて");
+  const [temp, setTemp] = useState<(typeof FOOD_TEMPS)[number]>("すべて");
+  const cats = useMemo(() => ["すべて", ...Array.from(new Set(FOOD_DB.map((i) => i.category)))], []);
+  const hits = useMemo(
+    () =>
+      FOOD_DB.filter(
+        (i) =>
+          (cat === "すべて" || i.category === cat) &&
+          (temp === "すべて" || i.temp === temp) &&
+          (query.trim() === "" || (i.name + i.category + i.spec).toLowerCase().includes(query.trim().toLowerCase()))
+      ),
+    [query, cat, temp]
+  );
+
+  return (
+    <div className="mt-10 rounded-2xl border border-border bg-card p-6 pc:p-8">
+      {/* 検索ボックス */}
+      <div className="relative">
+        <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="商品名・カテゴリで検索（例：鶏肉、食用油）"
+          className="h-12 pl-11"
+          aria-label="商品検索"
+        />
+      </div>
+
+      {/* カテゴリ・温度帯フィルタ */}
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        {cats.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setCat(c)}
+            className={`rounded-full border px-4 py-1.5 transition-colors ${
+              cat === c ? "border-brand bg-brand text-brand-foreground" : "border-border bg-background text-foreground hover:border-brand hover:text-brand"
+            }`}
+            style={{ fontSize: 13 }}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground" style={{ fontSize: 12 }}>温度帯：</span>
+        {FOOD_TEMPS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTemp(t)}
+            className={`rounded-full border px-3.5 py-1 transition-colors ${
+              temp === t ? "border-brand bg-brand text-brand-foreground" : "border-border bg-background text-foreground hover:border-brand hover:text-brand"
+            }`}
+            style={{ fontSize: 12 }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* 検索結果 */}
+      <p className="mt-6 text-muted-foreground" style={{ fontSize: 13 }}>
+        {hits.length}件を表示
+      </p>
+      <div className="mt-3 grid gap-3 tab:grid-cols-2 pc:grid-cols-3">
+        {hits.map((i) => {
+          const inner = (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex bg-secondary px-2.5 py-0.5 text-muted-foreground" style={{ fontSize: 11 }}>{i.category}</span>
+                <span
+                  className={`inline-flex px-2.5 py-0.5 text-white ${i.temp === "冷凍" ? "bg-brand" : i.temp === "冷蔵" ? "bg-[#4a90b8]" : "bg-[#8a8a8a]"}`}
+                  style={{ fontSize: 11 }}
+                >
+                  {i.temp}
+                </span>
+              </div>
+              <p className="mt-2" style={{ fontSize: 15, fontWeight: 700 }}>{i.name}</p>
+              <p className="mt-1 text-muted-foreground" style={{ fontSize: 12 }}>{i.spec}</p>
+              {i.to && (
+                <span className="mt-2 inline-flex items-center gap-1 text-brand" style={{ fontSize: 12 }}>
+                  詳細を見る <ArrowRight size={12} />
+                </span>
+              )}
+            </>
+          );
+          return i.to ? (
+            <Link key={i.name} to={i.to} className="rounded-xl border border-border bg-background p-4 transition-colors hover:border-brand">
+              {inner}
+            </Link>
+          ) : (
+            <div key={i.name} className="rounded-xl border border-border bg-background p-4">
+              {inner}
+            </div>
+          );
+        })}
+      </div>
+      {hits.length === 0 && (
+        <p className="mt-4 text-center text-muted-foreground" style={{ fontSize: 14 }}>
+          該当する商品が見つかりませんでした。条件を変えてお試しください。
+        </p>
+      )}
+
+      <p className="mt-6 text-muted-foreground" style={{ fontSize: 12 }}>
+        ※ 商品検索は開発中の機能イメージ（モックアップ）です。現在は約5,000品目のうち一部の商品のみを表示しています。
+      </p>
+    </div>
+  );
+}
+
+// おすすめパッケージ（/food/packages/:id の3ページへの導線）
+export const FOOD_PACKAGES: { id: string; title: string; lead: string }[] = [
+  { id: "izakaya-starter", title: "居酒屋の開業におすすめの商品セット", lead: "揚げ物・焼き物・ドリンクまわりの定番をひとまとめに。" },
+  { id: "cafe-sweets", title: "カフェ・喫茶店の開業におすすめの商品セット", lead: "氷カフェ・スイーツ食材で、ドリンクとデザートを手早く。" },
+  { id: "banquet-season", title: "ホテル・レストランの宴会シーズンにおすすめの商品セット", lead: "繁忙期の仕込みを支える、大容量・時短の定番セット。" },
+];
+
+// ─────────────────────────────────────────────────────────
+
+/** 要確認スロット対応の項目レンダラ */
+function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; si: number; ii: number; it: DetailItem; secJp: string }) {
+  const base = `division:${division}.sec.${si}.${ii}`;
+  const value = txt(`${base}.body`, it.pending ? "" : it.body ?? "");
+  if (it.pending && !value && !EDIT_MODE) return null;
+  const bodyText = value || (it.pending ? PENDING_HINT : "");
+
+  if (it.image) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className={`grid items-center gap-8 pc:grid-cols-[2fr_3fr] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
+      >
+        <div className="[direction:ltr] pc:px-12">
+          {it.title && (
+            <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
+              {txt(`${base}.title`, it.title)}
+            </h3>
+          )}
+          <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
+            {bodyText}
+          </p>
+        </div>
+        <ImageWithFallback
+          src={img(it.imgKey ?? `${base}.image`, IMG_PLACEHOLDER)}
+          alt={it.title || secJp}
+          className="aspect-[4/3] w-full rounded-2xl border border-border object-cover [direction:ltr]"
+          {...edImg(it.imgKey ?? `${base}.image`, `${it.title || secJp} 画像`)}
+        />
+      </motion.div>
+    );
+  }
+  return (
+    <div className={it.title ? "rounded-2xl border border-border bg-card p-8" : "max-w-3xl"}>
+      {it.title && (
+        <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
+          {txt(`${base}.title`, it.title)}
+        </h3>
+      )}
+      <p
+        className={`mt-3 ${it.pending && !value ? "text-muted-foreground" : "text-foreground/80"}`}
+        style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }}
+        {...ed(`${base}.body`, it.pending ? "本文（要確認・未確定）" : "本文", { multiline: true })}
+      >
+        {bodyText}
+      </p>
+    </div>
+  );
+}
+
+/** セクション（全項目が未入力の要確認スロットなら公開ページでは丸ごと非表示） */
+function DetailSectionBlock({ division, si, sec, heat }: { division: Division; si: number; sec: DetailSection; heat: any }) {
+  const visible = sec.items.some((it, ii) => !it.pending || txt(`division:${division}.sec.${si}.${ii}.body`, "") !== "");
+  if (!visible && !EDIT_MODE) return null;
+  return (
+    <Section heat={heat}>
+      <SectionTitle en={sec.en} jp={sec.jp} />
+      <div className="mt-12 space-y-10">
+        {sec.items.map((it, ii) => (
+          <DetailItemBlock key={ii} division={division} si={si} ii={ii} it={it} secJp={sec.jp} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** 商品カード（既存の商品詳細ページへの導線） */
+function ProductCard({ division, id }: { division: Division; id: string }) {
+  const p = PRODUCTS.find((x) => x.id === id);
+  if (!p) return null;
+  return (
+    <Link
+      to={`/${division}/products/${p.id}`}
+      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-lg"
+    >
+      <div className="aspect-[4/3] overflow-hidden bg-secondary">
+        <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h4 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{txt(`product:${p.id}:name`, p.name)}</h4>
+        <p className="mt-1 flex-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{txt(`product:${p.id}:catch`, p.catch)}</p>
+        <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
+          詳細を見る <ArrowRight size={14} />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 export function DivisionPage({ division }: { division: Division }) {
   const mv = MV[division];
   const divTitle = txt(`division:${division}.mv.title`, mv.title);
-  const items = PRODUCTS.filter((p) => p.division === division);
   const [openCats, setOpenCats] = useState<string[]>([]);
   const toggleCat = (c: string) =>
     setOpenCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   const bizHeat = division === "food" ? HEAT.foodBiz : HEAT.iceBiz;
   const reasonHeat = division === "food" ? HEAT.foodReason : HEAT.iceReason;
   const listHeat = division === "food" ? HEAT.foodList : HEAT.iceList;
+
+  // 氷ができるまで（活用提案）内の要確認スロット
+  const recipePendingVal = txt(`division:ice.recipeIdeas.pending`, "");
 
   return (
     <>
@@ -217,90 +587,118 @@ export function DivisionPage({ division }: { division: Division }) {
         </Section>
       )}
 
-      {/* シート構成に沿った各セクション */}
-      {DETAIL[division].map((sec, si) => (
-        <Section key={si} heat={si % 2 ? listHeat : reasonHeat}>
-          <SectionTitle en={sec.en} jp={sec.jp} />
-          <div className="mt-12 space-y-10">
-            {sec.items.map((it, ii) => {
-              const base = `division:${division}.sec.${si}.${ii}`;
-              return it.image ? (
-                <motion.div
-                  key={ii}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                  className={`grid items-center gap-8 pc:grid-cols-[2fr_3fr] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
-                >
-                  <div className="[direction:ltr] pc:px-12">
-                    {it.title && (
-                      <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-                        {txt(`${base}.title`, it.title)}
-                      </h3>
-                    )}
-                    <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
-                      {txt(`${base}.body`, it.body)}
-                    </p>
-                  </div>
-                  <ImageWithFallback
-                    src={img(it.imgKey ?? `${base}.image`, IMG_PLACEHOLDER)}
-                    alt={it.title || sec.jp}
-                    className="aspect-[4/3] w-full rounded-2xl border border-border object-cover [direction:ltr]"
-                    {...edImg(it.imgKey ?? `${base}.image`, `${it.title || sec.jp} 画像`)}
-                  />
-                </motion.div>
-              ) : (
-                <div key={ii} className={it.title ? "rounded-2xl border border-border bg-card p-8" : "max-w-3xl"}>
-                  {it.title && (
-                    <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-                      {txt(`${base}.title`, it.title)}
-                    </h3>
-                  )}
-                  <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
-                    {txt(`${base}.body`, it.body)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </Section>
+      {/* 商品一覧より上のセクション（シート準拠） */}
+      {DETAIL_PRE[division].map((sec, si) => (
+        <DetailSectionBlock key={si} division={division} si={si} sec={sec} heat={si % 2 ? listHeat : reasonHeat} />
       ))}
 
-      {/* 商品一覧（以下は現状維持） */}
-      <Section heat={listHeat}>
-        <SectionTitle en="PRODUCTS" jp="取り扱い商品" />
-        <div className="mt-10 grid gap-6 tab:grid-cols-2 pc:grid-cols-3">
-          {items.map((p) => (
-            <Link
-              key={p.id}
-              to={`/${division}/products/${p.id}`}
-              className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-lg"
-            >
-              <div className="aspect-[4/3] overflow-hidden bg-secondary">
-                <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
+      {/* ── 氷・氷菓：製品ラインナップ（シートのカテゴリ分け通り） ── */}
+      {division === "ice" && (
+        <Section heat={listHeat}>
+          <SectionTitle en="LINEUP" jp="製品ラインナップ" />
+          <div className="mt-12 space-y-16">
+            {ICE_CATEGORIES.map((cat, ci) => (
+              <div key={ci}>
+                <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`ice:lineup.${ci}.name`, "カテゴリ名")}>
+                  {txt(`ice:lineup.${ci}.name`, cat.name)}
+                </h3>
+                <p className="mt-5 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.desc`, "カテゴリ説明", { multiline: true })}>
+                  {txt(`ice:lineup.${ci}.desc`, cat.desc)}
+                </p>
+                <div className="mt-8 grid gap-8 pc:grid-cols-[1fr_2fr]">
+                  {/* 規格一覧 */}
+                  <div className="rounded-2xl border border-border bg-card p-6">
+                    <p className="text-muted-foreground" style={{ fontSize: 12, letterSpacing: "0.08em" }}>規格一覧</p>
+                    <p className="mt-3" style={{ fontSize: 14, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.skus`, "規格一覧", { multiline: true })}>
+                      {txt(`ice:lineup.${ci}.skus`, cat.skus)}
+                    </p>
+                  </div>
+                  {/* 対応する商品詳細ページ */}
+                  <div className="grid content-start gap-5 tab:grid-cols-2 pc:grid-cols-3">
+                    {cat.products.map((id) => (
+                      <ProductCard key={id} division="ice" id={id} />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-1 flex-col p-6">
-                <span className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`product:${p.id}:genre`, "商品ジャンル")}>{txt(`product:${p.id}:genre`, p.genre)}</span>
-                <h3 className="mt-1" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{txt(`product:${p.id}:name`, p.name)}</h3>
-                <p className="mt-2 flex-1 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{txt(`product:${p.id}:catch`, p.catch)}</p>
-                <span className="mt-4 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
-                  詳細を見る <ArrowRight size={14} />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Section>
+            ))}
+          </div>
+        </Section>
+      )}
 
-      {/* 氷のレシピ（アイス事業部のみ・カテゴリごとにアコーディオン展開） */}
+      {/* ── 業務用食材：取り扱い商品カテゴリ（検索モックアップ） ── */}
+      {division === "food" && (
+        <Section heat={listHeat}>
+          <SectionTitle en="PRODUCTS" jp="取り扱い商品カテゴリ" />
+          <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.products.intro", "取り扱い商品カテゴリ 説明", { multiline: true })}>
+            {txt("division:food.products.intro", "取扱商品の主要カテゴリは食用油・輸入鶏肉をはじめとする業務用食材です。")}
+          </p>
+          {/* 要確認：カテゴリ一覧と代表商品名 */}
+          {(txt("division:food.products.categories", "") || EDIT_MODE) && (
+            <p className="mt-4 max-w-3xl text-muted-foreground" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.products.categories", "カテゴリ一覧と代表商品名（要確認・未確定）", { multiline: true })}>
+              {txt("division:food.products.categories", PENDING_HINT)}
+            </p>
+          )}
+          <FoodSearchMock />
+        </Section>
+      )}
+
+      {/* ── 業務用食材：おすすめパッケージ ── */}
+      {division === "food" && (
+        <Section heat={reasonHeat} id="packages">
+          <SectionTitle en="PACKAGES" jp="おすすめパッケージ" />
+          <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.9 }}>
+            業態や季節に合わせて、よく使われる商品を組み合わせたおすすめのセットをご提案しています。
+          </p>
+          <div className="mt-10 grid gap-6 pc:grid-cols-3">
+            {FOOD_PACKAGES.map((pkg, i) => (
+              <Link
+                key={pkg.id}
+                to={`/food/packages/${pkg.id}`}
+                className="group flex flex-col rounded-2xl border border-border bg-card p-8 transition-colors hover:border-brand"
+              >
+                <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 32, fontWeight: 700, lineHeight: 1 }}>{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-4" style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.5 }} {...ed(`package:${pkg.id}.title`, "パッケージ名")}>
+                  {txt(`package:${pkg.id}.title`, pkg.title)}
+                </h3>
+                <p className="mt-3 flex-1 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9 }} {...ed(`package:${pkg.id}.lead`, "リード")}>
+                  {txt(`package:${pkg.id}.lead`, pkg.lead)}
+                </p>
+                <span className="mt-5 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
+                  セット内容を見る <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ── 氷・氷菓：活用提案・メニューレシピ ── */}
       {division === "ice" && (
         <Section heat={HEAT.iceRecipe} id="ice-recipe">
-          <SectionTitle en="ICE RECIPE" jp="氷のレシピ" />
-          <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.9 }}>
+          <SectionTitle en="RECIPE IDEAS" jp="活用提案・メニューレシピ" />
+          {/* 氷カフェが生まれた理由 */}
+          <div className="mt-10 rounded-2xl border border-border bg-card p-8">
+            <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed("division:ice.recipeIdeas.storyTitle", "見出し")}>
+              {txt("division:ice.recipeIdeas.storyTitle", "氷カフェが生まれた理由")}
+            </h3>
+            <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed("division:ice.recipeIdeas.story", "本文", { multiline: true })}>
+              {txt("division:ice.recipeIdeas.story", ICE_RECIPE_STORY)}
+            </p>
+          </div>
+
+          {/* メニューレシピ（既存のレシピアコーディオン） */}
+          <h3 className="mt-14" style={{ fontSize: 20, fontWeight: 700 }}>メニューレシピ</h3>
+          <p className="mt-3 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.9 }}>
             氷カフェ・カクテル氷・雪氷を使った、お店でそのまま使えるレシピメニュー。
           </p>
-          <div className="mt-10 space-y-4">
+          {/* 要確認：QRコード案内のレシピ内容・動画コンテンツ */}
+          {(recipePendingVal || EDIT_MODE) && (
+            <p className="mt-3 max-w-3xl text-muted-foreground" style={{ fontSize: 14, lineHeight: 2, whiteSpace: "pre-line" }} {...ed("division:ice.recipeIdeas.pending", "メニューレシピ補足（要確認・未確定）", { multiline: true })}>
+              {recipePendingVal || PENDING_HINT}
+            </p>
+          )}
+          <div className="mt-8 space-y-4">
             {ICE_RECIPES.map((cat) => {
               const open = openCats.includes(cat.category);
               return (
@@ -341,6 +739,38 @@ export function DivisionPage({ division }: { division: Division }) {
                       </div>
                     </div>
                   )}
+                </div>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+
+      {/* 商品一覧より下のセクション（お客様の声・環境への取り組み） */}
+      {DETAIL_POST[division].map((sec, si) => (
+        <DetailSectionBlock key={si} division={division} si={si + 10} sec={sec} heat={si % 2 ? reasonHeat : bizHeat} />
+      ))}
+
+      {/* よくあるご質問（回答が未確定の設問は公開ページでは非表示） */}
+      {(FAQ[division].some((f, i) => !f.pending || txt(`division:${division}.faq.${i}.a`, "") !== "") || EDIT_MODE) && (
+        <Section heat={reasonHeat}>
+          <SectionTitle en="FAQ" jp="よくあるご質問" />
+          <div className="mt-10 space-y-4">
+            {FAQ[division].map((f, i) => {
+              const a = txt(`division:${division}.faq.${i}.a`, f.pending ? "" : f.a ?? "");
+              if (f.pending && !a && !EDIT_MODE) return null;
+              return (
+                <div key={i} className="rounded-xl border border-border bg-card p-6">
+                  <p className="flex gap-3" style={{ fontSize: 16, fontWeight: 700 }}>
+                    <span className="text-brand" style={{ fontFamily: "var(--font-accent)" }}>Q.</span>
+                    <span {...ed(`division:${division}.faq.${i}.q`, "質問")}>{txt(`division:${division}.faq.${i}.q`, f.q)}</span>
+                  </p>
+                  <p className="mt-3 flex gap-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
+                    <span className="text-muted-foreground" style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}>A.</span>
+                    <span style={{ whiteSpace: "pre-line" }} className={f.pending && !a ? "text-muted-foreground" : ""} {...ed(`division:${division}.faq.${i}.a`, f.pending ? "回答（要確認・未確定）" : "回答", { multiline: true })}>
+                      {a || (f.pending ? PENDING_HINT : "")}
+                    </span>
+                  </p>
                 </div>
               );
             })}

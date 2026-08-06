@@ -10,7 +10,10 @@ import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
+
+// 要確認スロットの案内文（未入力の間、公開ページでは項目ごと非表示になる）
+const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
 
 // ＋画像の差し替え可能なプレースホルダー（編集前に表示するグレー枠）
 const IMG_PLACEHOLDER =
@@ -23,7 +26,9 @@ export type ServiceId = "warehouse" | "dryice";
 
 interface ServiceSectionItem {
   title?: string;
-  body: string;
+  body?: string;
+  /** true なら要確認スロット（既定は空。入力されるまで公開ページでは非表示） */
+  pending?: boolean;
   /** true なら画像＋テキストの交互レイアウトで表示 */
   image?: boolean;
 }
@@ -38,7 +43,7 @@ interface ServiceConfig {
   lead: string;
   overview: string;
   sections: ServiceSection[];
-  faq: { q: string; a: string }[];
+  faq: { q: string; a?: string; pending?: boolean }[];
   /** 施設写真（倉庫事業のみ。キャプションはシートの指定に準拠） */
   photos?: string[];
   /** 外部ショップ導線（ドライアイスのみ） */
@@ -68,6 +73,7 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
             body: "冷凍（F級：-18℃以下）および冷蔵（C3級：5℃以下）に対応しています。",
             image: true,
           },
+          { title: "セキュリティ・管理体制", pending: true },
         ],
       },
       {
@@ -94,6 +100,8 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
         q: "荷役料はどのように計算されますか？",
         a: "最初の商品お預かり時に1回のみ徴収します。複数回に分けて出庫される場合も、追加の荷役料は発生しません。",
       },
+      { q: "最低保管期間はありますか？", pending: true },
+      { q: "見学・下見は可能ですか？", pending: true },
     ],
     photos: [
       "移動ラックシステム（冷凍庫内）",
@@ -120,6 +128,7 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
             body: "お客様のご要望に合わせてサイズをカットしてお届けします。業務用の大ロットから小口まで対応しています。",
             image: true,
           },
+          { pending: true },
           {
             title: "主な用途",
             body:
@@ -144,10 +153,17 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
             title: "個人向けECサイト",
             body: "個人のお客様向けには、ECサイトからもご購入いただけます。",
           },
+          { pending: true },
         ],
+      },
+      {
+        en: "SHOP",
+        jp: "販売サイト",
+        items: [{ pending: true }],
       },
     ],
     faq: [
+      { q: "最小注文量はどのくらいですか？", pending: true },
       {
         q: "サイズのカット指定はできますか？",
         a: "はい、お客様のご要望に合わせてカットしてお届けしています。詳細はお問い合わせください。",
@@ -160,6 +176,7 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
         q: "個人での購入は可能ですか？",
         a: "個人のお客様向けには、ECサイトからご購入いただけます。",
       },
+      { q: "配送エリアはどこまで対応していますか？", pending: true },
     ],
     shopUrl: "https://www.dry-ice.jp/",
   },
@@ -209,13 +226,20 @@ export function ServicePage({ service }: { service: ServiceId }) {
         </div>
       </Section>
 
-      {/* シート構成に沿った各セクション */}
-      {s.sections.map((sec, si) => (
+      {/* シート構成に沿った各セクション（要確認スロットは未入力の間、公開ページでは非表示） */}
+      {s.sections.map((sec, si) => {
+        const visible =
+          sec.items.some((it, ii) => !it.pending || txt(`${base}.sec.${si}.${ii}.body`, "") !== "") || EDIT_MODE;
+        if (!visible) return null;
+        return (
         <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
           <SectionTitle en={sec.en} jp={sec.jp} />
           <div className="mt-12 space-y-10">
-            {sec.items.map((it, ii) =>
-              it.image ? (
+            {sec.items.map((it, ii) => {
+              const value = txt(`${base}.sec.${si}.${ii}.body`, it.pending ? "" : it.body ?? "");
+              if (it.pending && !value && !EDIT_MODE) return null;
+              const bodyText = value || (it.pending ? PENDING_HINT : "");
+              return it.image ? (
                 <motion.div
                   key={ii}
                   initial={{ opacity: 0, y: 24 }}
@@ -231,7 +255,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                       </h3>
                     )}
                     <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.sec.${si}.${ii}.body`, "本文", { multiline: true })}>
-                      {txt(`${base}.sec.${si}.${ii}.body`, it.body)}
+                      {bodyText}
                     </p>
                   </div>
                   <ImageWithFallback
@@ -248,15 +272,20 @@ export function ServicePage({ service }: { service: ServiceId }) {
                       {txt(`${base}.sec.${si}.${ii}.title`, it.title)}
                     </h3>
                   )}
-                  <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.sec.${si}.${ii}.body`, "本文", { multiline: true })}>
-                    {txt(`${base}.sec.${si}.${ii}.body`, it.body)}
+                  <p
+                    className={`mt-3 ${it.pending && !value ? "text-muted-foreground" : "text-foreground/80"}`}
+                    style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }}
+                    {...ed(`${base}.sec.${si}.${ii}.body`, it.pending ? "本文（要確認・未確定）" : "本文", { multiline: true })}
+                  >
+                    {bodyText}
                   </p>
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         </Section>
-      ))}
+        );
+      })}
 
       {/* 施設写真（倉庫事業のみ・キャプションはシート指定） */}
       {s.photos && (
@@ -284,7 +313,10 @@ export function ServicePage({ service }: { service: ServiceId }) {
       <Section heat={HEAT.foodReason}>
         <SectionTitle en="FAQ" jp="よくあるご質問" />
         <div className="mt-10 space-y-4">
-          {s.faq.map((f, i) => (
+          {s.faq.map((f, i) => {
+            const a = txt(`${base}.faq.${i}.a`, f.pending ? "" : f.a ?? "");
+            if (f.pending && !a && !EDIT_MODE) return null;
+            return (
             <div key={i} className="rounded-xl border border-border bg-card p-6">
               <p className="flex gap-3" style={{ fontSize: 16, fontWeight: 700 }}>
                 <span className="text-brand" style={{ fontFamily: "var(--font-accent)" }}>Q.</span>
@@ -292,10 +324,13 @@ export function ServicePage({ service }: { service: ServiceId }) {
               </p>
               <p className="mt-3 flex gap-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
                 <span className="text-muted-foreground" style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}>A.</span>
-                <span style={{ whiteSpace: "pre-line" }} {...ed(`${base}.faq.${i}.a`, "回答", { multiline: true })}>{txt(`${base}.faq.${i}.a`, f.a)}</span>
+                <span style={{ whiteSpace: "pre-line" }} className={f.pending && !a ? "text-muted-foreground" : ""} {...ed(`${base}.faq.${i}.a`, f.pending ? "回答（要確認・未確定）" : "回答", { multiline: true })}>
+                  {a || (f.pending ? PENDING_HINT : "")}
+                </span>
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </Section>
 
