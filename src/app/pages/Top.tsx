@@ -24,10 +24,19 @@ const STRENGTH_PLACEHOLDER =
 const STRENGTH_BODY_DEFAULT =
   "アイスラインが選ばれる理由は、一言で言えば「欠かさない」ことです。需要が読めないときでも、季節が外れているときでも、営業と製造と物流が動いて、約束した量を届ける。それを積み重ねてきた120年があります。\nFSSC・ISO認証に裏打ちされた品質と、5,000品目を超える商品ラインアップで、これからも食を支え続けます。";
 
+// 事業一覧（現在のサイト構成に対応）。倉庫・ドライアイスの画像は各事業ページの
+// MV画像（service:*.mv.image）を共有し、コンソールで設定すればトップにも反映される。
+const SERVICES: { to: string; en: string; title: string; lead: string; imgKey?: string; imgDefault?: string }[] = [
+  { to: "/ice", en: "ICE", title: "氷・氷菓の製造販売", lead: "冷たいものなら、アイスライン。", imgDefault: IMG.iceMv },
+  { to: "/food", en: "FOOD", title: "業務用食材の販売", lead: "食の現場に、深く根を張る。", imgDefault: IMG.foodMv },
+  { to: "/warehouse", en: "WAREHOUSE", title: "倉庫事業", lead: "食を預かる、冷たい倉庫。", imgKey: "service:warehouse.mv.image" },
+  { to: "/dryice", en: "DRY ICE", title: "ドライアイスの販売", lead: "必要なとき、必要な量を。", imgKey: "service:dryice.mv.image" },
+];
+
 const AUDIENCE = [
   { icon: Building2, label: "業務用の氷・食品をお探しの方へ", note: "B2B 顧客向け", to: "/food", external: false },
   { icon: ShoppingBag, label: "オンラインショップはこちら", note: "B2C 消費者向け", to: "https://www.dry-ice.jp/", external: true },
-  { icon: Users, label: "採用情報・エントリーはこちら", note: "求職者向け", to: "/recruit", external: false },
+  { icon: Users, label: "採用情報・エントリーはこちら", note: "求職者向け", to: "/recruit3", external: false },
 ];
 
 function Hero() {
@@ -127,6 +136,32 @@ export function Top() {
               {txt("top:strengthV2.body", STRENGTH_BODY_DEFAULT)}
             </p>
           </div>
+        </div>
+      </Section>
+
+      {/* 事業内容（現在のサイト構成：4事業への導線） */}
+      <Section heat={HEAT.topGenre}>
+        <SectionTitle en="OUR SERVICES" jp="事業内容" />
+        <div className="mt-10 grid gap-5 tab:grid-cols-2">
+          {SERVICES.map((s, i) => (
+            <Link key={s.to} to={s.to} className="group relative overflow-hidden rounded-lg">
+              <div className="aspect-[16/8] w-full overflow-hidden bg-secondary">
+                <ImageWithFallback
+                  src={s.imgKey ? img(s.imgKey, STRENGTH_PLACEHOLDER) : s.imgDefault!}
+                  alt={s.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/80 via-ink/30 to-transparent p-6">
+                <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.18em" }}>{s.en}</span>
+                <span className="mt-1 flex items-center gap-2 text-white" style={{ fontSize: 20, fontWeight: 700 }}>
+                  <span {...ed(`top:services.${i}.title`, "事業名")}>{txt(`top:services.${i}.title`, s.title)}</span>
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </span>
+                <span className="mt-1 text-white/80" style={{ fontSize: 13 }} {...ed(`top:services.${i}.lead`, "事業リード")}>{txt(`top:services.${i}.lead`, s.lead)}</span>
+              </div>
+            </Link>
+          ))}
         </div>
       </Section>
 
