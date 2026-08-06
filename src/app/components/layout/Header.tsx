@@ -7,16 +7,17 @@ import { cn } from "../ui/utils";
 import { ed, edImg, txt, img } from "../../lib/editable";
 
 // ロゴクリックで / へ遷移できるため「TOP」はナビから除外。
-// 旧「TOP」の位置に外部ショップ（SHOP）リンクを配置。
-const NAV: { to: string; label: string; external?: boolean }[] = [
-  { to: "https://www.dry-ice.jp/", label: "SHOP", external: true },
-  { to: "/food", label: "食品事業部" },
-  { to: "/ice", label: "アイス事業部" },
+// 構成: SHOP（ボタン状・少し離す）→ サービス4項目 → 会社情報 → お知らせ → 採用情報CTA。
+// shop: 外部ショップ。ボタン状の見た目で、隣のナビから少し離して配置する。
+const NAV: { to: string; label: string; external?: boolean; shop?: boolean }[] = [
+  { to: "https://www.dry-ice.jp/", label: "SHOP", external: true, shop: true },
+  // サービス（概念上のグループ。「サービス」というメニュー自体は置かない）
+  { to: "/ice", label: "氷・氷菓" },
+  { to: "/food", label: "業務用食材" },
+  { to: "/warehouse", label: "倉庫事業" },
+  { to: "/dryice", label: "ドライアイス" },
   { to: "/company", label: "会社情報" },
   { to: "/news", label: "お知らせ" },
-  { to: "/contact", label: "お問い合わせ" },
-  { to: "/recruit2", label: "採用2" },
-  { to: "/recruit3", label: "採用3" },
 ];
 
 export function Header() {
@@ -50,7 +51,12 @@ export function Header() {
                   href={n.to}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative px-3 py-2 text-foreground transition-colors hover:text-brand"
+                  className={cn(
+                    "relative px-3 py-2 text-foreground transition-colors hover:text-brand",
+                    // SHOP はボタン状の見た目にし、隣のナビから少しだけ離す
+                    n.shop &&
+                      "mr-4 rounded-full border border-brand px-4 py-1.5 text-brand hover:bg-brand hover:text-brand-foreground"
+                  )}
                   style={{ fontSize: 14 }}
                 >
                   <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>

@@ -70,10 +70,9 @@ export function RecruitVideoPanel({ value, onChange }: { value: any; onChange: (
 }
 
 /* ===================== 採用3 背景動画 ===================== */
-// 採用3ページの背景に敷く動画（最大5本）を設定する。
+// 採用3ページのメインビジュアル以下の背景に敷く動画（最大5本）を設定する。
 // 値は sections.json の recruit3Bg に保存: { videos: string[] }。
-// コンテンツとの前後関係はセクション単位で、ページ単位エディタ（プレビューの要素クリック）から
-// recruit3:layer.* の汎用オーバーライドとして編集する。
+// 動画は素の色のまま描画され、上に淡いブルー〜白の薄いベールを重ねてコンテンツの背面に敷かれる。
 // ページ側はスクロール量に応じて 1本目の先頭フレーム 〜 最終本の最終フレームを再生位置として割り当てる。
 export const R3_BG_MAX = 5;
 
@@ -112,15 +111,11 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
   return (
     <div className="space-y-4">
       <p className="text-[12px] text-slate-500">
-        採用3ページの背景に敷く動画です（最大 {R3_BG_MAX} 本）。ページ最上部が1本目の先頭フレーム、
-        最後の文字コンテンツが最終本の最終フレームになるよう、スクロールに追随して再生位置が変わります。
-        上から順に再生されます。設定はプレビューには即時反映されません（「更新（本番へ公開）」後に反映されます）。
-      </p>
-
-      <p className="rounded-md border border-slate-200 bg-white p-3 text-[12px] text-slate-500">
-        コンテンツとの<strong className="font-semibold text-slate-700">前後関係はセクション単位</strong>で設定します。
-        左のプレビューで対象のセクションをクリックすると、右パネルにそのセクションの
-        「背景動画との前後関係」が表示されます（既定は「動画の背面」）。
+        採用3ページのメインビジュアル以下の背景に敷く動画です（最大 {R3_BG_MAX} 本）。
+        MV直下が1本目の先頭フレーム、ページ最下端が最終本の最終フレームになるよう、
+        スクロールに追随して再生位置が変わります。上から順に再生されます。
+        動画の上には淡いブルー〜白の薄いベールがかかり、コンテンツは常に動画の前面に表示されます。
+        設定はプレビューには即時反映されません（「更新（本番へ公開）」後に反映されます）。
       </p>
 
       <div className="flex items-center justify-between">
@@ -137,7 +132,7 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
       {cfg.videos.length === 0 && (
         <p className="rounded-md border border-dashed border-slate-300 p-6 text-center text-[12px] text-slate-400">
           背景動画がありません。「＋ 背景動画を追加」から登録してください。
-          （0本の場合、背景はグラデーションのみになります）
+          （0本の場合、背景は採用2と同じパララックス背景になります）
         </p>
       )}
 

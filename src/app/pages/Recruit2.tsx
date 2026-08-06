@@ -89,7 +89,7 @@ const ICE_KNOCK = (() => {
 
 // MVアニメーション用スタイル（画像マーキー＝低速 / 切り抜き帯＝高速、どちらも右→左ループ。
 // スクロールインジケーターは右下で縦に流れる）
-function R2Styles() {
+export function R2Styles() {
   return (
     <style>{`
       .r2-marquee { animation: r2-scroll 50s linear infinite; will-change: transform; }
@@ -170,7 +170,7 @@ function Sec({ children, className = "" }: { children: React.ReactNode; classNam
   );
 }
 
-function Hero() {
+export function Hero() {
   // 背後のスライド画像（差し替え可・4枚）。複数枚が継ぎ足されながら流れ、ICELINEの穴から覗く。
   const slides = Array.from({ length: MV_SLIDE_COUNT }, (_, i) =>
     img(`recruit2:mv.slide.${i}`, MV_SLIDE_DEFAULTS[i])
@@ -273,7 +273,7 @@ function BigHead({ base, en, jp, center }: { base: string; en: string; jp: strin
   );
 }
 
-function Biz() {
+export function Biz() {
   return (
     <Sec>
       {/* 画像1のレイアウト：見出し ＋ 2事業部のボックスを中央寄せ（本文は非表示） */}
@@ -298,7 +298,7 @@ function Biz() {
   );
 }
 
-function Philosophy() {
+export function Philosophy() {
   // 画像2のデザイン：ティール背景に、随所へ白いソフト領域。中央に大きな理念テキスト（pronets風）。
   return (
     <section className="relative overflow-hidden px-6 py-24 pc:py-32">
@@ -351,7 +351,7 @@ function Deco({ className, color, rotate = 0 }: { className?: string; color: str
   );
 }
 
-function Locations() {
+export function Locations() {
   // 画像3のデザイン：中央見出し＋装飾、拠点カード（画像＋ラベル）。画像は差し替え可能。
   return (
     <Sec>
@@ -384,7 +384,7 @@ function Locations() {
 // 仕事の魅力の各ブロックのリード（既定・編集可）
 const CHARM_LEADS = ["何かあったら、まず話す。", "毎日の約束が、信頼になる。", "食のすべてに、そっと関わる。"];
 
-function Charm() {
+export function Charm() {
   // 画像1のレイアウト：横長ヒーロー画像の上にタイトル、その下にリード＋本文。
   return (
     <Sec>
@@ -417,7 +417,7 @@ function Charm() {
   );
 }
 
-function Day() {
+export function Day() {
   const d = RECRUIT_DAYS[0];
   return (
     <Sec>
@@ -460,7 +460,7 @@ const CAREER_PATHS = [
   { label: "総合職", note: "総合職のステップ例" },
 ];
 
-function CareerPath() {
+export function CareerPath() {
   const [tab, setTab] = useState(0);
   return (
     <Sec>
@@ -536,7 +536,7 @@ function Image2Row({ base, red, blue, black, defaultSide, imgLabel = "画像" }:
   );
 }
 
-function Jobs() {
+export function Jobs() {
   // 画像2のレイアウト：赤タイトル・青リード・黒本文・横に画像（左右は console 切替）
   return (
     <Sec>
@@ -558,7 +558,7 @@ function Jobs() {
   );
 }
 
-function CeoMessage() {
+export function CeoMessage() {
   // 業務内容と同じ画像2レイアウト
   return (
     <Sec>
@@ -578,7 +578,7 @@ function CeoMessage() {
 }
 
 // 会社紹介資料（カンパニーデック）。従来の採用ページと同じ profileSlides.json を共有。
-function CompanyProfile() {
+export function CompanyProfile() {
   const slides = [...(profileSlides as string[])];
   while (slides.length < 3) slides.push(""); // 未設定でも最低3枚のプレースホルダーを表示
   return (
@@ -607,7 +607,7 @@ function CompanyProfile() {
 }
 
 // カンパニーデック直下の動画埋め込みセクション（URLは console のテキスト項目で設定）
-function DeckVideo() {
+export function DeckVideo() {
   const url = txt("recruit2:movie.url", "");
   const embed = url ? toEmbed(url) : null;
   return (
@@ -632,7 +632,7 @@ function DeckVideo() {
   );
 }
 
-function People() {
+export function People() {
   const video = ((sectionsJson as any).recruit2Video as string) || "";
   const embed = toEmbed(video);
   return (
@@ -671,7 +671,7 @@ function People() {
   );
 }
 
-function ApplyCta() {
+export function ApplyCta() {
   return (
     <Sec>
       <div className="rounded-[2.5rem] px-6 py-16 text-center pc:px-16 pc:py-20" style={{ background: `linear-gradient(120deg, ${PAL.red}, ${PAL.coral})` }}>
@@ -685,7 +685,7 @@ function ApplyCta() {
   );
 }
 
-function Conditions() {
+export function Conditions() {
   return (
     <Sec>
       <Head base="recruit2:term" en="CONDITIONS" jp="諸条件" />
@@ -707,7 +707,7 @@ function Conditions() {
   );
 }
 
-function EntryForm() {
+export function EntryForm() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     toast.success("エントリーを受け付けました。担当者よりご連絡いたします。");
@@ -752,7 +752,7 @@ function EntryForm() {
  * ページ背景：指定画像を全幅で敷き、スクロールに合わせてゆっくり縦パララックス。
  * ページ最上部で画像の上端、ページ最下端で画像の下端がビューポートに合う。
  */
-function PageBg() {
+export function PageBg() {
   const imgRef = useRef<HTMLImageElement>(null);
   useEffect(() => {
     const img = imgRef.current;

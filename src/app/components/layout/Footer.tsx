@@ -6,8 +6,10 @@ const COLS = [
   {
     title: "事業",
     links: [
-      { to: "/food", label: "食品事業部" },
-      { to: "/ice", label: "アイス事業部" },
+      { to: "/ice", label: "氷・氷菓の製造販売" },
+      { to: "/food", label: "業務用食材の販売" },
+      { to: "/warehouse", label: "倉庫事業" },
+      { to: "/dryice", label: "ドライアイスの販売" },
     ],
   },
   {

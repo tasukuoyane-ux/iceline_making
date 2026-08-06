@@ -11,8 +11,10 @@ const DRAFT_KEY = "iceline-console-draft";
 
 const PAGES: { label: string; path: string }[] = [
   { label: "トップ", path: "/" },
-  { label: "食品事業部", path: "/food" },
-  { label: "アイス事業部", path: "/ice" },
+  { label: "氷・氷菓の製造販売", path: "/ice" },
+  { label: "業務用食材の販売", path: "/food" },
+  { label: "倉庫事業", path: "/warehouse" },
+  { label: "ドライアイスの販売", path: "/dryice" },
   { label: "商品: ドライアイス", path: "/food/products/dry-ice" },
   { label: "お知らせ一覧", path: "/news" },
   { label: "動画で知る", path: "/videos" },

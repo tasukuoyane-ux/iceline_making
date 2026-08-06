@@ -7,6 +7,7 @@ import { VideoCta } from "./components/layout/VideoCta";
 import { CookieConsent } from "./components/layout/CookieConsent";
 import { Top } from "./pages/Top";
 import { DivisionPage } from "./pages/DivisionPage";
+import { ServicePage } from "./pages/ServicePage";
 import { ProductDetail } from "./pages/ProductDetail";
 import { Company } from "./pages/Company";
 import { Contact } from "./pages/Contact";
@@ -52,6 +53,8 @@ function Site() {
           <Route path="/ice/recipe/:id" element={<RecipeDetail />} />
           <Route path="/food/products/:id" element={<ProductDetail />} />
           <Route path="/ice/products/:id" element={<ProductDetail />} />
+          <Route path="/warehouse" element={<ServicePage service="warehouse" />} />
+          <Route path="/dryice" element={<ServicePage service="dryice" />} />
           <Route path="/company" element={<Company />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/news" element={<News />} />

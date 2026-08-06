@@ -1,46 +1,41 @@
-// 採用ページ 第3案（プレイグラウンド）。
-// デザイン検証用。文言・画像はすべてダミー／プレースホルダーで、個数は採用2に合わせている
-// （見出し=13セクション + ヒーロー、画像=24、本文≈32）。
+// 採用ページ 第3案。
+// コンテンツは採用2（Recruit2）を完全に踏襲する（同じコンポーネント・同じ編集キーを共有。
+// 採用2側で編集した文言・画像は採用3にもそのまま反映される）。
 //
 // ■ ビジュアルコンセプト
-//  - ページ全体の背景に「スクロール追随の動画」を敷く（最大5本／管理コンソールで設定）。
-//    ページ最上部＝1本目の先頭フレーム、最後の文字コンテンツ＝最終本の最終フレーム。
+//  - メインビジュアル（採用2と同じヒーロー）以下では、背景に「スクロール追随の動画」を敷く
+//    （最大5本／管理コンソール「採用3 背景動画」で設定）。
+//    MV直下＝1本目の先頭フレーム、ページ最下端＝最終本の最終フレーム。
 //    スクロール位置をそのまま再生位置に写す（自動再生ではないので上下どちらにも追随する）。
-//  - 動画とコンテンツの前後関係は「セクション単位」で切替可能（既定＝コンテンツが動画の背面）。
-//    プレビューでセクションをクリックすると、右パネルにそのセクションの前後関係が出る。
-//  - 背面のコンテンツは動画レイヤーの mix-blend-mode:difference によって反転色で浮かび上がる。
-//    このとき動画自体が変色しないよう、下地は黒にしている（difference の相手が黒＝無変化のため）。
-//    動画が1本も無い場合は従来どおりグラデーション（#333→#dedede）を下地にする。
+//  - 旧実装の mix-blend-mode:difference（反転合成）は廃止。動画は素の色のまま描画し、
+//    上に淡いブルー〜白の薄いベール（採用2の配色 #d9ecf2 系）を重ねて色味を落ち着かせる。
+//    コンテンツは動画の前面に通常合成で重なるため、白カード基調の採用2デザインが
+//    そのまま読みやすく載る（安心感のあるブレンド）。
+//  - 動画が1本も無い場合は採用2と同じパララックス背景（PageBg）を表示する。
 //
 // ■ z順（下→上）
-//    0: 下地（黒 or グラデーション） → 1: 背面セクション → 5: 背景動画(difference) → 10: 前面セクション
-//
-// ■ 編集
-//  - 文言・画像は recruit3: プレフィックスの汎用オーバーライドで管理コンソールから編集可能。
-//  - 前後関係は recruit3:layer.* の汎用オーバーライド（プレビューの要素クリックから編集）。
-//  - 背景動画は sections.json の recruit3Bg（コンソール「コンテンツ管理 → 採用3 背景動画」）。
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, edSel, txt, img } from "../lib/editable";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Label } from "../components/ui/label";
-import { Button } from "../components/ui/button";
+//    0: 背景動画＋ベール（fixed） → 10: コンテンツ → 20: ヒーロー（MVの間は動画を隠す）
+import { useEffect, useRef, useState } from "react";
 import sectionsJson from "../../content/sections.json";
-
-// ── ダミーテキスト ─────────────────────────────────────────
-const DUMMY_BODY =
-  "ここにダミーテキストが入ります。実際の原稿が決まるまでのプレースホルダーとして表示しています。レイアウトや余白、行間の確認にご利用ください。";
-const DUMMY_HEAD = "見出しダミーテキスト";
-
-// 差し替え用の画像プレースホルダー（グレー枠）
-const PH =
-  "data:image/svg+xml;charset=utf-8," +
-  encodeURIComponent(
-    "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#e7ebee'/><text x='50%' y='50%' font-size='30' fill='#9aa4ad' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>＋ 画像</text></svg>"
-  );
+import {
+  R2Styles,
+  PageBg,
+  Hero,
+  Biz,
+  Philosophy,
+  CeoMessage,
+  Locations,
+  Charm,
+  Day,
+  CareerPath,
+  Jobs,
+  CompanyProfile,
+  DeckVideo,
+  People,
+  ApplyCta,
+  Conditions,
+  EntryForm,
+} from "./Recruit2";
 
 // ── 背景動画の設定（sections.json / コンソールで編集） ──────────
 // キー欠落・型崩れに耐えるフォールバック付きで読む（古い公開JSONでも落ちないように）。
@@ -51,61 +46,13 @@ const BG_VIDEOS: string[] = (Array.isArray(BG_RAW.videos) ? BG_RAW.videos : [])
   .slice(0, BG_MAX);
 const HAS_BG = BG_VIDEOS.length > 0;
 
-// ── コンテンツと背景動画の前後関係（セクション単位） ──────────
-// 値は recruit3:layer.<key> の汎用オーバーライド（"back" | "front"）。既定は "back"（動画の背面）。
-const LAYER_OPTS = [
-  { value: "back", label: "動画の背面（文字は反転合成で浮かび上がる）" },
-  { value: "front", label: "動画の前面（そのまま重ねて表示）" },
-];
-const Z_BACK = 1;
-const Z_FRONT = 10;
-
-function layerOf(key: string): "back" | "front" {
-  return txt(`recruit3:layer.${key}`, "back") === "front" ? "front" : "back";
-}
-
-/** セクションに付ける前後関係の属性一式（z-index と、コンソール編集用の data 属性） */
-function layerProps(key: string, label: string) {
-  const cur = layerOf(key);
-  return {
-    "data-r3-sec": "",
-    style: { zIndex: cur === "front" ? Z_FRONT : Z_BACK },
-    ...edSel(`recruit3:layer.${key}`, `${label}：背景動画との前後関係`, LAYER_OPTS, cur),
-  };
-}
-
-// ── セクション定義（個数は採用2に対応。すべてダミー） ──────────
-// images: 画像の枚数 / bodies: 本文ブロックの数
-const SECTIONS: { en: string; images: number; bodies: number }[] = [
-  { en: "BUSINESS", images: 2, bodies: 2 },
-  { en: "PHILOSOPHY", images: 0, bodies: 2 },
-  { en: "MESSAGE", images: 1, bodies: 1 },
-  { en: "LOCATIONS", images: 3, bodies: 3 },
-  { en: "CULTURE", images: 3, bodies: 3 },
-  { en: "A DAY", images: 1, bodies: 1 },
-  { en: "CAREER", images: 4, bodies: 4 },
-  { en: "POSITIONS", images: 4, bodies: 4 },
-  { en: "PROFILE", images: 3, bodies: 1 },
-  { en: "MOVIE", images: 0, bodies: 1 },
-  { en: "PEOPLE", images: 3, bodies: 3 },
-  { en: "CONDITIONS", images: 0, bodies: 6 },
-  { en: "ENTRY", images: 0, bodies: 1 },
-];
-
 // ── 背景動画レイヤー ──────────────────────────────────────
-// スクロール量 p∈[0,1] を動画本数で等分し、i 番目の動画の再生位置に写す。
-//  - p=0 … 1本目の先頭フレーム（ページ最上部）
-//  - p=1 … 最終本の最終フレーム（最後の文字コンテンツが画面下端に達した位置）
+// areaRef（MV以下のコンテンツ領域）のスクロール量 p∈[0,1] を動画本数で等分し、
+// i 番目の動画の再生位置に写す。
+//  - p=0 … 1本目の先頭フレーム（MV直下がビューポート上端に来る前）
+//  - p=1 … 最終本の最終フレーム（領域下端が画面下端に達した位置）
 // 自動再生はせず currentTime を直接動かすため、下スクロール／上スクロールの両方に追随する。
-function BgVideos({
-  urls,
-  pageRef,
-  endRef,
-}: {
-  urls: string[];
-  pageRef: React.RefObject<HTMLDivElement>;
-  endRef: React.RefObject<HTMLElement>;
-}) {
+function BgVideos({ urls, areaRef }: { urls: string[]; areaRef: React.RefObject<HTMLDivElement> }) {
   const vids = useRef<(HTMLVideoElement | null)[]>([]);
   const [active, setActive] = useState(0);
   // metadata 読込完了時にも位置を合わせ直すため、計算関数を ref で共有する
@@ -118,16 +65,13 @@ function BgVideos({
 
     const sync = () => {
       queued = false;
-      const page = pageRef.current;
-      if (!page) return;
+      const area = areaRef.current;
+      if (!area) return;
       const y = window.scrollY;
-      // ページ先頭のドキュメント座標
-      const start = y + page.getBoundingClientRect().top;
-      // 「最後の文字コンテンツ」の下端が画面下端に来た時点を終端とする
-      const endEl = endRef.current;
-      const endBottom = endEl
-        ? y + endEl.getBoundingClientRect().bottom
-        : start + page.scrollHeight;
+      const rect = area.getBoundingClientRect();
+      // 領域の先頭・末尾のドキュメント座標
+      const start = y + rect.top;
+      const endBottom = y + rect.bottom;
       const finish = Math.max(start + 1, endBottom - window.innerHeight);
       const p = Math.min(1, Math.max(0, (y - start) / (finish - start)));
 
@@ -168,26 +112,19 @@ function BgVideos({
     window.addEventListener("resize", onScroll);
     // 画像読込やフォント適用で高さが変わると終端位置もずれるため再計算する
     const ro = new ResizeObserver(onScroll);
-    if (pageRef.current) ro.observe(pageRef.current);
+    if (areaRef.current) ro.observe(areaRef.current);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       ro.disconnect();
     };
-  }, [urls.length, pageRef, endRef]);
+  }, [urls.length, areaRef]);
 
   if (urls.length === 0) return null;
 
   return (
-    <div
-      className="pointer-events-none fixed inset-0"
-      // 背面セクション（z=1）より上、前面セクション（z=10）より下に置く。
-      // difference 合成により、背面に置かれた文字が反転色で浮かび上がる。
-      // 下地は黒なので、文字の無い部分では動画がそのままの色で見える。
-      style={{ zIndex: 5, mixBlendMode: "difference" }}
-      aria-hidden
-    >
+    <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
       {urls.map((src, i) => (
         <video
           key={src + i}
@@ -212,219 +149,54 @@ function BgVideos({
           }}
         />
       ))}
+      {/* 淡いブルー〜白のベール。動画の色をそのまま活かしつつ彩度・コントラストを
+          そっと抑え、白カード基調のコンテンツが安心して読めるトーンにする。 */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(217,236,242,0.50) 0%, rgba(255,255,255,0.38) 45%, rgba(217,236,242,0.50) 100%)",
+        }}
+      />
     </div>
-  );
-}
-
-// ── 部品 ──────────────────────────────────────────────────
-
-// セクション見出し（英字＋日本語・中央寄せ・すりガラスのチップ）
-function Heading({ si, en }: { si: number; en: string }) {
-  return (
-    <div className="relative z-10 mx-auto mb-10 w-fit text-center">
-      <span className="block rounded-full bg-white/55 px-6 py-3 shadow-sm backdrop-blur-md">
-        <span
-          className="block text-[11px] font-semibold uppercase tracking-[0.28em] text-rose-500"
-          {...ed(`recruit3:s${si}.en`, "英字ラベル")}
-        >
-          {txt(`recruit3:s${si}.en`, en)}
-        </span>
-        <span
-          className="mt-1 block text-xl font-bold text-slate-800 pc:text-2xl"
-          {...ed(`recruit3:s${si}.jp`, "見出し")}
-        >
-          {txt(`recruit3:s${si}.jp`, DUMMY_HEAD)}
-        </span>
-      </span>
-    </div>
-  );
-}
-
-// 本文カード（すりガラス）
-function Body({ path, className = "" }: { path: string; className?: string }) {
-  return (
-    <p
-      className={
-        "rounded-2xl bg-white/60 p-6 text-sm leading-loose text-slate-700 shadow-sm backdrop-blur-md " +
-        className
-      }
-      {...ed(path, "本文", { multiline: true })}
-    >
-      {txt(path, DUMMY_BODY)}
-    </p>
   );
 }
 
 export function Recruit3() {
-  const pageRef = useRef<HTMLDivElement>(null);
-  // 「最後の文字コンテンツ」＝背景動画の終端を決める基準要素
-  const endRef = useRef<HTMLParagraphElement>(null);
-
-  // 画像の通し番号（左右交互配置に使用）
-  let imgSeq = 0;
+  // MV以下のコンテンツ領域（背景動画のスクロール進行の基準）
+  const areaRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={pageRef} className="relative isolate overflow-hidden">
-      {/* コンソールで前後関係を切り替えた瞬間にプレビューへ反映するための規則。
-          編集ブリッジが data-edit-selected を書き込むので、それを z-index に写す。 */}
-      <style>{`
-        [data-r3-sec][data-edit-selected="back"] { z-index: ${Z_BACK} !important; }
-        [data-r3-sec][data-edit-selected="front"] { z-index: ${Z_FRONT} !important; }
-      `}</style>
+    <div className="relative isolate min-h-screen overflow-hidden">
+      <R2Styles />
+      {/* 動画が無い場合は採用2と同じパララックス背景 */}
+      {!HAS_BG && <PageBg />}
 
-      {/* z=0) 下地。動画がある場合は黒（difference の相手を黒にして動画の色を保つ）。 */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: HAS_BG
-            ? "#000"
-            : "linear-gradient(180deg, #333 0%, #5f5f5f 28%, #9a9a9a 60%, #cfcfcf 85%, #dedede 100%)",
-        }}
-        aria-hidden
-      />
-
-      {/* z=5) 背景動画（difference 合成）。背面セクションと前面セクションの間に入る。 */}
-      <BgVideos urls={BG_VIDEOS} pageRef={pageRef} endRef={endRef} />
-
-      {/* コンテンツ。前後関係はセクションごとの z-index で決まるため、
-          このラッパーには z-index を付けない（付けると重ね合わせ文脈ができて動画と交差できない）。 */}
-      <div>
-        {/* ヒーロー（最上部） */}
-        <header
-          className="relative mx-auto flex min-h-[70vh] max-w-[1400px] flex-col items-center justify-center px-6 py-24 text-center"
-          {...layerProps("hero", "ヒーロー")}
-        >
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-400">RECRUIT — PLAYGROUND</p>
-          <h1
-            className="mt-6 text-4xl font-bold leading-tight text-white pc:text-6xl"
-            style={{ whiteSpace: "pre-line", textShadow: "0 4px 30px rgba(0,0,0,0.5)" }}
-            {...ed("recruit3:hero.title", "メインコピー", { multiline: true })}
-          >
-            {txt("recruit3:hero.title", "メインコピー\nダミーテキスト")}
-          </h1>
-          <p
-            className="mt-6 max-w-xl text-sm leading-loose text-white/70"
-            {...ed("recruit3:hero.sub", "サブコピー")}
-          >
-            {txt("recruit3:hero.sub", DUMMY_BODY)}
-          </p>
-        </header>
-
-        {/* 各セクション */}
-        {SECTIONS.map((s, si) => {
-          const rows = Math.max(s.images, s.bodies);
-          // エントリーは専用セクションとして最後に描画するため、ここでは描画しない
-          if (s.en === "ENTRY") return null;
-          return (
-            <section
-              key={si}
-              className="relative mx-auto max-w-[1400px] px-6 py-16 pc:px-10"
-              {...layerProps(`s${si}`, s.en)}
-            >
-              <Heading si={si} en={s.en} />
-
-              <div className="space-y-16">
-                  {Array.from({ length: rows }).map((_, k) => {
-                    const hasImg = k < s.images;
-                    const hasBody = k < s.bodies;
-                    if (hasImg) {
-                      const seq = imgSeq++;
-                      const right = seq % 2 === 1; // 左右交互に
-                      return (
-                        <div
-                          key={k}
-                          className={
-                            "flex flex-col items-center gap-8 tab:flex-row tab:items-center tab:gap-12 " +
-                            (right ? "tab:flex-row-reverse" : "")
-                          }
-                        >
-                          {/* 画像 */}
-                          <div
-                            className={
-                              "w-[86%] shrink-0 rounded-2xl bg-white/80 p-2 shadow-lg backdrop-blur-sm tab:w-1/2 " +
-                              (right ? "self-end tab:self-auto" : "self-start tab:self-auto")
-                            }
-                          >
-                            <ImageWithFallback
-                              src={img(`recruit3:s${si}.img${k}`, PH)}
-                              alt=""
-                              className="aspect-[4/3] w-full rounded-xl object-cover"
-                              {...edImg(`recruit3:s${si}.img${k}`, "画像")}
-                            />
-                          </div>
-                          {/* 本文 */}
-                          <div className="w-full tab:w-1/2">
-                            {hasBody ? <Body path={`recruit3:s${si}.body${k}`} /> : null}
-                          </div>
-                        </div>
-                      );
-                    }
-                    // 画像なしの本文ブロック（中央寄せ）
-                    return (
-                      <Body key={k} path={`recruit3:s${si}.body${k}`} className="mx-auto max-w-3xl text-center" />
-                    );
-                  })}
-              </div>
-            </section>
-          );
-        })}
-
-        {/* 最下部：エントリー */}
-        <section
-          className="relative mx-auto w-full max-w-3xl px-6 py-16"
-          {...layerProps("entry", "エントリー")}
-        >
-          <Heading si={SECTIONS.length - 1} en="ENTRY" />
-          <EntryForm si={SECTIONS.length - 1} />
-        </section>
-
-        <p
-          ref={endRef}
-          className="relative mx-auto max-w-[1400px] px-6 pb-28 pt-6 text-center text-xs text-slate-500"
-          {...layerProps("note", "注記")}
-        >
-          ※ 採用3はデザイン検証用のプレイグラウンドです。文言・画像はすべてダミーです。
-        </p>
+      {/* ヒーロー（採用2と同一）。MV表示中は背景動画より前面に置いて動画を隠す */}
+      <div className="relative z-20">
+        <Hero />
       </div>
-    </div>
-  );
-}
 
-// エントリーフォーム（最終セクション）
-function EntryForm({ si }: { si: number }) {
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    toast.success("エントリーを受け付けました（プロトタイプ）。");
-    (e.target as HTMLFormElement).reset();
-  };
-  return (
-    <div className="mx-auto max-w-2xl rounded-3xl bg-white/70 p-8 shadow-lg backdrop-blur-md">
-      <p className="text-center text-sm leading-loose text-slate-700" {...ed(`recruit3:s${si}.body0`, "リード", { multiline: true })}>
-        {txt(`recruit3:s${si}.body0`, DUMMY_BODY)}
-      </p>
-      <form onSubmit={onSubmit} className="mt-8 space-y-5">
-        <div className="grid gap-2">
-          <Label htmlFor="r3-name">お名前 *</Label>
-          <Input id="r3-name" required placeholder="山田 太郎" />
+      {/* MV以下：スクロール追随の背景動画（fixed）＋採用2踏襲のコンテンツ */}
+      <div ref={areaRef} className="relative">
+        {HAS_BG && <BgVideos urls={BG_VIDEOS} areaRef={areaRef} />}
+        <div className="relative z-10">
+          <Biz />
+          <Philosophy />
+          <CeoMessage />
+          <Locations />
+          <Charm />
+          <Day />
+          <CareerPath />
+          <Jobs />
+          <CompanyProfile />
+          <DeckVideo />
+          <People />
+          <ApplyCta />
+          <Conditions />
+          <EntryForm />
         </div>
-        <div className="grid gap-2 tab:grid-cols-2 tab:gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="r3-email">メールアドレス *</Label>
-            <Input id="r3-email" type="email" required placeholder="example@mail.com" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="r3-tel">電話番号</Label>
-            <Input id="r3-tel" placeholder="090-0000-0000" />
-          </div>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="r3-msg">メッセージ</Label>
-          <Textarea id="r3-msg" rows={5} placeholder="ダミーのメッセージ欄" />
-        </div>
-        <Button type="submit" className="w-full" style={{ height: 48 }}>
-          この内容で送信する <ArrowRight size={16} />
-        </Button>
-      </form>
+      </div>
     </div>
   );
 }
