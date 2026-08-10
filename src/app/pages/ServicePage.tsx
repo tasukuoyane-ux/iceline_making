@@ -223,6 +223,23 @@ export function ServicePage({ service }: { service: ServiceId }) {
           >
             {txt(`${base}.overview`, s.overview)}
           </p>
+          {/* ドライアイス：ECサイトへの導線ボタン */}
+          {s.shopUrl && (
+            <div className="mt-8">
+              <a
+                href={s.shopUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
+                style={{ fontSize: 15 }}
+              >
+                <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
+                  {txt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
+                </span>
+                <ArrowRight size={16} />
+              </a>
+            </div>
+          )}
         </div>
       </Section>
 
