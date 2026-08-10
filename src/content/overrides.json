@@ -53,5 +53,10 @@
   "recruit2:job.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/7f4e02244d449a3ebfb367edc366d92f-rFtjaP7XLm8BufaeMIYVp9x6NFNCwT.webp",
   "recruit2:job.3.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_02__1_-CAuB9kdi6DFGY4vPP3ofAMhQCeGFq3.jpg",
   "recruit2:movie.url": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/ICELINE_MGpre_-GK3QLQQHuHxYlqBw3UDqqVbl7EJxJQ.webm",
-  "recruit2:philo.creed": "お客様に愛され信頼されるいい会社、社員が胸を張れる良い会社をみんなでつくる。"
+  "recruit2:philo.creed": "お客様に愛され信頼されるいい会社、社員が胸を張れる良い会社をみんなでつくる。",
+  "division:ice.process.step.1.title": "（工程名2）",
+  "division:ice.process.step.2.title": "（工程名3）",
+  "division:ice.process.step.3.title": "（工程名4）",
+  "division:ice.process.step.4.title": "（工程名5）",
+  "division:ice.process.step.5.title": "（工程名6）"
 }
