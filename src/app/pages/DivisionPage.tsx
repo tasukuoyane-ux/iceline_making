@@ -39,6 +39,10 @@ interface DetailItem {
   pending?: boolean;
   /** true なら画像＋テキストの交互レイアウトで表示 */
   image?: boolean;
+  /** true なら画像枠を縦長2枚（斜め区切り）で表示（image と併用） */
+  splitImage?: boolean;
+  /** true なら本文の右側（SPでは下）に画像を置ける（未設定の間は公開ページでは文章のみ） */
+  sideImage?: boolean;
   /** 既存アップロード画像を引き継ぐ場合の明示キー */
   imgKey?: string;
 }
@@ -46,6 +50,8 @@ interface DetailSection {
   en: string;
   jp: string;
   items: DetailItem[];
+  /** true なら項目の下に工程フロー（写真＋工程名、最大10ステップ）を表示 */
+  flow?: boolean;
 }
 interface FaqItem {
   q: string;
@@ -147,12 +153,14 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
           body:
             "西大寺工場では、逆浸透膜（RO膜）でろ過した水を使用しています。不純物を除去した純度の高い水を原料とすることで、安定した品質の氷を製造しています。",
           image: true,
+          splitImage: true,
         },
         {
           title: "製法について",
           body:
             "製氷方法は、工場と製品によって異なります。\n二日市工場ではカングリット製法を採用しています。135kgの大きな氷の塊からカットして加工していく方法で、かち割り氷や小さな氷など多様なサイズに対応できることが特徴です。製氷に時間を要しますが、大型の氷から精密に加工できる点が強みです。\n西大寺工場ではターボ製氷（氷柱方式）を採用しています。90〜120分という短いサイクルで製氷できるため、需要の変動に柔軟に対応できる生産体制を整えています。\n氷の品質は、不純物をどれだけ取り除けるかで決まります。水の純度が高いほど透明で硬く、溶けにくい氷になります。ロッキーアイスが「硬く透明で溶けにくい」のは、原料水の純度を高め、低温でじっくり凍らせる工程を徹底しているからです。",
           image: true,
+          splitImage: true,
         },
         { title: "製造能力・設備", pending: true },
       ],
@@ -164,6 +172,7 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
         {
           body:
             "国際食品安全認証「FSSC22000」を取得しています。食品安全マネジメントシステムの国際規格に基づき、原料の受け入れから製造・検査・出荷までの全工程において、定められた基準に沿った管理を行っています。",
+          sideImage: true,
         },
         { pending: true },
       ],
@@ -173,8 +182,8 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       jp: "氷ができるまで",
       items: [
         { body: "氷カフェ（コーヒー）を例に、製造工程をご紹介します。" },
-        { pending: true },
       ],
+      flow: true,
     },
   ],
 };
@@ -257,6 +266,34 @@ const ICE_CATEGORIES: { name: string; desc: string; skus: string; products: stri
     products: ["frappe-rich"],
   },
 ];
+
+// ─────────────────────────────────────────────────────────
+// 事業概要の下に置く商品ラインナップ導線タイル（氷・氷菓のみ）。
+// 画像・名称・リンク先はすべてコンソールから編集可能
+// （キー: ice:lineupNav.{i}.image / .name / .href）。
+// リンク先は「#〜」でページ内アンカー、「/〜」でサイト内ページ、
+// 「https://〜」で外部サイト（別タブ）として扱う。
+// ─────────────────────────────────────────────────────────
+const ICE_LINEUP_NAV: { name: string; href: string; img: string }[] = [
+  { name: "無色透明\nかち割り氷", href: "/ice/products/rocky-ice", img: IMG.iceClose },
+  { name: "味・色付き氷", href: "/ice/products/ice-cafe", img: IMG.icedCoffee },
+  { name: "コンビニ向け", href: "#ice-lineup", img: IMG.iceBlue },
+];
+
+// ─────────────────────────────────────────────────────────
+// 製品ラインナップに追加するドライアイス（製氷の上に表示）。
+// 内容は「ドライアイスの販売」ページに準拠。「詳細を見る」はECサイトへ。
+// インデックス式の ice:lineup.{ci}.* とは独立した ice:lineup.dryice.* キーで管理し、
+// 既存カテゴリの保存済みオーバーライドがずれないようにしている。
+// ─────────────────────────────────────────────────────────
+const DRYICE_LINEUP = {
+  name: "ドライアイス",
+  desc:
+    "ドライアイスは、二酸化炭素を固体にしたもので、約-79℃という極低温の保冷材です。溶けても水が残らないため、食品や精密機器の輸送にも安心してお使いいただけます。低温物流・葬儀・スイーツ輸送など幅広い用途に対応しており、お客様のご要望に合わせたサイズへのカット加工にも対応しています。個人のお客様向けには、ECサイトからもご購入いただけます。",
+  skus:
+    "・ブロック（1kg〜約20kg）\n・各種スライス加工\n・ご要望に応じたサイズへのカット対応\n\n【主な用途】\n・低温物流・冷凍食品の輸送保冷\n・葬儀・遺体保冷\n・スイーツ・ケーキの輸送\n・その他、冷却・保冷が必要な用途全般",
+  ecUrl: "https://www.dry-ice.jp/",
+};
 
 // 活用提案・メニューレシピ（シート準拠の確定原稿）
 const ICE_RECIPE_STORY =
@@ -432,6 +469,140 @@ export const FOOD_PACKAGES: { id: string; title: string; lead: string }[] = [
 
 // ─────────────────────────────────────────────────────────
 
+/** 編集モード限定：リンク先URLをテキストとして編集するための行 */
+function EditableLinkHint({ path, label, href }: { path: string; label: string; href: string }) {
+  if (!EDIT_MODE) return null;
+  return (
+    <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(path, label)}>
+      {href}
+    </p>
+  );
+}
+
+/** 商品ラインナップ導線タイル（画像＋グレーオーバーレイ＋白文字。全体がボタン） */
+function LineupNavTile({ i, def }: { i: number; def: { name: string; href: string; img: string } }) {
+  const base = `ice:lineupNav.${i}`;
+  const name = txt(`${base}.name`, def.name);
+  const href = txt(`${base}.href`, def.href);
+  const inner = (
+    <>
+      <ImageWithFallback
+        src={img(`${base}.image`, def.img || IMG_PLACEHOLDER)}
+        alt={name}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        {...edImg(`${base}.image`, `ラインナップ導線${i + 1} 画像`)}
+      />
+      {/* グレーのオーバーレイ */}
+      <div className="absolute inset-0 bg-ink/50 transition-colors group-hover:bg-ink/35" />
+      <span
+        className="absolute inset-0 flex items-center justify-center px-4 text-center text-white"
+        style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.6, whiteSpace: "pre-line" }}
+        {...ed(`${base}.name`, `ラインナップ導線${i + 1} 名称`)}
+      >
+        {name}
+      </span>
+    </>
+  );
+  const cls = "group relative block aspect-[16/9] overflow-hidden rounded-xl border border-border";
+  return (
+    <div>
+      {/^https?:/i.test(href) ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
+      ) : href.startsWith("#") ? (
+        <a href={href} className={cls}>{inner}</a>
+      ) : (
+        <Link to={href} className={cls}>{inner}</Link>
+      )}
+      <EditableLinkHint path={`${base}.href`} label={`ラインナップ導線${i + 1} リンク先URL`} href={href} />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 氷ができるまで：工程フロー。
+// 写真＋工程名＋説明のステップを最大10まで表示できる。
+// ステップ1は常に表示し、2以降は工程名・説明・写真のいずれかが
+// コンソールで入力されると公開ページに現れる（削除は入力を空に戻す）。
+// ─────────────────────────────────────────────────────────
+const MAX_PROCESS_STEPS = 10;
+
+function IceProcessFlow() {
+  const steps = Array.from({ length: MAX_PROCESS_STEPS }, (_, i) => {
+    const base = `division:ice.process.step.${i}`;
+    return {
+      base,
+      i,
+      title: txt(`${base}.title`, ""),
+      body: txt(`${base}.body`, ""),
+      image: img(`${base}.image`, ""),
+    };
+  });
+  const visible = steps.filter((s) => s.i === 0 || EDIT_MODE || s.title !== "" || s.body !== "" || s.image !== "");
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-10 tab:grid-cols-3 pc:grid-cols-5 pc:gap-x-8">
+      {visible.map((s, n) => (
+        <div key={s.i} className="relative">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-secondary">
+            <ImageWithFallback
+              src={s.image || IMG_PLACEHOLDER}
+              alt={s.title || `工程${n + 1}`}
+              className="h-full w-full object-cover"
+              {...edImg(`${s.base}.image`, `工程${s.i + 1} 写真`)}
+            />
+            <span
+              className="absolute left-0 top-0 bg-brand px-2.5 py-1 text-brand-foreground"
+              style={{ fontFamily: "var(--font-accent)", fontSize: 11, letterSpacing: "0.08em" }}
+            >
+              STEP {n + 1}
+            </span>
+          </div>
+          <p className="mt-3" style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${s.base}.title`, `工程${s.i + 1} 工程名`)}>
+            {s.title || (EDIT_MODE || s.i === 0 ? "（工程名）" : "")}
+          </p>
+          {(s.body || EDIT_MODE) && (
+            <p className="mt-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${s.base}.body`, `工程${s.i + 1} 説明`, { multiline: true })}>
+              {s.body || "（説明・任意）"}
+            </p>
+          )}
+          {/* 次の工程への矢印（行末で折り返す位置でも軽く見えるよう控えめに） */}
+          {n < visible.length - 1 && (
+            <ChevronRight
+              size={20}
+              className="absolute top-[calc(37.5%-10px)] hidden text-brand pc:block"
+              style={{ right: -26 }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** ドライアイスの商品カード（ECサイトへ外部リンク） */
+function DryIceLineupCard({ ecUrl }: { ecUrl: string }) {
+  const p = PRODUCTS.find((x) => x.id === "dry-ice");
+  if (!p) return null;
+  return (
+    <a
+      href={ecUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-lg"
+    >
+      <div className="aspect-[4/3] overflow-hidden bg-secondary">
+        <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <h4 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{txt(`product:${p.id}:name`, p.name)}</h4>
+        <p className="mt-1 flex-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{txt(`product:${p.id}:catch`, p.catch)}</p>
+        <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
+          詳細を見る（ECサイト） <ArrowRight size={14} />
+        </span>
+      </div>
+    </a>
+  );
+}
+
 /** 要確認スロット対応の項目レンダラ */
 function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; si: number; ii: number; it: DetailItem; secJp: string }) {
   const base = `division:${division}.sec.${si}.${ii}`;
@@ -458,13 +629,60 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
             {bodyText}
           </p>
         </div>
-        <ImageWithFallback
-          src={img(it.imgKey ?? `${base}.image`, IMG_PLACEHOLDER)}
-          alt={it.title || secJp}
-          className="aspect-[4/3] w-full rounded-2xl border border-border object-cover [direction:ltr]"
-          {...edImg(it.imgKey ?? `${base}.image`, `${it.title || secJp} 画像`)}
-        />
+        {it.splitImage ? (
+          /* 縦長画像2枚を斜めの区切りで並べ、全体で従来の 4:3 の枠に収める */
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl [direction:ltr]">
+            <div className="absolute inset-y-0 left-0 w-[58%]" style={{ clipPath: "polygon(0 0, 96.5% 0, 74% 100%, 0 100%)" }}>
+              <ImageWithFallback
+                src={img(it.imgKey ?? `${base}.image`, IMG_PLACEHOLDER)}
+                alt={`${it.title || secJp} 画像1`}
+                className="h-full w-full object-cover"
+                {...edImg(it.imgKey ?? `${base}.image`, `${it.title || secJp} 画像1（左）`)}
+              />
+            </div>
+            <div className="absolute inset-y-0 right-0 w-[58%]" style={{ clipPath: "polygon(27.6% 0, 100% 0, 100% 100%, 5.2% 100%)" }}>
+              <ImageWithFallback
+                src={img(`${base}.image2`, IMG_PLACEHOLDER)}
+                alt={`${it.title || secJp} 画像2`}
+                className="h-full w-full object-cover"
+                {...edImg(`${base}.image2`, `${it.title || secJp} 画像2（右）`)}
+              />
+            </div>
+          </div>
+        ) : (
+          <ImageWithFallback
+            src={img(it.imgKey ?? `${base}.image`, IMG_PLACEHOLDER)}
+            alt={it.title || secJp}
+            className="aspect-[4/3] w-full rounded-2xl border border-border object-cover [direction:ltr]"
+            {...edImg(it.imgKey ?? `${base}.image`, `${it.title || secJp} 画像`)}
+          />
+        )}
       </motion.div>
+    );
+  }
+
+  // 本文の右側（SPでは下）に画像を置けるレイアウト。
+  // 画像未設定の間は公開ページでは従来どおり文章のみ表示する。
+  if (it.sideImage && (img(`${base}.image`, "") !== "" || EDIT_MODE)) {
+    return (
+      <div className="grid items-center gap-8 pc:grid-cols-[3fr_2fr]">
+        <div>
+          {it.title && (
+            <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
+              {txt(`${base}.title`, it.title)}
+            </h3>
+          )}
+          <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
+            {bodyText}
+          </p>
+        </div>
+        <ImageWithFallback
+          src={img(`${base}.image`, IMG_PLACEHOLDER)}
+          alt={it.title || secJp}
+          className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
+          {...edImg(`${base}.image`, `${it.title || secJp} 画像`)}
+        />
+      </div>
     );
   }
   return (
@@ -496,6 +714,7 @@ function DetailSectionBlock({ division, si, sec, heat }: { division: Division; s
         {sec.items.map((it, ii) => (
           <DetailItemBlock key={ii} division={division} si={si} ii={ii} it={it} secJp={sec.jp} />
         ))}
+        {sec.flow && <IceProcessFlow />}
       </div>
     </Section>
   );
@@ -564,6 +783,14 @@ export function DivisionPage({ division }: { division: Division }) {
             {txt(`division:${division}.overview`, OVERVIEW[division])}
           </p>
         </div>
+        {/* 氷・氷菓：商品ラインナップ導線（画像＋グレーオーバーレイ＋白文字のボタン） */}
+        {division === "ice" && (
+          <div className="mx-auto mt-12 grid max-w-5xl gap-5 tab:grid-cols-3">
+            {ICE_LINEUP_NAV.map((def, i) => (
+              <LineupNavTile key={i} i={i} def={def} />
+            ))}
+          </div>
+        )}
       </Section>
 
       {/* サプライチェーン（業務用食材のみ・シート準拠） */}
@@ -594,9 +821,34 @@ export function DivisionPage({ division }: { division: Division }) {
 
       {/* ── 氷・氷菓：製品ラインナップ（シートのカテゴリ分け通り） ── */}
       {division === "ice" && (
-        <Section heat={listHeat}>
+        <Section heat={listHeat} id="ice-lineup">
           <SectionTitle en="LINEUP" jp="製品ラインナップ" />
           <div className="mt-12 space-y-16">
+            {/* ドライアイス（内容は「ドライアイスの販売」ページ準拠・詳細はECサイトへ） */}
+            <div>
+              <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed("ice:lineup.dryice.name", "カテゴリ名")}>
+                {txt("ice:lineup.dryice.name", DRYICE_LINEUP.name)}
+              </h3>
+              <p className="mt-5 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed("ice:lineup.dryice.desc", "カテゴリ説明", { multiline: true })}>
+                {txt("ice:lineup.dryice.desc", DRYICE_LINEUP.desc)}
+              </p>
+              <div className="mt-8 grid gap-8 pc:grid-cols-[1fr_2fr]">
+                {/* 規格一覧 */}
+                <div className="rounded-2xl border border-border bg-card p-6">
+                  <p className="text-muted-foreground" style={{ fontSize: 12, letterSpacing: "0.08em" }}>規格一覧</p>
+                  <p className="mt-3" style={{ fontSize: 14, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("ice:lineup.dryice.skus", "規格一覧", { multiline: true })}>
+                    {txt("ice:lineup.dryice.skus", DRYICE_LINEUP.skus)}
+                  </p>
+                </div>
+                {/* ECサイトへの導線カード */}
+                <div className="grid content-start gap-5 tab:grid-cols-2 pc:grid-cols-3">
+                  <div>
+                    <DryIceLineupCard ecUrl={txt("ice:lineup.dryice.ecUrl", DRYICE_LINEUP.ecUrl)} />
+                    <EditableLinkHint path="ice:lineup.dryice.ecUrl" label="ドライアイス ECサイトURL" href={txt("ice:lineup.dryice.ecUrl", DRYICE_LINEUP.ecUrl)} />
+                  </div>
+                </div>
+              </div>
+            </div>
             {ICE_CATEGORIES.map((cat, ci) => (
               <div key={ci}>
                 <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`ice:lineup.${ci}.name`, "カテゴリ名")}>
