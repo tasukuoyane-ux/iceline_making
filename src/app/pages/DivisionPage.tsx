@@ -43,6 +43,8 @@ interface DetailItem {
   splitImage?: boolean;
   /** true なら本文の右側（SPでは下）に画像を置ける（未設定の間は公開ページでは文章のみ） */
   sideImage?: boolean;
+  /** true なら本文の右側（SPでは下）に画像3枚のマーソンリーを表示 */
+  masonryImages?: boolean;
   /** 既存アップロード画像を引き継ぐ場合の明示キー */
   imgKey?: string;
 }
@@ -86,6 +88,14 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
             "担当者は配送と営業を兼務しています。定期的に同じお客様のもとへ足を運ぶからこそ、在庫の変化も、売れ筋の移り変わりも、現場の空気も見えてきます。気になることがあればその場で提案し、依頼を待つのではなく、必要なものを先回りして考えることを大切にしています。お客様一社一社の状況を把握しながら、長く寄り添える関係を積み上げていきたいと思っています。",
           image: true,
         },
+        // 旧「サプライチェーン」セクションのコンテンツ（画像はアップロード済みのものを引き継ぐ）
+        {
+          title: "サプライチェーン",
+          body:
+            "お客様のニーズに応じた商品を国内外から調達し、岡山市北区青江の物流センターで保管し、岡山県全域のお客様へ届けています。前日注文・翌日配送を基本とし、受発注から配送までを一貫した体制で運用しています。",
+          image: true,
+          imgKey: "division:food.supplyChain.image",
+        },
       ],
     },
     {
@@ -120,15 +130,24 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
         },
       ],
     },
+    // 「万全の物流体制」と「品質保証への取り組み」の間の事業の特徴。
+    // 試食による確認（旧・品質保証セクションから移動）＋右側に画像3枚のマーソンリー。
     {
-      en: "QUALITY",
-      jp: "品質保証への取り組み",
+      en: "FEATURES",
+      jp: "事業の特徴",
       items: [
         {
           title: "試食による確認",
           body:
             "数十年にわたり社内での試食会を継続しており、直近6年で実施頻度をさらに高めています。各メーカーによるプレゼンテーションの場としても機能しており、新商品やリニューアル品を中心に、仕入れ担当者が市場動向と照らし合わせながら取り扱いを判断しています。確認を通じて、お客様に商品の特長や使い方をより具体的にお伝えできるようにしています。",
+          masonryImages: true,
         },
+      ],
+    },
+    {
+      en: "QUALITY",
+      jp: "品質保証への取り組み",
+      items: [
         {
           title: "国内外からの調達",
           body:
@@ -610,6 +629,50 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
   if (it.pending && !value && !EDIT_MODE) return null;
   const bodyText = value || (it.pending ? PENDING_HINT : "");
 
+  // 本文の右側（SPでは下）に画像3枚のマーソンリー（1枚目は縦長で2段ぶち抜き）
+  if (it.masonryImages) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="grid items-center gap-8 pc:grid-cols-[2fr_3fr]"
+      >
+        <div className="pc:px-12">
+          {it.title && (
+            <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
+              {txt(`${base}.title`, it.title)}
+            </h3>
+          )}
+          <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
+            {bodyText}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <ImageWithFallback
+            src={img(`${base}.image`, IMG_PLACEHOLDER)}
+            alt={`${it.title || secJp} 画像1`}
+            className="row-span-2 h-full w-full rounded-2xl border border-border object-cover"
+            {...edImg(`${base}.image`, `${it.title || secJp} 画像1（縦長）`)}
+          />
+          <ImageWithFallback
+            src={img(`${base}.image2`, IMG_PLACEHOLDER)}
+            alt={`${it.title || secJp} 画像2`}
+            className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
+            {...edImg(`${base}.image2`, `${it.title || secJp} 画像2`)}
+          />
+          <ImageWithFallback
+            src={img(`${base}.image3`, IMG_PLACEHOLDER)}
+            alt={`${it.title || secJp} 画像3`}
+            className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
+            {...edImg(`${base}.image3`, `${it.title || secJp} 画像3`)}
+          />
+        </div>
+      </motion.div>
+    );
+  }
+
   if (it.image) {
     return (
       <motion.div
@@ -792,27 +855,6 @@ export function DivisionPage({ division }: { division: Division }) {
           </div>
         )}
       </Section>
-
-      {/* サプライチェーン（業務用食材のみ・シート準拠） */}
-      {division === "food" && (
-        <Section heat={listHeat}>
-          <SectionTitle en="SUPPLY CHAIN" jp="サプライチェーン" />
-          <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.supplyChain.body", "サプライチェーン", { multiline: true })}>
-            {txt(
-              "division:food.supplyChain.body",
-              "お客様のニーズに応じた商品を国内外から調達し、岡山市北区青江の物流センターで保管し、岡山県全域のお客様へ届けています。前日注文・翌日配送を基本とし、受発注から配送までを一貫した体制で運用しています。"
-            )}
-          </p>
-          <div className="mt-8">
-            <ImageWithFallback
-              src={img("division:food.supplyChain.image", IMG.foodNetwork || IMG_PLACEHOLDER)}
-              alt="サプライチェーン"
-              className="w-full rounded-2xl border border-border object-cover"
-              {...edImg("division:food.supplyChain.image", "サプライチェーン画像")}
-            />
-          </div>
-        </Section>
-      )}
 
       {/* 商品一覧より上のセクション（シート準拠） */}
       {DETAIL_PRE[division].map((sec, si) => (
