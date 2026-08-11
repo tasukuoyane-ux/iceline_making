@@ -8,6 +8,21 @@ import { PageFields, PageField } from "./PageFields";
 import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel, RecruitVideoPanel, Recruit3BgPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
+const VIEWPORT_KEY = "iceline-console-viewport";
+
+// プレビューの表示幅。SPは実機で多い390〜430pxの中間、PCはブレークポイント
+// （--breakpoint-pc: 1025px）を確実に超える一般的なデスクトップ幅で描画する。
+// ペインが狭いときは transform: scale で縮小表示する（レイアウト自体は指定幅で組まれる）。
+const VIEWPORTS = [
+  { id: "sp", label: "SP", width: 400, note: "スマホ表示（400px）" },
+  { id: "pc", label: "PC", width: 1280, note: "パソコン表示（1280px）" },
+] as const;
+type ViewportId = (typeof VIEWPORTS)[number]["id"];
+
+function loadViewport(): ViewportId {
+  const raw = localStorage.getItem(VIEWPORT_KEY);
+  return VIEWPORTS.some((v) => v.id === raw) ? (raw as ViewportId) : "pc";
+}
 
 const PAGES: { label: string; path: string }[] = [
   { label: "トップ", path: "/" },
@@ -66,6 +81,25 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   const splitRef = useRef<HTMLDivElement>(null);
   const [leftPct, setLeftPct] = useState(50);
   const [dragging, setDragging] = useState(false);
+  // SP / PC のプレビュー切替。iframe を指定幅で描画し、ペインに収まらない分は縮小表示する。
+  const [viewport, setViewport] = useState<ViewportId>(loadViewport);
+  const previewBoxRef = useRef<HTMLDivElement>(null);
+  const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    localStorage.setItem(VIEWPORT_KEY, viewport);
+  }, [viewport]);
+
+  // プレビュー枠の実寸を監視（仕切りドラッグ・ウィンドウリサイズに追従して縮尺を再計算する）。
+  useEffect(() => {
+    const el = previewBoxRef.current;
+    if (!el) return;
+    const update = () => setBoxSize({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   function startDrag(e: React.MouseEvent) {
     e.preventDefault();
@@ -112,6 +146,13 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   useEffect(() => {
     sendOverrides();
   }, [sendOverrides]);
+
+  // SP/PC切替でiframe内のコンポーネントが再描画されると、下書きのDOMパッチが
+  // 消えることがあるため、切替直後に少し遅らせて下書きを再送する。
+  useEffect(() => {
+    const t = setTimeout(sendOverrides, 400);
+    return () => clearTimeout(t);
+  }, [viewport, sendOverrides]);
 
   // iframeからのメッセージ
   useEffect(() => {
@@ -180,6 +221,10 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   const previewSrc = `${previewPath}${previewPath.includes("?") ? "&" : "?"}__edit=1`;
   const currentPageLabel = PAGES.find((p) => p.path === previewPath)?.label || previewPath;
 
+  // プレビューの縮尺計算：指定幅がペインに収まらないときだけ縮小（拡大はしない）。
+  const vpWidth = VIEWPORTS.find((v) => v.id === viewport)!.width;
+  const scale = boxSize.w > 0 ? Math.min(1, boxSize.w / vpWidth) : 1;
+
   return (
     <div className="flex h-screen flex-col bg-slate-100">
       {/* 上部バー */}
@@ -222,19 +267,51 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
                 <option key={p.path} value={p.path}>{p.label}</option>
               ))}
             </select>
+            <div role="group" aria-label="プレビューの表示幅" className="flex overflow-hidden rounded border border-slate-300">
+              {VIEWPORTS.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  title={v.note}
+                  aria-pressed={viewport === v.id}
+                  onClick={() => setViewport(v.id)}
+                  className={
+                    "px-2.5 py-1 text-[12px] font-medium transition-colors " +
+                    (viewport === v.id ? "bg-emerald-600 text-white" : "bg-white text-slate-600 hover:bg-slate-100")
+                  }
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            {scale < 1 && (
+              <span className="text-[11px] text-slate-400">{Math.round(scale * 100)}%表示</span>
+            )}
             <span className="ml-auto text-[11px] text-slate-400">要素をクリックすると右で編集できます</span>
           </div>
-          <iframe
-            ref={iframeRef}
-            key={previewPath}
-            src={previewSrc}
-            title="ライブプレビュー"
-            className="min-h-0 flex-1 bg-white"
-            onLoad={() => {
-              sendOverrides();
-              postToFrame({ type: "request-fields" });
-            }}
-          />
+          {/* 指定幅（SP=400px / PC=1280px）でページを描画し、ペインに収まらない分は縮小表示。
+              iframe を再マウントしない（key は previewPath のみ）ため、切替時に再読込は発生しない。 */}
+          <div ref={previewBoxRef} className="min-h-0 flex-1 overflow-hidden bg-slate-200">
+            <div className="mx-auto h-full" style={{ width: vpWidth * scale }}>
+              <iframe
+                ref={iframeRef}
+                key={previewPath}
+                src={previewSrc}
+                title="ライブプレビュー"
+                className="bg-white"
+                style={{
+                  width: vpWidth,
+                  height: boxSize.h > 0 ? boxSize.h / scale : "100%",
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top left",
+                }}
+                onLoad={() => {
+                  sendOverrides();
+                  postToFrame({ type: "request-fields" });
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ドラッグ可能な仕切り */}
