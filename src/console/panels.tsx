@@ -40,7 +40,7 @@ function VideoUploadButton({ onUploaded }: { onUploaded: (url: string) => void }
   );
 }
 
-function genId(prefix: string): string {
+export function genId(prefix: string): string {
   // 時刻に依存しない簡易ユニークID
   return `${prefix}-${Math.floor(performance.now() * 1000).toString(36)}${Math.floor(performance.now()).toString(36)}`;
 }

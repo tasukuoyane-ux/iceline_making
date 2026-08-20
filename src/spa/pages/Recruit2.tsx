@@ -32,11 +32,11 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 
 // 指示書の配色（colorhunt d9ecf2-f56a79-ff414d-1aa6b7）
-const PAL = { blue: "#d9ecf2", coral: "#f56a79", red: "#ff414d", teal: "#1aa6b7", ink: "#0f2a33" };
-const ACCENTS = [PAL.red, PAL.teal, PAL.coral];
+export const PAL = { blue: "#d9ecf2", coral: "#f56a79", red: "#ff414d", teal: "#1aa6b7", ink: "#0f2a33" };
+export const ACCENTS = [PAL.red, PAL.teal, PAL.coral];
 
 // 差し替え用プレースホルダー（グレー枠 ＋画像）
-const PH =
+export const PH =
   "data:image/svg+xml;charset=utf-8," +
   encodeURIComponent(
     "<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#eef4f7'/><text x='50%' y='50%' font-size='30' fill='#9fb6c0' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>＋ 画像</text></svg>"
@@ -65,9 +65,10 @@ const MV_SLIDE_DEFAULTS = [
 // MVスライド枚数（既定と同数。差し替えは recruit2:mv.slide.{i}）
 const MV_SLIDE_COUNT = MV_SLIDE_DEFAULTS.length;
 
-// ICELINEの文字型に「切り抜かれた」ビビッドカラーの帯（文字部分が透明の穴＝背後の画像が覗く）。
+// ICELINEの文字型に「切り抜かれた」帯（文字部分が透明の穴＝背後の画像が覗く）。
 // 字面（cap height）を帯の高さと一致させ、帯を 88vh で描画すると「文字自体が 88vh」になる。
-const ICE_KNOCK = (() => {
+// 帯の色はページごとに指定できる（採用2＝水色 #1ec8dd、採用3＝白 #fff）。
+const makeIceKnock = (color: string) => {
   const h = 240;               // 帯の高さ＝ビューポート高（88vh で描画）
   // 文字の cap height が帯より少し大きくなるフォントサイズにし、上下を帯でクリップ。
   // → 各文字が帯（＝ビューポート）の高さを上端から下端まで埋める。
@@ -75,7 +76,6 @@ const ICE_KNOCK = (() => {
   const cap = fontSize * 0.716; // 大文字の高さ（近似）
   const baselineY = h / 2 + cap / 2; // 字面を帯の中央に置く（上下対称にはみ出してクリップ）
   const w = 1960;              // ICELINE 1語＋左右の余白（帯連結時の語間になる）
-  const color = "#1ec8dd";
   const svg =
     "<svg xmlns='http://www.w3.org/2000/svg' width='" + w + "' height='" + h + "' viewBox='0 0 " + w + " " + h + "'>" +
       "<defs><mask id='k'>" +
@@ -85,7 +85,7 @@ const ICE_KNOCK = (() => {
       "<rect width='" + w + "' height='" + h + "' fill='" + color + "' mask='url(#k)'/>" +
     "</svg>";
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-})();
+};
 
 // MVアニメーション用スタイル（画像マーキー＝低速 / 切り抜き帯＝高速、どちらも右→左ループ。
 // スクロールインジケーターは右下で縦に流れる）
@@ -107,7 +107,7 @@ export function R2Styles() {
 }
 
 /** インライン編集可能なテキスト要素 */
-function Ed({
+export function Ed({
   path,
   def,
   label,
@@ -133,12 +133,12 @@ function Ed({
 }
 
 /** インライン差し替え可能な画像（既定はプレースホルダー） */
-function EdImg({ path, label, className, alt = "" }: { path: string; label?: string; className?: string; alt?: string }) {
+export function EdImg({ path, label, className, alt = "" }: { path: string; label?: string; className?: string; alt?: string }) {
   return <ImageWithFallback src={img(path, PH)} alt={alt} className={className} {...edImg(path, label)} />;
 }
 
 /** セクション見出し（英字ピル ＋ 日本語見出し） */
-function Head({ base, en, jp, center }: { base: string; en: string; jp: string; center?: boolean }) {
+export function Head({ base, en, jp, center }: { base: string; en: string; jp: string; center?: boolean }) {
   return (
     <div className={center ? "text-center" : ""}>
       <Ed
@@ -162,7 +162,7 @@ function Head({ base, en, jp, center }: { base: string; en: string; jp: string; 
 }
 
 /** 左右に余白を持つセクションコンテナ */
-function Sec({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export function Sec({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <section className={"relative mx-auto w-full max-w-[1200px] px-6 py-16 pc:px-12 pc:py-24 " + className}>
       {children}
@@ -170,7 +170,9 @@ function Sec({ children, className = "" }: { children: React.ReactNode; classNam
   );
 }
 
-export function Hero() {
+export function Hero({ bandColor = "#1ec8dd" }: { bandColor?: string } = {}) {
+  // ICELINEの形に切り抜かれた帯（色はページごとに指定可能）
+  const iceKnock = makeIceKnock(bandColor);
   // 背後のスライド画像（差し替え可・4枚）。複数枚が継ぎ足されながら流れ、ICELINEの穴から覗く。
   const slides = Array.from({ length: MV_SLIDE_COUNT }, (_, i) =>
     img(`recruit2:mv.slide.${i}`, MV_SLIDE_DEFAULTS[i])
@@ -212,8 +214,8 @@ export function Hero() {
           横方向は画面に収まらなくてよいので maxWidth:none で自然幅のまま右→左ループ。 */}
       <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
         <div className="r2-fast flex items-center" style={{ width: "max-content", height: "88vh" }}>
-          <img src={ICE_KNOCK} alt="ICELINE" style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
-          <img src={ICE_KNOCK} alt="" aria-hidden style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
+          <img src={iceKnock} alt="ICELINE" style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
+          <img src={iceKnock} alt="" aria-hidden style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
         </div>
       </div>
 

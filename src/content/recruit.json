@@ -1,0 +1,151 @@
+{
+  "jobs": [
+    {
+      "id": "job-sales",
+      "title": "営業職",
+      "dept": "食品事業部",
+      "active": true,
+      "body": "飲食店・食品メーカー・食品問屋などの既存取引先を対象に、ルート配送と営業を兼ねて担当します。毎日の配送で現場に通うからこそ、取引先の困りごとに気づける。「売る」だけでなく、必要なものを一緒に考えながら伴走する仕事です。",
+      "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/4deb0c46044c5be50ffb5d01aadda51c-T9xwTFYT9o0QVJ9OqdwU19JkT4jYcx.jpg",
+      "day": {
+        "note": "食品事業部 営業職のある1日",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/cdac920d974bb34ec99434e43ab12640-RUuGjXNwjsW8b8ecJAartA8l1Kv74Y.webp",
+        "steps": [
+          { "time": "始業", "task": "出社・朝礼で当日のルートを確認" },
+          { "time": "午前", "task": "既存取引先へルート配送・納品" },
+          { "time": "午前", "task": "現場で在庫確認・困りごとのヒアリング" },
+          { "time": "昼", "task": "昼休憩" },
+          { "time": "午後", "task": "新規開拓の訪問・提案商談" },
+          { "time": "午後", "task": "受発注処理・製造部と在庫調整" },
+          { "time": "退社", "task": "日報作成・翌日準備・退社" }
+        ]
+      },
+      "career": {
+        "note": "食品事業部 営業職のステップ例",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/6d5940811fae81de33e15aa1696c29e4-2pSc4G4HR3k6a5Hqvm0inKZeARjxgi.jpg",
+        "steps": [
+          { "time": "1年目", "task": "先輩に同行しながら基礎を習得。担当業務を一つずつ覚える。" },
+          { "time": "2〜3年目", "task": "自分の担当を持って独り立ち。後輩のサポートも始める。" },
+          { "time": "4〜5年目", "task": "チームのまとめ役として、計画・調整を担う。" },
+          { "time": "6年目〜", "task": "リーダー・管理職として部門を牽引する。" }
+        ]
+      },
+      "message": "現場に通うほど、\n頼られる人になる。\nあなたの誠実さが、武器になります。"
+    },
+    {
+      "id": "job-dryice",
+      "title": "ドライアイス製造",
+      "dept": "食品事業部",
+      "active": true,
+      "body": "ドライアイスの製造から、用途に合わせた加工、検品、梱包、出荷準備までを担当します。食品の鮮度や低温物流を、温度の面から支える役割です。手順を守って安全に作業を進めることが第一。決めたことを着実に積み重ねていくことが大切です。",
+      "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/8096f27bd7be98baf1873fb61cd3a6d4-cCoFjaYWCp2ItLce473Te3fDW9E9N0.jpg",
+      "day": {
+        "note": "食品事業部 ドライアイス製造のある1日",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/cdac920d974bb34ec99434e43ab12640-RUuGjXNwjsW8b8ecJAartA8l1Kv74Y.webp",
+        "steps": [
+          { "time": "始業", "task": "出社・身支度・設備の点検" },
+          { "time": "朝礼", "task": "当日の生産計画を共有" },
+          { "time": "午前", "task": "ドライアイスの製造・加工" },
+          { "time": "午前", "task": "検品・梱包" },
+          { "time": "昼", "task": "昼休憩" },
+          { "time": "午後", "task": "出荷準備・在庫調整" },
+          { "time": "午後", "task": "設備清掃・安全確認" },
+          { "time": "退社", "task": "翌日準備・退社" }
+        ]
+      },
+      "career": {
+        "note": "製造職のステップ例",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/6d5940811fae81de33e15aa1696c29e4-2pSc4G4HR3k6a5Hqvm0inKZeARjxgi.jpg",
+        "steps": [
+          { "time": "1年目", "task": "先輩に同行しながら基礎を習得。担当業務を一つずつ覚える。" },
+          { "time": "2〜3年目", "task": "自分の担当を持って独り立ち。後輩のサポートも始める。" },
+          { "time": "4〜5年目", "task": "チームのまとめ役として、計画・調整を担う。" },
+          { "time": "6年目〜", "task": "リーダー・管理職として部門を牽引する。" }
+        ]
+      },
+      "message": "確かな手順が、\n食の鮮度を守る。\nコツコツ型の力を、発揮してください。"
+    },
+    {
+      "id": "job-ice",
+      "title": "製造スタッフ",
+      "dept": "アイス事業部",
+      "active": true,
+      "body": "業務用の氷、コンビニ向けのカップ氷、味付きの氷など、さまざまな氷を製造します。原料の管理から製氷、検品、梱包、出荷までを担当。色や味のついた新しい氷づくりに関わることもあります。季節で需要が大きく動くなかでも、欠品を出さないことを大切にしています。",
+      "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/7f4e02244d449a3ebfb367edc366d92f-rFtjaP7XLm8BufaeMIYVp9x6NFNCwT.webp",
+      "day": {
+        "note": "アイス事業部 製造スタッフのある1日",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/cdac920d974bb34ec99434e43ab12640-RUuGjXNwjsW8b8ecJAartA8l1Kv74Y.webp",
+        "steps": [
+          { "time": "始業", "task": "出社・身支度・製氷機の点検" },
+          { "time": "朝礼", "task": "当日の生産計画を共有" },
+          { "time": "午前", "task": "原料管理・製氷ラインの運転" },
+          { "time": "午前", "task": "検品・梱包" },
+          { "time": "昼", "task": "昼休憩" },
+          { "time": "午後", "task": "出荷準備・在庫調整" },
+          { "time": "午後", "task": "設備清掃・衛生管理" },
+          { "time": "退社", "task": "翌日準備・退社" }
+        ]
+      },
+      "career": {
+        "note": "アイス事業部 製造職のステップ例",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/6d5940811fae81de33e15aa1696c29e4-2pSc4G4HR3k6a5Hqvm0inKZeARjxgi.jpg",
+        "steps": [
+          { "time": "1年目", "task": "先輩に同行しながら基礎を習得。担当業務を一つずつ覚える。" },
+          { "time": "2〜3年目", "task": "自分の担当を持って独り立ち。後輩のサポートも始める。" },
+          { "time": "4〜5年目", "task": "チームのまとめ役として、計画・調整を担う。" },
+          { "time": "6年目〜", "task": "リーダー・管理職として部門を牽引する。" }
+        ]
+      },
+      "message": "岡山の氷を、\n日本の氷にする仲間へ。\n欠品を出さない誇りを、一緒に。"
+    },
+    {
+      "id": "job-quality",
+      "title": "品質管理職",
+      "dept": "アイス事業部",
+      "active": true,
+      "body": "製品の安全を守るため、製造ラインの巡回・検査・記録から、クレーム対応までを担当します。FSSC・ISO認証を現場で支える役割です。決めたことを地道に積み重ねられる方を歓迎します。",
+      "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_02__1_-CAuB9kdi6DFGY4vPP3ofAMhQCeGFq3.jpg",
+      "day": {
+        "note": "品質管理部門のある1日",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/cdac920d974bb34ec99434e43ab12640-RUuGjXNwjsW8b8ecJAartA8l1Kv74Y.webp",
+        "steps": [
+          { "time": "始業", "task": "出社・身支度" },
+          { "time": "朝礼", "task": "当日の予定共有" },
+          { "time": "午前", "task": "工場内巡回（清潔度・異物混入チェック）" },
+          { "time": "午前", "task": "製品検査・記録作業" },
+          { "time": "昼", "task": "昼休憩" },
+          { "time": "午後", "task": "クレーム対応・生産計画調整・報告書作成" },
+          { "time": "退社", "task": "翌日準備・退社" }
+        ]
+      },
+      "career": {
+        "note": "品質管理部門のステップ例",
+        "image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/6d5940811fae81de33e15aa1696c29e4-2pSc4G4HR3k6a5Hqvm0inKZeARjxgi.jpg",
+        "steps": [
+          { "time": "1年目", "task": "先輩に同行しながら基礎を習得。担当業務を一つずつ覚える。" },
+          { "time": "2〜3年目", "task": "自分の担当を持って独り立ち。後輩のサポートも始める。" },
+          { "time": "4〜5年目", "task": "チームのまとめ役として、計画・調整を担う。" },
+          { "time": "6年目〜", "task": "リーダー・管理職として部門を牽引する。" }
+        ]
+      },
+      "message": "安全は、地道の先にある。\n決めたことを守り抜く人を、\n私たちは尊敬します。"
+    }
+  ],
+  "conditions": [
+    { "label": "雇用形態", "value": "正社員（試用期間あり）" },
+    { "label": "勤務地", "value": "岡山市内の本社・工場・倉庫" },
+    { "label": "勤務時間", "value": "実働8時間（部門によりシフト制）" },
+    { "label": "休日休暇", "value": "週休2日制、年末年始、有給休暇 ほか" },
+    { "label": "待遇", "value": "各種社会保険完備、昇給・賞与、交通費支給" },
+    { "label": "応募資格", "value": "業界・食品業界の経験は問いません" }
+  ],
+  "benefits": [
+    { "label": "昇給・賞与", "value": "昇給 年1回（4月）／賞与 年2回（7月・12月）" },
+    { "label": "各種手当", "value": "時間外手当（全額支給）、通勤手当（マイカー通勤可）、家族手当（配偶者・子ども対象）" },
+    { "label": "社会保険", "value": "健康保険・厚生年金・雇用保険・労災保険 完備" },
+    { "label": "退職金・401k", "value": "退職金制度（勤続3年以上）に加えて確定拠出年金（401k）を導入" },
+    { "label": "研修・スキルアップ", "value": "外部研修・セミナー受講のサポートあり" },
+    { "label": "表彰制度", "value": "永年勤続表彰（10年ごと）" },
+    { "label": "転勤", "value": "基本的に転勤はありません。暮らす場所に根を張って働けます" }
+  ]
+}

@@ -2,6 +2,7 @@
 // 編集→プレビュー用オーバーライド生成→変更ファイル抽出（公開）まで担う。
 
 import videosJson from "../content/videos.json";
+import recruitJson from "../content/recruit.json";
 import interviewsJson from "../content/interviews.json";
 import imagesJson from "../content/images.json";
 import sectionsJson from "../content/sections.json";
@@ -35,6 +36,47 @@ export interface ImagesData {
   INTERVIEW_IMG: Record<string, string>;
 }
 
+/* ---- 採用（募集職種）。「採用」タブで編集し、採用3ページに表示される ---- */
+export interface RecruitStep {
+  time: string;
+  task: string;
+}
+export interface RecruitTimeline {
+  note: string;
+  image: string;
+  steps: RecruitStep[];
+}
+export interface RecruitJob {
+  id: string;
+  /** 職種名（募集職種一覧・カード見出しに表示） */
+  title: string;
+  /** 部門名（例: 食品事業部） */
+  dept: string;
+  /** 募集中フラグ（OFFにすると公開ページに表示されない。データは残る） */
+  active: boolean;
+  /** 業務内容 本文 */
+  body: string;
+  /** 業務内容 画像 */
+  image: string;
+  /** 1日の流れ */
+  day: RecruitTimeline;
+  /** キャリアパス */
+  career: RecruitTimeline;
+  /** 職種別メッセージ（改行可・大きな黒文字で表示） */
+  message: string;
+}
+export interface RecruitRow {
+  label: string;
+  value: string;
+}
+export interface RecruitData {
+  jobs: RecruitJob[];
+  /** 諸条件（表） */
+  conditions: RecruitRow[];
+  /** 福利厚生（諸条件の色違いの表） */
+  benefits: RecruitRow[];
+}
+
 // 注意: お知らせ（news）は Payload CMS（/admin）へ移行済み。
 // コンソールの下書き・公開対象から外している（news.json はもうコミットしない）。
 export interface Content {
@@ -42,6 +84,8 @@ export interface Content {
   interviews: InterviewItem[];
   images: ImagesData;
   sections: any;
+  // 採用（募集職種・諸条件・福利厚生）。「採用」タブで編集
+  recruit: RecruitData;
   // 会社紹介資料（採用ページ COMPANY PROFILE のスライド画像URL一覧）
   profileSlides: string[];
   // お問い合わせ設定（送信先メールアドレス）
@@ -53,6 +97,7 @@ export interface Content {
 // 下書き対象 → リポジトリ上のファイルパス
 export const FILE_PATHS: Record<keyof Content, string> = {
   videos: "src/content/videos.json",
+  recruit: "src/content/recruit.json",
   interviews: "src/content/interviews.json",
   images: "src/content/images.json",
   sections: "src/content/sections.json",
@@ -117,6 +162,7 @@ export function baseline(): Content {
   return normalizeContent(
     clone({
       videos: videosJson as VideoItem[],
+      recruit: recruitJson as RecruitData,
       interviews: interviewsJson as any[],
       images: imagesJson as ImagesData,
       sections: sectionsJson as any,
@@ -141,11 +187,45 @@ export function normalizeContent(c: any): Content {
     image: iv.image,
     blocks: toBlocks(iv.blocks ?? iv.paragraphs),
   }));
+  // 採用データ（キー欠落・型崩れに耐える正規化。古いローカル下書きの補完にも使う）
+  c.recruit = normalizeRecruit(c.recruit);
   if (!Array.isArray(c.profileSlides)) c.profileSlides = [""];
   if (!c.contact || typeof c.contact !== "object") c.contact = { recipient: "" };
   if (typeof c.contact.recipient !== "string") c.contact.recipient = "";
   if (!c.overrides) c.overrides = {};
   return c as Content;
+}
+
+/** 採用データの正規化（キー欠落・型崩れに耐える） */
+export function normalizeRecruit(r: any): RecruitData {
+  const rows = (v: any): RecruitRow[] =>
+    (Array.isArray(v) ? v : []).map((x: any) => ({
+      label: String(x?.label ?? ""),
+      value: String(x?.value ?? ""),
+    }));
+  const timeline = (v: any): RecruitTimeline => ({
+    note: String(v?.note ?? ""),
+    image: String(v?.image ?? ""),
+    steps: (Array.isArray(v?.steps) ? v.steps : []).map((s: any) => ({
+      time: String(s?.time ?? ""),
+      task: String(s?.task ?? ""),
+    })),
+  });
+  return {
+    jobs: (Array.isArray(r?.jobs) ? r.jobs : []).map((j: any) => ({
+      id: String(j?.id ?? ""),
+      title: String(j?.title ?? ""),
+      dept: String(j?.dept ?? ""),
+      active: j?.active !== false,
+      body: String(j?.body ?? ""),
+      image: String(j?.image ?? ""),
+      day: timeline(j?.day),
+      career: timeline(j?.career),
+      message: String(j?.message ?? ""),
+    })),
+    conditions: rows(r?.conditions),
+    benefits: rows(r?.benefits),
+  };
 }
 
 /* ============ 汎用パスの取得/設定（ページ単位エディタ用） ============ */

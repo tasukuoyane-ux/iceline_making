@@ -11,14 +11,16 @@ import { Content, baseline, baselineSig, buildOverrides, changedFiles, clone, ge
 import { Button, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { PageFields, PageField } from "./PageFields";
+import { RecruitPanel } from "./RecruitPanel";
 import { VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel, SectionVideoPanel, Recruit3BgPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 const VIEWPORT_KEY = "iceline-console-viewport";
 
-// 編集の対象タブ（参考: hp-renew-2026 と同構成。「実績」は当サイトには無い）
+// 編集の対象タブ
 const TABS = [
   { id: "pages", label: "ページ編集" },
+  { id: "recruit", label: "採用" },
   { id: "seo", label: "SEO" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
@@ -154,6 +156,14 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
 
   const sendOverrides = useCallback(() => {
     postToFrame({ type: "draft", overrides: buildOverrides(draft) });
+    // 採用（募集職種）の下書き。件数・並び順が変わるためページ側は React 再描画で反映する
+    postToFrame({
+      type: "recruit",
+      recruit: {
+        ...draft.recruit,
+        faq: Array.isArray(draft.sections?.recruitFaq?.items) ? draft.sections.recruitFaq.items : [],
+      },
+    });
   }, [draft, postToFrame]);
 
   useEffect(() => {
@@ -256,7 +266,15 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
             <button
               key={t.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setTab(t.id);
+                // 採用タブは採用3ページの内容を編集するため、プレビューも合わせる
+                if (t.id === "recruit" && previewPath !== "/recruit3") {
+                  setPreviewPath("/recruit3");
+                  setFields([]);
+                  setSelectedPath(null);
+                }
+              }}
               aria-pressed={tab === t.id}
               className={
                 "px-3 py-1 text-[12px] font-medium transition-colors " +
@@ -395,6 +413,8 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
           <div id="fields-scroll" className="min-h-0 flex-1 overflow-y-auto p-4">
             {tab === "seo" ? (
               <SeoPanel draft={draft} setValue={setValue} />
+            ) : tab === "recruit" ? (
+              <RecruitPanel draft={draft} setSlice={setSlice} />
             ) : (
               <>
                 {/* プレビュー中のページに応じた構造化マネージャ（追加・削除・並べ替え） */}

@@ -212,6 +212,10 @@ export function initEditBridge() {
       // 下書き反映後に一覧も更新
       postFields();
     }
+    // 採用（募集職種）の下書き。件数・並び順が変わるため React 再描画で反映する
+    if (msg.type === "recruit") {
+      import("./recruitStore").then((m) => m.setRecruitPreview(msg.recruit ?? null));
+    }
     if (msg.type === "request-fields") postFields();
     if (msg.type === "scroll-to") {
       const p = cssEscape(msg.path);
