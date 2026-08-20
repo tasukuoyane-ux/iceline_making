@@ -34,7 +34,7 @@ export function SectionTitle({ en, jp, align = "left", invert, className }: Sect
     <div className={cn(align === "center" && "text-center", className)}>
       {en && (
         <div
-          className={cn("mb-2", invert ? "text-brand" : "text-brand")}
+          className={cn("mb-2", invert ? "text-white/85" : "text-brand")}
           style={{ fontFamily: "var(--font-accent)", fontSize: 13, letterSpacing: "0.18em" }}
         >
           {en}

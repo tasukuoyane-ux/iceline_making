@@ -8,7 +8,8 @@ import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
+import { RatioField } from "../components/common/RatioField";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
 const MV: Record<Division, { img: string; en: string; title: string; lead: string }> = {
@@ -637,9 +638,11 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="grid items-center gap-8 pc:grid-cols-[2fr_3fr]"
+        className="grid items-center gap-8 pc:[grid-template-columns:var(--ratio)]"
+        style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 60, false) }}
       >
         <div className="pc:px-12">
+          <RatioField path={`${base}.ratio`} def={60} />
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}
@@ -680,9 +683,11 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className={`grid items-center gap-8 pc:grid-cols-[2fr_3fr] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
+        className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
+        style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 60, false) }}
       >
         <div className="[direction:ltr] pc:px-12">
+          <RatioField path={`${base}.ratio`} def={60} />
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}
@@ -728,8 +733,12 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
   // 画像未設定の間は公開ページでは従来どおり文章のみ表示する。
   if (it.sideImage && (img(`${base}.image`, "") !== "" || EDIT_MODE)) {
     return (
-      <div className="grid items-center gap-8 pc:grid-cols-[3fr_2fr]">
+      <div
+        className="grid items-center gap-8 pc:[grid-template-columns:var(--ratio)]"
+        style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 40, false) }}
+      >
         <div>
+          <RatioField path={`${base}.ratio`} def={40} />
           {it.title && (
             <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}
@@ -838,11 +847,11 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </section>
 
-      {/* 事業概要 */}
-      <Section heat={bizHeat}>
+      {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分） */}
+      <Section heat={bizHeat} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" />
-          <p className="mt-6 text-left text-foreground/80 pc:text-center" style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`division:${division}.overview`, "事業概要", { multiline: true })}>
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert />
+          <p className="mt-6 text-left text-white/90 pc:text-center" style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`division:${division}.overview`, "事業概要", { multiline: true })}>
             {txt(`division:${division}.overview`, OVERVIEW[division])}
           </p>
         </div>

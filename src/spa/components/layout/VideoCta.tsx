@@ -6,7 +6,7 @@ export function VideoCta() {
   return (
     <Link
       to="/videos"
-      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-brand-foreground shadow-lg transition-all hover:bg-brand-dark hover:shadow-xl pc:bottom-8 pc:right-8"
+      className="video-cta fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-brand-foreground shadow-lg transition-all hover:bg-brand-dark hover:shadow-xl pc:bottom-8 pc:right-8"
       style={{ fontSize: 14 }}
     >
       <PlayCircle size={20} />

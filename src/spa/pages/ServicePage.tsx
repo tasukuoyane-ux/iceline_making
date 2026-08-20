@@ -10,7 +10,8 @@ import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
-import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
+import { RatioField } from "../components/common/RatioField";
 
 // 要確認スロットの案内文（未入力の間、公開ページでは項目ごと非表示になる）
 const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
@@ -212,12 +213,12 @@ export function ServicePage({ service }: { service: ServiceId }) {
         </div>
       </section>
 
-      {/* 事業概要 */}
-      <Section heat={HEAT.foodBiz}>
+      {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分） */}
+      <Section heat={HEAT.foodBiz} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" />
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert />
           <p
-            className="mt-6 text-left text-foreground/80 pc:text-center"
+            className="mt-6 text-left text-white/90 pc:text-center"
             style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }}
             {...ed(`${base}.overview`, "事業概要", { multiline: true })}
           >
@@ -230,8 +231,8 @@ export function ServicePage({ service }: { service: ServiceId }) {
                 href={s.shopUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
-                style={{ fontSize: 15 }}
+                className="inline-flex items-center gap-2 bg-white px-8 py-3.5 text-brand transition-colors hover:bg-white/90"
+                style={{ fontSize: 15, fontWeight: 700 }}
               >
                 <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
                   {txt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
@@ -263,9 +264,11 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
-                  className={`grid items-center gap-8 pc:grid-cols-[2fr_3fr] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
+                  className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
+                  style={{ ["--ratio" as any]: ratioCols(`${base}.sec.${si}.${ii}.ratio`, 60, false) }}
                 >
                   <div className="[direction:ltr] pc:px-12">
+                    <RatioField path={`${base}.sec.${si}.${ii}.ratio`} def={60} />
                     {it.title && (
                       <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.sec.${si}.${ii}.title`, "見出し")}>
                         {txt(`${base}.sec.${si}.${ii}.title`, it.title)}

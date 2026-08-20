@@ -26,7 +26,7 @@ export function News() {
             onClick={() => setCat(c)}
             className={cn(
               "border px-4 py-2 transition-colors",
-              cat === c ? "border-brand bg-brand text-brand-foreground" : "border-border hover:border-brand"
+              cat === c ? "border-brand bg-brand text-brand-foreground" : "border-border bg-white hover:border-brand"
             )}
             style={{ fontSize: 13 }}
           >
@@ -35,7 +35,8 @@ export function News() {
         ))}
       </div>
 
-      <ul className="mt-8 divide-y divide-border border-t border-border">
+      {/* リンク（インタラクティブ要素）の背景は無地の白 */}
+      <ul className="mt-8 divide-y divide-border rounded-xl bg-white px-5 shadow-sm">
         {items.map((n) => (
           <li key={n.id}>
             <Link to={`/news/${n.id}`} className="flex flex-col gap-2 py-5 transition-colors hover:text-brand tab:flex-row tab:items-center tab:gap-6">

@@ -7,11 +7,34 @@ import { IMG, PRODUCT_IMG } from "../data/images";
 import { useNews } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
 import { InlineMovieTag } from "../components/common/MovieBadge";
+import { RatioField } from "../components/common/RatioField";
 
 // トップページ メインビジュアル（TOP専用キーで編集対象を明確化）
 const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュアル", key: "topMv" };
+
+// MVに重ねる白の斜線ストライプ（45°の破線を帯状に散らしたオーバーレイ）。
+// 擬似乱数は決定的（毎回同じ模様）で、SVGをデータURIとして焼き込む。
+const MV_STRIPES = (() => {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  const lines: string[] = [];
+  for (let i = 0; i < 30; i++) {
+    const y = -420 + i * 44;
+    const dashes: string[] = [];
+    for (let j = 0; j < 7; j++) {
+      dashes.push(`${Math.round(30 + rnd() * 230)} ${Math.round(40 + rnd() * 200)}`);
+    }
+    lines.push(
+      `<line x1='-900' y1='${y}' x2='2500' y2='${y}' stroke='#fff' stroke-width='15' stroke-dasharray='${dashes.join(" ")}' stroke-dashoffset='${Math.round(rnd() * 600)}'/>`
+    );
+  }
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900' viewBox='0 0 1600 900' preserveAspectRatio='xMidYMid slice'>` +
+    `<g transform='rotate(-45 800 450)'>${lines.join("")}</g></svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+})();
 
 // 「私たちの強み」画像の差し替え用プレースホルダー（編集前のグレー枠）
 const STRENGTH_PLACEHOLDER =
@@ -45,8 +68,10 @@ function Hero() {
   // オーバーレイ・テキストは配置せず、画像そのものを見せる。
   const s = TOP_MV;
   return (
-    <section className="w-full overflow-hidden bg-ink">
+    <section className="relative w-full overflow-hidden bg-ink">
       <ImageWithFallback src={s.img} alt={s.alt} className="block w-full" {...edImg(`images:IMG.${s.key}`, "トップ メインビジュアル")} />
+      {/* 白の斜線ストライプオーバーレイ */}
+      <img src={MV_STRIPES} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
     </section>
   );
 }
@@ -95,7 +120,8 @@ export function Top() {
         <div className="grid gap-8 pc:grid-cols-[280px_1fr]">
           <SectionTitle en="NEWS" jp="新着情報" />
           <div>
-            <ul className="divide-y divide-border border-t border-border">
+            {/* リンク（インタラクティブ要素）の背景は無地の白 */}
+            <ul className="divide-y divide-border rounded-xl bg-white px-5 shadow-sm">
               {news.slice(0, 4).map((n) => (
                 <li key={n.id}>
                   <Link to={`/news/${n.id}`} className="flex flex-col gap-1 py-4 transition-colors hover:text-brand tab:flex-row tab:items-center tab:gap-6">
@@ -124,7 +150,10 @@ export function Top() {
         <h2 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} {...ed("top:strengthV2.title", "強み 見出し（H2）")}>
           {txt("top:strengthV2.title", "私たちの強み")}
         </h2>
-        <div className="mt-10 grid items-center gap-8 pc:grid-cols-2 pc:gap-12">
+        <div
+          className="mt-10 grid items-center gap-8 pc:gap-12 pc:[grid-template-columns:var(--ratio)]"
+          style={{ ["--ratio" as any]: ratioCols("top:strengthV2.ratio", 50, true) }}
+        >
           {/* 左：画像（差し替え可能） */}
           <ImageWithFallback
             src={img("top:strengthV2.image", STRENGTH_PLACEHOLDER)}
@@ -140,6 +169,7 @@ export function Top() {
             <p className="mt-4 text-foreground/80" style={{ fontSize: 16, lineHeight: 2, whiteSpace: "pre-line" }} {...ed("top:strengthV2.body", "強み 本文", { multiline: true })}>
               {txt("top:strengthV2.body", STRENGTH_BODY_DEFAULT)}
             </p>
+            <RatioField path="top:strengthV2.ratio" def={50} />
           </div>
         </div>
       </Section>

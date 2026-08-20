@@ -3,6 +3,19 @@ import { Content, getValueByPath, setValueByPath } from "./content";
 import { Select, TextArea, TextInput } from "./ui";
 import { ImageField } from "./ImageField";
 
+// アニメーションの選択肢（値は "種類|開始オフセットpx|移動量px" で overrides の anim:<パス> に保存）
+const ANIM_OPTS: { value: string; label: string }[] = [
+  { value: "", label: "アニメなし" },
+  { value: "fade-b", label: "フェードイン（下から）" },
+  { value: "fade-t", label: "フェードイン（上から）" },
+  { value: "fade-l", label: "フェードイン（左から）" },
+  { value: "fade-r", label: "フェードイン（右から）" },
+  { value: "slide-b", label: "スライドイン（下から）" },
+  { value: "slide-t", label: "スライドイン（上から）" },
+  { value: "slide-l", label: "スライドイン（左から）" },
+  { value: "slide-r", label: "スライドイン（右から）" },
+];
+
 export interface PageField {
   path: string;
   kind: "text" | "image" | "select";
@@ -55,6 +68,11 @@ export function PageFields({
         // 画面幅ごとの非表示設定（overrides の `hide:<パス>` に 'sp' | 'pc' | 'sp,pc'）
         const hideKey = `hide:${f.path}`;
         const hideVal = getValueByPath(draft, hideKey) || "";
+        // スクロール連動アニメーション（"種類|開始オフセット|移動量"）
+        const animKey = `anim:${f.path}`;
+        const [animType = "", animOffset = "0", animAmount = "40"] = (getValueByPath(draft, animKey) || "").split("|");
+        const setAnim = (t: string, o: string, a: string) =>
+          onChange(setValueByPath(draft, animKey, t ? `${t}|${o || "0"}|${a || "40"}` : ""));
         const toggleHide = (which: "sp" | "pc") => {
           const parts = new Set(hideVal.split(",").filter(Boolean));
           if (parts.has(which)) parts.delete(which);
@@ -116,6 +134,48 @@ export function PageFields({
                       ? "SPでは表示されません"
                       : "PCでは表示されません"}
                 </span>
+              )}
+            </div>
+
+            {/* スクロール連動アニメーション */}
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+              <select
+                value={animType}
+                onChange={(e) => setAnim(e.target.value, animOffset, animAmount)}
+                aria-label="アニメーション"
+                className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 outline-none"
+              >
+                {ANIM_OPTS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              {animType && (
+                <>
+                  <label className="flex items-center gap-1 text-[10px] text-slate-500">
+                    開始オフセット
+                    <input
+                      type="number"
+                      min={0}
+                      step={10}
+                      value={animOffset}
+                      onChange={(e) => setAnim(animType, e.target.value, animAmount)}
+                      className="w-14 rounded border border-slate-300 px-1 py-0.5 text-[10px] outline-none"
+                    />
+                    px
+                  </label>
+                  <label className="flex items-center gap-1 text-[10px] text-slate-500">
+                    移動量
+                    <input
+                      type="number"
+                      min={0}
+                      step={10}
+                      value={animAmount}
+                      onChange={(e) => setAnim(animType, animOffset, e.target.value)}
+                      className="w-14 rounded border border-slate-300 px-1 py-0.5 text-[10px] outline-none"
+                    />
+                    px
+                  </label>
+                </>
               )}
             </div>
 

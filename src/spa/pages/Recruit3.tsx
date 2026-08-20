@@ -18,7 +18,8 @@ import { Link } from "react-router";
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols } from "../lib/editable";
+import { RatioField } from "../components/common/RatioField";
 import { useRecruitData, RecruitJob, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { INTERVIEWS } from "../data/recruit";
@@ -370,7 +371,11 @@ function Charm3() {
         {CHARM3_DEFAULTS.map((c, i) => {
           const imageLeft = i % 2 === 0; // 1項目目=画像左 / 2項目目=画像右
           return (
-            <div key={i} className="grid items-center gap-6 pc:grid-cols-2 pc:gap-10">
+            <div
+              key={i}
+              className="grid items-center gap-6 pc:gap-10 pc:[grid-template-columns:var(--ratio)]"
+              style={{ ["--ratio" as any]: ratioCols(`recruit3:charm.${i}.ratio`, 50, imageLeft) }}
+            >
               {/* 画像（見出しを重ねる。文字影で目立たせる） */}
               <div className={"relative overflow-hidden rounded-[1.5rem] shadow-[0_18px_40px_rgba(15,42,51,0.16)] " + (imageLeft ? "pc:order-1" : "pc:order-2")}>
                 <ImageWithFallback
@@ -396,6 +401,7 @@ function Charm3() {
               >
                 {txt(`recruit3:charm.${i}.body`, c.body)}
               </p>
+              <RatioField path={`recruit3:charm.${i}.ratio`} def={50} />
             </div>
           );
         })}

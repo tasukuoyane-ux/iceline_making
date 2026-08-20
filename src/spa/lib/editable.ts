@@ -95,3 +95,16 @@ export function img(path: string, def: string): string {
   const v = OVERRIDES[path];
   return v !== undefined && v !== "" ? v : def;
 }
+
+/** 画像と文章の横並び比率（画像の幅％）。CMSの「画像の幅％（30〜70）」項目を読む */
+export function ratioPct(path: string, defPct: number): number {
+  const v = parseInt(txt(path, String(defPct)), 10);
+  if (Number.isNaN(v)) return defPct;
+  return Math.min(70, Math.max(30, v));
+}
+
+/** grid-template-columns 用の値。imageFirst=画像列が先頭（1列目）か */
+export function ratioCols(path: string, defImgPct: number, imageFirst: boolean): string {
+  const p = ratioPct(path, defImgPct);
+  return imageFirst ? `${p}fr ${100 - p}fr` : `${100 - p}fr ${p}fr`;
+}

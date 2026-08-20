@@ -70,8 +70,9 @@ export interface HeatStyles {
 export function heatStyles(p: HeatProfile): HeatStyles {
   const score = heatScore(p);
   const surface =
+    // 基本背景はページ全体の背景画像（BG_Prism）を透過して見せる
     rank(p.background) <= 0
-      ? "bg-background"
+      ? "bg-transparent"
       : rank(p.background) === 1
       ? "bg-secondary/40"
       : rank(p.background) === 2

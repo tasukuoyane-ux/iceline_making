@@ -23,6 +23,39 @@ import { RecipeDetail } from "./pages/RecipeDetail";
 import { Privacy } from "./pages/Privacy";
 import { ConsoleApp } from "../console/ConsoleApp";
 
+// 基本背景（採用ページ以外）：プリズム調の背景画像を全面に敷く。
+// 採用系ページは各ページ独自の背景（パララックス・スクロール動画）を持つため白のまま。
+function SiteBg() {
+  const { pathname } = useLocation();
+  const isRecruit = pathname.startsWith("/recruit");
+  return (
+    <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden>
+      {!isRecruit && (
+        <img src="/images/background/BG_Prism.jpg" alt="" className="h-full w-full object-cover" />
+      )}
+    </div>
+  );
+}
+
+// スクロール連動アニメーション（コンソールの「ページ編集」で各要素に設定）の起動。
+// SPA遷移後の描画タイミングに合わせて数回スキャンする。
+function AnimateBoot() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    let alive = true;
+    const run = () => {
+      if (!alive) return;
+      import("./lib/animate").then((m) => alive && m.applyAnimations());
+    };
+    const timers = [60, 400, 1200].map((ms) => setTimeout(run, ms));
+    return () => {
+      alive = false;
+      timers.forEach(clearTimeout);
+    };
+  }, [pathname]);
+  return null;
+}
+
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
@@ -44,7 +77,9 @@ function ScrollToTop() {
 // 公開サイト本体（ヘッダー・フッター付き）
 function Site() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
+      <SiteBg />
+      <AnimateBoot />
       <Header />
       <main className="flex-1">
         <Routes>

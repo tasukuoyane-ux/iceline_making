@@ -199,3 +199,13 @@
     line-height: 1.5;
   }
 }
+
+/* Cookie同意バナー表示中は「動画で知る」固定ボタンを上へ逃がす（重なり防止） */
+html.cookie-open .video-cta {
+  bottom: 112px;
+}
+@media (min-width: 1025px) {
+  html.cookie-open .video-cta {
+    bottom: 88px;
+  }
+}

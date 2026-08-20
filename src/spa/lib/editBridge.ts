@@ -58,8 +58,10 @@ function applyHideStyle(overrides: Record<string, string>) {
 function applyOverrides(overrides: Record<string, string>) {
   lastOverrides = overrides;
   applyHideStyle(overrides);
+  // アニメーション設定は animate モジュールが要素へ反映する（DOMパッチ対象外）
+  import("./animate").then((m) => m.setAnimOverrides(overrides));
   for (const [path, value] of Object.entries(overrides)) {
-    if (path.startsWith("hide:")) continue; // 非表示設定は applyHideStyle で処理済み
+    if (path.startsWith("hide:") || path.startsWith("anim:")) continue; // 専用モジュールで処理済み
     document.querySelectorAll<HTMLElement>(`[data-edit="${cssEscape(path)}"]`).forEach((el) => {
       if (el.textContent !== value) el.textContent = value;
     });

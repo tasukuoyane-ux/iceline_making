@@ -14,6 +14,13 @@ export function CookieConsent() {
     }
   }, []);
 
+  // バナー表示中は html にクラスを付け、固定ボタン（動画で知る）を上へ逃がす（重なり防止）
+  useEffect(() => {
+    if (!show) return;
+    document.documentElement.classList.add("cookie-open");
+    return () => document.documentElement.classList.remove("cookie-open");
+  }, [show]);
+
   function accept() {
     try {
       localStorage.setItem(KEY, "1");
