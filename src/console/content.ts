@@ -1,7 +1,6 @@
 // コンテンツの下書き管理。ビルド時JSONをベースラインとして読み込み、
 // 編集→プレビュー用オーバーライド生成→変更ファイル抽出（公開）まで担う。
 
-import newsJson from "../content/news.json";
 import videosJson from "../content/videos.json";
 import interviewsJson from "../content/interviews.json";
 import imagesJson from "../content/images.json";
@@ -9,17 +8,10 @@ import sectionsJson from "../content/sections.json";
 import overridesJson from "../content/overrides.json";
 import profileSlidesJson from "../content/profileSlides.json";
 import contactJson from "../content/contact.json";
-import { Block, toBlocks } from "../app/data/blocks";
+import { Block, toBlocks } from "../spa/data/blocks";
 
 export type { Block };
 
-export interface NewsItem {
-  id: string;
-  date: string;
-  category: "お知らせ" | "製品" | "採用" | "メディア";
-  title: string;
-  blocks: Block[];
-}
 export interface VideoItem {
   id: string;
   title: string;
@@ -43,8 +35,9 @@ export interface ImagesData {
   INTERVIEW_IMG: Record<string, string>;
 }
 
+// 注意: お知らせ（news）は Payload CMS（/admin）へ移行済み。
+// コンソールの下書き・公開対象から外している（news.json はもうコミットしない）。
 export interface Content {
-  news: NewsItem[];
   videos: VideoItem[];
   interviews: InterviewItem[];
   images: ImagesData;
@@ -57,11 +50,8 @@ export interface Content {
   overrides: Record<string, string>;
 }
 
-export const NEWS_CATEGORIES: NewsItem["category"][] = ["お知らせ", "製品", "採用", "メディア"];
-
 // 下書き対象 → リポジトリ上のファイルパス
 export const FILE_PATHS: Record<keyof Content, string> = {
-  news: "src/content/news.json",
   videos: "src/content/videos.json",
   interviews: "src/content/interviews.json",
   images: "src/content/images.json",
@@ -126,7 +116,6 @@ export function baselineSig(): string {
 export function baseline(): Content {
   return normalizeContent(
     clone({
-      news: newsJson as any[],
       videos: videosJson as VideoItem[],
       interviews: interviewsJson as any[],
       images: imagesJson as ImagesData,
@@ -140,13 +129,8 @@ export function baseline(): Content {
 
 /** 旧形式(body / paragraphs)を blocks へ揃える。localStorageの古い下書き対策にも使う。 */
 export function normalizeContent(c: any): Content {
-  c.news = (c.news || []).map((n: any) => ({
-    id: n.id,
-    date: n.date,
-    category: n.category,
-    title: n.title,
-    blocks: toBlocks(n.blocks ?? n.body),
-  }));
+  // 旧下書き（localStorage）に残っている news は Payload 移行済みのため捨てる
+  delete c.news;
   c.interviews = (c.interviews || []).map((iv: any) => ({
     id: iv.id,
     name: iv.name,
@@ -188,14 +172,14 @@ export function getValueByPath(d: Content, path: string): string | undefined {
     const [g, k] = path.slice(7).split(".");
     return (d.images as any)[g]?.[k];
   }
-  if (path.startsWith("news:") || path.startsWith("videos:") || path.startsWith("interviews:")) {
+  if (path.startsWith("videos:") || path.startsWith("interviews:")) {
     const colon = path.indexOf(":");
     const kind = path.slice(0, colon);
     const rest = path.slice(colon + 1);
     const sep = rest.indexOf(":");
     const id = rest.slice(0, sep);
     const field = rest.slice(sep + 1);
-    const arr: any[] = (d as any)[kind === "news" ? "news" : kind === "videos" ? "videos" : "interviews"];
+    const arr: any[] = (d as any)[kind === "videos" ? "videos" : "interviews"];
     const item = arr.find((x) => x.id === id);
     return item ? deepGet(item, field) : undefined;
   }
@@ -210,14 +194,14 @@ export function setValueByPath(d: Content, path: string, value: string): Content
   } else if (path.startsWith("images:")) {
     const [g, k] = path.slice(7).split(".");
     (next.images as any)[g][k] = value;
-  } else if (path.startsWith("news:") || path.startsWith("videos:") || path.startsWith("interviews:")) {
+  } else if (path.startsWith("videos:") || path.startsWith("interviews:")) {
     const colon = path.indexOf(":");
     const kind = path.slice(0, colon);
     const rest = path.slice(colon + 1);
     const sep = rest.indexOf(":");
     const id = rest.slice(0, sep);
     const field = rest.slice(sep + 1);
-    const arr: any[] = (next as any)[kind === "news" ? "news" : kind === "videos" ? "videos" : "interviews"];
+    const arr: any[] = (next as any)[kind === "videos" ? "videos" : "interviews"];
     const item = arr.find((x) => x.id === id);
     if (item) deepSet(item, field, value);
   } else {
@@ -273,13 +257,6 @@ function flatten(prefix: string, value: any, out: Record<string, string>) {
  */
 export function buildOverrides(draft: Content): Record<string, string> {
   const o: Record<string, string> = {};
-
-  draft.news.forEach((n) => {
-    o[`news:${n.id}:date`] = n.date;
-    o[`news:${n.id}:category`] = n.category;
-    o[`news:${n.id}:title`] = n.title;
-    // 本文は blocks（構造編集のため inline プレビュー対象外）
-  });
 
   draft.videos.forEach((v) => {
     o[`videos:${v.id}:title`] = v.title;

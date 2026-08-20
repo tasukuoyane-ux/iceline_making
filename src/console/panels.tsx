@@ -1,7 +1,10 @@
 // /console 各コンテンツ種別の編集パネル。
-import { createContext, useContext, useRef, useState } from "react";
-import { Content, NewsItem, VideoItem, InterviewItem, NEWS_CATEGORIES } from "./content";
-import { Field, TextInput, TextArea, Select, Button, Card, Collapsible } from "./ui";
+// ページ編集タブで、プレビュー中のページに応じて右パネルへ差し込まれる
+// 「構造化マネージャ」（追加・削除・並べ替えを伴う編集）の実装。
+// ※ お知らせ（旧 NewsPanel）は Payload CMS（/admin）へ移行済み。
+import { useRef, useState } from "react";
+import { VideoItem, InterviewItem } from "./content";
+import { Field, TextInput, Button, Card, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { BlockEditor } from "./BlockEditor";
 import { uploadImage } from "./api";
@@ -42,15 +45,27 @@ function genId(prefix: string): string {
   return `${prefix}-${Math.floor(performance.now() * 1000).toString(36)}${Math.floor(performance.now()).toString(36)}`;
 }
 
-/* ===================== 採用ページ 紹介動画 ===================== */
-// 採用ページのヒーローメッセージ〜事業紹介の間に表示する紹介動画のURLを設定する。
-// 値は sections.json の recruitIntroVideo に保存。空欄ならページ側でセクション自体を非表示にする。
-export function RecruitVideoPanel({ value, onChange }: { value: any; onChange: (v: any) => void }) {
-  const url: string = value?.recruitIntroVideo ?? "";
-  const setUrl = (v: string) => onChange({ ...value, recruitIntroVideo: v });
+/* ===================== セクション動画（汎用） ===================== */
+// sections.json 直下の「動画URL 1本」を編集する汎用パネル。
+//  - recruitIntroVideo: 採用ページ ヒーローメッセージと事業紹介の間の紹介動画
+//  - recruit2Video:     採用2「人を知る」の紹介動画
+// 空欄ならページ側でセクション自体を非表示にする。
+export function SectionVideoPanel({
+  value,
+  onChange,
+  sectionKey,
+  title,
+}: {
+  value: any;
+  onChange: (v: any) => void;
+  sectionKey: string;
+  title: string;
+}) {
+  const url: string = value?.[sectionKey] ?? "";
+  const setUrl = (v: string) => onChange({ ...value, [sectionKey]: v });
   return (
     <div className="space-y-4">
-      <Card title="採用ページ 紹介動画（ヒーローメッセージと事業紹介の間に表示）">
+      <Card title={title}>
         <Field
           label="動画URL"
           hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄ならセクション自体を非表示。"
@@ -162,67 +177,6 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
             </div>
           </Field>
         </Card>
-      ))}
-    </div>
-  );
-}
-
-/* ===================== お知らせ ===================== */
-export function NewsPanel({ value, onChange }: { value: NewsItem[]; onChange: (v: NewsItem[]) => void }) {
-  function update(i: number, patch: Partial<NewsItem>) {
-    const next = value.slice();
-    next[i] = { ...next[i], ...patch };
-    onChange(next);
-  }
-  function add() {
-    const item: NewsItem = {
-      id: genId("n"),
-      date: "2026.01.01",
-      category: "お知らせ",
-      title: "新しいお知らせ",
-      blocks: [{ type: "paragraph", text: "本文を入力してください。" }],
-    };
-    onChange([item, ...value]);
-  }
-  function remove(i: number) {
-    if (!confirm("このお知らせを削除しますか？")) return;
-    onChange(value.filter((_, idx) => idx !== i));
-  }
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-[12px] text-slate-500">記事は新しいものが上に表示されます。</p>
-        <Button variant="primary" onClick={add}>＋ お知らせを追加</Button>
-      </div>
-      {value.map((n, i) => (
-        <div key={n.id} data-focus={n.id}>
-          <Collapsible
-            title={n.title || "（無題）"}
-            action={<Button variant="danger" onClick={() => remove(i)}>削除</Button>}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="日付" hint="例: 2026.06.01">
-                <TextInput value={n.date} onChange={(e) => update(i, { date: e.target.value })} />
-              </Field>
-              <Field label="カテゴリ">
-                <Select value={n.category} onChange={(e) => update(i, { category: e.target.value as NewsItem["category"] })}>
-                  {NEWS_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </Select>
-              </Field>
-            </div>
-            <div className="mt-3">
-              <Field label="タイトル">
-                <TextInput value={n.title} onChange={(e) => update(i, { title: e.target.value })} />
-              </Field>
-            </div>
-            <div className="mt-3">
-              <span className="mb-1 block text-[13px] font-medium text-slate-600">本文</span>
-              <BlockEditor value={n.blocks} onChange={(blocks) => update(i, { blocks })} />
-            </div>
-          </Collapsible>
-        </div>
       ))}
     </div>
   );
@@ -388,197 +342,5 @@ export function ContactSettingsPanel({ value, onChange }: { value: { recipient: 
         </Field>
       </Card>
     </div>
-  );
-}
-
-/* ===================== 画像 ===================== */
-const IMAGE_GROUP_LABELS: Record<string, string> = {
-  IMG: "共通画像（トップ・各ページで使用）",
-  PRODUCT_IMG: "商品画像",
-  INTERVIEW_IMG: "インタビュー画像（旧・互換用）",
-};
-
-export function ImagesPanel({ value, onChange }: { value: Content["images"]; onChange: (v: Content["images"]) => void }) {
-  function set(group: keyof Content["images"], key: string, url: string) {
-    onChange({ ...value, [group]: { ...value[group], [key]: url } });
-  }
-  return (
-    <div className="space-y-6">
-      <p className="text-[12px] text-slate-500">
-        各画像の「画像をアップロード」からPCの画像に差し替えられます。URLを直接貼り付けることもできます。
-      </p>
-      {(["IMG", "PRODUCT_IMG", "INTERVIEW_IMG"] as const).map((group) => (
-        <div key={group}>
-          <h4 className="mb-2 text-[14px] font-semibold text-slate-800">{IMAGE_GROUP_LABELS[group]}</h4>
-          <div className="space-y-3">
-            {Object.entries(value[group]).map(([key, url]) => (
-              <div key={key} data-focus={`${group}.${key}`}>
-                <Card>
-                  <ImageField label={key} value={url} onChange={(u) => set(group, key, u)} />
-                </Card>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ===================== セクション文言 ===================== */
-// 注意: フォーカス保持のため Txt はモジュールレベルの安定コンポーネントにする。
-// （描画関数の内部で定義すると毎レンダリングで型が変わり、1文字入力ごとに
-//   再マウントされて入力フォーカスが外れる＝不具合 1-1 の原因）
-const SectionsCtx = createContext<{ get: any; setPath: (p: string, v: string) => void }>({
-  get: {},
-  setPath: () => {},
-});
-
-function Txt({ label, path, area }: { label: string; path: string; area?: boolean }) {
-  const { get, setPath } = useContext(SectionsCtx);
-  let cur: any = get;
-  for (const k of path.split(".")) cur = cur?.[k];
-  return (
-    <Field label={label}>
-      {area ? (
-        <TextArea rows={4} value={cur ?? ""} onChange={(e) => setPath(path, e.target.value)} />
-      ) : (
-        <TextInput value={cur ?? ""} onChange={(e) => setPath(path, e.target.value)} />
-      )}
-    </Field>
-  );
-}
-
-export function SectionsPanel({ value, onChange }: { value: any; onChange: (v: any) => void }) {
-  // ドット区切りパスで深い値を更新
-  function setPath(path: string, v: string) {
-    const next = JSON.parse(JSON.stringify(value));
-    const keys = path.split(".");
-    let cur = next;
-    for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
-    cur[keys[keys.length - 1]] = v;
-    onChange(next);
-  }
-
-  return (
-    <SectionsCtx.Provider value={{ get: value, setPath }}>
-    <div className="space-y-4">
-      <div data-focus="site">
-        <Card title="サイト共通">
-          <div className="space-y-3">
-            <Txt label="キャッチコピー（トップ大見出し）" path="site.tagline" />
-            <Txt label="サブコピー" path="site.subTagline" />
-            <Txt label="創業年数ラベル" path="site.yearsLabel" />
-          </div>
-        </Card>
-      </div>
-      <div data-focus="videosIntro">
-        <Card title="動画ページ 導入文">
-          <Txt label="導入文" path="videosIntro" area />
-        </Card>
-      </div>
-      <div data-focus="divisionBiz">
-        <Card title="事業概要（食品 / アイス）">
-          <div className="space-y-4">
-            <div className="rounded-md bg-slate-50 p-3">
-              <p className="mb-2 text-[12px] font-semibold text-slate-500">食品事業部</p>
-              <div className="space-y-3">
-                <Txt label="コピー" path="divisionBiz.food.copy" />
-                <Txt label="本文" path="divisionBiz.food.body" area />
-              </div>
-            </div>
-            <div className="rounded-md bg-slate-50 p-3">
-              <p className="mb-2 text-[12px] font-semibold text-slate-500">アイス事業部</p>
-              <div className="space-y-3">
-                <Txt label="コピー" path="divisionBiz.ice.copy" />
-                <Txt label="本文" path="divisionBiz.ice.body" area />
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div data-focus="divisionInfo">
-        <Card title="選ばれる理由（食品 / アイス）">
-          <div className="space-y-4">
-            <div className="rounded-md bg-slate-50 p-3">
-              <p className="mb-2 text-[12px] font-semibold text-slate-500">食品事業部</p>
-              <div className="space-y-3">
-                <Txt label="見出し" path="divisionInfo.food.reasonCatch" />
-                <Txt label="本文" path="divisionInfo.food.reasonBody" area />
-              </div>
-            </div>
-            <div className="rounded-md bg-slate-50 p-3">
-              <p className="mb-2 text-[12px] font-semibold text-slate-500">アイス事業部</p>
-              <div className="space-y-3">
-                <Txt label="見出し" path="divisionInfo.ice.reasonCatch" />
-                <Txt label="本文" path="divisionInfo.ice.reasonBody" area />
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-      <div data-focus="recruitMv">
-        <Card title="採用ページ メインビジュアル">
-          <div className="space-y-3">
-            <Txt label="メインコピー" path="recruitMv.main" />
-            <Txt label="サブコピー" path="recruitMv.sub" />
-            <Txt label="本文" path="recruitMv.body" area />
-          </div>
-        </Card>
-      </div>
-      <div data-focus="recruitIntroVideo">
-        <Card title="採用ページ 紹介動画（事業紹介の前に表示）">
-          <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄ならセクション自体を非表示。">
-            <div className="space-y-2">
-              <TextInput
-                value={value.recruitIntroVideo ?? ""}
-                onChange={(e) => setPath("recruitIntroVideo", e.target.value)}
-                placeholder="https://… または .mp4 / .webm / .mov"
-              />
-              <VideoUploadButton onUploaded={(url) => setPath("recruitIntroVideo", url)} />
-            </div>
-          </Field>
-        </Card>
-      </div>
-      <div data-focus="recruit2Video">
-        <Card title="採用2 紹介動画（「人を知る」に表示）">
-          <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄なら非表示。">
-            <div className="space-y-2">
-              <TextInput
-                value={value.recruit2Video ?? ""}
-                onChange={(e) => setPath("recruit2Video", e.target.value)}
-                placeholder="https://… または .mp4 / .webm / .mov"
-              />
-              <VideoUploadButton onUploaded={(url) => setPath("recruit2Video", url)} />
-            </div>
-          </Field>
-        </Card>
-      </div>
-      <div data-focus="recruitApply">
-        <Card title="採用ページ 応募セクション">
-          <div className="space-y-3">
-            <Txt label="コピー" path="recruitApply.copy" />
-            <Txt label="本文" path="recruitApply.body" area />
-          </div>
-        </Card>
-      </div>
-      <div data-focus="philosophy">
-        <Card title="経営理念">
-          <Txt label="理念" path="philosophy.body" area />
-        </Card>
-      </div>
-      <div data-focus="ceoMessage">
-        <Card title="代表メッセージ">
-          <div className="space-y-3">
-            <Txt label="タイトル" path="ceoMessage.title" />
-            <Txt label="肩書き" path="ceoMessage.name" />
-            {(value.ceoMessage?.paragraphs ?? []).map((_: string, i: number) => (
-              <Txt key={i} label={`段落 ${i + 1}`} path={`ceoMessage.paragraphs.${i}`} area />
-            ))}
-          </div>
-        </Card>
-      </div>
-    </div>
-    </SectionsCtx.Provider>
   );
 }

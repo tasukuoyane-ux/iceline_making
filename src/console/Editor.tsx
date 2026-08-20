@@ -1,14 +1,27 @@
-// /console エディタ本体：左にライブプレビュー(iframe)、右に「そのページの編集要素一覧」、上部に更新ボタン。
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// /console エディタ本体。
+// ヘッダー: タブ（ページ編集 / SEO）・ページ選択・SP/PC切替・公開ボタン等。
+// 本体: 左にライブプレビュー(iframe)、右にタブごとの編集パネル。
+//  - ページ編集: プレビュー中ページの編集要素一覧（+ ページに応じた構造化マネージャ）
+//  - SEO: サイト全域のメタ情報（site:seo.*、overrides.json に保存）
+// お知らせ記事は Payload CMS（/admin）で管理する（ヘッダーの「お知らせ管理」から）。
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AuthUser, clearAuth, publish } from "./api";
-import { Content, baseline, baselineSig, buildOverrides, changedFiles, clone, healDraft } from "./content";
-import { Button } from "./ui";
+import { Content, baseline, baselineSig, buildOverrides, changedFiles, clone, getValueByPath, healDraft, setValueByPath } from "./content";
+import { Button, Collapsible } from "./ui";
+import { ImageField } from "./ImageField";
 import { PageFields, PageField } from "./PageFields";
-import { NewsPanel, VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel, RecruitVideoPanel, Recruit3BgPanel } from "./panels";
+import { VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel, SectionVideoPanel, Recruit3BgPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 const VIEWPORT_KEY = "iceline-console-viewport";
+
+// 編集の対象タブ（参考: hp-renew-2026 と同構成。「実績」は当サイトには無い）
+const TABS = [
+  { id: "pages", label: "ページ編集" },
+  { id: "seo", label: "SEO" },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
 
 // プレビューの表示幅。SPは実機で多い390〜430pxの中間、PCはブレークポイント
 // （--breakpoint-pc: 1025px）を確実に超える一般的なデスクトップ幅で描画する。
@@ -66,16 +79,16 @@ function loadDraft(): Content {
   return baseline();
 }
 
-type ManageTab = "news" | "videos" | "interviews" | "profileSlides" | "recruitVideo" | "recruit3Bg" | "contact";
-
 export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+  const [tab, setTab] = useState<TabId>("pages");
   const [draft, setDraft] = useState<Content>(loadDraft);
   const [base, setBase] = useState<Content>(baseline);
   const [previewPath, setPreviewPath] = useState("/");
   const [publishing, setPublishing] = useState(false);
   const [fields, setFields] = useState<PageField[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [manage, setManage] = useState<ManageTab | null>(null);
+  // プレビューを強制再読み込みするためのキー（破棄後の巻き戻し表示などに使う）
+  const [frameKey, setFrameKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   // プレビュー / 編集パネルの幅比率（％）。仕切りのドラッグで変更可能。
   const splitRef = useRef<HTMLDivElement>(null);
@@ -185,9 +198,15 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
     setDraft((d) => ({ ...d, [key]: value }));
   }
 
+  // 汎用パス（data-edit パス / site:seo.* / hide:*）への読み書き
+  const setValue = useCallback((path: string, value: string) => {
+    setDraft((d) => setValueByPath(d, path, value));
+  }, []);
+
   function discard() {
     if (!confirm("未公開の変更をすべて破棄して、最後に公開した状態に戻しますか？")) return;
     setDraft(clone(base));
+    setFrameKey((k) => k + 1); // プレビューを再読み込みして下書きパッチを消す
     toast.info("変更を破棄しました");
   }
 
@@ -227,75 +246,114 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
 
   return (
     <div className="flex h-screen flex-col bg-slate-100">
-      {/* 上部バー */}
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-2.5">
-        <div className="flex items-center gap-3">
-          <span className="text-[15px] font-bold text-slate-800">アイスライン 管理コンソール</span>
-          {changeCount > 0 && (
-            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[12px] font-medium text-amber-700">
-              未公開の変更 {changeCount}件
-            </span>
-          )}
+      {/* ヘッダー */}
+      <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-2">
+        <span className="text-[14px] font-bold text-slate-800">アイスライン 管理コンソール</span>
+
+        {/* 編集の対象タブ */}
+        <div role="group" aria-label="編集の対象" className="flex overflow-hidden rounded-md border border-slate-300">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              aria-pressed={tab === t.id}
+              className={
+                "px-3 py-1 text-[12px] font-medium transition-colors " +
+                (tab === t.id ? "bg-emerald-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50")
+              }
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="hidden text-[13px] text-slate-500 sm:inline">{user.name} さん</span>
-          <Button onClick={() => setManage("news")}>コンテンツ管理</Button>
-          <Button onClick={discard} disabled={changeCount === 0}>変更を破棄</Button>
-          <Button variant="primary" onClick={onPublish} disabled={publishing || changeCount === 0}>
-            {publishing ? "公開中…" : "更新（本番へ公開）"}
-          </Button>
-          <Button variant="ghost" onClick={logout}>ログアウト</Button>
+
+        <select
+          value={previewPath}
+          onChange={(e) => {
+            setPreviewPath(e.target.value);
+            setFields([]);
+            setSelectedPath(null);
+          }}
+          aria-label="プレビューするページ"
+          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-[12px] text-slate-700 outline-none"
+        >
+          {PAGES.map((p) => (
+            <option key={p.path} value={p.path}>{p.label}</option>
+          ))}
+        </select>
+
+        <div role="group" aria-label="プレビューの表示幅" className="flex overflow-hidden rounded-md border border-slate-300">
+          {VIEWPORTS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              title={v.note}
+              aria-pressed={viewport === v.id}
+              onClick={() => setViewport(v.id)}
+              className={
+                "px-2.5 py-1 text-[12px] font-medium transition-colors " +
+                (viewport === v.id ? "bg-slate-800 text-white" : "bg-white text-slate-600 hover:bg-slate-100")
+              }
+            >
+              {v.label}
+            </button>
+          ))}
         </div>
+
+        <Button type="button" onClick={() => setFrameKey((k) => k + 1)}>プレビュー再読み込み</Button>
+
+        {/* 公開前チェックリストの自動検査（/console/check）。編集中の状態を失わないよう別タブで開く。 */}
+        <a
+          href="/console/check"
+          target="_blank"
+          rel="noreferrer"
+          title="公開前チェックリストの自動検査（別タブで開く）"
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          セルフチェック
+        </a>
+
+        {/* お知らせ記事は Payload の管理画面（/admin）で編集する */}
+        <a
+          href="/admin"
+          target="_blank"
+          rel="noreferrer"
+          title="お知らせ記事の管理画面（別タブで開く）"
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          お知らせ管理
+        </a>
+
+        <span className="ml-auto text-[12px] text-slate-500">
+          {changeCount > 0 ? `未公開の変更 ${changeCount}件` : "変更なし"}
+        </span>
+        <Button onClick={discard} disabled={changeCount === 0}>変更を破棄</Button>
+        <Button variant="primary" onClick={onPublish} disabled={publishing || changeCount === 0}>
+          {publishing ? "公開中…" : "更新（本番へ公開）"}
+        </Button>
+        <span className="text-[12px] text-slate-400">{user.name} さん</span>
+        <Button variant="ghost" onClick={logout}>ログアウト</Button>
       </header>
 
       {/* 本体：左プレビュー / 右エディタ（仕切りをドラッグで幅調整） */}
       <div ref={splitRef} className="relative flex min-h-0 flex-1">
         {/* 左：ライブプレビュー */}
         <div style={{ width: `${leftPct}%` }} className="flex min-w-0 flex-col border-r border-slate-200 bg-white">
-          <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-2">
-            <span className="text-[12px] text-slate-500">プレビュー：</span>
-            <select
-              value={previewPath}
-              onChange={(e) => {
-                setPreviewPath(e.target.value);
-                setFields([]);
-                setSelectedPath(null);
-              }}
-              className="rounded border border-slate-300 bg-white px-2 py-1 text-[13px] outline-none"
-            >
-              {PAGES.map((p) => (
-                <option key={p.path} value={p.path}>{p.label}</option>
-              ))}
-            </select>
-            <div role="group" aria-label="プレビューの表示幅" className="flex overflow-hidden rounded border border-slate-300">
-              {VIEWPORTS.map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  title={v.note}
-                  aria-pressed={viewport === v.id}
-                  onClick={() => setViewport(v.id)}
-                  className={
-                    "px-2.5 py-1 text-[12px] font-medium transition-colors " +
-                    (viewport === v.id ? "bg-emerald-600 text-white" : "bg-white text-slate-600 hover:bg-slate-100")
-                  }
-                >
-                  {v.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-1.5">
+            <span className="text-[12px] text-slate-500">プレビュー：{currentPageLabel}</span>
             {scale < 1 && (
               <span className="text-[11px] text-slate-400">{Math.round(scale * 100)}%表示</span>
             )}
             <span className="ml-auto text-[11px] text-slate-400">要素をクリックすると右で編集できます</span>
           </div>
           {/* 指定幅（SP=400px / PC=1280px）でページを描画し、ペインに収まらない分は縮小表示。
-              iframe を再マウントしない（key は previewPath のみ）ため、切替時に再読込は発生しない。 */}
+              iframe を再マウントしない（key は frameKey と previewPath のみ）ため、SP/PC切替時に再読込は発生しない。 */}
           <div ref={previewBoxRef} className="min-h-0 flex-1 overflow-hidden bg-slate-200">
             <div className="mx-auto h-full" style={{ width: vpWidth * scale }}>
               <iframe
                 ref={iframeRef}
-                key={previewPath}
+                key={`${frameKey}:${previewPath}`}
                 src={previewSrc}
                 title="ライブプレビュー"
                 className="bg-white"
@@ -323,100 +381,205 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
           <span className="pointer-events-none absolute inset-y-0 -left-1.5 -right-1.5" />
         </div>
 
-        {/* 右：ページ単位エディタ */}
+        {/* 右：タブごとの編集パネル */}
         <div className="flex min-w-0 flex-1 flex-col bg-slate-50">
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2">
-            <div>
-              <p className="text-[13px] font-semibold text-slate-800">{currentPageLabel} の編集</p>
-              <p className="text-[11px] text-slate-400">このページに表示される要素が上から順に並んでいます</p>
+          {tab === "pages" && (
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-2">
+              <div>
+                <p className="text-[13px] font-semibold text-slate-800">{currentPageLabel} の編集</p>
+                <p className="text-[11px] text-slate-400">このページに表示される要素が上から順に並んでいます</p>
+              </div>
+              <span className="text-[11px] text-slate-400">{fields.length} 項目</span>
             </div>
-            <span className="text-[11px] text-slate-400">{fields.length} 項目</span>
-          </div>
+          )}
           <div id="fields-scroll" className="min-h-0 flex-1 overflow-y-auto p-4">
-            <PageFields
-              fields={fields}
-              draft={draft}
-              onChange={setDraft}
-              selectedPath={selectedPath}
-              onFocusField={onFocusField}
-            />
+            {tab === "seo" ? (
+              <SeoPanel draft={draft} setValue={setValue} />
+            ) : (
+              <>
+                {/* プレビュー中のページに応じた構造化マネージャ（追加・削除・並べ替え） */}
+                <PageManagers route={previewPath} draft={draft} setSlice={setSlice} />
+                <PageFields
+                  fields={fields}
+                  draft={draft}
+                  base={base}
+                  onChange={setDraft}
+                  selectedPath={selectedPath}
+                  onFocusField={onFocusField}
+                />
+              </>
+            )}
           </div>
         </div>
 
         {/* ドラッグ中は iframe 上でもマウス追従できるよう全面オーバーレイ */}
         {dragging && <div className="absolute inset-0 z-30 cursor-col-resize" />}
       </div>
-
-      {/* コンテンツ管理（追加・削除）オーバーレイ */}
-      {manage && (
-        <ManageOverlay
-          tab={manage}
-          setTab={setManage}
-          draft={draft}
-          setSlice={setSlice}
-          onClose={() => setManage(null)}
-        />
-      )}
     </div>
   );
 }
 
-function ManageOverlay({
-  tab,
-  setTab,
+/**
+ * プレビュー中のページに応じて右パネル上部へ差し込む構造化マネージャ。
+ * （参考プロジェクトの MembersManager 方式。旧「コンテンツ管理」オーバーレイの再配置先）
+ * 追加・削除・並べ替えはプレビューへ即時反映されない点は従来どおり
+ * （文言・画像の変更のみ DOM パッチで即時反映される）。
+ */
+function PageManagers({
+  route,
   draft,
   setSlice,
-  onClose,
 }: {
-  tab: ManageTab;
-  setTab: (t: ManageTab) => void;
+  route: string;
   draft: Content;
   setSlice: <K extends keyof Content>(key: K, value: Content[K]) => void;
-  onClose: () => void;
 }) {
-  const TABS: { key: ManageTab; label: string }[] = [
-    { key: "news", label: "お知らせ" },
-    { key: "videos", label: "動画" },
-    { key: "interviews", label: "社員インタビュー" },
-    { key: "profileSlides", label: "会社紹介資料" },
-    { key: "recruitVideo", label: "採用動画" },
-    { key: "recruit3Bg", label: "採用3 背景動画" },
-    { key: "contact", label: "お問い合わせ設定" },
-  ];
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/30" onClick={onClose}>
-      <div className="flex h-full w-full max-w-2xl flex-col bg-slate-50 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[14px] font-bold text-slate-800">コンテンツ管理</span>
-            <span className="text-[11px] text-slate-400">記事・動画・インタビューの追加／削除</span>
-          </div>
-          <Button variant="ghost" onClick={onClose}>閉じる</Button>
-        </div>
-        <div className="flex shrink-0 gap-1 border-b border-slate-200 bg-white px-3 py-1.5">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={
-                "rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors " +
-                (tab === t.key ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-100")
-              }
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          {tab === "news" && <NewsPanel value={draft.news} onChange={(v) => setSlice("news", v)} />}
-          {tab === "videos" && <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />}
-          {tab === "interviews" && <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />}
-          {tab === "profileSlides" && <ProfileSlidesPanel value={draft.profileSlides} onChange={(v) => setSlice("profileSlides", v)} />}
-          {tab === "recruitVideo" && <RecruitVideoPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />}
-          {tab === "recruit3Bg" && <Recruit3BgPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />}
-          {tab === "contact" && <ContactSettingsPanel value={draft.contact} onChange={(v) => setSlice("contact", v)} />}
-        </div>
+  const items: { title: string; node: ReactNode }[] = [];
+
+  if (route === "/videos") {
+    items.push({
+      title: "動画の管理（追加・削除）",
+      node: <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />,
+    });
+  }
+  if (route === "/recruit" || route === "/recruit2") {
+    items.push({
+      title: route === "/recruit" ? "採用 紹介動画" : "採用2 紹介動画",
+      node: (
+        <SectionVideoPanel
+          value={draft.sections}
+          onChange={(v) => setSlice("sections", v)}
+          sectionKey={route === "/recruit" ? "recruitIntroVideo" : "recruit2Video"}
+          title={
+            route === "/recruit"
+              ? "採用ページ 紹介動画（ヒーローメッセージと事業紹介の間に表示）"
+              : "採用2 紹介動画（「人を知る」に表示）"
+          }
+        />
+      ),
+    });
+    items.push({
+      title: "会社紹介資料（スライド）",
+      node: <ProfileSlidesPanel value={draft.profileSlides} onChange={(v) => setSlice("profileSlides", v)} />,
+    });
+    items.push({
+      title: "社員インタビュー（追加・削除）",
+      node: <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />,
+    });
+  }
+  if (route === "/recruit3") {
+    items.push({
+      title: "採用3 背景動画",
+      node: <Recruit3BgPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />,
+    });
+  }
+  if (route === "/contact") {
+    items.push({
+      title: "お問い合わせ設定（送信先）",
+      node: <ContactSettingsPanel value={draft.contact} onChange={(v) => setSlice("contact", v)} />,
+    });
+  }
+
+  if (route === "/news" || route.startsWith("/news/")) {
+    return (
+      <div className="mb-3 rounded-lg border border-sky-200 bg-sky-50 p-3">
+        <p className="text-[13px] font-semibold text-slate-800">お知らせ記事の編集について</p>
+        <p className="mt-1 text-[12px] leading-relaxed text-slate-600">
+          お知らせの記事（追加・編集・削除）は記事管理画面で行います。
+          日付・カテゴリ・タイトル・本文の編集、下書き保存と公開ができます。
+        </p>
+        <a
+          href="/admin"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-block rounded-md bg-sky-600 px-3 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-sky-700"
+        >
+          記事管理画面（/admin）を開く
+        </a>
       </div>
+    );
+  }
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mb-3 space-y-2">
+      {items.map((m) => (
+        <Collapsible key={m.title} title={m.title}>
+          {m.node}
+        </Collapsible>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * 「SEO」タブ。サイト全域のメタ情報を設定する。
+ *  - OGP画像（SNSでシェアされたときのサムネイル。推奨 1200×630px）
+ *  - メタディスクリプション（検索結果の説明文）
+ *  - キーワード（読点・カンマ区切り）
+ * 値は文言と同じ overrides（site:seo.*）に保存され、「更新（本番へ公開）」→
+ * デプロイ完了で全ページの <head> に反映される。head のメタ情報のため
+ * 左のプレビュー画面には現れない。
+ */
+function SeoPanel({
+  draft,
+  setValue,
+}: {
+  draft: Content;
+  setValue: (path: string, value: string) => void;
+}) {
+  const get = (path: string) => getValueByPath(draft, path) ?? "";
+  const desc = get("site:seo.description");
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-[13px] font-bold text-slate-800">SEO設定</h2>
+        <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+          サイト全域の検索・シェア向けメタ情報です。「更新（本番へ公開）」の
+          あと、デプロイ完了（数分）で全ページに反映されます。メタ情報のため
+          左のプレビューには表示されません。
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 bg-white p-3">
+        <span className="text-[12px] font-bold text-slate-700">OGPイメージ</span>
+        <p className="mt-0.5 mb-2 text-[11px] leading-relaxed text-slate-500">
+          SNS（X・Facebook・LINE等）でシェアされたときに出るサムネイル。
+          推奨サイズは 1200×630px です。
+        </p>
+        <ImageField label="" value={get("site:seo.ogImage")} onChange={(url) => setValue("site:seo.ogImage", url)} />
+      </div>
+
+      <label className="block rounded-lg border border-slate-200 bg-white p-3">
+        <span className="text-[12px] font-bold text-slate-700">メタディスクリプション</span>
+        <p className="mt-0.5 mb-2 text-[11px] leading-relaxed text-slate-500">
+          検索結果に出るサイトの説明文。全角80〜120字程度が目安です
+          （現在 {desc.length} 字）。空にするとコード側の既定文に戻ります。
+        </p>
+        <textarea
+          value={desc}
+          onChange={(e) => setValue("site:seo.description", e.target.value)}
+          rows={4}
+          placeholder="アイスライン株式会社 — 氷・氷菓の製造販売、業務用食材の販売、倉庫事業。"
+          className="w-full rounded border border-slate-300 p-2 text-[12px] leading-relaxed text-slate-800"
+        />
+      </label>
+
+      <label className="block rounded-lg border border-slate-200 bg-white p-3">
+        <span className="text-[12px] font-bold text-slate-700">キーワード</span>
+        <p className="mt-0.5 mb-2 text-[11px] leading-relaxed text-slate-500">
+          サイト全域のキーワード。読点（、）またはカンマ（,）区切りで入力します。
+          例: 業務用食材、氷、ドライアイス
+        </p>
+        <input
+          type="text"
+          value={get("site:seo.keywords")}
+          onChange={(e) => setValue("site:seo.keywords", e.target.value)}
+          placeholder="業務用食材、氷、ドライアイス"
+          className="w-full rounded border border-slate-300 p-2 text-[12px] text-slate-800"
+        />
+      </label>
     </div>
   );
 }

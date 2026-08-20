@@ -1,6 +1,6 @@
 // ページ単位エディタ：現在プレビュー中ページの編集可能要素を、DOM順に並べて編集する。
 import { Content, getValueByPath, setValueByPath } from "./content";
-import { Field, TextInput, TextArea, Select } from "./ui";
+import { Select, TextArea, TextInput } from "./ui";
 import { ImageField } from "./ImageField";
 
 export interface PageField {
@@ -15,12 +15,14 @@ export interface PageField {
 export function PageFields({
   fields,
   draft,
+  base,
   onChange,
   selectedPath,
   onFocusField,
 }: {
   fields: PageField[];
   draft: Content;
+  base: Content;
   onChange: (next: Content) => void;
   selectedPath: string | null;
   onFocusField: (path: string) => void;
@@ -30,7 +32,7 @@ export function PageFields({
       <div className="p-6 text-center text-[13px] text-slate-400">
         このページには編集できる要素が見つかりませんでした。
         <br />
-        左のプレビューで別のページを選ぶか、少し待ってから再度お試しください。
+        別のページを選ぶか、「プレビュー再読み込み」を押してください。
       </div>
     );
   }
@@ -42,8 +44,23 @@ export function PageFields({
 
   return (
     <div className="space-y-3">
+      <p className="text-[11px] leading-relaxed text-slate-500">
+        プレビュー内の見出し・本文・画像をクリックすると、その項目がここで開きます。
+        「SPで非表示」「PCで非表示」でその要素を画面幅ごとに隠せます。
+      </p>
       {fields.map((f, i) => {
         const active = selectedPath === f.path;
+        // 未公開バッジ: 下書きの値が公開済み（base）と異なるとき
+        const dirty = (getValueByPath(draft, f.path) ?? "") !== (getValueByPath(base, f.path) ?? "");
+        // 画面幅ごとの非表示設定（overrides の `hide:<パス>` に 'sp' | 'pc' | 'sp,pc'）
+        const hideKey = `hide:${f.path}`;
+        const hideVal = getValueByPath(draft, hideKey) || "";
+        const toggleHide = (which: "sp" | "pc") => {
+          const parts = new Set(hideVal.split(",").filter(Boolean));
+          if (parts.has(which)) parts.delete(which);
+          else parts.add(which);
+          onChange(setValueByPath(draft, hideKey, [...parts].join(",")));
+        };
         return (
           <div
             key={f.path}
@@ -60,7 +77,48 @@ export function PageFields({
               <span className="ml-auto text-[10px] text-slate-300">
                 {f.kind === "image" ? "画像" : f.kind === "select" ? "設定" : f.multiline ? "文章" : "テキスト"}
               </span>
+              {dirty && (
+                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">未公開</span>
+              )}
             </div>
+
+            {/* 画面幅ごとの非表示トグル */}
+            <div className="mb-1.5 flex items-center gap-1.5">
+              {(
+                [
+                  ["sp", "SPで非表示"],
+                  ["pc", "PCで非表示"],
+                ] as const
+              ).map(([which, label]) => {
+                const onNow = hideVal.includes(which);
+                return (
+                  <button
+                    key={which}
+                    type="button"
+                    aria-pressed={onNow}
+                    onClick={() => toggleHide(which)}
+                    className={
+                      "rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors " +
+                      (onNow
+                        ? "border-rose-500 bg-rose-500 text-white"
+                        : "border-slate-300 bg-white text-slate-500 hover:bg-slate-50")
+                    }
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+              {hideVal && (
+                <span className="text-[10px] text-slate-400">
+                  {hideVal === "sp,pc" || hideVal === "pc,sp"
+                    ? "SP・PCとも非表示"
+                    : hideVal === "sp"
+                      ? "SPでは表示されません"
+                      : "PCでは表示されません"}
+                </span>
+              )}
+            </div>
+
             {f.kind === "select" ? (
               <Select
                 value={val(f)}

@@ -4,8 +4,14 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
+    "dev": "next dev",
+    "build": "next build",
+    "build:vercel": "node scripts/vercel-build.mjs",
+    "start": "next start",
+    "payload": "payload",
+    "generate:types": "payload generate:types",
+    "generate:importmap": "payload generate:importmap",
+    "migrate:news": "node --env-file=.env --import tsx scripts/migrate-news.ts",
     "hash-password": "node scripts/hash-password.mjs"
   },
   "dependencies": {
@@ -13,6 +19,11 @@
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.5",
     "@mui/material": "7.3.5",
+    "@payloadcms/db-vercel-postgres": "^3.87.1",
+    "@payloadcms/next": "^3.87.1",
+    "@payloadcms/richtext-lexical": "^3.87.1",
+    "@payloadcms/storage-vercel-blob": "^3.87.1",
+    "@payloadcms/translations": "^3.87.1",
     "@popperjs/core": "2.11.8",
     "@radix-ui/react-accordion": "1.2.3",
     "@radix-ui/react-alert-dialog": "1.1.6",
@@ -42,21 +53,26 @@
     "@radix-ui/react-tooltip": "1.1.8",
     "@vercel/blob": "0.27.3",
     "bcryptjs": "2.4.3",
-    "jose": "5.9.6",
     "canvas-confetti": "1.9.4",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "date-fns": "3.6.0",
     "embla-carousel-react": "8.6.0",
+    "graphql": "^16.14.2",
     "input-otp": "1.4.2",
-    "jsonwebtoken": "9.0.2",
+    "jose": "5.9.6",
     "lucide-react": "0.487.0",
     "motion": "12.23.24",
+    "next": "^16.3.0",
     "next-themes": "0.4.6",
+    "payload": "^3.87.1",
+    "pg": "^8.20.0",
+    "react": "^19.2.7",
     "react-day-picker": "8.10.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
+    "react-dom": "^19.2.7",
     "react-hook-form": "7.55.0",
     "react-popper": "2.3.0",
     "react-resizable-panels": "2.1.7",
@@ -64,36 +80,21 @@
     "react-router": "7.13.0",
     "react-slick": "0.31.0",
     "recharts": "2.15.2",
+    "sharp": "^0.35.3",
     "sonner": "2.0.3",
     "tailwind-merge": "3.2.0",
     "tw-animate-css": "1.3.8",
     "vaul": "1.1.2"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "4.1.12",
+    "@tailwindcss/postcss": "^4.1.12",
     "@types/bcryptjs": "2.4.6",
-    "@types/jsonwebtoken": "9.0.7",
     "@types/node": "^25.9.3",
-    "@vercel/node": "5.0.0",
-    "@vitejs/plugin-react": "4.7.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.26",
     "tailwindcss": "4.1.12",
-    "vite": "6.3.5"
-  },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.2"
   }
 }
