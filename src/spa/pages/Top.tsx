@@ -15,6 +15,7 @@ import { RatioField } from "../components/common/RatioField";
 const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュアル", key: "topMv" };
 
 // MVに重ねる白の斜線ストライプ（45°の破線を帯状に散らしたオーバーレイ）。
+// 右から左に向けてだんだん濃くなる（右端は薄く・左に近づくほど白が強い）。
 // 擬似乱数は決定的（毎回同じ模様）で、SVGをデータURIとして焼き込む。
 const MV_STRIPES = (() => {
   let seed = 7;
@@ -32,7 +33,11 @@ const MV_STRIPES = (() => {
   }
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='900' viewBox='0 0 1600 900' preserveAspectRatio='xMidYMid slice'>` +
-    `<g transform='rotate(-45 800 450)'>${lines.join("")}</g></svg>`;
+    // 左=白（不透明）→右=濃いグレー（約2割の不透明度）のマスクで濃度を横方向に変化させる
+    `<defs><linearGradient id='f' x1='0' y1='0' x2='1' y2='0'>` +
+    `<stop offset='0' stop-color='#ffffff'/><stop offset='0.5' stop-color='#a6a6a6'/><stop offset='1' stop-color='#383838'/>` +
+    `</linearGradient><mask id='m'><rect width='1600' height='900' fill='url(#f)'/></mask></defs>` +
+    `<g mask='url(#m)'><g transform='rotate(-45 800 450)'>${lines.join("")}</g></g></svg>`;
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 })();
 
@@ -70,8 +75,21 @@ function Hero() {
   return (
     <section className="relative w-full overflow-hidden bg-ink">
       <ImageWithFallback src={s.img} alt={s.alt} className="block w-full" {...edImg(`images:IMG.${s.key}`, "トップ メインビジュアル")} />
-      {/* 白の斜線ストライプオーバーレイ */}
+      {/* 白の斜線ストライプオーバーレイ（右→左でだんだん濃くなる） */}
       <img src={MV_STRIPES} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+      {/* 左1/3は真っ白のパネル（見出しを乗せる領域）。右端はグラデーションでストライプへ馴染ませる */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white" aria-hidden />
+      <div className="pointer-events-none absolute inset-y-0 left-1/3 w-[12%] bg-gradient-to-r from-white to-transparent" aria-hidden />
+      {/* MV見出し（H2相当・コンソールの「ページ編集」から文言を変更できる） */}
+      <div className="absolute inset-y-0 left-0 flex w-1/3 items-center">
+        <h2
+          className="w-full px-[9%]"
+          style={{ fontSize: "clamp(18px, 3.4vw, 46px)", fontWeight: 900, lineHeight: 1.6, color: "#101c24", whiteSpace: "pre-line" }}
+          {...ed("top:mv.title", "MV 見出し", { multiline: true })}
+        >
+          {txt("top:mv.title", "氷と食で、\n日々に応える。")}
+        </h2>
+      </div>
     </section>
   );
 }

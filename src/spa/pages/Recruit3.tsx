@@ -714,16 +714,16 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
           </section>
         )}
 
-        {/* 諸条件（現状踏襲） */}
+        {/* 諸条件（職種ごと。旧データは共通テンプレートにフォールバック） */}
         <section className="mt-24">
           <OvHead en="CONDITIONS" jp="諸条件" />
-          <RowsTable rows={data.conditions} tint="teal" />
+          <RowsTable rows={job.conditions?.length ? job.conditions : data.conditions} tint="teal" />
         </section>
 
-        {/* 福利厚生（諸条件の色違い） */}
+        {/* 福利厚生（職種ごと・諸条件の色違い） */}
         <section className="mt-20">
           <OvHead en="BENEFITS" jp="福利厚生" />
-          <RowsTable rows={data.benefits} tint="coral" />
+          <RowsTable rows={job.benefits?.length ? job.benefits : data.benefits} tint="coral" />
         </section>
 
         {/* よくある質問（現状踏襲） */}

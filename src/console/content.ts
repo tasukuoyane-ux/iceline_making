@@ -64,6 +64,10 @@ export interface RecruitJob {
   career: RecruitTimeline;
   /** 職種別メッセージ（改行可・大きな黒文字で表示） */
   message: string;
+  /** 諸条件（表・職種ごと） */
+  conditions: RecruitRow[];
+  /** 福利厚生（諸条件の色違いの表・職種ごと） */
+  benefits: RecruitRow[];
 }
 export interface RecruitRow {
   label: string;
@@ -71,9 +75,9 @@ export interface RecruitRow {
 }
 export interface RecruitData {
   jobs: RecruitJob[];
-  /** 諸条件（表） */
+  /** 諸条件のテンプレート（新規職種追加時の初期値。旧データの後方互換フォールバックも兼ねる） */
   conditions: RecruitRow[];
-  /** 福利厚生（諸条件の色違いの表） */
+  /** 福利厚生のテンプレート（同上） */
   benefits: RecruitRow[];
 }
 
@@ -211,20 +215,29 @@ export function normalizeRecruit(r: any): RecruitData {
       task: String(s?.task ?? ""),
     })),
   });
+  const sharedConditions = rows(r?.conditions);
+  const sharedBenefits = rows(r?.benefits);
   return {
-    jobs: (Array.isArray(r?.jobs) ? r.jobs : []).map((j: any) => ({
-      id: String(j?.id ?? ""),
-      title: String(j?.title ?? ""),
-      dept: String(j?.dept ?? ""),
-      active: j?.active !== false,
-      body: String(j?.body ?? ""),
-      image: String(j?.image ?? ""),
-      day: timeline(j?.day),
-      career: timeline(j?.career),
-      message: String(j?.message ?? ""),
-    })),
-    conditions: rows(r?.conditions),
-    benefits: rows(r?.benefits),
+    jobs: (Array.isArray(r?.jobs) ? r.jobs : []).map((j: any) => {
+      const cond = rows(j?.conditions);
+      const bene = rows(j?.benefits);
+      return {
+        id: String(j?.id ?? ""),
+        title: String(j?.title ?? ""),
+        dept: String(j?.dept ?? ""),
+        active: j?.active !== false,
+        body: String(j?.body ?? ""),
+        image: String(j?.image ?? ""),
+        day: timeline(j?.day),
+        career: timeline(j?.career),
+        message: String(j?.message ?? ""),
+        // 旧データ（職種ごとの設定がない）は共通テンプレートを引き継ぐ
+        conditions: cond.length ? cond : clone(sharedConditions),
+        benefits: bene.length ? bene : clone(sharedBenefits),
+      };
+    }),
+    conditions: sharedConditions,
+    benefits: sharedBenefits,
   };
 }
 

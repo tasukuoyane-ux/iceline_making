@@ -138,6 +138,14 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
           <TextArea rows={4} value={job.message} onChange={(e) => onChange({ ...job, message: e.target.value })} />
         </Field>
       </Card>
+
+      <Card title="諸条件（この職種）">
+        <RowsEditor value={job.conditions} onChange={(conditions) => onChange({ ...job, conditions })} addLabel="行を追加" />
+      </Card>
+
+      <Card title="福利厚生（この職種・諸条件の色違いで表示）">
+        <RowsEditor value={job.benefits} onChange={(benefits) => onChange({ ...job, benefits })} addLabel="行を追加" />
+      </Card>
     </div>
   );
 }
@@ -170,6 +178,9 @@ export function RecruitPanel({
       day: { note: "", image: "", steps: [{ time: "始業", task: "出社" }] },
       career: { note: "", image: "", steps: [{ time: "1年目", task: "基礎を習得" }] },
       message: "",
+      // 諸条件・福利厚生はテンプレート（既定の共通内容）から複製して開始する
+      conditions: clone(recruit.conditions),
+      benefits: clone(recruit.benefits),
     };
     set({ jobs: [...recruit.jobs, job] });
   };
@@ -197,9 +208,9 @@ export function RecruitPanel({
   return (
     <div className="space-y-5">
       <p className="text-[11px] leading-relaxed text-slate-500">
-        採用3ページ（/recruit3）の「募集職種一覧」と、職種をクリックしたときに開く詳細
-        （業務内容・1日の流れ・キャリアパス・メッセージ・諸条件・福利厚生・よくある質問）を管理します。
-        変更は左のプレビューに反映され、「更新（本番へ公開）」で本番に公開されます。
+        採用3ページ（/recruit3）の「募集職種一覧」と、職種をクリックしたときに開く詳細を管理します。
+        業務内容・1日の流れ・キャリアパス・メッセージ・諸条件・福利厚生は職種ごとに、
+        よくある質問は全職種共通で設定します。変更は左のプレビューに反映され、「更新（本番へ公開）」で本番に公開されます。
       </p>
 
       {/* ── 募集中の職種 ── */}
@@ -249,16 +260,6 @@ export function RecruitPanel({
           </Collapsible>
         ))}
       </div>
-
-      {/* ── 諸条件 ── */}
-      <Collapsible title="諸条件（全職種共通）">
-        <RowsEditor value={recruit.conditions} onChange={(conditions) => set({ conditions })} addLabel="行を追加" />
-      </Collapsible>
-
-      {/* ── 福利厚生 ── */}
-      <Collapsible title="福利厚生（全職種共通・諸条件の色違いで表示）">
-        <RowsEditor value={recruit.benefits} onChange={(benefits) => set({ benefits })} addLabel="行を追加" />
-      </Collapsible>
 
       {/* ── よくある質問 ── */}
       <Collapsible title="よくある質問（全職種共通・/recruit と共通データ）">
