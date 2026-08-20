@@ -14,7 +14,7 @@
 //   動画が1本も無い場合は採用2と同じパララックス背景（PageBg）を表示する。
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -201,7 +201,7 @@ function BizLinks() {
     <Sec>
       <Head base="recruit3:bizlink" en="OUR BUSINESS" jp="事業を知る" center />
       <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
-        <Ed as="span" path="recruit3:bizlink.lead" def="4つの事業が、食の日常を支えています。カーソルを合わせると詳細が開きます。" label="事業リンク リード" />
+        <Ed as="span" path="recruit3:bizlink.lead" def="4つの事業が、食の日常を支えています。クリックすると詳細が開きます。" label="事業リンク リード" />
       </p>
 
       {/* 4マスのグリッド（SP=2列 / PC=4列） */}
@@ -210,7 +210,6 @@ function BizLinks() {
           <button
             key={l.to}
             type="button"
-            onMouseEnter={() => setOpen(i)}
             onClick={() => setOpen(i)}
             aria-haspopup="dialog"
             className="group relative block overflow-hidden rounded-[1.25rem] text-left shadow-[0_14px_30px_rgba(15,42,51,0.14)]"
@@ -746,7 +745,17 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
 function JobsSection() {
   const data = useRecruitData();
   const jobs = data.jobs.filter((j) => j.active);
-  const [openId, setOpenId] = useState<string | null>(null);
+  // 表示中の職種はURLのクエリパラメータ（?job=<職種ID>）で管理する。
+  // 職種ごとに固有のURLになり、共有・リロード・戻る操作でも同じ職種が開く。
+  // 既存のクエリ（編集モードの __edit 等）は保持する。
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openId = searchParams.get("job");
+  const setOpenId = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set("job", id);
+    else next.delete("job");
+    setSearchParams(next);
+  };
   const openIndex = jobs.findIndex((j) => j.id === openId);
   const openJob = openIndex >= 0 ? jobs[openIndex] : null;
 

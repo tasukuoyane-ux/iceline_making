@@ -847,7 +847,7 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </section>
 
-      {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分） */}
+      {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分。赤帯はタイトル＋本文まで） */}
       <Section heat={bizHeat} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
           <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert />
@@ -855,15 +855,18 @@ export function DivisionPage({ division }: { division: Division }) {
             {txt(`division:${division}.overview`, OVERVIEW[division])}
           </p>
         </div>
-        {/* 氷・氷菓：商品ラインナップ導線（画像＋グレーオーバーレイ＋白文字のボタン） */}
-        {division === "ice" && (
-          <div className="mx-auto mt-12 grid max-w-5xl gap-5 tab:grid-cols-3">
+      </Section>
+
+      {/* 氷・氷菓：商品ラインナップ導線（赤帯の外・画像＋グレーオーバーレイ＋白文字のボタン） */}
+      {division === "ice" && (
+        <Section heat={bizHeat} className="bg-transparent py-10 tab:py-12">
+          <div className="mx-auto grid max-w-5xl gap-5 tab:grid-cols-3">
             {ICE_LINEUP_NAV.map((def, i) => (
               <LineupNavTile key={i} i={i} def={def} />
             ))}
           </div>
-        )}
-      </Section>
+        </Section>
+      )}
 
       {/* 商品一覧より上のセクション（シート準拠） */}
       {DETAIL_PRE[division].map((sec, si) => (
