@@ -10,8 +10,7 @@ import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
-import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
-import { RatioField } from "../components/common/RatioField";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 
 // 要確認スロットの案内文（未入力の間、公開ページでは項目ごと非表示になる）
 const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
@@ -266,9 +265,9 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   transition={{ duration: 0.5 }}
                   className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
                   style={{ ["--ratio" as any]: ratioCols(`${base}.sec.${si}.${ii}.ratio`, 60, false) }}
+          {...ratioAttrs(`${base}.sec.${si}.${ii}.ratio`, 60, false)}
                 >
                   <div className="[direction:ltr] pc:px-12">
-                    <RatioField path={`${base}.sec.${si}.${ii}.ratio`} def={60} />
                     {it.title && (
                       <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.sec.${si}.${ii}.title`, "見出し")}>
                         {txt(`${base}.sec.${si}.${ii}.title`, it.title)}

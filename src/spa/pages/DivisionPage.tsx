@@ -8,8 +8,7 @@ import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
-import { RatioField } from "../components/common/RatioField";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
 const MV: Record<Division, { img: string; en: string; title: string; lead: string }> = {
@@ -640,9 +639,9 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
         transition={{ duration: 0.5 }}
         className="grid items-center gap-8 pc:[grid-template-columns:var(--ratio)]"
         style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 60, false) }}
+          {...ratioAttrs(`${base}.ratio`, 60, false)}
       >
         <div className="pc:px-12">
-          <RatioField path={`${base}.ratio`} def={60} />
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}
@@ -685,9 +684,9 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
         transition={{ duration: 0.5 }}
         className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
         style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 60, false) }}
+          {...ratioAttrs(`${base}.ratio`, 60, false)}
       >
         <div className="[direction:ltr] pc:px-12">
-          <RatioField path={`${base}.ratio`} def={60} />
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}
@@ -736,9 +735,9 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
       <div
         className="grid items-center gap-8 pc:[grid-template-columns:var(--ratio)]"
         style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 40, false) }}
+          {...ratioAttrs(`${base}.ratio`, 40, false)}
       >
         <div>
-          <RatioField path={`${base}.ratio`} def={40} />
           {it.title && (
             <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}

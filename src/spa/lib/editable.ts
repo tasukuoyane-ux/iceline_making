@@ -108,3 +108,16 @@ export function ratioCols(path: string, defImgPct: number, imageFirst: boolean):
   const p = ratioPct(path, defImgPct);
   return imageFirst ? `${p}fr ${100 - p}fr` : `${100 - p}fr ${p}fr`;
 }
+
+/**
+ * 画像と文章の横並びグリッドへ付与する比率マークアップ。
+ * コンソールはこの属性から「グリッド内の画像フィールド」と比率設定を対応付け、
+ * 画像編集欄にスライダーを表示し、editBridge が --ratio を書き換えて即時プレビューする。
+ */
+export function ratioAttrs(path: string, defImgPct: number, imageFirst: boolean): Record<string, string> {
+  return {
+    "data-ratio": path,
+    "data-ratio-def": String(defImgPct),
+    "data-ratio-first": imageFirst ? "1" : "0",
+  };
+}

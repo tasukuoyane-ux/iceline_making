@@ -7,9 +7,8 @@ import { IMG, PRODUCT_IMG } from "../data/images";
 import { useNews } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { InlineMovieTag } from "../components/common/MovieBadge";
-import { RatioField } from "../components/common/RatioField";
 
 // トップページ メインビジュアル（TOP専用キーで編集対象を明確化）
 const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュアル", key: "topMv" };
@@ -183,6 +182,7 @@ export function Top() {
         <div
           className="mt-10 grid items-center gap-8 pc:gap-12 pc:[grid-template-columns:var(--ratio)]"
           style={{ ["--ratio" as any]: ratioCols("top:strengthV2.ratio", 50, true) }}
+          {...ratioAttrs("top:strengthV2.ratio", 50, true)}
         >
           {/* 左：画像（差し替え可能） */}
           <ImageWithFallback
@@ -199,7 +199,6 @@ export function Top() {
             <p className="mt-4 text-foreground/80" style={{ fontSize: 16, lineHeight: 2, whiteSpace: "pre-line" }} {...ed("top:strengthV2.body", "強み 本文", { multiline: true })}>
               {txt("top:strengthV2.body", STRENGTH_BODY_DEFAULT)}
             </p>
-            <RatioField path="top:strengthV2.ratio" def={50} />
           </div>
         </div>
       </Section>

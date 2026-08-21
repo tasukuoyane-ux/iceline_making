@@ -23,6 +23,8 @@ export interface PageField {
   label: string;
   multiline: boolean;
   options?: { value: string; label: string }[]; // kind === "select" のみ
+  /** 画像フィールドが「画像と文章の横並びグリッド」内にある場合の比率設定（editBridgeが紐付け） */
+  ratio?: { path: string; def: number; first: boolean };
 }
 
 export function PageFields({
@@ -189,7 +191,32 @@ export function PageFields({
                 ))}
               </Select>
             ) : f.kind === "image" ? (
-              <ImageField label="" value={val(f)} onChange={(url) => onChange(setValueByPath(draft, f.path, url))} />
+              <>
+                <ImageField label="" value={val(f)} onChange={(url) => onChange(setValueByPath(draft, f.path, url))} />
+                {/* 画像と文章の横並びグリッド内の画像には、幅の比率スライダーを統合表示。
+                    ドラッグ中の値は左のプレビューへ即時反映される（editBridge が --ratio を更新） */}
+                {f.ratio && (() => {
+                  const raw = parseInt(getValueByPath(draft, f.ratio!.path) ?? "", 10);
+                  const cur = Math.min(70, Math.max(30, Number.isNaN(raw) ? f.ratio!.def : raw));
+                  return (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="shrink-0 text-[11px] font-medium text-slate-500">画像の幅</span>
+                      <input
+                        type="range"
+                        min={30}
+                        max={70}
+                        step={1}
+                        value={cur}
+                        onChange={(e) => onChange(setValueByPath(draft, f.ratio!.path, e.target.value))}
+                        className="min-w-0 flex-1 accent-emerald-600"
+                      />
+                      <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-slate-600">
+                        {cur}% : {100 - cur}%
+                      </span>
+                    </div>
+                  );
+                })()}
+              </>
             ) : f.multiline ? (
               <TextArea
                 rows={4}

@@ -9,8 +9,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Clock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, txt, img, ratioCols, EDIT_MODE } from "../lib/editable";
-import { RatioField } from "../components/common/RatioField";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { toEmbed } from "../lib/video";
 import {
   RECRUIT_MV,
@@ -527,6 +526,7 @@ function Image2Row({ base, red, blue, black, defaultSide, imgLabel = "画像" }:
     <div
       className="grid items-center gap-8 rounded-[1.75rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:gap-10 pc:p-9 pc:[grid-template-columns:var(--ratio)]"
       style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 50, imageLeft) }}
+          {...ratioAttrs(`${base}.ratio`, 50, imageLeft)}
     >
       <div className={imageLeft ? "pc:order-1" : "pc:order-2"}>
         <EdImg path={`${base}.image`} label={imgLabel} alt={blue} className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
@@ -537,7 +537,6 @@ function Image2Row({ base, red, blue, black, defaultSide, imgLabel = "画像" }:
         <Ed as="p" path={`${base}.black`} def={black} label="本文（黒）" multiline className="mt-4" style={{ color: "#1c2b30", fontSize: 15, lineHeight: 2.0, whiteSpace: "pre-line" }} />
         {/* 画像の左右位置（console で left / right を入力） */}
         <Ed as="span" path={`${base}.side`} def={defaultSide} label="画像の位置（left / right）" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }} />
-        <RatioField path={`${base}.ratio`} def={50} />
       </div>
     </div>
   );

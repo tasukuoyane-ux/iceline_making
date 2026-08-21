@@ -4,8 +4,7 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { CEO_MESSAGE, COMPANY_PROFILE, HISTORY, PHILOSOPHY, CSR } from "../data/company";
-import { ed, edImg, txt, img, ratioCols } from "../lib/editable";
-import { RatioField } from "../components/common/RatioField";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
 
 export function Company() {
   return (
@@ -24,9 +23,9 @@ export function Company() {
         <div
           className="grid items-stretch gap-10 pc:[grid-template-columns:var(--ratio)]"
           style={{ ["--ratio" as any]: ratioCols("company:ceo.ratio", 43, true) }}
+          {...ratioAttrs("company:ceo.ratio", 43, true)}
         >
           <div className="flex flex-col">
-            <RatioField path="company:ceo.ratio" def={43} />
             <SectionTitle en="MESSAGE" jp="代表メッセージ" />
             <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="mt-6 aspect-[4/3] w-full rounded-2xl object-cover pc:aspect-auto pc:min-h-0 pc:flex-1" {...edImg("images:IMG.waterDew")} />
             <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }} {...ed("sections:ceoMessage.name")}>{CEO_MESSAGE.name}</p>

@@ -55,9 +55,25 @@ function applyHideStyle(overrides: Record<string, string>) {
   if (el.textContent !== css) el.textContent = css;
 }
 
+/** 画像と文章の横並び比率（--ratio）を下書きの値で即時反映する。
+ * 対象は data-ratio 属性を持つグリッド要素。値は overrides の <data-ratio> キー
+ * （30〜70の数値文字列）で、無ければ data-ratio-def を使う。 */
+function applyRatioVars(overrides: Record<string, string>) {
+  document.querySelectorAll<HTMLElement>("[data-ratio]").forEach((el) => {
+    const path = el.getAttribute("data-ratio")!;
+    const def = parseInt(el.getAttribute("data-ratio-def") || "50", 10) || 50;
+    const first = el.getAttribute("data-ratio-first") === "1";
+    const raw = parseInt(overrides[path] ?? "", 10);
+    const p = Math.min(70, Math.max(30, Number.isNaN(raw) ? def : raw));
+    const cols = first ? `${p}fr ${100 - p}fr` : `${100 - p}fr ${p}fr`;
+    if (el.style.getPropertyValue("--ratio") !== cols) el.style.setProperty("--ratio", cols);
+  });
+}
+
 function applyOverrides(overrides: Record<string, string>) {
   lastOverrides = overrides;
   applyHideStyle(overrides);
+  applyRatioVars(overrides);
   // アニメーション設定は animate モジュールが要素へ反映する（DOMパッチ対象外）
   import("./animate").then((m) => m.setAnimOverrides(overrides));
   for (const [path, value] of Object.entries(overrides)) {
@@ -84,6 +100,8 @@ interface PageField {
   label: string;
   multiline: boolean;
   options?: { value: string; label: string }[];
+  /** 画像フィールドが「画像と文章の横並びグリッド」内にある場合の比率設定 */
+  ratio?: { path: string; def: number; first: boolean };
 }
 
 /** data-edit-options（"値:表示名" を | 区切り）をパースする */
@@ -104,6 +122,7 @@ function scanFields(): PageField[] {
     document.querySelectorAll<HTMLElement>("[data-edit],[data-edit-img],[data-edit-select]")
   );
   const seen = new Set<string>();
+  const claimedRatios = new Set<string>();
   const fields: PageField[] = [];
   for (const el of nodes) {
     const isImg = el.hasAttribute("data-edit-img");
@@ -127,6 +146,21 @@ function scanFields(): PageField[] {
     }
     const label = el.getAttribute("data-edit-label") || autoLabel(path);
     const multiline = !isSel && (el.hasAttribute("data-edit-multi") || (!isImg && value.length > 40));
+    // 画像フィールドが比率調整グリッド（data-ratio）内にあれば、比率設定を紐付ける
+    // （1つのグリッドに複数画像がある場合は最初の画像フィールドにだけ付ける）
+    let ratio: PageField["ratio"];
+    if (isImg) {
+      const rc = el.closest<HTMLElement>("[data-ratio]");
+      const rPath = rc?.getAttribute("data-ratio");
+      if (rc && rPath && !claimedRatios.has(rPath)) {
+        claimedRatios.add(rPath);
+        ratio = {
+          path: rPath,
+          def: parseInt(rc.getAttribute("data-ratio-def") || "50", 10) || 50,
+          first: rc.getAttribute("data-ratio-first") === "1",
+        };
+      }
+    }
     fields.push({
       path,
       kind: isSel ? "select" : isImg ? "image" : "text",
@@ -134,6 +168,7 @@ function scanFields(): PageField[] {
       label,
       multiline,
       ...(isSel ? { options: parseOptions(el.getAttribute("data-edit-options")) } : {}),
+      ...(ratio ? { ratio } : {}),
     });
   }
   return fields;

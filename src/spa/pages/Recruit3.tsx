@@ -18,8 +18,7 @@ import { Link, useSearchParams } from "react-router";
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, txt, img, ratioCols } from "../lib/editable";
-import { RatioField } from "../components/common/RatioField";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
 import { useRecruitData, RecruitJob, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { INTERVIEWS } from "../data/recruit";
@@ -374,6 +373,7 @@ function Charm3() {
               key={i}
               className="grid items-center gap-6 pc:gap-10 pc:[grid-template-columns:var(--ratio)]"
               style={{ ["--ratio" as any]: ratioCols(`recruit3:charm.${i}.ratio`, 50, imageLeft) }}
+          {...ratioAttrs(`recruit3:charm.${i}.ratio`, 50, imageLeft)}
             >
               {/* 画像（見出しを重ねる。文字影で目立たせる） */}
               <div className={"relative overflow-hidden rounded-[1.5rem] shadow-[0_18px_40px_rgba(15,42,51,0.16)] " + (imageLeft ? "pc:order-1" : "pc:order-2")}>
@@ -400,7 +400,6 @@ function Charm3() {
               >
                 {txt(`recruit3:charm.${i}.body`, c.body)}
               </p>
-              <RatioField path={`recruit3:charm.${i}.ratio`} def={50} />
             </div>
           );
         })}
@@ -475,7 +474,9 @@ function People3D() {
                 style={{
                   width: "min(72vw, 320px)",
                   aspectRatio: "3 / 4",
-                  transform: `translate(-50%, -50%) translateX(${d * 66}%) rotateY(${d * -35}deg) scale(${center ? 1 : 0.82})`,
+                  // translateX(±105%) で中央カードとX軸上で重ならない間隔を確保。
+                  // rotateY は正方向（左カードは右側が奥、右カードは左側が奥へ傾く）
+                  transform: `translate(-50%, -50%) translateX(${d * 105}%) rotateY(${d * 35}deg) scale(${center ? 1 : 0.82})`,
                   transformStyle: "preserve-3d",
                   zIndex: 10 - Math.abs(d),
                   opacity: visible ? 1 : 0,
