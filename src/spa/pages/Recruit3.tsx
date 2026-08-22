@@ -211,7 +211,7 @@ function BizLinks() {
             type="button"
             onClick={() => setOpen(i)}
             aria-haspopup="dialog"
-            className="group relative block overflow-hidden rounded-[1.25rem] text-left shadow-[0_14px_30px_rgba(15,42,51,0.14)]"
+            className="group relative block overflow-hidden rounded-[0.625rem] text-left shadow-[0_14px_30px_rgba(15,42,51,0.14)]"
           >
             <div className="aspect-[3/4] w-full overflow-hidden bg-secondary">
               <ImageWithFallback
@@ -247,7 +247,7 @@ function BizLinks() {
             if (e.target === e.currentTarget) setOpen(null);
           }}
         >
-          <div className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-[1.5rem] bg-white shadow-2xl">
+          <div className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-[0.75rem] bg-white shadow-2xl">
             <button
               type="button"
               onClick={() => setOpen(null)}
@@ -323,7 +323,7 @@ function Culture() {
   return (
     <Sec>
       <Head base="recruit3:culture" en="CULTURE" jp="アイスラインのカルチャー" />
-      <ol className="mt-12 divide-y divide-black/10 overflow-hidden rounded-[1.5rem] bg-white/85 shadow-[0_16px_36px_rgba(15,42,51,0.10)] backdrop-blur">
+      <ol className="mt-12 divide-y divide-black/10 overflow-hidden rounded-[0.75rem] bg-white/85 shadow-[0_16px_36px_rgba(15,42,51,0.10)] backdrop-blur">
         {CULTURE_DEFAULTS.map((c, i) => (
           <li key={i} className="flex gap-5 p-6 pc:gap-8 pc:p-9">
             <span
@@ -376,7 +376,7 @@ function Charm3() {
           {...ratioAttrs(`recruit3:charm.${i}.ratio`, 50, imageLeft)}
             >
               {/* 画像（見出しを重ねる。文字影で目立たせる） */}
-              <div className={"relative overflow-hidden rounded-[1.5rem] shadow-[0_18px_40px_rgba(15,42,51,0.16)] " + (imageLeft ? "pc:order-1" : "pc:order-2")}>
+              <div className={"relative overflow-hidden rounded-[0.75rem] shadow-[0_18px_40px_rgba(15,42,51,0.16)] " + (imageLeft ? "pc:order-1" : "pc:order-2")}>
                 <ImageWithFallback
                   src={img(`recruit3:charm.${i}.image`, img(`recruit2:charm.${i}.image`, PH))}
                   alt={txt(`recruit3:charm.${i}.title`, c.title)}
@@ -440,7 +440,7 @@ function People3D() {
             const visible = Math.abs(d) <= 1;
             const center = d === 0;
             const card = (
-              <div className="relative h-full w-full overflow-hidden rounded-[1.5rem] bg-secondary shadow-[0_20px_50px_rgba(15,42,51,0.25)]">
+              <div className="relative h-full w-full overflow-hidden rounded-[0.75rem] bg-secondary shadow-[0_20px_50px_rgba(15,42,51,0.25)]">
                 <ImageWithFallback
                   src={iv.image || PH}
                   alt={iv.name}
@@ -576,7 +576,7 @@ function Timeline({ t, timeWidth = 88 }: { t: RecruitTimeline; timeWidth?: numbe
         </ol>
       </div>
       {t.image ? (
-        <ImageWithFallback src={t.image} alt={t.note} className="aspect-[4/3] w-full rounded-[1.5rem] object-cover" />
+        <ImageWithFallback src={t.image} alt={t.note} className="aspect-[4/3] w-full rounded-[0.75rem] object-cover" />
       ) : null}
     </div>
   );
@@ -589,7 +589,7 @@ function RowsTable({ rows, tint }: { rows: RecruitRow[]; tint: "teal" | "coral" 
       ? { color: PAL.teal, background: "rgba(217,236,242,0.5)" }
       : { color: PAL.coral, background: "rgba(245,106,121,0.12)" };
   return (
-    <div className="mt-8 overflow-hidden rounded-[1.5rem] bg-white/90 ring-1 ring-black/5">
+    <div className="mt-8 overflow-hidden rounded-[0.75rem] bg-white/90 ring-1 ring-black/5">
       <table className="w-full">
         <tbody>
           {rows.map((r, i) => (
@@ -615,7 +615,7 @@ function FaqList({ items }: { items: { q: string; a: string }[] }) {
       {items.map((f, i) => {
         const isOpen = open.includes(i);
         return (
-          <div key={i} className="overflow-hidden rounded-xl border border-black/10 bg-white">
+          <div key={i} className="overflow-hidden rounded-md border border-black/10 bg-white">
             <h4>
               <button
                 type="button"
@@ -670,12 +670,12 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
         {/* 業務内容 */}
         <section>
           <OvHead en="POSITION" jp="業務内容" />
-          <div className="mt-8 grid items-center gap-8 rounded-[1.75rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:grid-cols-2 pc:gap-10 pc:p-9">
+          <div className="mt-8 grid items-center gap-8 rounded-[0.875rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:grid-cols-2 pc:gap-10 pc:p-9">
             <div className="pc:order-2">
               {job.image ? (
-                <ImageWithFallback src={job.image} alt={job.title} className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
+                <ImageWithFallback src={job.image} alt={job.title} className="aspect-[4/3] w-full rounded-[0.625rem] object-cover" />
               ) : (
-                <img src={PH} alt="" className="aspect-[4/3] w-full rounded-[1.25rem] object-cover" />
+                <img src={PH} alt="" className="aspect-[4/3] w-full rounded-[0.625rem] object-cover" />
               )}
             </div>
             <div className="pc:order-1">
@@ -734,7 +734,7 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
         </section>
 
         {/* エントリーフォーム（現状踏襲） */}
-        <section className="mt-20 overflow-hidden rounded-[1.75rem] shadow-[0_16px_36px_rgba(15,42,51,0.10)]">
+        <section className="mt-20 overflow-hidden rounded-[0.875rem] shadow-[0_16px_36px_rgba(15,42,51,0.10)]">
           <EntryForm />
         </section>
       </div>
@@ -768,11 +768,11 @@ function JobsSection() {
       </p>
 
       {jobs.length === 0 ? (
-        <p className="mt-10 rounded-[1.25rem] bg-white/85 p-10 text-center" style={{ fontSize: 14, color: "#55707a" }}>
+        <p className="mt-10 rounded-[0.625rem] bg-white/85 p-10 text-center" style={{ fontSize: 14, color: "#55707a" }}>
           現在募集中の職種はありません。
         </p>
       ) : (
-        <ul className="mt-10 divide-y divide-black/5 overflow-hidden rounded-[1.5rem] bg-white/90 shadow-[0_16px_36px_rgba(15,42,51,0.12)] backdrop-blur">
+        <ul className="mt-10 divide-y divide-black/5 overflow-hidden rounded-[0.75rem] bg-white/90 shadow-[0_16px_36px_rgba(15,42,51,0.12)] backdrop-blur">
           {jobs.map((j, i) => (
             <li key={j.id}>
               <button

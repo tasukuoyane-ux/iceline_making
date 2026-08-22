@@ -16,6 +16,66 @@ const ANIM_OPTS: { value: string; label: string }[] = [
   { value: "slide-r", label: "スライドイン（右から）" },
 ];
 
+/** アニメーション設定コントロール（種類select＋オフセット・移動量入力）。
+ * 要素単体（anim:<編集パス>）にも横並びグループ全体（anim:<比率パス>）にも使う。 */
+function AnimControls({
+  draft,
+  animKey,
+  onChange,
+  ariaLabel = "アニメーション",
+}: {
+  draft: Content;
+  animKey: string;
+  onChange: (next: Content) => void;
+  ariaLabel?: string;
+}) {
+  const [type = "", offset = "0", amount = "40"] = (getValueByPath(draft, animKey) || "").split("|");
+  const set = (t: string, o: string, a: string) =>
+    onChange(setValueByPath(draft, animKey, t ? `${t}|${o || "0"}|${a || "40"}` : ""));
+  return (
+    <>
+      <select
+        value={type}
+        onChange={(e) => set(e.target.value, offset, amount)}
+        aria-label={ariaLabel}
+        className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 outline-none"
+      >
+        {ANIM_OPTS.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+      {type && (
+        <>
+          <label className="flex items-center gap-1 text-[10px] text-slate-500">
+            開始オフセット
+            <input
+              type="number"
+              min={0}
+              step={10}
+              value={offset}
+              onChange={(e) => set(type, e.target.value, amount)}
+              className="w-14 rounded border border-slate-300 px-1 py-0.5 text-[10px] outline-none"
+            />
+            px
+          </label>
+          <label className="flex items-center gap-1 text-[10px] text-slate-500">
+            移動量
+            <input
+              type="number"
+              min={0}
+              step={10}
+              value={amount}
+              onChange={(e) => set(type, offset, e.target.value)}
+              className="w-14 rounded border border-slate-300 px-1 py-0.5 text-[10px] outline-none"
+            />
+            px
+          </label>
+        </>
+      )}
+    </>
+  );
+}
+
 export interface PageField {
   path: string;
   kind: "text" | "image" | "select";
@@ -70,11 +130,6 @@ export function PageFields({
         // 画面幅ごとの非表示設定（overrides の `hide:<パス>` に 'sp' | 'pc' | 'sp,pc'）
         const hideKey = `hide:${f.path}`;
         const hideVal = getValueByPath(draft, hideKey) || "";
-        // スクロール連動アニメーション（"種類|開始オフセット|移動量"）
-        const animKey = `anim:${f.path}`;
-        const [animType = "", animOffset = "0", animAmount = "40"] = (getValueByPath(draft, animKey) || "").split("|");
-        const setAnim = (t: string, o: string, a: string) =>
-          onChange(setValueByPath(draft, animKey, t ? `${t}|${o || "0"}|${a || "40"}` : ""));
         const toggleHide = (which: "sp" | "pc") => {
           const parts = new Set(hideVal.split(",").filter(Boolean));
           if (parts.has(which)) parts.delete(which);
@@ -139,46 +194,9 @@ export function PageFields({
               )}
             </div>
 
-            {/* スクロール連動アニメーション */}
+            {/* スクロール連動アニメーション（この要素単体） */}
             <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-              <select
-                value={animType}
-                onChange={(e) => setAnim(e.target.value, animOffset, animAmount)}
-                aria-label="アニメーション"
-                className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 outline-none"
-              >
-                {ANIM_OPTS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              {animType && (
-                <>
-                  <label className="flex items-center gap-1 text-[10px] text-slate-500">
-                    開始オフセット
-                    <input
-                      type="number"
-                      min={0}
-                      step={10}
-                      value={animOffset}
-                      onChange={(e) => setAnim(animType, e.target.value, animAmount)}
-                      className="w-14 rounded border border-slate-300 px-1 py-0.5 text-[10px] outline-none"
-                    />
-                    px
-                  </label>
-                  <label className="flex items-center gap-1 text-[10px] text-slate-500">
-                    移動量
-                    <input
-                      type="number"
-                      min={0}
-                      step={10}
-                      value={animAmount}
-                      onChange={(e) => setAnim(animType, animOffset, e.target.value)}
-                      className="w-14 rounded border border-slate-300 px-1 py-0.5 text-[10px] outline-none"
-                    />
-                    px
-                  </label>
-                </>
-              )}
+              <AnimControls draft={draft} animKey={`anim:${f.path}`} onChange={onChange} />
             </div>
 
             {f.kind === "select" ? (
@@ -216,6 +234,18 @@ export function PageFields({
                     </div>
                   );
                 })()}
+                {/* 横並びグリッド（画像＋文章）を1つのまとまりとしてアニメーションさせる設定 */}
+                {f.ratio && (
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1.5">
+                    <span className="shrink-0 text-[11px] font-medium text-slate-500">横並び全体（画像＋文章まとめて）</span>
+                    <AnimControls
+                      draft={draft}
+                      animKey={`anim:${f.ratio.path}`}
+                      onChange={onChange}
+                      ariaLabel="横並び全体のアニメーション"
+                    />
+                  </div>
+                )}
               </>
             ) : f.multiline ? (
               <TextArea

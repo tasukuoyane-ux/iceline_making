@@ -95,7 +95,7 @@ export function applyAnimations(): void {
     const path = cssEscape(key.slice(ANIM_PREFIX.length));
     const cfg = parse(val);
     document
-      .querySelectorAll<HTMLElement>(`[data-edit="${path}"],[data-edit-img="${path}"]`)
+      .querySelectorAll<HTMLElement>(`[data-edit="${path}"],[data-edit-img="${path}"],[data-ratio="${path}"]`)
       .forEach((el) => {
         if (!cfg) {
           if (el.dataset.animApplied) cleanup(el);
@@ -126,7 +126,7 @@ export function setAnimOverrides(next: Record<string, string>): void {
     if ((prev[k] || "") === (next[k] || "")) continue;
     const path = cssEscape(k.slice(ANIM_PREFIX.length));
     document
-      .querySelectorAll<HTMLElement>(`[data-edit="${path}"],[data-edit-img="${path}"]`)
+      .querySelectorAll<HTMLElement>(`[data-edit="${path}"],[data-edit-img="${path}"],[data-ratio="${path}"]`)
       .forEach(cleanup);
   }
   applyAnimations();
