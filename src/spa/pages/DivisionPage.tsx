@@ -831,7 +831,7 @@ export function DivisionPage({ division }: { division: Division }) {
     <>
       {/* メインビジュアル（高さは会社情報ページに合わせる・タイトル中央・タイトルも編集可能） */}
       <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
-        <ImageWithFallback src={MV[division].img} alt={divTitle} className="absolute inset-0 h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像")} />
+        <ImageWithFallback src={MV[division].img} alt={divTitle} loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像")} />
         <div className="absolute inset-0 bg-ink/50" />
         <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>

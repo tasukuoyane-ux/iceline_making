@@ -193,6 +193,8 @@ export function ServicePage({ service }: { service: ServiceId }) {
         <ImageWithFallback
           src={img(`${base}.mv.image`, IMG_PLACEHOLDER)}
           alt={s.title}
+          loading="eager"
+          fetchPriority="high"
           className="absolute inset-0 h-full w-full object-cover"
           {...edImg(`${base}.mv.image`, "メインビジュアル画像")}
         />

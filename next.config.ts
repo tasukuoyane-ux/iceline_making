@@ -4,6 +4,18 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   // 型チェックはローカルで行う運用（旧構成も strict:false・型検査なし）。
   typescript: { ignoreBuildErrors: true },
+  // 画像最適化（/_next/image）。SPA は <img> のまま src/lib/imageOpt.ts の
+  // ヘルパーで最適化URLを組み立てるため、許可ホストをここに列挙する
+  // （imageOpt.ts の OPT_HOSTS と一致させること）。
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'tlnao3m7wsd1mzf2.public.blob.vercel-storage.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+    ],
+    qualities: [75],
+    // 変換結果のキャッシュ（Blob 上の元画像はURLが不変なので長めに保持）
+    minimumCacheTTL: 2678400,
+  },
 }
 
 const config = withPayload(nextConfig)

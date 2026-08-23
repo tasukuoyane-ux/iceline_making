@@ -1,27 +1,31 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "./components/ui/sonner";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 import { VideoCta } from "./components/layout/VideoCta";
 import { CookieConsent } from "./components/layout/CookieConsent";
+import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Top } from "./pages/Top";
-import { DivisionPage } from "./pages/DivisionPage";
-import { ServicePage } from "./pages/ServicePage";
-import { PackagePage } from "./pages/PackagePage";
-import { ProductDetail } from "./pages/ProductDetail";
-import { Company } from "./pages/Company";
-import { Contact } from "./pages/Contact";
-import { News } from "./pages/News";
-import { NewsDetail } from "./pages/NewsDetail";
-import { Videos } from "./pages/Videos";
-import { Recruit } from "./pages/Recruit";
-import { Recruit2 } from "./pages/Recruit2";
-import { Recruit3 } from "./pages/Recruit3";
-import { Interview } from "./pages/Interview";
-import { RecipeDetail } from "./pages/RecipeDetail";
-import { Privacy } from "./pages/Privacy";
-import { ConsoleApp } from "../console/ConsoleApp";
+
+// パフォーマンス対応：トップ以外のページと管理コンソールは遅延読み込み
+// （ルート別チャンクに分割）し、初回に読むJS量を減らす。
+const DivisionPage = lazy(() => import("./pages/DivisionPage").then((m) => ({ default: m.DivisionPage })));
+const ServicePage = lazy(() => import("./pages/ServicePage").then((m) => ({ default: m.ServicePage })));
+const PackagePage = lazy(() => import("./pages/PackagePage").then((m) => ({ default: m.PackagePage })));
+const ProductDetail = lazy(() => import("./pages/ProductDetail").then((m) => ({ default: m.ProductDetail })));
+const Company = lazy(() => import("./pages/Company").then((m) => ({ default: m.Company })));
+const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.Contact })));
+const News = lazy(() => import("./pages/News").then((m) => ({ default: m.News })));
+const NewsDetail = lazy(() => import("./pages/NewsDetail").then((m) => ({ default: m.NewsDetail })));
+const Videos = lazy(() => import("./pages/Videos").then((m) => ({ default: m.Videos })));
+const Recruit = lazy(() => import("./pages/Recruit").then((m) => ({ default: m.Recruit })));
+const Recruit2 = lazy(() => import("./pages/Recruit2").then((m) => ({ default: m.Recruit2 })));
+const Recruit3 = lazy(() => import("./pages/Recruit3").then((m) => ({ default: m.Recruit3 })));
+const Interview = lazy(() => import("./pages/Interview").then((m) => ({ default: m.Interview })));
+const RecipeDetail = lazy(() => import("./pages/RecipeDetail").then((m) => ({ default: m.RecipeDetail })));
+const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
+const ConsoleApp = lazy(() => import("../console/ConsoleApp").then((m) => ({ default: m.ConsoleApp })));
 
 // 基本背景（採用ページ以外）：プリズム調の背景画像を全面に敷く。
 // 採用系ページは各ページ独自の背景（パララックス・スクロール動画）を持つため白のまま。
@@ -31,7 +35,12 @@ function SiteBg() {
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden>
       {!isRecruit && (
-        <img src="/images/background/BG_Prism.jpg" alt="" className="h-full w-full object-cover" />
+        <ImageWithFallback
+          src="/images/background/BG_Prism.jpg"
+          alt=""
+          loading="eager"
+          className="h-full w-full object-cover"
+        />
       )}
     </div>
   );
@@ -82,28 +91,30 @@ function Site() {
       <AnimateBoot />
       <Header />
       <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Top />} />
-          <Route path="/food" element={<DivisionPage division="food" />} />
-          <Route path="/ice" element={<DivisionPage division="ice" />} />
-          <Route path="/ice/recipe/:id" element={<RecipeDetail />} />
-          <Route path="/food/products/:id" element={<ProductDetail />} />
-          <Route path="/food/packages/:id" element={<PackagePage />} />
-          <Route path="/ice/products/:id" element={<ProductDetail />} />
-          <Route path="/warehouse" element={<ServicePage service="warehouse" />} />
-          <Route path="/dryice" element={<ServicePage service="dryice" />} />
-          <Route path="/company" element={<Company />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/news/:id" element={<NewsDetail />} />
-          <Route path="/videos" element={<Videos />} />
-          <Route path="/recruit" element={<Recruit />} />
-          <Route path="/recruit2" element={<Recruit2 />} />
-          <Route path="/recruit3" element={<Recruit3 />} />
-          <Route path="/recruit/interview/:id" element={<Interview />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="*" element={<Top />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<Top />} />
+            <Route path="/food" element={<DivisionPage division="food" />} />
+            <Route path="/ice" element={<DivisionPage division="ice" />} />
+            <Route path="/ice/recipe/:id" element={<RecipeDetail />} />
+            <Route path="/food/products/:id" element={<ProductDetail />} />
+            <Route path="/food/packages/:id" element={<PackagePage />} />
+            <Route path="/ice/products/:id" element={<ProductDetail />} />
+            <Route path="/warehouse" element={<ServicePage service="warehouse" />} />
+            <Route path="/dryice" element={<ServicePage service="dryice" />} />
+            <Route path="/company" element={<Company />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/news/:id" element={<NewsDetail />} />
+            <Route path="/videos" element={<Videos />} />
+            <Route path="/recruit" element={<Recruit />} />
+            <Route path="/recruit2" element={<Recruit2 />} />
+            <Route path="/recruit3" element={<Recruit3 />} />
+            <Route path="/recruit/interview/:id" element={<Interview />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="*" element={<Top />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
       <VideoCta />
@@ -116,12 +127,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
-        {/* 社員専用 管理コンソール（ヘッダー・フッターなし） */}
-        <Route path="/console/*" element={<ConsoleApp />} />
-        {/* 公開サイト */}
-        <Route path="/*" element={<Site />} />
-      </Routes>
+      <Suspense fallback={null}>
+        <Routes>
+          {/* 社員専用 管理コンソール（ヘッダー・フッターなし） */}
+          <Route path="/console/*" element={<ConsoleApp />} />
+          {/* 公開サイト */}
+          <Route path="/*" element={<Site />} />
+        </Routes>
+      </Suspense>
       <Toaster position="top-center" richColors />
     </BrowserRouter>
   );

@@ -49,7 +49,19 @@ export default function FrontendLayout({ children }: { children: ReactNode }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="stylesheet" href={FONT_CSS} />
+        {/* フォントCSSは非レンダリングブロックで読み込む（media=print → 読込後に all へ）。
+            display=swap のため、読込までは代替フォントで即時に文字が描画される。 */}
+        <link rel="preload" as="style" href={FONT_CSS} />
+        <link rel="stylesheet" href={FONT_CSS} media="print" id="async-font-css" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var l=document.getElementById('async-font-css');if(!l)return;var d=function(){l.media='all'};if(l.sheet){d()}else{l.addEventListener('load',d)}})()",
+          }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={FONT_CSS} />
+        </noscript>
         {/* 旧 index.html のインラインスタイルを再現 */}
         <style
           dangerouslySetInnerHTML={{

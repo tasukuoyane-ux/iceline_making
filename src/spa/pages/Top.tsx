@@ -85,7 +85,16 @@ function Hero() {
   const s = TOP_MV;
   return (
     <section className="relative w-full overflow-hidden bg-ink">
-      <ImageWithFallback src={s.img} alt={s.alt} className="block w-full" {...edImg(`images:IMG.${s.key}`, "トップ メインビジュアル")} />
+      {/* LCP要素：遅延させず最優先で読み込む（page.tsx で preload 済み） */}
+      <ImageWithFallback
+        src={s.img}
+        alt={s.alt}
+        className="block w-full"
+        loading="eager"
+        fetchPriority="high"
+        sizes="100vw"
+        {...edImg(`images:IMG.${s.key}`, "トップ メインビジュアル")}
+      />
       {/* 白の斜線ストライプオーバーレイ（右→左でだんだん濃くなる） */}
       <img src={MV_STRIPES} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
       {/* 左1/3は真っ白のパネル（見出しを乗せる領域）。右端はグラデーションでストライプへ馴染ませる */}
@@ -246,6 +255,7 @@ export function Top() {
                     <ImageWithFallback
                       src={PRODUCT_IMG[p.id]}
                       alt={g.label}
+                      sizes="50vw"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   )}
