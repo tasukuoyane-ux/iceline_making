@@ -50,8 +50,9 @@ export default function FrontendLayout({ children }: { children: ReactNode }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         {/* フォントCSSは非レンダリングブロックで読み込む（media=print → 読込後に all へ）。
-            display=swap のため、読込までは代替フォントで即時に文字が描画される。 */}
-        <link rel="preload" as="style" href={FONT_CSS} />
+            display=swap のため、読込までは代替フォントで即時に文字が描画される。
+            preload は付けない：フォントCSS（約230KB）と和文woff2（約600KB）が
+            高優先で先行取得され、LCP画像・JSの帯域を奪って表示を遅らせるため。 */}
         <link rel="stylesheet" href={FONT_CSS} media="print" id="async-font-css" />
         <script
           dangerouslySetInnerHTML={{

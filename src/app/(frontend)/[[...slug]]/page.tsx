@@ -3,6 +3,7 @@ import { fetchPublishedNews } from '../../../lib/newsData'
 import { canOptimize, optSrcSet, optUrl } from '../../../lib/imageOpt'
 import imagesData from '../../../content/images.json'
 import { SpaClient } from './SpaClient'
+import { TopShell } from './TopShell'
 
 // ISR（5分）。お知らせの公開・更新時は News コレクションの afterChange
 // フックが revalidatePath('/', 'layout') で即時に再検証する。
@@ -16,7 +17,8 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   // トップページの LCP（メインビジュアル画像）を最優先でプリロードする。
   // SPA はクライアント描画のため、これが無いと「JS実行後」まで画像発見が遅れる。
   const { slug } = await params
-  if (!slug?.length) {
+  const isTop = !slug?.length
+  if (isTop) {
     const mv = (imagesData as { IMG?: Record<string, string> }).IMG?.topMv
     if (mv && canOptimize(mv)) {
       preload(optUrl(mv, 1080), {
@@ -49,6 +51,8 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
           dangerouslySetInnerHTML={{ __html: newsJson }}
         />
       )}
+      {/* SPA 起動までのファーストビュー先行描画（SpaRoot がマウント時に除去） */}
+      {isTop && <TopShell />}
       <SpaClient />
     </>
   )
