@@ -24,10 +24,11 @@ const DECOR_TOKEN = /\[\[([^:\]]+):([^\]]*)\]\]/g;
 const NAMED_COLORS: Record<string, string> = { red: "#E60012", white: "#ffffff", black: "#111111" };
 const SIZE_NAMES: Record<string, RichSize> = { xl: "xl", "特大": "xl", lg: "lg", "大": "lg", sm: "sm", "小": "sm" };
 
-/** サイズトークンのインラインスタイル（要素の基準サイズに対する倍率） */
+/** サイズトークンのインラインスタイル（要素の基準サイズに対する倍率）。
+ * 大は特大の約7割（トップMVモックの「氷と食で、…」の「と」のサイズ感）。 */
 export function sizeStyle(size?: RichSize): { fontSize: string; fontWeight?: number; lineHeight?: number } | undefined {
   if (size === "xl") return { fontSize: "3em", fontWeight: 900, lineHeight: 1.6 };
-  if (size === "lg") return { fontSize: "1.6em", fontWeight: 800, lineHeight: 1.6 };
+  if (size === "lg") return { fontSize: "2.1em", fontWeight: 900, lineHeight: 1.6 };
   if (size === "sm") return { fontSize: "1em" };
   return undefined;
 }
