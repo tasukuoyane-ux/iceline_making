@@ -542,6 +542,12 @@ function PageManagers({
  * デプロイ完了で全ページの <head> に反映される。head のメタ情報のため
  * 左のプレビュー画面には現れない。
  */
+/** パスワードを SHA-256（16進）にハッシュ化する。平文は保存しない */
+async function sha256Hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 function SeoPanel({
   draft,
   setValue,
@@ -551,6 +557,8 @@ function SeoPanel({
 }) {
   const get = (path: string) => getValueByPath(draft, path) ?? "";
   const desc = get("site:seo.description");
+  // サイト閲覧パスワードの入力欄（保存されるのはハッシュのみ）
+  const [protectPw, setProtectPw] = useState("");
   return (
     <div className="space-y-4">
       <div>
@@ -600,6 +608,50 @@ function SeoPanel({
           className="w-full rounded border border-slate-300 p-2 text-[12px] text-slate-800"
         />
       </label>
+
+      {/* サイト閲覧パスワード（サイト全体の閲覧保護） */}
+      <div className="rounded-lg border border-slate-200 bg-white p-3">
+        <span className="text-[12px] font-bold text-slate-700">サイト閲覧パスワード</span>
+        <p className="mt-0.5 mb-2 text-[11px] leading-relaxed text-slate-500">
+          有効にして公開すると、サイト全体の閲覧にパスワードが必要になります
+          （/console と /admin は対象外なので、忘れてもここから変更・解除できます）。
+          パスワードはハッシュ化して保存され、平文は残りません。
+          変更すると閲覧済みブラウザでも再入力が必要になります。
+        </p>
+        <label className="flex items-center gap-2 text-[12px] font-medium text-slate-700">
+          <input
+            type="checkbox"
+            checked={get("site:protect.enabled") === "1"}
+            onChange={(e) => setValue("site:protect.enabled", e.target.checked ? "1" : "")}
+          />
+          閲覧パスワードを有効にする
+        </label>
+        <div className="mt-2 flex items-center gap-2">
+          <input
+            type="text"
+            value={protectPw}
+            onChange={(e) => setProtectPw(e.target.value)}
+            placeholder="新しい閲覧パスワード"
+            className="min-w-0 flex-1 rounded border border-slate-300 p-2 text-[12px] text-slate-800"
+          />
+          <button
+            type="button"
+            disabled={protectPw === ""}
+            onClick={async () => {
+              setValue("site:protect.hash", await sha256Hex(protectPw));
+              setProtectPw("");
+            }}
+            className="shrink-0 rounded bg-slate-800 px-3 py-2 text-[12px] font-medium text-white transition-colors hover:bg-slate-700 disabled:opacity-40"
+          >
+            設定
+          </button>
+        </div>
+        <p className="mt-1.5 text-[11px] text-slate-500">
+          {get("site:protect.hash")
+            ? "パスワード：設定済み（変更するには新しいパスワードを入力して「設定」）"
+            : "パスワード：未設定（未設定の間は有効にしても保護されません）"}
+        </p>
+      </div>
     </div>
   );
 }

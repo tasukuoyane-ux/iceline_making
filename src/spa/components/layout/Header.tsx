@@ -51,7 +51,7 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   const { pathname } = useLocation();
-  // 採用3ページでは帯をブランドレッドにし、ナビ文字色を白へ反転する。
+  // 採用3ページでは帯をサーモンピンクにし、ナビ文字色を白へ反転する。
   // ロゴもこのページ専用に差し替え可能（recruit3:header.logo）。
   const r3 = pathname.startsWith("/recruit3");
   const logoSrc = img("header:logo", logo);
@@ -62,7 +62,7 @@ export function Header() {
         "sticky top-0 z-50 w-full border-b backdrop-blur transition-transform duration-300",
         // SPメニュー展開中はスライドアウトしない（操作途中で消えないように）
         hidden && !open ? "-translate-y-full" : "translate-y-0",
-        r3 ? "border-white/25 bg-[#E60012]" : "border-border bg-background/90",
+        r3 ? "border-white/25 bg-[#FA8072]" : "border-border bg-background/90",
       )}
     >
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 pc:h-20 pc:px-8">
@@ -99,7 +99,7 @@ export function Header() {
             className={cn(
               "mr-4 rounded-full border px-4 py-1.5 transition-colors",
               r3
-                ? "border-white text-white hover:bg-white hover:text-[#E60012]"
+                ? "border-white text-white hover:bg-white hover:text-[#FA8072]"
                 : "border-brand text-brand hover:bg-brand hover:text-brand-foreground",
             )}
             style={{ fontSize: 14 }}
@@ -119,7 +119,7 @@ export function Header() {
                     "rounded-full px-3.5 py-1.5 transition-colors",
                     active
                       ? r3
-                        ? "bg-white text-[#E60012] shadow-sm"
+                        ? "bg-white text-[#FA8072] shadow-sm"
                         : "bg-background text-brand shadow-sm"
                       : r3
                         ? "text-white hover:text-white/75"

@@ -798,6 +798,109 @@ function JobsSection() {
   );
 }
 
+/* ═══════════════ MV内の追記（サブコピー＋H3・本文） ═══════════════ */
+
+// メインビジュアルのキャッチコピー下に表示する追記。未入力の間は公開ページでは非表示。
+function HeroExtra() {
+  const sub = txt("recruit3:mv.subcopy", "");
+  const h3 = txt("recruit3:mv.h3", "");
+  const p = txt("recruit3:mv.p", "");
+  if (sub === "" && h3 === "" && p === "" && !EDIT_MODE) return null;
+  const shadow = "0 2px 18px rgba(255,255,255,0.65)";
+  return (
+    <div className="mx-auto mt-5 max-w-[34em]">
+      {(sub !== "" || EDIT_MODE) && (
+        <Ed
+          as="p"
+          path="recruit3:mv.subcopy"
+          def="（サブコピー）"
+          label="MV サブコピー"
+          multiline
+          style={{ color: "#0b2530", fontSize: "clamp(14px, 1.9vw, 20px)", fontWeight: 800, lineHeight: 1.8, whiteSpace: "pre-line", textShadow: shadow }}
+        />
+      )}
+      {(h3 !== "" || p !== "" || EDIT_MODE) && (
+        <div className="mt-4">
+          {(h3 !== "" || EDIT_MODE) && (
+            <Ed
+              as="h3"
+              path="recruit3:mv.h3"
+              def="（見出し）"
+              label="MV 小見出し（H3）"
+              style={{ color: "#0b2530", fontSize: "clamp(15px, 1.7vw, 19px)", fontWeight: 900, lineHeight: 1.6, textShadow: shadow }}
+            />
+          )}
+          {(p !== "" || EDIT_MODE) && (
+            <Ed
+              as="p"
+              path="recruit3:mv.p"
+              def="（本文）"
+              label="MV 本文"
+              multiline
+              className="mt-1.5"
+              style={{ color: "#0b2530", fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.9, whiteSpace: "pre-line", textShadow: shadow }}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════ 数字で見るアイスライン ═══════════════ */
+
+// 画像の中に H3＋p を重ねたタイルを gap:1px で敷き詰める。
+// 最大12枠で、いずれか（画像・見出し・説明）が入力された枠だけが公開される
+// （＝任意の数のセットを追加できる）。全枠未入力の間はセクションごと非表示。
+const MAX_STATS = 12;
+
+function Stats3() {
+  const items = Array.from({ length: MAX_STATS }, (_, i) => ({
+    i,
+    image: img(`recruit3:stats.${i}.image`, ""),
+    h3: txt(`recruit3:stats.${i}.h3`, ""),
+    p: txt(`recruit3:stats.${i}.p`, ""),
+  }));
+  const filled = items.filter((s) => s.image !== "" || s.h3 !== "" || s.p !== "");
+  if (filled.length === 0 && !EDIT_MODE) return null;
+  const shown = EDIT_MODE ? items : filled;
+  return (
+    <Sec>
+      <Head base="recruit3:stats.head" en="COMPANY DECK" jp="数字で見るアイスライン" />
+      <div className="mt-10 grid grid-cols-2 gap-[1px] tab:grid-cols-3 pc:grid-cols-4">
+        {shown.map((s) => (
+          <div key={s.i} className="relative aspect-[4/3] overflow-hidden bg-secondary">
+            <ImageWithFallback
+              src={s.image || PH}
+              alt={s.h3 || `数字で見るアイスライン ${s.i + 1}`}
+              sizes="(min-width: 1025px) 25vw, 50vw"
+              className="absolute inset-0 h-full w-full object-cover"
+              {...edImg(`recruit3:stats.${s.i}.image`, `数字タイル${s.i + 1} 画像`)}
+            />
+            {/* 文字の可読性用のグラデーション */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-black/10" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center text-white">
+              <h3
+                style={{ fontSize: "clamp(18px, 2.3vw, 28px)", fontWeight: 900, lineHeight: 1.3, textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}
+                {...ed(`recruit3:stats.${s.i}.h3`, `数字タイル${s.i + 1} 見出し`)}
+              >
+                {s.h3 || (EDIT_MODE ? "（見出し）" : "")}
+              </h3>
+              <p
+                className="mt-1"
+                style={{ fontSize: 12, lineHeight: 1.7, whiteSpace: "pre-line", textShadow: "0 1px 8px rgba(0,0,0,0.45)" }}
+                {...ed(`recruit3:stats.${s.i}.p`, `数字タイル${s.i + 1} 説明`, { multiline: true })}
+              >
+                {s.p || (EDIT_MODE ? "（説明）" : "")}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Sec>
+  );
+}
+
 /* ═══════════════ ページ本体 ═══════════════ */
 
 // メインビジュアルの表示・非表示（コンソールのプルダウンで切り替え）
@@ -823,7 +926,7 @@ export function Recruit3() {
       <style>{`[data-edit-select="recruit3:mv.visible"][data-edit-selected="hidden"]{display:none}`}</style>
       {(mvVisible !== "hidden" || EDIT_MODE) && (
         <div className="relative z-20" {...edSel("recruit3:mv.visible", "メインビジュアルの表示", MV_VISIBLE_OPTS, mvVisible)}>
-          <Hero bandColor="#fff" />
+          <Hero bandColor="#fff" extra={<HeroExtra />} />
         </div>
       )}
 
@@ -837,6 +940,8 @@ export function Recruit3() {
           <Culture />
           {/* 4. 仕事の魅力 */}
           <Charm3 />
+          {/* 4.5. 数字で見るアイスライン（タイルが入力されるまで非表示） */}
+          <Stats3 />
           {/* 5. 人を知る */}
           <People3D />
           {/* 6. 募集職種一覧 */}

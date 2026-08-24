@@ -170,7 +170,7 @@ export function Sec({ children, className = "" }: { children: React.ReactNode; c
   );
 }
 
-export function Hero({ bandColor = "#1ec8dd" }: { bandColor?: string } = {}) {
+export function Hero({ bandColor = "#1ec8dd", extra }: { bandColor?: string; extra?: React.ReactNode } = {}) {
   // ICELINEの形に切り抜かれた帯（色はページごとに指定可能）
   const iceKnock = makeIceKnock(bandColor);
   // 背後のスライド画像（差し替え可・4枚）。複数枚が継ぎ足されながら流れ、ICELINEの穴から覗く。
@@ -219,7 +219,7 @@ export function Hero({ bandColor = "#1ec8dd" }: { bandColor?: string } = {}) {
         </div>
       </div>
 
-      {/* キャッチコピー（MV内のコンテンツは上記＋これのみ） */}
+      {/* キャッチコピー（＋ページ側から extra で追記できる：採用3のサブコピー等） */}
       <div className="relative z-10 px-6 text-center">
         <Ed
           as="p"
@@ -230,6 +230,7 @@ export function Hero({ bandColor = "#1ec8dd" }: { bandColor?: string } = {}) {
           className="mx-auto max-w-[20em]"
           style={{ color: "#0b2530", fontSize: "clamp(24px, 4.4vw, 56px)", fontWeight: 900, lineHeight: 1.4, whiteSpace: "pre-line", textShadow: "0 2px 22px rgba(255,255,255,0.6)" }}
         />
+        {extra}
       </div>
 
       {/* スクロールインジケーター（右下・縦書き＋流れる縦線） */}
