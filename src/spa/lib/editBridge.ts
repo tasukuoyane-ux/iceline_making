@@ -99,7 +99,7 @@ function applyOverrides(overrides: Record<string, string>) {
   // アニメーション設定は animate モジュールが要素へ反映する（DOMパッチ対象外）
   import("./animate").then((m) => m.setAnimOverrides(overrides));
   for (const [path, value] of Object.entries(overrides)) {
-    if (path.startsWith("hide:") || path.startsWith("anim:")) continue; // 専用モジュールで処理済み
+    if (path.startsWith("hide:") || path.startsWith("anim:") || path.startsWith("color:")) continue; // 専用処理（style/animate）で反映済み
     document.querySelectorAll<HTMLElement>(`[data-edit="${cssEscape(path)}"]`).forEach((el) => {
       if (el.hasAttribute("data-edit-rich")) {
         // リッチ本文：textContent の書き換えでは p/li 構造が壊れるため再構築する
@@ -132,6 +132,20 @@ interface PageField {
   options?: { value: string; label: string }[];
   /** 画像フィールドが「画像と文章の横並びグリッド」内にある場合の比率設定 */
   ratio?: { path: string; def: number; first: boolean };
+  /** 所属セクションの表示名（コンソールのアコーディオングルーピング用） */
+  section?: string;
+}
+
+/** 要素が属するセクションの表示名（見出しテキスト）を求める */
+function sectionLabelFor(el: HTMLElement): string {
+  const sec = el.closest<HTMLElement>("section, header");
+  if (sec) {
+    if (sec.tagName === "HEADER") return "メインビジュアル";
+    const h = sec.querySelector("h2, h1");
+    const t = (h?.textContent || "").trim().replace(/\s+/g, " ");
+    if (t) return t.length > 24 ? t.slice(0, 24) + "…" : t;
+  }
+  return "その他";
 }
 
 /** data-edit-options（"値:表示名" を | 区切り）をパースする */
@@ -200,6 +214,7 @@ function scanFields(): PageField[] {
       value,
       label,
       multiline,
+      section: sectionLabelFor(el),
       ...(isSel ? { options: parseOptions(el.getAttribute("data-edit-options")) } : {}),
       ...(ratio ? { ratio } : {}),
     });

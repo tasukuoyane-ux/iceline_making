@@ -18,7 +18,7 @@ import { Link, useSearchParams } from "react-router";
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, PlayCircle, X } from "lucide-react";
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, edSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, edSel, repeatSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { useRecruitData, RecruitJob, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { INTERVIEWS } from "../data/recruit";
@@ -357,14 +357,24 @@ const CULTURE_DEFAULTS = [
     body: "氷の製造から、食材の卸、物流、品質管理まで。アイスラインは、食品に関わるあらゆる仕事が一つの会社の中にあります。誰かの食卓を、誰かの店を、誰かの日常を——表に出なくても、確かに支えている。この仕事を続けた時間は、知識としてではなく、体の感覚として残っていきます。",
   },
 ];
-const CULTURE_NUMS = ["①", "②", "③"];
+const CULTURE_NUMS = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"];
+// 項目数はコンソールの「項目数」プルダウンで 1〜8 に変更できる（既定3）
+const MAX_CULTURE = 8;
 
 function Culture() {
+  const rep = repeatSel("recruit3:culture.count", CULTURE_DEFAULTS.length, MAX_CULTURE, "カルチャーの項目数");
+  const items = Array.from(
+    { length: MAX_CULTURE },
+    (_, i) => CULTURE_DEFAULTS[i] ?? { title: "（見出し）", body: "（本文）" }
+  );
   return (
     <Sec>
       <Head base="recruit3:culture" en="CULTURE" jp="アイスラインのカルチャー" />
-      <ol className="mt-12 divide-y divide-black/10 overflow-hidden rounded-[0.75rem] bg-white/85 shadow-[0_16px_36px_rgba(15,42,51,0.10)] backdrop-blur">
-        {CULTURE_DEFAULTS.map((c, i) => (
+      <ol
+        className="mt-12 divide-y divide-black/10 overflow-hidden rounded-[0.75rem] bg-white/85 shadow-[0_16px_36px_rgba(15,42,51,0.10)] backdrop-blur"
+        {...rep.attrs}
+      >
+        {items.map((c, i) => (
           <li key={i} className="flex gap-5 p-6 pc:gap-8 pc:p-9">
             <span
               aria-hidden
@@ -401,12 +411,20 @@ const CHARM3_DEFAULTS = [
   },
 ];
 
+// 項目数はコンソールの「項目数」プルダウンで 1〜6 に変更できる（既定2）
+const MAX_CHARM = 6;
+
 function Charm3() {
+  const rep = repeatSel("recruit3:charm.count", CHARM3_DEFAULTS.length, MAX_CHARM, "仕事の魅力の項目数");
+  const items = Array.from(
+    { length: MAX_CHARM },
+    (_, i) => CHARM3_DEFAULTS[i] ?? { title: "（見出し）", body: "（本文）" }
+  );
   return (
     <Sec>
       <Head base="recruit3:charm" en="ATTRACTIVE" jp="仕事の魅力" />
-      <div className="mt-12 space-y-12 pc:space-y-16">
-        {CHARM3_DEFAULTS.map((c, i) => {
+      <div className="mt-12 space-y-12 pc:space-y-16" {...rep.attrs}>
+        {items.map((c, i) => {
           const imageLeft = i % 2 === 0; // 1項目目=画像左 / 2項目目=画像右
           return (
             <div

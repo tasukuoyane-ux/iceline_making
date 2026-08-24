@@ -96,6 +96,28 @@ export function edSel(
   };
 }
 
+/**
+ * 繰り返しセクションの「項目数」設定。
+ * コンテナに attrs を展開し、子要素を max 個描画しておくと、
+ * theme.css の [data-repeat] ルールが設定数を超えた子要素を隠す
+ * （公開値は data-edit-value、プレビューの下書きは data-edit-selected で反映）。
+ * コンソールには「項目数」のプルダウンとして表示される。
+ */
+export function repeatSel(
+  path: string,
+  def: number,
+  max: number,
+  label = "項目数"
+): { count: number; attrs: Record<string, string> } {
+  const raw = parseInt(txt(path, String(def)), 10);
+  const count = Math.min(max, Math.max(1, Number.isNaN(raw) ? def : raw));
+  const options = Array.from({ length: max }, (_, i) => ({ value: String(i + 1), label: `${i + 1}項目` }));
+  return {
+    count,
+    attrs: { ...edSel(path, label, options, String(count)), "data-repeat": "1" },
+  };
+}
+
 /** 汎用オーバーライドのテキスト値（編集済みなら override、無ければ既定値） */
 export function txt(path: string, def: string): string {
   const v = OVERRIDES[path];

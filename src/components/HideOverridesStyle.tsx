@@ -23,12 +23,20 @@ function esc(s: string): string {
 export function buildHideCss(overrides: Record<string, string>): string {
   const sp: string[] = []
   const pc: string[] = []
+  const colors: string[] = []
   for (const [key, value] of Object.entries(overrides)) {
-    if (!key.startsWith('hide:') || !value) continue
-    const path = esc(key.slice('hide:'.length))
-    const sel = `[data-edit="${path}"],[data-edit-img="${path}"],[data-edit-select="${path}"]`
-    if (value.includes('sp')) sp.push(sel)
-    if (value.includes('pc')) pc.push(sel)
+    if (key.startsWith('hide:') && value) {
+      const path = esc(key.slice('hide:'.length))
+      const sel = `[data-edit="${path}"],[data-edit-img="${path}"],[data-edit-select="${path}"]`
+      if (value.includes('sp')) sp.push(sel)
+      if (value.includes('pc')) pc.push(sel)
+    }
+    // 文字色（コンソールの「文字色」設定。`color:<編集パス>` → #rrggbb）。
+    // インラインstyleの色指定にも勝てるよう !important を付ける。
+    if (key.startsWith('color:') && /^#[0-9a-fA-F]{3,8}$/.test(value)) {
+      const path = esc(key.slice('color:'.length))
+      colors.push(`[data-edit="${path}"]{color:${value} !important}`)
+    }
   }
   const rules: string[] = []
   if (sp.length) {
@@ -41,7 +49,7 @@ export function buildHideCss(overrides: Record<string, string>): string {
       `@media (min-width: 1025px){${pc.join(',')}{display:none !important}}`,
     )
   }
-  return rules.join('\n')
+  return rules.concat(colors).join('\n')
 }
 
 export function HideOverridesStyle() {
