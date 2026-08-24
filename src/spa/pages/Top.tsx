@@ -13,9 +13,8 @@ import { InlineMovieTag } from "../components/common/MovieBadge";
 // トップページ メインビジュアル（TOP専用キーで編集対象を明確化）
 const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュアル", key: "topMv" };
 
-// MVに重ねる白の斜線ストライプ。サーバ先行描画（TopShell）と共用するため
-// src/lib/mvStripes.ts に切り出した（模様・生成ロジックは従来と同一）。
-import { MV_STRIPES } from "../../lib/mvStripes";
+// MVのストライプ・白パネル・グラデーション加工は 2026-08 改修で削除
+//（src/lib/mvStripes.ts は不使用になった）。
 
 // 「私たちの強み」画像の差し替え用プレースホルダー（編集前のグレー枠）
 const STRENGTH_PLACEHOLDER =
@@ -74,11 +73,8 @@ function Hero() {
         height={800}
         {...edImg(`images:IMG.${s.key}`, "トップ メインビジュアル")}
       />
-      {/* 白の斜線ストライプオーバーレイ（右→左でだんだん濃くなる） */}
-      <img src={MV_STRIPES} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
-      {/* 左1/3は真っ白のパネル（見出しを乗せる領域）。右端はグラデーションでストライプへ馴染ませる */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white" aria-hidden />
-      <div className="pointer-events-none absolute inset-y-0 left-1/3 w-[12%] bg-gradient-to-r from-white to-transparent" aria-hidden />
+      {/* ストライプ・白パネル・グラデーションの加工は 2026-08 改修で削除
+          （画像をそのまま表示する） */}
       {/* MV見出し（H2相当・コンソールの「ページ編集」から文言を変更できる） */}
       <div className="absolute inset-y-0 left-0 flex w-1/3 items-center">
         <h2

@@ -1,6 +1,5 @@
 import overridesData from '../../../content/overrides.json'
 import imagesData from '../../../content/images.json'
-import { MV_STRIPES } from '../../../lib/mvStripes'
 import { canOptimize, optSrcSet, optUrl } from '../../../lib/imageOpt'
 
 const OVERRIDES = overridesData as Record<string, string>
@@ -16,9 +15,6 @@ const SHELL_CSS = `
 #top-shell .ts-hd{height:64px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)}
 #top-shell .ts-mv{position:relative;overflow:hidden;background:#101c24}
 #top-shell .ts-img{display:block;width:100%;height:auto;aspect-ratio:1920/800;object-fit:cover}
-#top-shell .ts-stripes{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#top-shell .ts-panel{position:absolute;top:0;bottom:0;left:0;width:33.3333%;background:#fff}
-#top-shell .ts-grad{position:absolute;top:0;bottom:0;left:33.3333%;width:12%;background:linear-gradient(to right,#fff,rgba(255,255,255,0))}
 #top-shell .ts-titlewrap{position:absolute;top:0;bottom:0;left:0;width:33.3333%;display:flex;align-items:center}
 #top-shell .ts-title{width:100%;padding:0 9%;margin:0;font-size:clamp(18px,3.4vw,46px);font-weight:900;line-height:1.6;color:#101c24;white-space:pre-line}
 @media (min-width:1025px){#top-shell .ts-hd{height:80px}}
@@ -43,9 +39,7 @@ export function TopShell() {
           alt=""
           className="ts-img"
         />
-        <img src={MV_STRIPES} alt="" className="ts-stripes" />
-        <div className="ts-panel" />
-        <div className="ts-grad" />
+        {/* ストライプ・白パネル・グラデーションの加工は 2026-08 改修で削除（Top.tsx の Hero と同一） */}
         <div className="ts-titlewrap">
           <h2 className="ts-title">{title}</h2>
         </div>
