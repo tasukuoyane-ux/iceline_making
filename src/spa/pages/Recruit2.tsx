@@ -162,9 +162,9 @@ export function Head({ base, en, jp, center }: { base: string; en: string; jp: s
 }
 
 /** 左右に余白を持つセクションコンテナ */
-export function Sec({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export function Sec({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
   return (
-    <section className={"relative mx-auto w-full max-w-[1200px] px-6 py-16 pc:px-12 pc:py-24 " + className}>
+    <section id={id} className={"relative mx-auto w-full max-w-[1200px] px-6 py-16 pc:px-12 pc:py-24 " + className}>
       {children}
     </section>
   );

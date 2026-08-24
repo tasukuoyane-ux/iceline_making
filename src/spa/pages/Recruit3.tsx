@@ -883,7 +883,7 @@ function JobsSection() {
   const openJob = openIndex >= 0 ? jobs[openIndex] : null;
 
   return (
-    <Sec>
+    <Sec id="jobs" className="scroll-mt-20">
       <Head base="recruit3:jobs" en="RECRUIT" jp="募集職種一覧" center />
       <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
         <Ed as="span" path="recruit3:jobs.lead" def="職種名を選ぶと、業務内容・1日の流れ・キャリアパス・諸条件をご覧いただけます。" label="募集職種 リード" />
@@ -907,7 +907,7 @@ function JobsSection() {
                 </span>
                 <span style={{ fontSize: "clamp(16px, 2vw, 19px)", fontWeight: 800, color: PAL.ink }}>{j.title}</span>
                 <span className="ml-auto inline-flex items-center gap-1 transition-transform group-hover:translate-x-1" style={{ fontSize: 13, fontWeight: 700, color: PAL.teal }}>
-                  詳しく見る <ArrowRight size={15} />
+                  <span {...ed("recruit3:jobs.more", "職種リンク文言")}>{txt("recruit3:jobs.more", "詳細・エントリー")}</span> <ArrowRight size={15} />
                 </span>
               </button>
             </li>

@@ -154,9 +154,10 @@ export function Header() {
               </Link>
             );
           })}
-          {/* 採用情報は採用3（採用2踏襲＋動画背景）を表示する */}
+          {/* 採用情報は採用3（採用2踏襲＋動画背景）を表示する。
+              採用3ページでは「エントリー」となり、募集職種一覧セクションへのアンカーになる */}
           <Link
-            to="/recruit3"
+            to={r3 ? "/recruit3#jobs" : "/recruit3"}
             className={cn(
               "ml-3 inline-flex items-center px-5 py-2.5 transition-colors",
               r3
@@ -165,7 +166,11 @@ export function Header() {
             )}
             style={{ fontSize: 14 }}
           >
-            <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
+            {r3 ? (
+              <span {...ed("recruit3:header.cta.label", "採用CTA（採用3・エントリー）")}>{txt("recruit3:header.cta.label", "エントリー")}</span>
+            ) : (
+              <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
+            )}
           </Link>
         </nav>
 
@@ -225,11 +230,15 @@ export function Header() {
             </div>
 
             <Link
-              to="/recruit3"
+              to={r3 ? "/recruit3#jobs" : "/recruit3"}
               onClick={() => setOpen(false)}
               className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground"
             >
-              <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
+              {r3 ? (
+                <span {...ed("recruit3:header.cta.label", "採用CTA（採用3・エントリー）")}>{txt("recruit3:header.cta.label", "エントリー")}</span>
+              ) : (
+                <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
+              )}
             </Link>
           </div>
         </nav>
