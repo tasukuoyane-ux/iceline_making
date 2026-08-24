@@ -259,5 +259,22 @@
   "service:dryice.sec.stores.2.title": "写真・地図",
   "service:dryice.sec.stores.3.title": "津山地区の方へ",
   "service:dryice.sec.stores.3.body": "津山地区の方は、以下の代理店へお問い合わせください。\nドライアイスウエダ（旧 北冷物産）　津山市北園町6-3\n0868-23-2578",
-  "recruit3:work.body": "特別じゃないけど、欠かせない。\n\n氷は、もう特別なものではありません。\nコンビニでも、飲食店でも、家庭でも。\nどこにでもあって、当たり前に使われています。\n\n氷がなければ、夏の飲み物はぬるいまま。\n食品の鮮度も、守れないかもしれません。\n物流や医療の現場も、少し困るはず。\n\nつくり、運び、届ける。\n目立つことは、あまりありません。\nそれでも、なくなったら誰かが困る。\n\nその仕事を、私たちは今日も、丁寧に続けています。"
+  "recruit3:work.body": "特別じゃないけど、欠かせない。\n\n氷は、もう特別なものではありません。\nコンビニでも、飲食店でも、家庭でも。\nどこにでもあって、当たり前に使われています。\n\n氷がなければ、夏の飲み物はぬるいまま。\n食品の鮮度も、守れないかもしれません。\n物流や医療の現場も、少し困るはず。\n\nつくり、運び、届ける。\n目立つことは、あまりありません。\nそれでも、なくなったら誰かが困る。\n\nその仕事を、私たちは今日も、丁寧に続けています。",
+  "division:ice.sec.reasons.0.ratio": "40",
+  "division:ice.sec.reasons.1.ratio": "40",
+  "division:ice.sec.reasons.2.ratio": "40",
+  "division:ice.sec.0.0.ratio": "50",
+  "division:ice.sec.0.1.ratio": "50",
+  "division:food.sec.supply.0.ratio": "40",
+  "division:food.sec.features.0.ratio": "40",
+  "division:food.sec.features.1.ratio": "40",
+  "division:food.sec.features.2.ratio": "40",
+  "division:food.sec.features.3.ratio": "40",
+  "division:food.sec.logistics.0.ratio": "40",
+  "division:food.sec.logistics.1.ratio": "40",
+  "division:food.sec.logistics.2.ratio": "40",
+  "division:food.sec.logistics.3.ratio": "40",
+  "division:food.sec.quality.0.ratio": "40",
+  "division:food.sec.quality.1.ratio": "40",
+  "division:food.sec.quality.2.ratio": "40"
 }
