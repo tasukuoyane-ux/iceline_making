@@ -46,6 +46,18 @@ export interface RecruitTimeline {
   image: string;
   steps: RecruitStep[];
 }
+/** 見出し（H2）＋本文＋画像 のシンプルなコンテンツブロック */
+export interface RecruitBlock {
+  title: string;
+  body: string;
+  image: string;
+}
+/** PRポイントの1項目（H3＋本文＋画像は任意） */
+export interface RecruitPrPoint {
+  title: string;
+  body: string;
+  image: string;
+}
 export interface RecruitJob {
   id: string;
   /** 職種名（募集職種一覧・カード見出しに表示） */
@@ -58,11 +70,17 @@ export interface RecruitJob {
   body: string;
   /** 業務内容 画像 */
   image: string;
-  /** 1日の流れ */
+  /** 1日の流れ（2026-08 改修でオーバーレイからは削除。旧データ互換のため保持） */
   day: RecruitTimeline;
-  /** キャリアパス */
+  /** キャリアパス（同上・旧データ互換のため保持） */
   career: RecruitTimeline;
-  /** 職種別メッセージ（改行可・大きな黒文字で表示） */
+  /** 1日の仕事内容（H2＋本文＋画像。本文か画像が入力されるまで非表示） */
+  daywork: RecruitBlock;
+  /** やりがい・特徴（H2＋本文＋画像。本文か画像が入力されるまで非表示） */
+  appeal: RecruitBlock;
+  /** この仕事のPRポイント（H2＋任意個数の H3/本文/画像） */
+  pr: { title: string; points: RecruitPrPoint[] };
+  /** 職種別メッセージ（改行可・大きな黒文字で表示。エントリーフォーム直前に表示） */
   message: string;
   /** 選考の流れ（1日の流れと同じタイムライン形式・職種ごと） */
   flow: RecruitTimeline;
@@ -222,6 +240,11 @@ export function normalizeRecruit(r: any): RecruitData {
       task: String(s?.task ?? ""),
     })),
   });
+  const block = (v: any, defTitle: string): RecruitBlock => ({
+    title: String(v?.title ?? "") || defTitle,
+    body: String(v?.body ?? ""),
+    image: String(v?.image ?? ""),
+  });
   const sharedConditions = rows(r?.conditions);
   const sharedBenefits = rows(r?.benefits);
   // 旧・共通「選考の流れ」（文字列の配列）を職種別タイムラインの初期値に変換する
@@ -243,6 +266,16 @@ export function normalizeRecruit(r: any): RecruitData {
         image: String(j?.image ?? ""),
         day: timeline(j?.day),
         career: timeline(j?.career),
+        daywork: block(j?.daywork, "1日の仕事内容"),
+        appeal: block(j?.appeal, "やりがい・特徴"),
+        pr: {
+          title: String(j?.pr?.title ?? "") || "この仕事のPRポイント",
+          points: (Array.isArray(j?.pr?.points) ? j.pr.points : []).map((p: any) => ({
+            title: String(p?.title ?? ""),
+            body: String(p?.body ?? ""),
+            image: String(p?.image ?? ""),
+          })),
+        },
         message: String(j?.message ?? ""),
         flow: flow.steps.length ? flow : { note: "", image: "", steps: clone(sharedFlowSteps) },
         // 旧データ（職種ごとの設定がない）は共通テンプレートを引き継ぐ

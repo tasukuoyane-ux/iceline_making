@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowRight, Building2, ShoppingBag, Snowflake } from "lucide-react";
+import { ArrowRight, Building2, ShoppingBag, Snowflake, Users } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
@@ -37,12 +37,22 @@ const SERVICES: { to: string; en: string; title: string; lead: string; imgKey?: 
   { to: "/dryice", en: "DRY ICE", title: "ドライアイスの販売", lead: "必要なとき、必要な量を。", imgKey: "service:dryice.mv.image" },
 ];
 
-// MV下の導線。label が1行目、note が2行目（括弧内の補足。無い導線は空文字）。
+// MV下の導線（4つ）。label が1行目、note が2行目（括弧内の補足。無い導線は空文字）。
+// アイコン（SVG/画像）・文言・リンク先はすべてコンソールから編集できる
+// （キー: top:audience.{i}.icon / .label / .note / .to）。
 const AUDIENCE = [
-  { icon: Building2, label: "お取引企業様", note: "氷/氷菓・食材・ドライアイス・倉庫", to: "/contact", external: false },
-  { icon: Snowflake, label: "一般のお客様", note: "氷/氷菓", to: "/ice", external: false },
-  { icon: ShoppingBag, label: "ドライアイスオンラインショップ", note: "", to: "https://www.dry-ice.jp/", external: true },
+  { icon: Building2, label: "お取引企業様", note: "氷/氷菓・食材・ドライアイス・倉庫", to: "/contact" },
+  { icon: Snowflake, label: "一般のお客様", note: "氷/氷菓", to: "/ice" },
+  { icon: ShoppingBag, label: "ドライアイスオンラインショップ", note: "", to: "https://www.dry-ice.jp/" },
+  { icon: Users, label: "採用情報", note: "", to: "/recruit3" },
 ];
+
+// 導線アイコンの差し替え用プレースホルダー（編集前の小さな「＋」枠）
+const AUDIENCE_ICON_PH =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" rx="8" fill="#f1f1f3"/><text x="50%" y="54%" font-size="28" fill="#bcbcc2" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">＋</text></svg>'
+  );
 
 function Hero() {
   // メインビジュアル：トリミングせず全体表示（PC・SP共通）。
@@ -89,34 +99,58 @@ export function Top() {
     <>
       <Hero />
 
-      {/* ヒーロー：対象者別3導線 */}
+      {/* ヒーロー：対象者別4導線（アイコン・文言・リンク先はコンソールから編集可能） */}
       <Section heat={HEAT.topHero}>
-        <div className="grid gap-4 tab:grid-cols-3">
+        <div className="grid gap-4 tab:grid-cols-2 pc:grid-cols-4">
           {AUDIENCE.map((a, i) => {
-            const cls = "group flex items-center justify-between border border-border bg-card p-6 transition-colors hover:border-brand";
+            const cls = "group flex h-full items-center justify-between border border-border bg-card p-6 transition-colors hover:border-brand";
+            // アイコン：画像（SVG可）が設定されていればそれを、無ければ既定のアイコンを表示
+            const iconSrc = img(`top:audience.${i}.icon`, "");
+            // リンク先：コンソールで編集可能。「https://…」は外部サイト（別タブ）
+            const href = txt(`top:audience.${i}.to`, a.to);
+            const external = /^https?:/i.test(href);
             const inner = (
               <>
-                <div className="flex items-center gap-4">
-                  <a.icon className="text-brand" size={28} />
-                  <div>
-                    <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, "導線ラベル")}>{txt(`top:audience.${i}.label`, a.label)}</p>
+                <div className="flex min-w-0 items-center gap-4">
+                  {iconSrc !== "" || EDIT_MODE ? (
+                    <ImageWithFallback
+                      src={iconSrc || AUDIENCE_ICON_PH}
+                      alt=""
+                      className="h-8 w-8 shrink-0 object-contain"
+                      {...edImg(`top:audience.${i}.icon`, `導線${i + 1} アイコン画像（SVG可）`)}
+                    />
+                  ) : (
+                    <a.icon className="shrink-0 text-brand" size={28} />
+                  )}
+                  <div className="min-w-0">
+                    <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, `導線${i + 1} ラベル`)}>{txt(`top:audience.${i}.label`, a.label)}</p>
                     {/* 2行目（括弧内の補足）。空の導線では表示しない */}
                     {(txt(`top:audience.${i}.note`, a.note) || EDIT_MODE) && (
-                      <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, "導線サブラベル")}>{txt(`top:audience.${i}.note`, a.note)}</p>
+                      <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, `導線${i + 1} サブラベル`)}>{txt(`top:audience.${i}.note`, a.note)}</p>
                     )}
                   </div>
                 </div>
-                <ArrowRight className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
+                <ArrowRight className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
               </>
             );
-            return a.external ? (
-              <a key={a.to} href={a.to} target="_blank" rel="noopener noreferrer" className={cls}>
-                {inner}
-              </a>
-            ) : (
-              <Link key={a.to} to={a.to} className={cls}>
-                {inner}
-              </Link>
+            return (
+              <div key={i}>
+                {external ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+                    {inner}
+                  </a>
+                ) : (
+                  <Link to={href} className={cls}>
+                    {inner}
+                  </Link>
+                )}
+                {/* 編集モード限定：リンク先URLの編集行 */}
+                {EDIT_MODE && (
+                  <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(`top:audience.${i}.to`, `導線${i + 1} リンク先URL`)}>
+                    {href}
+                  </p>
+                )}
+              </div>
             );
           })}
         </div>

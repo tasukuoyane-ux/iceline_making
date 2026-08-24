@@ -24,6 +24,7 @@ export function buildHideCss(overrides: Record<string, string>): string {
   const sp: string[] = []
   const pc: string[] = []
   const colors: string[] = []
+  const flips: string[] = []
   for (const [key, value] of Object.entries(overrides)) {
     if (key.startsWith('hide:') && value) {
       const path = esc(key.slice('hide:'.length))
@@ -45,6 +46,18 @@ export function buildHideCss(overrides: Record<string, string>): string {
       const inner = `[data-edit="${path}"],[data-edit-img="${path}"],[data-edit-select="${path}"]`
       colors.push(`section:has(${inner}),main header:has(${inner}){display:none !important}`)
     }
+    // 画像＋文章の横並びグリッドの「左右入れ替え」（`flip:<比率パス>` = "1"）。
+    // PC幅でグリッドの direction を既定と反対向きにして列順を反転する。
+    // 既定で direction:rtl のグリッドは data-ratio-rtl="1" が付いており ltr へ反転。
+    // 子要素の文字方向は direction:ltr に戻す（列順は親の direction で決まる）。
+    if (key.startsWith('flip:') && value === '1') {
+      const path = esc(key.slice('flip:'.length))
+      flips.push(
+        `[data-ratio="${path}"]:not([data-ratio-rtl]){direction:rtl}` +
+          `[data-ratio="${path}"][data-ratio-rtl="1"]{direction:ltr}` +
+          `[data-ratio="${path}"]>*{direction:ltr}`,
+      )
+    }
   }
   const rules: string[] = []
   if (sp.length) {
@@ -56,6 +69,9 @@ export function buildHideCss(overrides: Record<string, string>): string {
     rules.push(
       `@media (min-width: 1025px){${pc.join(',')}{display:none !important}}`,
     )
+  }
+  if (flips.length) {
+    rules.push(`@media (min-width: 1025px){${flips.join('\n')}}`)
   }
   return rules.concat(colors).join('\n')
 }

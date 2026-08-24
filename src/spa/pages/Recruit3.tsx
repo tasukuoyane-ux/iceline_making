@@ -19,7 +19,7 @@ import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, PlayCircle, 
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, edImg, edSel, repeatSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
-import { useRecruitData, RecruitJob, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
+import { useRecruitData, RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { INTERVIEWS } from "../data/recruit";
 import { VIDEOS, VideoItem } from "../data/news";
@@ -411,69 +411,52 @@ function Culture() {
   );
 }
 
-/* ═══════════════ 4. 仕事の魅力（2項目） ═══════════════ */
+/* ═══════════════ 4. アイスラインの仕事 ═══════════════ */
 
-const CHARM3_DEFAULTS = [
-  {
-    title: "現場との距離が、近い",
-    body: "配送も製造も品質管理も、お客様や商品のすぐそばに現場があります。自分の仕事が誰の役に立っているかが、毎日見える。この距離の近さが、仕事の手応えになります。",
-  },
-  {
-    title: "氷から食まで、広がるフィールド",
-    body: "製氷、食材卸、物流、品質管理。食に関わる仕事が一つの会社の中にそろっています。部門を越えて経験を広げながら、自分の得意を見つけられる環境です。",
-  },
-];
-
-// 項目数はコンソールの「項目数」プルダウンで 1〜6 に変更できる（既定2）
-const MAX_CHARM = 6;
-
-function Charm3() {
-  const rep = repeatSel("recruit3:charm.count", CHARM3_DEFAULTS.length, MAX_CHARM, "仕事の魅力の項目数");
-  const items = Array.from(
-    { length: MAX_CHARM },
-    (_, i) => CHARM3_DEFAULTS[i] ?? { title: "（見出し）", body: "（本文）" }
-  );
+// 画像と文字（H2・強調p・通常p）が横並びのセクション（カルチャーの前に表示）。
+// PCの左右はコンソールの「左右入れ替え」で反転できるが、DOM順は画像が先頭のため
+// SPでは常に上＝画像・下＝文言になる（flip は PC 幅のみに効く）。
+function Work3() {
   return (
     <Sec>
-      <Head base="recruit3:charm" en="ATTRACTIVE" jp="仕事の魅力" />
-      <div className="mt-12 space-y-12 pc:space-y-16" {...rep.attrs}>
-        {items.map((c, i) => {
-          const imageLeft = i % 2 === 0; // 1項目目=画像左 / 2項目目=画像右
-          return (
-            <div
-              key={i}
-              className="grid items-center gap-6 pc:gap-10 pc:[grid-template-columns:var(--ratio)]"
-              style={{ ["--ratio" as any]: ratioCols(`recruit3:charm.${i}.ratio`, 50, imageLeft) }}
-          {...ratioAttrs(`recruit3:charm.${i}.ratio`, 50, imageLeft)}
-            >
-              {/* 画像（見出しを重ねる。文字影で目立たせる） */}
-              <div className={"relative overflow-hidden rounded-[0.75rem] shadow-[0_18px_40px_rgba(15,42,51,0.16)] " + (imageLeft ? "pc:order-1" : "pc:order-2")}>
-                <ImageWithFallback
-                  src={img(`recruit3:charm.${i}.image`, img(`recruit2:charm.${i}.image`, PH))}
-                  alt={txt(`recruit3:charm.${i}.title`, c.title)}
-                  className="aspect-[4/3] w-full object-cover"
-                  {...edImg(`recruit3:charm.${i}.image`, `魅力${i + 1} 画像`)}
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-                <h3
-                  className="absolute bottom-5 left-6 right-6 text-white"
-                  style={{ fontSize: "clamp(20px, 3vw, 30px)", fontWeight: 900, lineHeight: 1.5, textShadow: "0 2px 14px rgba(0,0,0,0.65), 0 0 4px rgba(0,0,0,0.4)" }}
-                  {...ed(`recruit3:charm.${i}.title`, `魅力${i + 1} 見出し`)}
-                >
-                  {txt(`recruit3:charm.${i}.title`, c.title)}
-                </h3>
-              </div>
-              {/* 本文 */}
-              <p
-                className={imageLeft ? "pc:order-2" : "pc:order-1"}
-                style={{ fontSize: 15, lineHeight: 2.2, color: "#1c2b30", whiteSpace: "pre-line" }}
-                {...ed(`recruit3:charm.${i}.body`, `魅力${i + 1} 本文`, { multiline: true })}
-              >
-                {txt(`recruit3:charm.${i}.body`, c.body)}
-              </p>
-            </div>
-          );
-        })}
+      <div
+        className="grid items-center gap-8 pc:gap-12 pc:[grid-template-columns:var(--ratio)]"
+        style={{ ["--ratio" as any]: ratioCols("recruit3:work.ratio", 50, true) }}
+        {...ratioAttrs("recruit3:work.ratio", 50, true)}
+      >
+        {/* 画像（SPでは上に表示） */}
+        <ImageWithFallback
+          src={img("recruit3:work.image", PH)}
+          alt={txt("recruit3:work.title", "アイスラインの仕事")}
+          className="aspect-[4/3] w-full rounded-[0.75rem] object-cover shadow-[0_18px_40px_rgba(15,42,51,0.16)]"
+          {...edImg("recruit3:work.image", "アイスラインの仕事 画像")}
+        />
+        {/* 文言（H2＋強調p＋通常p） */}
+        <div>
+          <h2
+            style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}
+            {...ed("recruit3:work.title", "アイスラインの仕事 見出し（H2）")}
+          >
+            {txt("recruit3:work.title", "アイスラインの仕事")}
+          </h2>
+          <p
+            className="mt-5"
+            style={{ fontSize: "clamp(16px, 2vw, 20px)", fontWeight: 800, lineHeight: 1.9, color: PAL.ink, whiteSpace: "pre-line" }}
+            {...ed("recruit3:work.strong", "アイスラインの仕事 本文（強調）", { multiline: true })}
+          >
+            <strong>{txt("recruit3:work.strong", "氷と食のフィールドで、暮らしの当たり前を支える。")}</strong>
+          </p>
+          <p
+            className="mt-4"
+            style={{ fontSize: 15, lineHeight: 2.2, color: "#1c2b30", whiteSpace: "pre-line" }}
+            {...ed("recruit3:work.body", "アイスラインの仕事 本文", { multiline: true })}
+          >
+            {txt(
+              "recruit3:work.body",
+              "氷の製造から、業務用食材の卸、低温物流、品質管理まで。アイスラインの仕事は、食に関わる現場のすぐそばにあります。自分の仕事が誰の役に立っているかが毎日見える。その手応えを積み重ねられる環境です。"
+            )}
+          </p>
+        </div>
       </div>
     </Sec>
   );
@@ -684,12 +667,12 @@ function RowsTable({ rows, tint }: { rows: RecruitRow[]; tint: "teal" | "coral" 
   );
 }
 
-/** よくある質問（旧採用ページのアコーディオンを踏襲） */
-function FaqList({ items }: { items: { q: string; a: string }[] }) {
+/** よくある質問のQ&Aアコーディオン（1カテゴリ分。旧採用ページのデザイン踏襲） */
+function FaqQaList({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number[]>([]);
   const toggle = (i: number) => setOpen((a) => (a.includes(i) ? a.filter((x) => x !== i) : [...a, i]));
   return (
-    <div className="mt-8 space-y-3">
+    <div className="space-y-3">
       {items.map((f, i) => {
         const isOpen = open.includes(i);
         return (
@@ -718,6 +701,120 @@ function FaqList({ items }: { items: { q: string; a: string }[] }) {
         );
       })}
     </div>
+  );
+}
+
+/** よくある質問（カテゴリを1階層目のアコーディオンにした2階層構成。
+ * カテゴリは CMS の「採用 > よくある質問」で各Q&Aに設定する（未設定は「その他」）。
+ * カテゴリの並びはQ&Aの並び順における初出順。 */
+function FaqList({ items }: { items: { q: string; a: string; cat?: string }[] }) {
+  const groups: { name: string; items: { q: string; a: string }[] }[] = [];
+  for (const f of items) {
+    const name = (f.cat || "").trim() || "その他";
+    const g = groups.find((x) => x.name === name);
+    if (g) g.items.push(f);
+    else groups.push({ name, items: [f] });
+  }
+  const [openCats, setOpenCats] = useState<string[]>([]);
+  const toggleCat = (name: string) =>
+    setOpenCats((a) => (a.includes(name) ? a.filter((x) => x !== name) : [...a, name]));
+  // カテゴリが1つも設定されていない（全て「その他」）場合は従来どおり1階層で表示
+  if (groups.length === 1 && groups[0].name === "その他") {
+    return (
+      <div className="mt-8">
+        <FaqQaList items={groups[0].items} />
+      </div>
+    );
+  }
+  return (
+    <div className="mt-8 space-y-4">
+      {groups.map((g) => {
+        const isOpen = openCats.includes(g.name);
+        return (
+          <div key={g.name} className="overflow-hidden rounded-[0.625rem] border border-black/10 bg-white/95">
+            <button
+              type="button"
+              onClick={() => toggleCat(g.name)}
+              aria-expanded={isOpen}
+              className="flex w-full items-center justify-between gap-3 px-6 py-5 text-left transition-colors hover:bg-slate-50"
+            >
+              <span className="flex items-center gap-3">
+                <span style={{ fontSize: 16, fontWeight: 900, color: PAL.ink }}>{g.name}</span>
+                <span style={{ fontSize: 12, color: "#55707a" }}>{g.items.length}件</span>
+              </span>
+              <ChevronDown size={20} className={`shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} style={{ color: "#55707a" }} />
+            </button>
+            {isOpen && (
+              <div className="border-t border-black/10 bg-[#f8fbfc] p-4 pc:p-5">
+                <FaqQaList items={g.items} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** H2＋本文＋画像のシンプルなセクション（1日の仕事内容／やりがい・特徴）。
+ * 本文か画像が入力されるまで表示しない（旧データの職種でも安全に非表示になる）。 */
+function OvBlockSec({ block, defTitle }: { block?: RecruitBlock; defTitle: string }) {
+  if (!block || (block.body.trim() === "" && block.image.trim() === "")) return null;
+  const hasImage = block.image.trim() !== "";
+  return (
+    <section className="mt-20">
+      <h2 style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}>
+        {block.title || defTitle}
+      </h2>
+      <div className={`mt-6 grid items-center gap-8 ${hasImage ? "pc:grid-cols-2 pc:gap-10" : ""}`}>
+        {block.body.trim() !== "" && (
+          <p style={{ color: "#1c2b30", fontSize: 15, lineHeight: 2.0, whiteSpace: "pre-line" }}>{block.body}</p>
+        )}
+        {hasImage && (
+          <ImageWithFallback src={block.image} alt={block.title || defTitle} className="aspect-[4/3] w-full rounded-[0.75rem] object-cover" />
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** この仕事のPRポイント（H2の下に H3＋本文＋画像（任意）の項目を任意の数表示）。
+ * 項目が1つも無い間は表示しない。 */
+function OvPrSec({ pr, accent }: { pr?: { title: string; points: RecruitPrPoint[] }; accent: string }) {
+  const points = (pr?.points ?? []).filter((p) => p.title.trim() !== "" || p.body.trim() !== "" || p.image.trim() !== "");
+  if (points.length === 0) return null;
+  return (
+    <section className="mt-20">
+      <h2 style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}>
+        {pr?.title || "この仕事のPRポイント"}
+      </h2>
+      <div className="mt-6 space-y-6">
+        {points.map((p, i) => {
+          const hasImage = p.image.trim() !== "";
+          return (
+            <div key={i} className="rounded-[0.875rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.10)] pc:p-8">
+              <div className={`grid items-center gap-6 ${hasImage ? "pc:grid-cols-2 pc:gap-10" : ""}`}>
+                <div>
+                  {p.title.trim() !== "" && (
+                    <h3 className="border-l-4 pl-3" style={{ borderColor: accent, fontSize: 18, fontWeight: 800, color: PAL.ink, lineHeight: 1.5 }}>
+                      {p.title}
+                    </h3>
+                  )}
+                  {p.body.trim() !== "" && (
+                    <p className={p.title.trim() !== "" ? "mt-3" : ""} style={{ color: "#1c2b30", fontSize: 15, lineHeight: 2.0, whiteSpace: "pre-line" }}>
+                      {p.body}
+                    </p>
+                  )}
+                </div>
+                {hasImage && (
+                  <ImageWithFallback src={p.image} alt={p.title} className="aspect-[4/3] w-full rounded-[0.625rem] object-cover" />
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -766,10 +863,10 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
       </div>
 
       <div className="mx-auto max-w-[1000px] px-6 pb-24 pt-12">
-        {/* 業務内容 */}
+        {/* 業務内容（2026-08 改修：セクション見出し（黒文字）と英字ラベル（赤ピル）は
+            表示せず、コンテンツのカードだけを表示する） */}
         <section>
-          <OvHead en="POSITION" jp="業務内容" base="recruit3:ov.position" />
-          <div className="mt-8 grid items-center gap-8 rounded-[0.875rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:grid-cols-2 pc:gap-10 pc:p-9">
+          <div className="grid items-center gap-8 rounded-[0.875rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:grid-cols-2 pc:gap-10 pc:p-9">
             <div className="pc:order-2">
               {job.image ? (
                 <ImageWithFallback src={job.image} alt={job.title} className="aspect-[4/3] w-full rounded-[0.625rem] object-cover" />
@@ -785,34 +882,14 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
           </div>
         </section>
 
-        {/* 1日の流れ */}
-        <section className="mt-20">
-          <OvHead en="A DAY" jp="1日の流れ" base="recruit3:ov.day" />
-          <Timeline t={job.day} timeWidth={64} />
-        </section>
+        {/* 1日の仕事内容（H2＋本文＋画像。CMSの職種編集で入力。未入力の間は非表示） */}
+        <OvBlockSec block={job.daywork} defTitle="1日の仕事内容" />
 
-        {/* キャリアパス */}
-        <section className="mt-20">
-          <OvHead en="CAREER PATH" jp="キャリアパス" base="recruit3:ov.career" />
-          <Timeline t={job.career} timeWidth={96} />
-        </section>
+        {/* やりがい・特徴（H2＋本文＋画像。同上） */}
+        <OvBlockSec block={job.appeal} defTitle="やりがい・特徴" />
 
-        {/* 職種別メッセージ（短文・改行・大きな黒文字） */}
-        {job.message && (
-          <section className="mt-24 text-center">
-            <p
-              style={{
-                fontSize: "clamp(24px, 4vw, 42px)",
-                fontWeight: 900,
-                color: "#111",
-                lineHeight: 1.9,
-                whiteSpace: "pre-line",
-              }}
-            >
-              {job.message}
-            </p>
-          </section>
-        )}
+        {/* この仕事のPRポイント（H2＋任意個数の H3/本文/画像。項目が無い間は非表示） */}
+        <OvPrSec pr={job.pr} accent={accent} />
 
         {/* 諸条件（職種ごと。旧データは共通テンプレートにフォールバック） */}
         <section className="mt-24">
@@ -848,11 +925,28 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
           );
         })()}
 
-        {/* よくある質問（現状踏襲） */}
+        {/* よくある質問（カテゴリを1階層目にした2階層アコーディオン） */}
         <section className="mt-20">
           <OvHead en="FAQ" jp="よくある質問" base="recruit3:ov.faq" />
           <FaqList items={data.faq} />
         </section>
+
+        {/* 職種別メッセージ（短文・改行・大きな黒文字。エントリーフォームの直前に表示） */}
+        {job.message && (
+          <section className="mt-24 text-center">
+            <p
+              style={{
+                fontSize: "clamp(24px, 4vw, 42px)",
+                fontWeight: 900,
+                color: "#111",
+                lineHeight: 1.9,
+                whiteSpace: "pre-line",
+              }}
+            >
+              {job.message}
+            </p>
+          </section>
+        )}
 
         {/* エントリーフォーム（現状踏襲） */}
         <section
@@ -1442,44 +1536,46 @@ export function Recruit3() {
       {/* 動画が無い場合は採用2と同じパララックス背景 */}
       {!HAS_BG && <PageBg />}
 
-      {/* 1. メインビジュアル（種類はコンソールのプルダウンで切替）。
-          MV表示中は背景動画より前面に置いて動画を隠す */}
       <style>{MV_TYPE_CSS}</style>
-      <div className="relative z-20" data-mv-root="1" {...edSel("recruit3:mv.type", "メインビジュアルの種類", MV_TYPE_OPTS, mvType)}>
-        {(EDIT_MODE || mvType === "hero") && (
-          <div data-mv-variant="hero">
-            <Hero bandColor="#fff" extra={<HeroExtra />} />
-          </div>
-        )}
-        {(EDIT_MODE || mvType === "image") && (
-          <div data-mv-variant="image">
-            <MvImage />
-          </div>
-        )}
-        {(EDIT_MODE || mvType === "video") && (
-          <div data-mv-variant="video">
-            <MvVideo />
-          </div>
-        )}
-        {(EDIT_MODE || mvType === "slideshow") && (
-          <div data-mv-variant="slideshow">
-            <MvSlideshow />
-          </div>
-        )}
-      </div>
 
-      {/* MV以下：スクロール追随の背景動画（fixed）＋新構成のコンテンツ */}
+      {/* メインビジュアル以下：スクロール追随の背景動画（fixed）＋新構成のコンテンツ。
+          2026-08 改修：MVを背景動画の領域内へ移し、「現状どおり（ICELINE帯）」は
+          独自背景（スライドマーキー・水色地・ティント）を持たない透過表示にして、
+          背景動画がメインビジュアルから適用されるようにした */}
       <div ref={areaRef} className="relative">
         {HAS_BG && <BgVideos urls={BG_VIDEOS} areaRef={areaRef} />}
         <div className="relative z-10">
+          {/* 1. メインビジュアル（種類はコンソールのプルダウンで切替） */}
+          <div data-mv-root="1" {...edSel("recruit3:mv.type", "メインビジュアルの種類", MV_TYPE_OPTS, mvType)}>
+            {(EDIT_MODE || mvType === "hero") && (
+              <div data-mv-variant="hero">
+                <Hero bandColor="#fff" bare extra={<HeroExtra />} />
+              </div>
+            )}
+            {(EDIT_MODE || mvType === "image") && (
+              <div data-mv-variant="image">
+                <MvImage />
+              </div>
+            )}
+            {(EDIT_MODE || mvType === "video") && (
+              <div data-mv-variant="video">
+                <MvVideo />
+              </div>
+            )}
+            {(EDIT_MODE || mvType === "slideshow") && (
+              <div data-mv-variant="slideshow">
+                <MvSlideshow />
+              </div>
+            )}
+          </div>
           {/* 2. 事業へのリンク */}
           <BizLinks />
           {/* 2.5. 数字で見るアイスライン（最低3枚のタイル・最大12枚まで追加可能） */}
           <Stats3 />
-          {/* 3. カルチャー */}
+          {/* 3. アイスラインの仕事（画像＋文言の横並び。カルチャーの前） */}
+          <Work3 />
+          {/* 4. カルチャー */}
           <Culture />
-          {/* 4. 仕事の魅力 */}
-          <Charm3 />
           {/* 5. 人を知る */}
           <People3D />
           {/* 5.5. 埋め込み動画（URL未設定の間は非表示） */}

@@ -1,10 +1,12 @@
 // 「採用」タブ：募集職種（採用3ページに表示）と諸条件・福利厚生・FAQ の管理。
 //  - 募集中の職種: ON/OFF・追加・編集・削除・並べ替え
-//  - 各職種: 業務内容 / 1日の流れ / キャリアパス / 職種別メッセージ
+//  - 各職種: 業務内容 / 1日の仕事内容 / やりがい・特徴 / PRポイント / 職種別メッセージ
 //  - 諸条件・福利厚生: 表の行（項目名＋内容）を編集
-//  - よくある質問: sections.json の recruitFaq を編集（旧採用ページと共通データ）
+//  - よくある質問: sections.json の recruitFaq を編集（旧採用ページと共通データ）。
+//    各Q&Aにカテゴリを設定でき、採用3の職種オーバーレイではカテゴリが
+//    1階層目のアコーディオンとして表示される。
 // 変更は左のプレビュー（採用3）へ即時反映され、「更新（本番へ公開）」で確定する。
-import { Content, RecruitData, RecruitJob, RecruitRow, RecruitStep, RecruitTimeline, clone, DEFAULT_RECRUIT_FLOW } from "./content";
+import { Content, RecruitBlock, RecruitData, RecruitJob, RecruitPrPoint, RecruitRow, RecruitStep, RecruitTimeline, clone, DEFAULT_RECRUIT_FLOW } from "./content";
 import { Field, TextInput, TextArea, Button, Card, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { genId } from "./panels";
@@ -69,6 +71,64 @@ function TimelineEditor({ value, onChange, noteLabel, timeLabel, imageLabel }: {
   );
 }
 
+/** 見出し（H2）＋本文＋画像 のシンプルなブロックエディタ（1日の仕事内容／やりがい・特徴共用） */
+function BlockEditorSimple({ value, onChange, imageLabel }: { value: RecruitBlock; onChange: (v: RecruitBlock) => void; imageLabel: string }) {
+  return (
+    <div className="space-y-3">
+      <Field label="見出し（H2）">
+        <TextInput value={value.title} onChange={(e) => onChange({ ...value, title: e.target.value })} />
+      </Field>
+      <Field label="本文" hint="本文か画像が入力されるまで公開ページでは非表示です">
+        <TextArea rows={4} value={value.body} onChange={(e) => onChange({ ...value, body: e.target.value })} />
+      </Field>
+      <ImageField label={imageLabel} value={value.image} onChange={(url) => onChange({ ...value, image: url })} />
+    </div>
+  );
+}
+
+/** この仕事のPRポイントのエディタ（H2＋任意個数の H3/本文/画像） */
+function PrEditor({ value, onChange }: { value: { title: string; points: RecruitPrPoint[] }; onChange: (v: { title: string; points: RecruitPrPoint[] }) => void }) {
+  const points = value.points;
+  const setPoints = (points: RecruitPrPoint[]) => onChange({ ...value, points });
+  const update = (i: number, patch: Partial<RecruitPrPoint>) => {
+    const next = points.slice();
+    next[i] = { ...next[i], ...patch };
+    setPoints(next);
+  };
+  return (
+    <div className="space-y-3">
+      <Field label="見出し（H2）">
+        <TextInput value={value.title} onChange={(e) => onChange({ ...value, title: e.target.value })} />
+      </Field>
+      {points.map((p, i) => (
+        <Card
+          key={i}
+          title={`ポイント ${i + 1}`}
+          action={
+            <div className="flex gap-1">
+              <Button onClick={() => setPoints(moveItem(points, i, -1))} disabled={i === 0}>↑</Button>
+              <Button onClick={() => setPoints(moveItem(points, i, 1))} disabled={i === points.length - 1}>↓</Button>
+              <Button variant="danger" onClick={() => { if (confirm(`ポイント${i + 1}を削除しますか？`)) setPoints(points.filter((_, x) => x !== i)); }}>削除</Button>
+            </div>
+          }
+        >
+          <div className="space-y-3">
+            <Field label="見出し（H3）">
+              <TextInput value={p.title} onChange={(e) => update(i, { title: e.target.value })} />
+            </Field>
+            <Field label="本文">
+              <TextArea rows={3} value={p.body} onChange={(e) => update(i, { body: e.target.value })} />
+            </Field>
+            <ImageField label="画像（任意・無しでも可）" value={p.image} onChange={(url) => update(i, { image: url })} />
+          </div>
+        </Card>
+      ))}
+      <Button onClick={() => setPoints([...points, { title: "", body: "", image: "" }])}>＋ ポイントを追加</Button>
+      <p className="text-[11px] text-slate-400">ポイントが1つも無い間は、公開ページではセクションごと表示されません。</p>
+    </div>
+  );
+}
+
 /** 項目名＋内容 の表エディタ（諸条件・福利厚生共用） */
 function RowsEditor({ value, onChange, addLabel }: { value: RecruitRow[]; onChange: (v: RecruitRow[]) => void; addLabel: string }) {
   const update = (i: number, patch: Partial<RecruitRow>) => {
@@ -113,27 +173,27 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
         </div>
       </Card>
 
-      <Card title="1日の流れ">
-        <TimelineEditor
-          value={job.day}
-          onChange={(day) => onChange({ ...job, day })}
-          noteLabel="メモ（時計アイコンの横に表示）"
-          timeLabel="時刻"
-          imageLabel="1日の流れ 画像"
+      <Card title="1日の仕事内容（業務内容の次に表示）">
+        <BlockEditorSimple
+          value={job.daywork}
+          onChange={(daywork) => onChange({ ...job, daywork })}
+          imageLabel="1日の仕事内容 画像"
         />
       </Card>
 
-      <Card title="キャリアパス">
-        <TimelineEditor
-          value={job.career}
-          onChange={(career) => onChange({ ...job, career })}
-          noteLabel="メモ（時計アイコンの横に表示）"
-          timeLabel="時期"
-          imageLabel="キャリアパス 画像"
+      <Card title="やりがい・特徴">
+        <BlockEditorSimple
+          value={job.appeal}
+          onChange={(appeal) => onChange({ ...job, appeal })}
+          imageLabel="やりがい・特徴 画像"
         />
       </Card>
 
-      <Card title="選考の流れ（1日の流れと同じタイムライン形式）">
+      <Card title="この仕事のPRポイント">
+        <PrEditor value={job.pr} onChange={(pr) => onChange({ ...job, pr })} />
+      </Card>
+
+      <Card title="選考の流れ（タイムライン形式）">
         <TimelineEditor
           value={job.flow}
           onChange={(flow) => onChange({ ...job, flow })}
@@ -143,7 +203,7 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
         />
       </Card>
 
-      <Card title="職種別メッセージ">
+      <Card title="職種別メッセージ（エントリーフォームの直前に表示）">
         <Field label="メッセージ" hint="短い文を改行で区切って入力します。大きな黒文字で表示されます。">
           <TextArea rows={4} value={job.message} onChange={(e) => onChange({ ...job, message: e.target.value })} />
         </Field>
@@ -185,8 +245,11 @@ export function RecruitPanel({
       active: false,
       body: "業務内容を入力してください。",
       image: "",
-      day: { note: "", image: "", steps: [{ time: "始業", task: "出社" }] },
-      career: { note: "", image: "", steps: [{ time: "1年目", task: "基礎を習得" }] },
+      day: { note: "", image: "", steps: [] },
+      career: { note: "", image: "", steps: [] },
+      daywork: { title: "1日の仕事内容", body: "", image: "" },
+      appeal: { title: "やりがい・特徴", body: "", image: "" },
+      pr: { title: "この仕事のPRポイント", points: [] },
       message: "",
       flow: { note: "", image: "", steps: DEFAULT_RECRUIT_FLOW.map((s, i) => ({ time: `STEP${i + 1}`, task: s })) },
       // 諸条件・福利厚生はテンプレート（既定の共通内容）から複製して開始する
@@ -201,26 +264,28 @@ export function RecruitPanel({
   };
 
   // よくある質問（sections.json の recruitFaq を編集。旧採用ページ /recruit と共通）
-  const faqItems: { q: string; a: string }[] = Array.isArray(draft.sections?.recruitFaq?.items)
+  const faqItems: { q: string; a: string; cat?: string }[] = Array.isArray(draft.sections?.recruitFaq?.items)
     ? draft.sections.recruitFaq.items
     : [];
-  const setFaq = (items: { q: string; a: string }[]) => {
+  const setFaq = (items: { q: string; a: string; cat?: string }[]) => {
     const sections = clone(draft.sections);
     if (!sections.recruitFaq || typeof sections.recruitFaq !== "object") sections.recruitFaq = {};
     sections.recruitFaq.items = items;
     setSlice("sections", sections);
   };
-  const updateFaq = (i: number, patch: Partial<{ q: string; a: string }>) => {
+  const updateFaq = (i: number, patch: Partial<{ q: string; a: string; cat: string }>) => {
     const next = faqItems.slice();
     next[i] = { ...next[i], ...patch };
     setFaq(next);
   };
+  // 既存のカテゴリ一覧（入力補助のdatalist用）
+  const faqCats = [...new Set(faqItems.map((f) => (f.cat || "").trim()).filter(Boolean))];
 
   return (
     <div className="space-y-5">
       <p className="text-[11px] leading-relaxed text-slate-500">
         採用3ページ（/recruit3）の「募集職種一覧」と、職種をクリックしたときに開く詳細を管理します。
-        業務内容・1日の流れ・キャリアパス・メッセージ・諸条件・福利厚生は職種ごとに、
+        業務内容・1日の仕事内容・やりがい・特徴・PRポイント・メッセージ・諸条件・福利厚生は職種ごとに、
         よくある質問は全職種共通で設定します。変更は左のプレビューに反映され、「更新（本番へ公開）」で本番に公開されます。
       </p>
 
@@ -275,6 +340,15 @@ export function RecruitPanel({
       {/* ── よくある質問 ── */}
       <Collapsible title="よくある質問（全職種共通・/recruit と共通データ）">
         <div className="space-y-3">
+          <p className="text-[11px] leading-relaxed text-slate-500">
+            「カテゴリ」に同じ名前を入れたQ&Aは、採用3の職種オーバーレイでひとつの
+            アコーディオンにまとまって表示されます（未入力は「その他」）。
+          </p>
+          <datalist id="recruit-faq-cats">
+            {faqCats.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
           {faqItems.map((f, i) => (
             <Card key={i} title={`Q${i + 1}`} action={
               <div className="flex gap-1">
@@ -284,12 +358,15 @@ export function RecruitPanel({
               </div>
             }>
               <div className="space-y-3">
+                <Field label="カテゴリ" hint="例: 応募・選考／働き方・休日／給与・待遇／職場環境・教育">
+                  <TextInput value={f.cat ?? ""} onChange={(e) => updateFaq(i, { cat: e.target.value })} list="recruit-faq-cats" />
+                </Field>
                 <Field label="質問"><TextInput value={f.q} onChange={(e) => updateFaq(i, { q: e.target.value })} /></Field>
                 <Field label="回答"><TextArea rows={3} value={f.a} onChange={(e) => updateFaq(i, { a: e.target.value })} /></Field>
               </div>
             </Card>
           ))}
-          <Button onClick={() => setFaq([...faqItems, { q: "新しい質問", a: "回答を入力してください。" }])}>＋ 質問を追加</Button>
+          <Button onClick={() => setFaq([...faqItems, { q: "新しい質問", a: "回答を入力してください。", cat: "" }])}>＋ 質問を追加</Button>
         </div>
       </Collapsible>
 

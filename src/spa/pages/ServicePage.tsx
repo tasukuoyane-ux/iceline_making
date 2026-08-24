@@ -349,7 +349,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   transition={{ duration: 0.5 }}
                   className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
                   style={{ ["--ratio" as any]: ratioCols(`${ib}.ratio`, 60, false) }}
-          {...ratioAttrs(`${ib}.ratio`, 60, false)}
+          {...ratioAttrs(`${ib}.ratio`, 60, false, ii % 2 === 1)}
                 >
                   <div className="[direction:ltr] pc:px-12">
                     {it.title && (

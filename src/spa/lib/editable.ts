@@ -154,11 +154,15 @@ export function ratioCols(path: string, defImgPct: number, imageFirst: boolean):
  * 画像と文章の横並びグリッドへ付与する比率マークアップ。
  * コンソールはこの属性から「グリッド内の画像フィールド」と比率設定を対応付け、
  * 画像編集欄にスライダーを表示し、editBridge が --ratio を書き換えて即時プレビューする。
+ * defRtl: グリッドが既定で PC の direction:rtl（左右反転表示）を使う場合に true。
+ * コンソールの「左右入れ替え」（overrides の flip:<path> = "1"）は
+ * この既定を基準に反対向きの direction を CSS で当てる（HideOverridesStyle 参照）。
  */
-export function ratioAttrs(path: string, defImgPct: number, imageFirst: boolean): Record<string, string> {
+export function ratioAttrs(path: string, defImgPct: number, imageFirst: boolean, defRtl = false): Record<string, string> {
   return {
     "data-ratio": path,
     "data-ratio-def": String(defImgPct),
     "data-ratio-first": imageFirst ? "1" : "0",
+    ...(defRtl ? { "data-ratio-rtl": "1" } : {}),
   };
 }

@@ -16,6 +16,18 @@ export interface RecruitTimeline {
   image: string;
   steps: RecruitStep[];
 }
+/** 見出し（H2）＋本文＋画像 のシンプルなコンテンツブロック */
+export interface RecruitBlock {
+  title: string;
+  body: string;
+  image: string;
+}
+/** PRポイントの1項目（H3＋本文＋画像は任意） */
+export interface RecruitPrPoint {
+  title: string;
+  body: string;
+  image: string;
+}
 export interface RecruitJob {
   id: string;
   title: string;
@@ -26,6 +38,12 @@ export interface RecruitJob {
   day: RecruitTimeline;
   career: RecruitTimeline;
   message: string;
+  /** 1日の仕事内容（H2＋本文＋画像。旧データでは未設定の場合がある） */
+  daywork?: RecruitBlock;
+  /** やりがい・特徴（H2＋本文＋画像。旧データでは未設定の場合がある） */
+  appeal?: RecruitBlock;
+  /** この仕事のPRポイント（H2＋任意個数の H3/本文/画像。旧データでは未設定の場合がある） */
+  pr?: { title: string; points: RecruitPrPoint[] };
   /** 選考の流れ（1日の流れと同じタイムライン形式。旧データでは未設定の場合がある） */
   flow?: RecruitTimeline;
   /** 諸条件（職種ごと。旧データでは未設定の場合がある） */
@@ -40,6 +58,8 @@ export interface RecruitRow {
 export interface FaqItem {
   q: string;
   a: string;
+  /** カテゴリ名（よくある質問の1階層目のアコーディオン。空・未設定は「その他」） */
+  cat?: string;
 }
 export interface RecruitView {
   jobs: RecruitJob[];

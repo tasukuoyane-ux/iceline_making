@@ -337,22 +337,45 @@ export function PageFields({
             {f.ratio && (() => {
               const raw = parseInt(getValueByPath(draft, f.ratio!.path) ?? "", 10);
               const cur = Math.min(70, Math.max(30, Number.isNaN(raw) ? f.ratio!.def : raw));
+              const flipKey = `flip:${f.ratio!.path}`;
+              const flipped = (getValueByPath(draft, flipKey) || "") === "1";
               return (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="shrink-0 text-[11px] font-medium text-slate-500">画像の幅</span>
-                  <input
-                    type="range"
-                    min={30}
-                    max={70}
-                    step={1}
-                    value={cur}
-                    onChange={(e) => onChange(setValueByPath(draft, f.ratio!.path, e.target.value))}
-                    className="min-w-0 flex-1 accent-emerald-600"
-                  />
-                  <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-slate-600">
-                    {cur}% : {100 - cur}%
-                  </span>
-                </div>
+                <>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="shrink-0 text-[11px] font-medium text-slate-500">画像の幅</span>
+                    <input
+                      type="range"
+                      min={30}
+                      max={70}
+                      step={1}
+                      value={cur}
+                      onChange={(e) => onChange(setValueByPath(draft, f.ratio!.path, e.target.value))}
+                      className="min-w-0 flex-1 accent-emerald-600"
+                    />
+                    <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-slate-600">
+                      {cur}% : {100 - cur}%
+                    </span>
+                  </div>
+                  {/* 画像と文章の左右を入れ替える（PC幅のみ。SPでは常に上＝先頭の要素） */}
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      aria-pressed={flipped}
+                      onClick={() => onChange(setValueByPath(draft, flipKey, flipped ? "" : "1"))}
+                      className={
+                        "rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors " +
+                        (flipped
+                          ? "border-emerald-600 bg-emerald-600 text-white"
+                          : "border-slate-300 bg-white text-slate-500 hover:bg-slate-50")
+                      }
+                    >
+                      ⇄ 左右入れ替え
+                    </button>
+                    <span className="text-[10px] text-slate-400">
+                      {flipped ? "PCで画像と文章の左右を入れ替えて表示中" : "PCでの画像と文章の左右を入れ替えます"}
+                    </span>
+                  </div>
+                </>
               );
             })()}
             {/* 横並びグリッド（画像＋文章）を1つのまとまりとしてアニメーションさせる設定 */}
@@ -417,6 +440,7 @@ export function PageFields({
         if (f.ratio) {
           next = setValueByPath(next, f.ratio.path, "");
           next = setValueByPath(next, "anim:" + f.ratio.path, "");
+          next = setValueByPath(next, "flip:" + f.ratio.path, "");
         }
       }
       return next;
@@ -437,6 +461,7 @@ export function PageFields({
             const rTo = f.ratio.path.replace(prefix + (n + 1) + ".", prefix + n + ".");
             next = setValueByPath(next, rTo, getValueByPath(next, f.ratio.path) ?? "");
             next = setValueByPath(next, "anim:" + rTo, getValueByPath(next, "anim:" + f.ratio.path) ?? "");
+            next = setValueByPath(next, "flip:" + rTo, getValueByPath(next, "flip:" + f.ratio.path) ?? "");
           }
         }
       }

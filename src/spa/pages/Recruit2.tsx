@@ -170,7 +170,7 @@ export function Sec({ children, className = "", id }: { children: React.ReactNod
   );
 }
 
-export function Hero({ bandColor = "#1ec8dd", extra }: { bandColor?: string; extra?: React.ReactNode } = {}) {
+export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: string; extra?: React.ReactNode; bare?: boolean } = {}) {
   // ICELINEの形に切り抜かれた帯（色はページごとに指定可能）
   const iceKnock = makeIceKnock(bandColor);
   // 背後のスライド画像（差し替え可・4枚）。複数枚が継ぎ足されながら流れ、ICELINEの穴から覗く。
@@ -178,23 +178,30 @@ export function Hero({ bandColor = "#1ec8dd", extra }: { bandColor?: string; ext
     img(`recruit2:mv.slide.${i}`, MV_SLIDE_DEFAULTS[i])
   );
   return (
-    <header className="relative flex h-[88vh] min-h-[560px] items-center justify-center overflow-hidden" style={{ background: PAL.blue }}>
+    <header
+      className="relative flex h-[88vh] min-h-[560px] items-center justify-center overflow-hidden"
+      // bare: 独自背景（スライドマーキー・水色地・ティント）を持たない透過表示。
+      // 採用3ではページ背面のスクロール追随動画がICELINEの穴から覗く。
+      style={{ background: bare ? "transparent" : PAL.blue }}
+    >
       {/* レイヤー1（下）：4枚の画像スライド。
           継ぎ足されながら右→左へ流れ続けるマーキー（pronets風）。
           編集プレビューでも本番と同じ見た目で表示し、差し替えは
           左下の編集用サムネイル（編集モード限定）から行う。 */}
-      <div className="pointer-events-none absolute inset-0 flex items-stretch overflow-hidden">
-        <div className="r2-marquee flex h-full items-stretch" style={{ width: "max-content" }}>
-          {[...slides, ...slides].map((src, i) => (
-            // 各スライドは縦横比 9:16（高さ88vh基準）の縦長
-            <div key={i} className="h-full shrink-0" style={{ width: "calc(88vh * 9 / 16)" }} aria-hidden={i >= slides.length}>
-              <img src={src} alt="" className="h-full w-full object-cover" />
-            </div>
-          ))}
+      {!bare && (
+        <div className="pointer-events-none absolute inset-0 flex items-stretch overflow-hidden">
+          <div className="r2-marquee flex h-full items-stretch" style={{ width: "max-content" }}>
+            {[...slides, ...slides].map((src, i) => (
+              // 各スライドは縦横比 9:16（高さ88vh基準）の縦長
+              <div key={i} className="h-full shrink-0" style={{ width: "calc(88vh * 9 / 16)" }} aria-hidden={i >= slides.length}>
+                <img src={src} alt="" className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       {/* 編集用サムネイル（編集モード限定・左下）：クリックで各スライドを差し替え */}
-      {EDIT_MODE && (
+      {!bare && EDIT_MODE && (
         <div className="absolute bottom-4 left-4 z-30 flex gap-1.5 rounded-md bg-white/80 p-1.5 shadow">
           {slides.map((src, i) => (
             <img
@@ -209,7 +216,7 @@ export function Hero({ bandColor = "#1ec8dd", extra }: { bandColor?: string; ext
       )}
 
       {/* 画像に薄いティントを重ね、切り抜きの視認性を上げる */}
-      <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(15,42,51,0.30)" }} />
+      {!bare && <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(15,42,51,0.30)" }} />}
 
       {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。帯・文字の高さ＝背景画像の高さ（88vh）。
           横方向は画面に収まらなくてよいので maxWidth:none で自然幅のまま右→左ループ。 */}

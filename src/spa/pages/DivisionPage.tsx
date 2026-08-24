@@ -100,6 +100,19 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
         { title: "（見出し）", pending: true, image: true },
       ],
     },
+    // 万全の物流体制（2026-08 追加）：「事業の特徴」と同じデザイン・コンテンツ量
+    // （画像＋テキストの交互配置・4項目）。本文が入力されるまで公開ページでは非表示。
+    {
+      en: "LOGISTICS",
+      jp: "万全の物流体制",
+      pathKey: "logistics",
+      items: [
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+      ],
+    },
     {
       en: "QUALITY",
       jp: "品質保証への取り組み",
@@ -152,7 +165,7 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
             "国際食品安全認証「FSSC22000」を取得しています。食品安全マネジメントシステムの国際規格に基づき、原料の受け入れから製造・検査・出荷までの全工程において、定められた基準に沿った管理を行っています。",
           sideImage: true,
         },
-        { title: "製造能力・設備", pending: true },
+        // 「製造能力・設備」（見出し＋文言のみの要確認スロット）は 2026-08 改修で削除
       ],
     },
     {
@@ -642,7 +655,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         transition={{ duration: 0.5 }}
         className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
         style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 60, false) }}
-          {...ratioAttrs(`${base}.ratio`, 60, false)}
+          {...ratioAttrs(`${base}.ratio`, 60, false, ii % 2 === 1)}
       >
         <div className="[direction:ltr] pc:px-12">
           {it.title && (
