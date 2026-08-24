@@ -1,6 +1,7 @@
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { SITE } from "../data/company";
+import { ed, txt } from "../lib/editable";
 
 const SECTIONS: { title: string; body: string[] }[] = [
   {
@@ -63,7 +64,7 @@ export function Privacy() {
     <>
       <section className="relative h-[32vh] min-h-[240px] w-full overflow-hidden bg-ink">
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>PRIVACY POLICY</p>
+          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:privacy.mv", "英語見出し（補助）")}>{txt("sectionEn:privacy.mv", "PRIVACY POLICY")}</p>
           <h1 className="mt-3 text-white" style={{ fontSize: "clamp(28px, 5vw, 46px)", fontWeight: 900, lineHeight: 1.2 }}>プライバシーポリシー</h1>
         </div>
       </section>

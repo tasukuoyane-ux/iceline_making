@@ -125,7 +125,7 @@ export function Top() {
       {/* 新着情報 */}
       <Section heat={HEAT.topNews}>
         <div className="grid gap-8 pc:grid-cols-[280px_1fr]">
-          <SectionTitle en="NEWS" jp="新着情報" />
+          <SectionTitle en="NEWS" jp="新着情報" path="sectionEn:top.news" />
           <div>
             {/* リンク（インタラクティブ要素）の背景は無地の白 */}
             <ul className="divide-y divide-border rounded-xl bg-white px-5 shadow-sm">
@@ -151,8 +151,12 @@ export function Top() {
 
       {/* 私たちの強み（画像＋テキスト：記事と同様のH2/H3/p構成・左右逆レイアウト・背景は白） */}
       <Section heat={HEAT.topStrength}>
-        <div className="mb-2 text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 13, letterSpacing: "0.18em" }}>
-          OUR STRENGTH
+        <div
+          className="mb-2 text-brand"
+          style={{ fontFamily: "var(--font-accent)", fontSize: 13, letterSpacing: "0.18em" }}
+          {...ed("sectionEn:top.strength", "英語見出し（補助）")}
+        >
+          {txt("sectionEn:top.strength", "OUR STRENGTH")}
         </div>
         <h2 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} {...ed("top:strengthV2.title", "強み 見出し（H2）")}>
           {txt("top:strengthV2.title", "私たちの強み")}
@@ -183,7 +187,7 @@ export function Top() {
 
       {/* 事業内容（現在のサイト構成：4事業への導線） */}
       <Section heat={HEAT.topGenre}>
-        <SectionTitle en="OUR SERVICES" jp="事業内容" />
+        <SectionTitle en="OUR SERVICES" jp="事業内容" path="sectionEn:top.services" />
         <div className="mt-10 grid gap-5 tab:grid-cols-2">
           {SERVICES.map((s, i) => (
             <Link key={s.to} to={s.to} className="group relative overflow-hidden rounded-lg">
@@ -195,7 +199,7 @@ export function Top() {
                 />
               </div>
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/80 via-ink/30 to-transparent p-6">
-                <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.18em" }}>{s.en}</span>
+                <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.18em" }} {...ed(`top:services.${i}.en`, "英語ラベル")}>{txt(`top:services.${i}.en`, s.en)}</span>
                 <span className="mt-1 flex items-center gap-2 text-white" style={{ fontSize: 20, fontWeight: 700 }}>
                   <span {...ed(`top:services.${i}.title`, "事業名")}>{txt(`top:services.${i}.title`, s.title)}</span>
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -209,7 +213,7 @@ export function Top() {
 
       {/* 商品ジャンル一覧 */}
       <Section heat={HEAT.topGenre}>
-        <SectionTitle en="PRODUCTS" jp="商品ジャンル" />
+        <SectionTitle en="PRODUCTS" jp="商品ジャンル" path="sectionEn:top.products" />
         <div className="mt-10 grid grid-cols-2 gap-4 tab:grid-cols-3 pc:grid-cols-3">
           {PRODUCT_GENRES.map((g, i) => {
             const p = PRODUCTS.find((pr) => pr.genre === g.label);

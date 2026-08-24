@@ -97,7 +97,7 @@ export function Recruit() {
       {/* 会社を知る｜企業理念 */}
       <Section heat={HEAT.recruitPhilosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
-          <SectionTitle en="OUR CREED" jp="企業理念" align="center" />
+          <SectionTitle en="OUR CREED" jp="企業理念" align="center" path="sectionEn:recruit.creed" />
           <p className="mx-auto mt-8 max-w-3xl text-center text-brand" style={{ fontSize: 23, fontWeight: 700, lineHeight: 1.8 }} {...ed("recruit:philosophy.creed", "企業理念キャッチ")}>
             {txt("recruit:philosophy.creed", RECRUIT_PHILOSOPHY.creed)}
           </p>
@@ -110,7 +110,7 @@ export function Recruit() {
       {/* 紹介動画（事業紹介の前・任意の動画を埋め込み可能） */}
       {introVideo && introEmbed && (
         <Section heat={HEAT.recruitBiz}>
-          <SectionTitle en="MOVIE" jp="紹介動画" />
+          <SectionTitle en="MOVIE" jp="紹介動画" path="sectionEn:recruit.movie" />
           <div className="mt-8 aspect-video w-full overflow-hidden rounded-2xl bg-black">
             {introEmbed.type === "iframe" ? (
               <iframe
@@ -129,7 +129,7 @@ export function Recruit() {
 
       {/* 会社を知る｜事業紹介 */}
       <Section heat={HEAT.recruitBiz}>
-        <SectionTitle en="ABOUT US" jp="事業紹介" />
+        <SectionTitle en="ABOUT US" jp="事業紹介" path="sectionEn:recruit.about" />
         <div className="mt-12 space-y-10">
           {RECRUIT_BIZ.map((b, i) => (
             <motion.div
@@ -158,7 +158,7 @@ export function Recruit() {
 
       {/* 会社を知る｜拠点情報 */}
       <Section heat={HEAT.recruitLocation}>
-        <SectionTitle en="LOCATIONS" jp="拠点情報" />
+        <SectionTitle en="LOCATIONS" jp="拠点情報" path="sectionEn:recruit.locations" />
         <div className="mt-10 grid gap-5 tab:grid-cols-3">
           {RECRUIT_LOCATIONS.map((l, i) => (
             <div key={l.name} className="rounded-xl border border-border bg-card p-6">
@@ -173,7 +173,7 @@ export function Recruit() {
       {/* 仕事を知る｜仕事の魅力 */}
       <Section heat={HEAT.recruitCharm} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
-          <SectionTitle en="OUR CULTURE" jp="仕事の魅力" />
+          <SectionTitle en="OUR CULTURE" jp="仕事の魅力" path="sectionEn:recruit.culture" />
           <div className="mt-12 space-y-6">
             {RECRUIT_CHARM.map((c, i) => (
               <motion.div
@@ -197,7 +197,7 @@ export function Recruit() {
 
       {/* 仕事を知る｜一日の流れ（職種タブ切替・PCは右に画像） */}
       <Section heat={HEAT.recruitDay}>
-        <SectionTitle en="A DAY" jp="一日の流れ" />
+        <SectionTitle en="A DAY" jp="一日の流れ" path="sectionEn:recruit.day" />
         <div className="mt-8 flex flex-wrap gap-2">
           {RECRUIT_DAYS.map((d, i) => (
             <button
@@ -252,7 +252,7 @@ export function Recruit() {
       <Section heat={HEAT.recruitDeck} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
           <div className="rounded-[2rem] bg-[#666666] p-10 text-white pc:p-16">
-            <SectionTitle en="COMPANY DECK" jp="数字で見るアイスライン" invert />
+            <SectionTitle en="COMPANY DECK" jp="数字で見るアイスライン" invert path="sectionEn:recruit.deck" />
             <div className="mt-10 grid grid-cols-2 gap-8 pc:grid-cols-4">
               {[
                 { n: "120", u: "年", l: "創業からの歴史" },
@@ -274,7 +274,7 @@ export function Recruit() {
 
       {/* 会社紹介資料（PowerPoint）カルーセル：手動スクロール・各スライド80%幅 */}
       <Section heat={HEAT.recruitDeck}>
-        <SectionTitle en="COMPANY PROFILE" jp="会社紹介資料" />
+        <SectionTitle en="COMPANY PROFILE" jp="会社紹介資料" path="sectionEn:recruit.profile" />
         <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }}>
           スライドを横スクロールでご覧いただけます。
         </p>
@@ -304,7 +304,7 @@ export function Recruit() {
 
       {/* 人を知る｜インタビュー＆動画 */}
       <Section heat={HEAT.recruitPeople}>
-        <SectionTitle en="PEOPLE" jp="人を知る" />
+        <SectionTitle en="PEOPLE" jp="人を知る" path="sectionEn:recruit.people" />
         {/* 公開済みの記事をすべて横スクロールのカルーセルで表示（カードデザインは現状維持） */}
         <div className="mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4">
           {INTERVIEWS.map((iv) => (
@@ -347,7 +347,7 @@ export function Recruit() {
 
       {/* 募集要項｜業務内容 */}
       <Section heat={HEAT.recruitJob}>
-        <SectionTitle en="POSITIONS" jp="募集職種" />
+        <SectionTitle en="POSITIONS" jp="募集職種" path="sectionEn:recruit.positions" />
         <div className="mt-10 grid gap-6 tab:grid-cols-2">
           {RECRUIT_JOBS.map((j, i) => (
             <div key={i} className="rounded-xl border border-border bg-card p-7">
@@ -361,7 +361,7 @@ export function Recruit() {
 
       {/* 待遇・勤務地（H3アコーディオン） */}
       <Section heat={HEAT.recruitJob}>
-        <SectionTitle en="BENEFITS" jp="待遇・勤務地" />
+        <SectionTitle en="BENEFITS" jp="待遇・勤務地" path="sectionEn:recruit.benefits" />
         <p
           className="mt-6 max-w-3xl text-foreground/80"
           style={{ fontSize: 15, lineHeight: 2.1 }}
@@ -407,7 +407,7 @@ export function Recruit() {
 
       {/* 募集要項｜諸条件 */}
       <Section heat={HEAT.recruitTerms}>
-        <SectionTitle en="CONDITIONS" jp="諸条件" />
+        <SectionTitle en="CONDITIONS" jp="諸条件" path="sectionEn:recruit.conditions" />
         <table className="mt-8 w-full border-t border-border">
           <tbody>
             {RECRUIT_TERMS.map((r, i) => (
@@ -422,7 +422,7 @@ export function Recruit() {
 
       {/* 選考フロー */}
       <Section heat={HEAT.recruitDay}>
-        <SectionTitle en="FLOW" jp="選考フロー" />
+        <SectionTitle en="FLOW" jp="選考フロー" path="sectionEn:recruit.flow" />
         <p
           className="mt-6 max-w-3xl text-foreground/80"
           style={{ fontSize: 15, lineHeight: 2.1 }}
@@ -452,7 +452,7 @@ export function Recruit() {
 
       {/* よくある質問（H3アコーディオン） */}
       <Section heat={HEAT.recruitTerms}>
-        <SectionTitle en="FAQ" jp="よくある質問" />
+        <SectionTitle en="FAQ" jp="よくある質問" path="sectionEn:recruit.faq" />
         <div className="mt-8 space-y-3">
           {RECRUIT_FAQ.items.map((f, i) => {
             const open = openFaq.includes(i);
@@ -491,7 +491,7 @@ export function Recruit() {
       {/* エントリーフォーム */}
       <Section heat={HEAT.recruitForm} contained={false}>
         <div className="mx-auto max-w-2xl px-5">
-          <SectionTitle en="ENTRY" jp="エントリー" align="center" />
+          <SectionTitle en="ENTRY" jp="エントリー" align="center" path="sectionEn:recruit.entry" />
           <form onSubmit={onSubmit} className="mt-10 space-y-6">
             <div className="grid gap-2">
               <Label htmlFor="r-name">お名前 <span className="text-brand">*</span></Label>

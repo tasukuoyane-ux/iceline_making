@@ -101,8 +101,8 @@ export function PackagePage() {
       <section className="relative w-full overflow-hidden bg-ink">
         <div className="mx-auto flex min-h-[240px] max-w-[1400px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
-              RECOMMENDED PACKAGE
+            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:package.mv", "英語見出し（補助）")}>
+              {txt("sectionEn:package.mv", "RECOMMENDED PACKAGE")}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 900, lineHeight: 1.4 }} {...ed(`${base}.title`, "パッケージ名")}>
               {txt(`${base}.title`, pkg.title)}
@@ -125,7 +125,7 @@ export function PackagePage() {
 
       {/* セット内容 */}
       <Section heat={HEAT.foodReason}>
-        <SectionTitle en="SET CONTENTS" jp="セット内容" />
+        <SectionTitle en="SET CONTENTS" jp="セット内容" path="sectionEn:package.contents" />
         <div className="mt-10 grid gap-5 tab:grid-cols-2">
           {pkg.items.map((it, i) => (
             <motion.div

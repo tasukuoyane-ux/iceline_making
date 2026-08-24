@@ -17,7 +17,7 @@ export function News() {
 
   return (
     <Section heat={HEAT.newsList}>
-      <SectionTitle en="NEWS" jp="お知らせ" />
+      <SectionTitle en="NEWS" jp="お知らせ" path="sectionEn:newsList.title" />
 
       <div className="mt-8 flex flex-wrap gap-2">
         {CATS.map((c) => (

@@ -201,8 +201,8 @@ export function ServicePage({ service }: { service: ServiceId }) {
         <div className="absolute inset-0 bg-ink/50" />
         <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
-              {s.en}
+            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`${base}.mv.en`, "英語見出し（補助）")}>
+              {txt(`${base}.mv.en`, s.en)}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`${base}.mv.title`, "ページタイトル")}>
               {txt(`${base}.mv.title`, s.title)}
@@ -217,7 +217,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
       {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分） */}
       <Section heat={HEAT.foodBiz} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert />
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`${base}.overview.en`} />
           <p
             className="mt-6 text-left text-white/90 pc:text-center"
             style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }}
@@ -252,7 +252,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
         if (!visible) return null;
         return (
         <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
-          <SectionTitle en={sec.en} jp={sec.jp} />
+          <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${si}.en`} />
           <div className="mt-12 space-y-10">
             {sec.items.map((it, ii) => {
               const value = txt(`${base}.sec.${si}.${ii}.body`, it.pending ? "" : it.body ?? "");
@@ -311,7 +311,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
       {/* 施設写真（倉庫事業のみ・キャプションはシート指定） */}
       {s.photos && (
         <Section heat={HEAT.foodList}>
-          <SectionTitle en="GALLERY" jp="施設写真" />
+          <SectionTitle en="GALLERY" jp="施設写真" path={`${base}.gallery.en`} />
           <div className="mt-10 grid grid-cols-2 gap-5 pc:grid-cols-3">
             {s.photos.map((cap, i) => (
               <figure key={i}>
@@ -332,7 +332,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
 
       {/* よくあるご質問 */}
       <Section heat={HEAT.foodReason}>
-        <SectionTitle en="FAQ" jp="よくあるご質問" />
+        <SectionTitle en="FAQ" jp="よくあるご質問" path={`${base}.faq.en`} />
         <div className="mt-10 space-y-4">
           {s.faq.map((f, i) => {
             const a = txt(`${base}.faq.${i}.a`, f.pending ? "" : f.a ?? "");

@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { HeatProfile, heatStyles } from "../../lib/heat";
 import { cn } from "../ui/utils";
+import { ed, txt, EDIT_MODE } from "../../lib/editable";
 
 interface SectionProps {
   heat: HeatProfile;
@@ -27,17 +28,21 @@ interface SectionTitleProps {
   align?: "left" | "center";
   invert?: boolean;
   className?: string;
+  /** 英語見出し補助文の編集パス（指定するとコンソールから編集可能になる） */
+  path?: string;
 }
 
-export function SectionTitle({ en, jp, align = "left", invert, className }: SectionTitleProps) {
+export function SectionTitle({ en, jp, align = "left", invert, className, path }: SectionTitleProps) {
+  const enVal = path ? txt(path, en ?? "") : en ?? "";
   return (
     <div className={cn(align === "center" && "text-center", className)}>
-      {en && (
+      {(enVal !== "" || (path && EDIT_MODE)) && (
         <div
           className={cn("mb-2", invert ? "text-white/85" : "text-brand")}
           style={{ fontFamily: "var(--font-accent)", fontSize: 13, letterSpacing: "0.18em" }}
+          {...(path ? ed(path, "英語見出し（補助）") : {})}
         >
-          {en}
+          {enVal}
         </div>
       )}
       <h2 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} className={cn(invert && "text-white")}>

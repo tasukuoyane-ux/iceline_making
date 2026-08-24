@@ -13,7 +13,7 @@ export function Company() {
         <ImageWithFallback src={IMG.warehouse} alt="会社情報" className="absolute inset-0 h-full w-full object-cover opacity-70" {...edImg("images:IMG.warehouse")} />
         <div className="absolute inset-0 bg-ink/50" />
         <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>COMPANY</p>
+          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:company.mv", "英語見出し（補助）")}>{txt("sectionEn:company.mv", "COMPANY")}</p>
           <h1 className="mt-3 text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed("company:hero.title", "会社情報")}>{txt("company:hero.title", "会社情報")}</h1>
         </div>
       </section>
@@ -26,7 +26,7 @@ export function Company() {
           {...ratioAttrs("company:ceo.ratio", 43, true)}
         >
           <div className="flex flex-col">
-            <SectionTitle en="MESSAGE" jp="代表メッセージ" />
+            <SectionTitle en="MESSAGE" jp="代表メッセージ" path="sectionEn:company.message" />
             <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="mt-6 aspect-[4/3] w-full rounded-2xl object-cover pc:aspect-auto pc:min-h-0 pc:flex-1" {...edImg("images:IMG.waterDew")} />
             <p className="mt-4 text-muted-foreground" style={{ fontSize: 14 }} {...ed("sections:ceoMessage.name")}>{CEO_MESSAGE.name}</p>
           </div>
@@ -41,7 +41,7 @@ export function Company() {
       {/* 企業理念 */}
       <Section heat={HEAT.philosophy} contained={false}>
         <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
-          <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" />
+          <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" path="sectionEn:company.philosophy" />
           <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed("sections:philosophy.body")}>
             {PHILOSOPHY.body}
           </p>
@@ -50,7 +50,7 @@ export function Company() {
 
       {/* 会社概要 */}
       <Section heat={HEAT.companyProfile}>
-        <SectionTitle en="PROFILE" jp="会社概要" />
+        <SectionTitle en="PROFILE" jp="会社概要" path="sectionEn:company.profile" />
         <table className="mt-8 w-full border-t border-border">
           <tbody>
             {COMPANY_PROFILE.map((r, i) => (
@@ -65,7 +65,7 @@ export function Company() {
 
       {/* 沿革（PC時：右50%に画像） */}
       <Section heat={HEAT.history}>
-        <SectionTitle en="HISTORY" jp="沿革" />
+        <SectionTitle en="HISTORY" jp="沿革" path="sectionEn:company.history" />
         <div className="mt-10 grid gap-10 pc:grid-cols-2">
           <ol className="border-l-2 border-border pl-6">
             {HISTORY.map((h, i) => (
@@ -91,7 +91,7 @@ export function Company() {
 
       {/* CSR */}
       <Section heat={HEAT.csr}>
-        <SectionTitle en="CSR" jp="社会的責任への取り組み" />
+        <SectionTitle en="CSR" jp="社会的責任への取り組み" path="sectionEn:company.csr" />
         <div className="mt-10 grid gap-6 pc:grid-cols-3">
           {CSR.map((c, i) => (
             <div key={c.title} className="border border-border bg-card p-7">

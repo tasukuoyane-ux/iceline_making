@@ -54,6 +54,10 @@ interface DetailSection {
   items: DetailItem[];
   /** true なら項目の下に工程フロー（写真＋工程名、最大10ステップ）を表示 */
   flow?: boolean;
+  /** 編集パス用のセクションキー。未指定なら表示順の添字を使う。
+   * セクションの追加・削除で既存の編集パス（division:*.sec.<キー>.*）が
+   * ずれないよう、並びを変えたセクションには明示的に付与すること。 */
+  pathKey?: string;
 }
 interface FaqItem {
   q: string;
@@ -70,102 +74,60 @@ const OVERVIEW: Record<Division, string> = {
 
 // 商品一覧（製品ラインナップ／取り扱い商品カテゴリ）より上のセクション
 const DETAIL_PRE: Record<Division, DetailSection[]> = {
+  // 業務用食材：見出し構成の再編（2026-08 改修）。
+  // 事業概要（現状踏襲）→ サプライチェーン → 事業の特徴（4項目）→ 品質保証への取り組み（3項目）。
+  // 中身はすべて入れ替え予定のため空欄（要確認スロット）。本文が入力されるまで
+  // 公開ページでは各セクションごと非表示になる。レイアウトはいずれも
+  // 旧「万全の物流体制」「事業の特徴」と同じ画像＋テキストの交互配置。
+  // pathKey は再編前の添字ベースの編集パス（sec.0〜3）と衝突しない固有キー。
   food: [
     {
-      en: "FEATURES",
-      jp: "事業の特徴",
-      items: [
-        {
-          title: "5,000品目を同時に動かせるということ",
-          body:
-            "食品には必ず賞味期限があります。1品目でも管理を誤れば廃棄になり、欠品すれば取引先の現場が止まります。5,000品目以上を扱う以上、その管理を誤らないための体制を、日々整えています。\nアイスラインの5,000品目は、単なる取扱品目数ではありません。長年の販売データをもとに抽出した、お客様が実際に必要としている在庫のある商品群です。毎月の棚卸しと受発注管理システムによる在庫管理を組み合わせ、動いている商品・動いていない商品の動向をリアルタイムで把握できる仕組みを整えています。冷凍品・チルド品の賞味期限チェックを徹底し、フードロスを極力抑えた運用を実現しています。",
-          image: true,
-        },
-        { title: "変化の激しい食品市場への対応", pending: true },
-        {
-          title: "現場に通い続けるから、見えることがある",
-          body:
-            "担当者は配送と営業を兼務しています。定期的に同じお客様のもとへ足を運ぶからこそ、在庫の変化も、売れ筋の移り変わりも、現場の空気も見えてきます。気になることがあればその場で提案し、依頼を待つのではなく、必要なものを先回りして考えることを大切にしています。お客様一社一社の状況を把握しながら、長く寄り添える関係を積み上げていきたいと思っています。",
-          image: true,
-        },
-        // 旧「サプライチェーン」セクションのコンテンツ（画像はアップロード済みのものを引き継ぐ）
-        {
-          title: "サプライチェーン",
-          body:
-            "お客様のニーズに応じた商品を国内外から調達し、岡山市北区青江の物流センターで保管し、岡山県全域のお客様へ届けています。前日注文・翌日配送を基本とし、受発注から配送までを一貫した体制で運用しています。",
-          image: true,
-          imgKey: "division:food.supplyChain.image",
-        },
-      ],
+      en: "SUPPLY CHAIN",
+      jp: "サプライチェーン",
+      pathKey: "supply",
+      items: [{ title: "（見出し）", pending: true, image: true }],
     },
-    {
-      en: "LOGISTICS",
-      jp: "万全の物流体制",
-      items: [
-        {
-          title: "拠点",
-          body:
-            "岡山市北区青江に物流センターを構え、商品の在庫・出荷管理を行っています。取扱商品が多岐にわたるため、温度帯の異なる商品も適切な環境で管理できる体制を整えています。",
-          image: true,
-          imgKey: "division:food.feat.0.0.image",
-        },
-        {
-          title: "配送体制",
-          body:
-            "42台の車両により、岡山県全域への配送を行っています。1日あたり平均900件以上の配送を担い、前日注文・翌日配送を基本としています。常温・冷凍の2温度帯に対応しており、近距離の配送には保冷車も使用しています。担当者は配送と営業を兼務し、日々の納品の中で在庫状況や現場のニーズを直接把握できる体制を整えています。",
-          image: true,
-          imgKey: "division:food.feat.0.1.image",
-        },
-        {
-          title: "受発注の体制",
-          body:
-            "受発注業務には管理システムを導入し、注文内容を正確かつタイムリーに処理しています。新商品の情報やお得な特売情報は、システム上での通知および紙媒体での配布により、お客様へお届けしています。システム未登録のお客様へは、担当者が直接チラシを手渡しするなど、情報が行き届く体制を維持しています。",
-          image: true,
-          imgKey: "division:food.feat.1.1.image",
-        },
-        {
-          title: "取引先ごとの対応",
-          body:
-            "取引先の業態・規模・メニュー構成は一社ごとに異なります。標準化された商品提供にとどまらず、一社一社の要望に応じた商品の組み合わせや配送頻度の調整など、きめ細かな対応を行っています。",
-        },
-      ],
-    },
-    // 「万全の物流体制」と「品質保証への取り組み」の間の事業の特徴。
-    // 試食による確認（旧・品質保証セクションから移動）＋右側に画像3枚のマーソンリー。
     {
       en: "FEATURES",
       jp: "事業の特徴",
+      pathKey: "features",
       items: [
-        {
-          title: "試食による確認",
-          body:
-            "数十年にわたり社内での試食会を継続しており、直近6年で実施頻度をさらに高めています。各メーカーによるプレゼンテーションの場としても機能しており、新商品やリニューアル品を中心に、仕入れ担当者が市場動向と照らし合わせながら取り扱いを判断しています。確認を通じて、お客様に商品の特長や使い方をより具体的にお伝えできるようにしています。",
-          masonryImages: true,
-        },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
       ],
     },
     {
       en: "QUALITY",
       jp: "品質保証への取り組み",
+      pathKey: "quality",
       items: [
-        {
-          title: "国内外からの調達",
-          body:
-            "取り扱う商品は、国内メーカーのものだけでなく、海外からの輸入品も多く含まれます。仕入れ先は国内外合わせて200社以上にのぼり、原産国はロシア・カナダ・中国・東南アジア・ポルトガル周辺など世界中に及びます。幅広い調達先を持つことで、季節や用途に応じた商品選定の幅を広げています。",
-        },
-        {
-          title: "衛生管理",
-          body:
-            "物流センター内は常に整理整頓された状態を維持しています。通路に物を置かず棚に収めるというルールを全従業員が徹底し、安全で衛生的な保管・出荷環境を確保しています。",
-        },
-        { pending: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
       ],
     },
   ],
   ice: [
+    // 選ばれる理由（「業務用食材」の「万全の物流体制」と同じ画像交互レイアウト・3点）。
+    // 3点とも要確認スロット：本文が入力されるまで公開ページでは非表示。
+    // pathKey "reasons"：後から挿入したセクションなので、既存セクションの
+    // 編集パス（sec.0 / sec.2）を変えないよう添字ではなく固有キーを使う。
+    {
+      en: "REASONS",
+      jp: "選ばれる理由",
+      pathKey: "reasons",
+      items: [
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true },
+      ],
+    },
     {
       en: "MANUFACTURING",
       jp: "製造の特徴",
+      pathKey: "0",
       items: [
         {
           title: "原料水について",
@@ -181,24 +143,20 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
           image: true,
           splitImage: true,
         },
-        { title: "製造能力・設備", pending: true },
-      ],
-    },
-    {
-      en: "QUALITY",
-      jp: "品質保証",
-      items: [
+        // 旧「品質保証」セクションのコンテンツ（3つ目の項目としてここへ移動）
         {
+          title: "品質保証",
           body:
             "国際食品安全認証「FSSC22000」を取得しています。食品安全マネジメントシステムの国際規格に基づき、原料の受け入れから製造・検査・出荷までの全工程において、定められた基準に沿った管理を行っています。",
           sideImage: true,
         },
-        { pending: true },
+        { title: "製造能力・設備", pending: true },
       ],
     },
     {
       en: "PROCESS",
       jp: "氷ができるまで",
+      pathKey: "2",
       items: [
         { body: "氷カフェ（コーヒー）を例に、製造工程をご紹介します。" },
       ],
@@ -622,9 +580,9 @@ function DryIceLineupCard({ ecUrl }: { ecUrl: string }) {
   );
 }
 
-/** 要確認スロット対応の項目レンダラ */
-function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; si: number; ii: number; it: DetailItem; secJp: string }) {
-  const base = `division:${division}.sec.${si}.${ii}`;
+/** 要確認スロット対応の項目レンダラ（sk はセクションの編集パスキー） */
+function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; sk: string; ii: number; it: DetailItem; secJp: string }) {
+  const base = `division:${division}.sec.${sk}.${ii}`;
   const value = txt(`${base}.body`, it.pending ? "" : it.body ?? "");
   if (it.pending && !value && !EDIT_MODE) return null;
   const bodyText = value || (it.pending ? PENDING_HINT : "");
@@ -776,14 +734,15 @@ function DetailItemBlock({ division, si, ii, it, secJp }: { division: Division; 
 
 /** セクション（全項目が未入力の要確認スロットなら公開ページでは丸ごと非表示） */
 function DetailSectionBlock({ division, si, sec, heat }: { division: Division; si: number; sec: DetailSection; heat: any }) {
-  const visible = sec.items.some((it, ii) => !it.pending || txt(`division:${division}.sec.${si}.${ii}.body`, "") !== "");
+  const sk = sec.pathKey ?? String(si);
+  const visible = sec.items.some((it, ii) => !it.pending || txt(`division:${division}.sec.${sk}.${ii}.body`, "") !== "");
   if (!visible && !EDIT_MODE) return null;
   return (
     <Section heat={heat}>
-      <SectionTitle en={sec.en} jp={sec.jp} />
+      <SectionTitle en={sec.en} jp={sec.jp} path={`division:${division}.sec.${sk}.en`} />
       <div className="mt-12 space-y-10">
         {sec.items.map((it, ii) => (
-          <DetailItemBlock key={ii} division={division} si={si} ii={ii} it={it} secJp={sec.jp} />
+          <DetailItemBlock key={ii} division={division} sk={sk} ii={ii} it={it} secJp={sec.jp} />
         ))}
         {sec.flow && <IceProcessFlow />}
       </div>
@@ -835,8 +794,8 @@ export function DivisionPage({ division }: { division: Division }) {
         <div className="absolute inset-0 bg-ink/50" />
         <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }}>
-              {mv.en}
+            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`division:${division}.mv.en`, "英語見出し（補助）")}>
+              {txt(`division:${division}.mv.en`, mv.en)}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`division:${division}.mv.title`, "ページタイトル")}>
               {divTitle}
@@ -849,7 +808,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分。赤帯はタイトル＋本文まで） */}
       <Section heat={bizHeat} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert />
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`division:${division}.overview.en`} />
           <p className="mt-6 text-left text-white/90 pc:text-center" style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`division:${division}.overview`, "事業概要", { multiline: true })}>
             {txt(`division:${division}.overview`, OVERVIEW[division])}
           </p>
@@ -875,7 +834,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 氷・氷菓：製品ラインナップ（シートのカテゴリ分け通り） ── */}
       {division === "ice" && (
         <Section heat={listHeat} id="ice-lineup">
-          <SectionTitle en="LINEUP" jp="製品ラインナップ" />
+          <SectionTitle en="LINEUP" jp="製品ラインナップ" path="division:ice.lineup.en" />
           <div className="mt-12 space-y-16">
             {/* ドライアイス（内容は「ドライアイスの販売」ページ準拠・詳細はECサイトへ） */}
             <div>
@@ -934,7 +893,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 業務用食材：取り扱い商品カテゴリ（検索モックアップ） ── */}
       {division === "food" && (
         <Section heat={listHeat}>
-          <SectionTitle en="PRODUCTS" jp="取り扱い商品カテゴリ" />
+          <SectionTitle en="PRODUCTS" jp="取り扱い商品カテゴリ" path="division:food.products.en" />
           <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.products.intro", "取り扱い商品カテゴリ 説明", { multiline: true })}>
             {txt("division:food.products.intro", "取扱商品の主要カテゴリは食用油・輸入鶏肉をはじめとする業務用食材です。")}
           </p>
@@ -951,7 +910,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 業務用食材：おすすめパッケージ ── */}
       {division === "food" && (
         <Section heat={reasonHeat} id="packages">
-          <SectionTitle en="PACKAGES" jp="おすすめパッケージ" />
+          <SectionTitle en="PACKAGES" jp="おすすめパッケージ" path="division:food.packages.en" />
           <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.9 }}>
             業態や季節に合わせて、よく使われる商品を組み合わせたおすすめのセットをご提案しています。
           </p>
@@ -981,7 +940,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 氷・氷菓：活用提案・メニューレシピ ── */}
       {division === "ice" && (
         <Section heat={HEAT.iceRecipe} id="ice-recipe">
-          <SectionTitle en="RECIPE IDEAS" jp="活用提案・メニューレシピ" />
+          <SectionTitle en="RECIPE IDEAS" jp="活用提案・メニューレシピ" path="division:ice.recipeIdeas.en" />
           {/* 氷カフェが生まれた理由 */}
           <div className="mt-10 rounded-2xl border border-border bg-card p-8">
             <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed("division:ice.recipeIdeas.storyTitle", "見出し")}>
@@ -1059,7 +1018,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* よくあるご質問（回答が未確定の設問は公開ページでは非表示） */}
       {(FAQ[division].some((f, i) => !f.pending || txt(`division:${division}.faq.${i}.a`, "") !== "") || EDIT_MODE) && (
         <Section heat={reasonHeat}>
-          <SectionTitle en="FAQ" jp="よくあるご質問" />
+          <SectionTitle en="FAQ" jp="よくあるご質問" path={`division:${division}.faq.en`} />
           <div className="mt-10 space-y-4">
             {FAQ[division].map((f, i) => {
               const a = txt(`division:${division}.faq.${i}.a`, f.pending ? "" : f.a ?? "");

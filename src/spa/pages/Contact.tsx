@@ -63,7 +63,7 @@ export function Contact() {
   return (
     <Section heat={HEAT.contactForm}>
       <div className="mx-auto max-w-2xl">
-        <SectionTitle en="CONTACT" jp="お問い合わせ" align="center" />
+        <SectionTitle en="CONTACT" jp="お問い合わせ" align="center" path="sectionEn:contact.main" />
         <p className="mx-auto mt-6 max-w-xl text-center text-muted-foreground" style={{ fontSize: 15, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("contact:intro", "導入文", { multiline: true })}>
           {txt("contact:intro", "商品についてのご相談、お取引に関するご質問など、お気軽にお問い合わせください。")}
         </p>

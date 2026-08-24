@@ -4,7 +4,7 @@ import { ArrowRight, ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { INTERVIEWS } from "../data/recruit";
 import { hasVideo } from "../data/blocks";
-import { ed, edImg } from "../lib/editable";
+import { ed, edImg, txt } from "../lib/editable";
 import { BlockContent } from "../components/common/BlockContent";
 import { MovieBadge } from "../components/common/MovieBadge";
 
@@ -41,7 +41,8 @@ export function Interview() {
         <div className="relative mx-auto w-full max-w-[1100px] px-5 pb-16 pc:px-8 pc:pb-24">
           <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: "easeOut" }}>
             <p className="mb-5 flex items-center gap-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.28em", fontSize: 13 }}>
-              <span className="inline-block h-px w-10 bg-brand" /> INTERVIEW
+              <span className="inline-block h-px w-10 bg-brand" />
+              <span {...ed("sectionEn:interview.mv", "英語見出し（補助）")}>{txt("sectionEn:interview.mv", "INTERVIEW")}</span>
             </p>
             <h1
               className="max-w-[18em] text-white"
@@ -88,7 +89,7 @@ export function Interview() {
       {/* ===== フッターCTA ===== */}
       <section className="border-t border-border bg-secondary/60">
         <div className="mx-auto max-w-[760px] px-5 py-16 text-center pc:py-20">
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 12 }}>JOIN US</p>
+          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 12 }} {...ed("sectionEn:interview.joinus", "英語見出し（補助）")}>{txt("sectionEn:interview.joinus", "JOIN US")}</p>
           <p className="mt-3" style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.5 }}>
             あなたの「正直さ」を、ここで活かしませんか。
           </p>

@@ -262,7 +262,7 @@ function BizLinks() {
             </div>
             {/* 下部：見出し＋文章（2カラム、SPは1カラム） */}
             <div className="p-6 pc:p-9">
-              <p style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.2em", color: PAL.red }}>{b.en}</p>
+              <p style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.2em", color: PAL.red }} {...ed(`recruit3:bizlink.${open}.en`, "英語ラベル")}>{txt(`recruit3:bizlink.${open}.en`, b.en)}</p>
               <h3 className="mt-1" style={{ fontSize: 24, fontWeight: 900, color: PAL.ink }}>
                 {txt(`recruit3:bizlink.${open}.name`, b.name)}
               </h3>

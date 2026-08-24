@@ -14,7 +14,7 @@ export function Videos() {
 
   return (
     <Section heat={HEAT.videoList}>
-      <SectionTitle en="MOVIE" jp="動画で知るアイスライン" />
+      <SectionTitle en="MOVIE" jp="動画で知るアイスライン" path="sectionEn:videos.movie" />
       <p className="mt-4 text-muted-foreground" style={{ fontSize: 15, lineHeight: 1.9 }} {...ed("sections:videosIntro")}>
         {sections.videosIntro}
       </p>
