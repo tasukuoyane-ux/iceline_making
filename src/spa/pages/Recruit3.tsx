@@ -15,13 +15,15 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useSearchParams } from "react-router";
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, PlayCircle, X } from "lucide-react";
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, edImg, edSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { useRecruitData, RecruitJob, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { INTERVIEWS } from "../data/recruit";
+import { VIDEOS, VideoItem } from "../data/news";
+import { toEmbed } from "../lib/video";
 import { R2Styles, PageBg, Hero, EntryForm, Sec, Head, Ed, PAL, ACCENTS, PH } from "./Recruit2";
 
 // ── 背景動画の設定（sections.json / コンソールで編集） ──────────
@@ -940,6 +942,229 @@ function Stats3() {
   );
 }
 
+/* ═══════════════ 埋め込み動画（人を知るの後） ═══════════════ */
+
+// 中央揃え・PCで800px幅の埋め込み動画。URL未設定の間は公開ページでは非表示。
+// YouTube/Vimeoの共有URLは iframe（最大化ボタン付き）、mp4等の直リンクは
+// <video controls>（全画面ボタン付き）で再生される。
+function Movie3() {
+  const url = txt("recruit3:movie.url", "");
+  const embed = toEmbed(url);
+  if (!embed && !EDIT_MODE) return null;
+  return (
+    <Sec>
+      <div className="mx-auto w-full max-w-[800px]">
+        <div className="aspect-video w-full overflow-hidden rounded-[0.625rem] bg-black shadow-[0_14px_30px_rgba(15,42,51,0.18)]">
+          {embed?.type === "iframe" ? (
+            <iframe
+              src={embed.src}
+              title="紹介動画"
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : embed ? (
+            <video src={embed.src} controls playsInline className="h-full w-full" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-white/70" style={{ fontSize: 14 }}>
+              （動画URL未設定）
+            </div>
+          )}
+        </div>
+        {EDIT_MODE && (
+          <p
+            className="mt-2 break-all rounded bg-white/85 px-2 py-1"
+            style={{ fontSize: 11, color: PAL.ink }}
+            {...ed("recruit3:movie.url", "埋め込み動画URL")}
+          >
+            {url || "（動画URLを入力：YouTube/Vimeoの共有URL、または mp4 等の直リンク）"}
+          </p>
+        )}
+      </div>
+    </Sec>
+  );
+}
+
+/* ═══════════════ カンパニーデック（スライドショー） ═══════════════ */
+
+// 16:9 画像のスライドショー（中央揃え・PCで800px幅）。最大20枚まで登録でき、
+// 画像が設定された枠だけが順に表示される（1枚も無い間は公開ページでは非表示）。
+// 編集モードでは全枠をグリッドで静止表示し、1枚ずつ差し替えられる。
+const MAX_DECK = 20;
+
+function Deck3() {
+  const all = Array.from({ length: MAX_DECK }, (_, i) => ({ i, src: img(`recruit3:deck.${i}.image`, "") }));
+  const slides = all.filter((s) => s.src !== "");
+  const [idx, setIdx] = useState(0);
+  const cur = slides.length > 0 ? idx % slides.length : 0;
+
+  // 5秒ごとに自動送り（2枚以上あるときだけ）
+  useEffect(() => {
+    if (EDIT_MODE || slides.length < 2) return;
+    const t = setInterval(() => setIdx((v) => v + 1), 5000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
+  if (slides.length === 0 && !EDIT_MODE) return null;
+  return (
+    <Sec>
+      <Head base="recruit3:deck.head" en="COMPANY DECK" jp="カンパニーデック" center />
+      <div className="mx-auto mt-10 w-full max-w-[800px]">
+        {EDIT_MODE ? (
+          /* 編集用：全枠をグリッド表示（画像をクリックして差し替え） */
+          <div className="grid grid-cols-2 gap-2 tab:grid-cols-3">
+            {all.map((s) => (
+              <div key={s.i} className="relative aspect-video overflow-hidden rounded bg-secondary">
+                <ImageWithFallback
+                  src={s.src || PH}
+                  alt={`スライド${s.i + 1}`}
+                  className="h-full w-full object-cover"
+                  {...edImg(`recruit3:deck.${s.i}.image`, `デッキ スライド${s.i + 1}`)}
+                />
+                <span className="absolute left-1 top-1 rounded bg-black/55 px-1.5 text-white" style={{ fontSize: 10 }}>
+                  {s.i + 1}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="relative">
+            <div className="relative aspect-video w-full overflow-hidden rounded-[0.625rem] bg-secondary shadow-[0_14px_30px_rgba(15,42,51,0.14)]">
+              {slides.map((s, n) => (
+                <ImageWithFallback
+                  key={s.i}
+                  src={s.src}
+                  alt={`カンパニーデック ${n + 1}枚目`}
+                  sizes="800px"
+                  loading={n === 0 ? "eager" : "lazy"}
+                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+                  style={{ opacity: n === cur ? 1 : 0 }}
+                />
+              ))}
+            </div>
+            {slides.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="前のスライド"
+                  onClick={() => setIdx((v) => (v - 1 + slides.length) % slides.length)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/85 p-2 shadow-md transition-colors hover:bg-white"
+                >
+                  <ChevronLeft size={20} style={{ color: PAL.ink }} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="次のスライド"
+                  onClick={() => setIdx((v) => v + 1)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/85 p-2 shadow-md transition-colors hover:bg-white"
+                >
+                  <ChevronRight size={20} style={{ color: PAL.ink }} />
+                </button>
+                <div className="mt-4 flex justify-center gap-2">
+                  {slides.map((s, n) => (
+                    <button
+                      key={s.i}
+                      type="button"
+                      aria-label={`${n + 1}枚目を表示`}
+                      onClick={() => setIdx(n)}
+                      className="h-2 w-2 rounded-full transition-colors"
+                      style={{ background: n === cur ? PAL.red : "rgba(22,35,43,0.25)" }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </Sec>
+  );
+}
+
+/* ═══════════════ 動画（動画で知るアイスライン・2×2グリッド） ═══════════════ */
+
+// 「動画で知るアイスライン」の動画一覧を2列グリッドで表示し、
+// クリックすると画面中央のモーダルで拡大再生する。
+// 動画・サムネイルはコンソールの「動画管理」（/videos と共通データ）で管理。
+function Videos3() {
+  const [playing, setPlaying] = useState<VideoItem | null>(null);
+  const embed = playing ? toEmbed(playing.videoUrl) : null;
+  useBodyLock(playing !== null);
+  return (
+    <Sec>
+      <Head base="recruit3:videos.head" en="MOVIE" jp="動画" center />
+      <div className="mx-auto mt-10 grid w-full max-w-[900px] grid-cols-2 gap-4 pc:gap-5">
+        {VIDEOS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            className="group text-left"
+            onClick={() => {
+              if (EDIT_MODE) return; // 編集モードでは再生せず選択を優先
+              setPlaying(v);
+            }}
+          >
+            <div className="relative aspect-video overflow-hidden rounded-[0.625rem] bg-secondary shadow-[0_10px_24px_rgba(15,42,51,0.14)]">
+              <ImageWithFallback
+                src={v.thumb}
+                alt={v.title}
+                sizes="(min-width: 1025px) 450px, 50vw"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                {...edImg(`videos:${v.id}:thumb`)}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-ink/30 transition-colors group-hover:bg-ink/45">
+                <PlayCircle size={48} className="text-white" />
+              </div>
+            </div>
+            <h3 className="mt-2" style={{ fontSize: 14, fontWeight: 800, color: PAL.ink }} {...ed(`videos:${v.id}:title`)}>
+              {v.title}
+            </h3>
+          </button>
+        ))}
+      </div>
+
+      {/* 拡大再生モーダル（画面中央・body直下へポータル描画） */}
+      {playing &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-5"
+            onClick={() => setPlaying(null)}
+          >
+            <div className="relative w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                aria-label="閉じる"
+                onClick={() => setPlaying(null)}
+                className="absolute -top-10 right-0 text-white/80 transition-colors hover:text-white"
+              >
+                <X size={26} />
+              </button>
+              <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+                {embed?.type === "iframe" && (
+                  <iframe
+                    src={embed.src + (embed.src.includes("?") ? "&" : "?") + "autoplay=1"}
+                    title={playing.title}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )}
+                {embed?.type === "video" && <video src={embed.src} controls autoPlay playsInline className="h-full w-full" />}
+                {!embed && (
+                  <div className="flex h-full w-full items-center justify-center text-white/70" style={{ fontSize: 14 }}>
+                    動画は準備中です。
+                  </div>
+                )}
+              </div>
+              <p className="mt-3 text-white" style={{ fontSize: 15, fontWeight: 700 }}>{playing.title}</p>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </Sec>
+  );
+}
+
 /* ═══════════════ ページ本体 ═══════════════ */
 
 // メインビジュアルの表示・非表示（コンソールのプルダウンで切り替え）
@@ -983,8 +1208,14 @@ export function Recruit3() {
           <Charm3 />
           {/* 5. 人を知る */}
           <People3D />
+          {/* 5.5. 埋め込み動画（URL未設定の間は非表示） */}
+          <Movie3 />
+          {/* 5.6. カンパニーデック（スライドショー。画像未設定の間は非表示） */}
+          <Deck3 />
           {/* 6. 募集職種一覧 */}
           <JobsSection />
+          {/* 7. 動画（動画で知るアイスライン・2×2グリッド） */}
+          <Videos3 />
         </div>
       </div>
     </div>
