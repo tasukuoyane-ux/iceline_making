@@ -158,6 +158,14 @@ export function Header() {
               採用3ページでは「エントリー」となり、募集職種一覧セクションへのアンカーになる */}
           <Link
             to={r3 ? "/recruit3#jobs" : "/recruit3"}
+            onClick={(e) => {
+              // 採用3では毎回確実に募集職種一覧へスクロールする
+              // （ハッシュが変わらない2回目以降のクリックでも効くように）
+              if (r3) {
+                e.preventDefault();
+                document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }}
             className={cn(
               "ml-3 inline-flex items-center px-5 py-2.5 transition-colors",
               r3
@@ -231,7 +239,13 @@ export function Header() {
 
             <Link
               to={r3 ? "/recruit3#jobs" : "/recruit3"}
-              onClick={() => setOpen(false)}
+              onClick={(e) => {
+                setOpen(false);
+                if (r3) {
+                  e.preventDefault();
+                  document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }}
               className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground"
             >
               {r3 ? (

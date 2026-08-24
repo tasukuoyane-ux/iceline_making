@@ -8,6 +8,34 @@ export interface RichBlock {
   lines: string[];
 }
 
+/** 行内の色付きセグメント。color が undefined なら既定色 */
+export interface RichSegment {
+  text: string;
+  color?: string;
+}
+
+// 行内の文字色トークン: [[red:文字]] または [[#rrggbb:文字]]
+const COLOR_TOKEN = /\[\[([^:\]]+):([^\]]*)\]\]/g;
+const NAMED_COLORS: Record<string, string> = { red: "#E60012", white: "#ffffff", black: "#111111" };
+
+/** 1行を色トークンで分割する（トークンが無ければ1セグメント） */
+export function splitColorTokens(line: string): RichSegment[] {
+  const out: RichSegment[] = [];
+  let last = 0;
+  COLOR_TOKEN.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = COLOR_TOKEN.exec(line)) !== null) {
+    if (m.index > last) out.push({ text: line.slice(last, m.index) });
+    const raw = m[1].trim().toLowerCase();
+    const color = NAMED_COLORS[raw] ?? (/^#[0-9a-f]{3,8}$/.test(raw) ? raw : undefined);
+    out.push({ text: m[2], color });
+    last = m.index + m[0].length;
+  }
+  if (last < line.length) out.push({ text: line.slice(last) });
+  if (out.length === 0) out.push({ text: "" });
+  return out;
+}
+
 const LIST_PREFIX = /^(?:・|-\s+)\s*(.*)$/;
 
 export function parseRich(value: string, forceList = false): RichBlock[] {

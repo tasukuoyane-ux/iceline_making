@@ -5,7 +5,7 @@
 // を行う。通常閲覧時は完全に無効（副作用なし）。
 
 import { EDIT_MODE } from "./editable";
-import { parseRich } from "./richText";
+import { parseRich, splitColorTokens } from "./richText";
 import { buildHideCss, HIDE_STYLE_ID } from "../../components/HideOverridesStyle";
 
 const OUTLINE_STYLE_ID = "iceline-edit-style";
@@ -71,6 +71,20 @@ function applyRatioVars(overrides: Record<string, string>) {
   });
 }
 
+/** 行内の文字色トークン（[[red:文字]] / [[#rrggbb:文字]]）を span へ展開して流し込む */
+function fillLine(node: HTMLElement, line: string) {
+  for (const seg of splitColorTokens(line)) {
+    if (seg.color) {
+      const sp = document.createElement("span");
+      sp.style.color = seg.color;
+      sp.textContent = seg.text;
+      node.appendChild(sp);
+    } else {
+      node.appendChild(document.createTextNode(seg.text));
+    }
+  }
+}
+
 /** リッチ本文（data-edit-rich）の中身を値から再構築する。
  * 行頭「・」「- 」の行は ul>li、それ以外は p（RichBody と同じ規則）。 */
 function renderRichInto(el: HTMLElement, value: string) {
@@ -80,13 +94,14 @@ function renderRichInto(el: HTMLElement, value: string) {
       const ul = document.createElement("ul");
       for (const line of b.lines) {
         const li = document.createElement("li");
-        li.textContent = line;
+        fillLine(li, line);
         ul.appendChild(li);
       }
       el.appendChild(ul);
     } else {
       const p = document.createElement("p");
-      p.textContent = b.lines[0] || " ";
+      if (b.lines[0]) fillLine(p, b.lines[0]);
+      else p.textContent = " ";
       el.appendChild(p);
     }
   }
@@ -142,9 +157,12 @@ interface PageField {
 
 /** 要素が属するセクションの表示名（見出しテキスト）を求める */
 function sectionLabelFor(el: HTMLElement): string {
+  // MVラッパー（data-mv-root）配下は種類を問わず「メインビジュアル」
+  if (el.closest("[data-mv-root]")) return "メインビジュアル";
   const sec = el.closest<HTMLElement>("section, header");
   if (sec) {
-    if (sec.tagName === "HEADER") return "メインビジュアル";
+    // ヒーロー（main内のheader）は「メインビジュアル」、サイトのナビは「ヘッダー」
+    if (sec.tagName === "HEADER") return sec.closest("main") ? "メインビジュアル" : "ヘッダー";
     // h2 → h1 → h3 の優先順（職種オーバーレイのセクション見出しは h3）
     const h = sec.querySelector("h2") ?? sec.querySelector("h1") ?? sec.querySelector("h3");
     const t = (h?.textContent || "").trim().replace(/\s+/g, " ");

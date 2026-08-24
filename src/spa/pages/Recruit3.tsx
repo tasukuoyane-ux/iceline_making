@@ -25,6 +25,7 @@ import { INTERVIEWS } from "../data/recruit";
 import { VIDEOS, VideoItem } from "../data/news";
 import { toEmbed } from "../lib/video";
 import { R2Styles, PageBg, Hero, EntryForm, Sec, Head, Ed, PAL, ACCENTS, PH } from "./Recruit2";
+import { RichBody } from "../components/common/RichBody";
 
 // ── 背景動画の設定（sections.json / コンソールで編集） ──────────
 const BG_MAX = 5;
@@ -737,29 +738,30 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
     >
       {/* ヘッダー（スクロールしても閉じられるよう sticky） */}
       <div className="sticky top-0 z-10 border-b border-black/5 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1000px] items-center gap-3 px-6 py-4">
-          <span className="rounded-full px-3 py-1 text-white" style={{ background: accent, fontSize: 12, fontWeight: 700 }}>{job.dept}</span>
-          <span className="truncate" style={{ fontSize: 18, fontWeight: 900, color: PAL.ink }}>{job.title}</span>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            {showEntryCta && (
-              <button
-                type="button"
-                onClick={() => entryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                className="rounded-full px-4 py-2 text-white transition-opacity hover:opacity-85"
-                style={{ background: PAL.red, fontSize: 13, fontWeight: 800 }}
-              >
-                エントリー
-              </button>
-            )}
+        {/* SPでは「バッジ＋職種名＋閉じる」「エントリー」の2行段組にして潰れを防ぐ */}
+        <div className="mx-auto flex max-w-[1000px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 pc:px-6 pc:py-4">
+          <span className="shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-white" style={{ background: accent, fontSize: 12, fontWeight: 700 }}>
+            {job.dept}
+          </span>
+          <span className="min-w-0 flex-1 truncate" style={{ fontSize: 17, fontWeight: 900, color: PAL.ink }}>{job.title}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="閉じる"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-100 pc:order-5"
+          >
+            <X size={22} style={{ color: PAL.ink }} />
+          </button>
+          {showEntryCta && (
             <button
               type="button"
-              onClick={onClose}
-              aria-label="閉じる"
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
+              onClick={() => entryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="basis-full rounded-full px-4 py-2 text-white transition-opacity hover:opacity-85 pc:order-4 pc:basis-auto"
+              style={{ background: PAL.red, fontSize: 13, fontWeight: 800 }}
             >
-              <X size={22} style={{ color: PAL.ink }} />
+              エントリー
             </button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -1278,18 +1280,161 @@ function Videos3() {
   );
 }
 
-/* ═══════════════ ページ本体 ═══════════════ */
+/* ═══════════════ メインビジュアル（種類切替） ═══════════════ */
 
-// メインビジュアルの表示・非表示（コンソールのプルダウンで切り替え）
-const MV_VISIBLE_OPTS = [
-  { value: "show", label: "表示" },
-  { value: "hidden", label: "非表示" },
+// MVの種類：現状どおり（ICELINE帯）／画像1枚／動画1本／画像スライドショー。
+// コンソールのプルダウンで切替。編集プレビューでは全種類を描画してCSSで
+// 即時切替し、公開ページでは選択された種類だけを描画する。
+const MV_TYPE_OPTS = [
+  { value: "hero", label: "現状どおり（ICELINE帯）" },
+  { value: "image", label: "画像1枚" },
+  { value: "video", label: "動画1本" },
+  { value: "slideshow", label: "画像スライドショー" },
 ];
+const MV_TYPE_CSS = ["hero", "image", "video", "slideshow"]
+  .map(
+    (t) =>
+      `[data-mv-root][data-edit-selected="${t}"] [data-mv-variant]:not([data-mv-variant="${t}"]),` +
+      `[data-mv-root]:not([data-edit-selected])[data-edit-value="${t}"] [data-mv-variant]:not([data-mv-variant="${t}"]){display:none}`
+  )
+  .join("\n");
+
+/** 画像/スライドショーMVに重ねるテキスト（特大・大・小。行内の色は [[red:文字]] 等で指定） */
+function MvRichText() {
+  const xl = txt("recruit3:mvtext.xl", "");
+  const lg = txt("recruit3:mvtext.lg", "");
+  const sm = txt("recruit3:mvtext.sm", "");
+  if (xl === "" && lg === "" && sm === "" && !EDIT_MODE) return null;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10 flex items-center">
+      <div className="pointer-events-auto mx-auto w-full max-w-[1200px] px-6 pc:px-12">
+        {(xl !== "" || EDIT_MODE) && (
+          <RichBody
+            path="recruit3:mvtext.xl"
+            text={xl || "（特大テキスト）"}
+            label="MVテキスト（特大）"
+            style={{ fontSize: "clamp(30px, 5.4vw, 60px)", fontWeight: 900, lineHeight: 1.6, color: "#16232b" }}
+          />
+        )}
+        {(lg !== "" || EDIT_MODE) && (
+          <RichBody
+            path="recruit3:mvtext.lg"
+            text={lg || "（大テキスト）"}
+            label="MVテキスト（大）"
+            className="mt-4"
+            style={{ fontSize: "clamp(18px, 2.6vw, 28px)", fontWeight: 800, lineHeight: 1.9, color: "#16232b" }}
+          />
+        )}
+        {(sm !== "" || EDIT_MODE) && (
+          <RichBody
+            path="recruit3:mvtext.sm"
+            text={sm || "（小テキスト）"}
+            label="MVテキスト（小）"
+            className="mt-5"
+            style={{ fontSize: "clamp(12px, 1.4vw, 16px)", fontWeight: 600, lineHeight: 2.1, color: "#16232b" }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MvImage() {
+  const src = img("recruit3:mvimg.image", "");
+  return (
+    <div className="relative w-full overflow-hidden bg-secondary">
+      <ImageWithFallback
+        src={src || PH}
+        alt=""
+        loading="eager"
+        sizes="100vw"
+        className="aspect-[4/3] w-full object-cover tab:aspect-[1920/800]"
+        {...edImg("recruit3:mvimg.image", "MV画像（1枚）")}
+      />
+      <MvRichText />
+    </div>
+  );
+}
+
+function MvVideo() {
+  const url = txt("recruit3:mvvideo.url", "");
+  return (
+    <div className="relative w-full overflow-hidden bg-black">
+      {url !== "" ? (
+        <video src={url} autoPlay muted loop playsInline className="aspect-[4/3] w-full object-cover tab:aspect-[1920/800]" />
+      ) : (
+        <div className="flex aspect-[4/3] w-full items-center justify-center tab:aspect-[1920/800]" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>
+          （MV動画未設定）
+        </div>
+      )}
+      {EDIT_MODE && (
+        <p
+          className="absolute bottom-2 left-2 z-10 max-w-[90%] break-all rounded bg-white/85 px-2 py-1"
+          style={{ fontSize: 11, color: PAL.ink }}
+          {...ed("recruit3:mvvideo.url", "MV動画URL")}
+          data-edit-video="1"
+        >
+          {url || "（MV動画のURLを入力、または動画ファイルをアップロード）"}
+        </p>
+      )}
+    </div>
+  );
+}
+
+const MAX_MV_SLIDES = 8;
+
+function MvSlideshow() {
+  const all = Array.from({ length: MAX_MV_SLIDES }, (_, i) => ({ i, src: img(`recruit3:mvslide.${i}.image`, "") }));
+  const slides = all.filter((s) => s.src !== "");
+  const [idx, setIdx] = useState(0);
+  const cur = slides.length > 0 ? idx % slides.length : 0;
+  useEffect(() => {
+    if (slides.length < 2) return;
+    const t = setInterval(() => setIdx((v) => v + 1), 5000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+  return (
+    <div className="relative w-full overflow-hidden bg-secondary">
+      <div className="relative aspect-[4/3] w-full tab:aspect-[1920/800]">
+        {slides.length > 0 ? (
+          slides.map((s, n) => (
+            <ImageWithFallback
+              key={s.i}
+              src={s.src}
+              alt=""
+              sizes="100vw"
+              loading={n === 0 ? "eager" : "lazy"}
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+              style={{ opacity: n === cur ? 1 : 0 }}
+            />
+          ))
+        ) : (
+          <div className="flex h-full w-full items-center justify-center" style={{ color: "#7a8a92", fontSize: 13 }}>
+            （スライド画像未設定：編集モード下部の枠から追加してください）
+          </div>
+        )}
+        <MvRichText />
+      </div>
+      {EDIT_MODE && (
+        <div className="relative z-10 flex gap-2 overflow-x-auto bg-white/85 p-2">
+          {all.map((s) => (
+            <div key={s.i} className="relative aspect-video w-32 shrink-0 overflow-hidden rounded bg-secondary">
+              <ImageWithFallback src={s.src || PH} alt="" className="h-full w-full object-cover" {...edImg(`recruit3:mvslide.${s.i}.image`, `MVスライド${s.i + 1}`)} />
+              <span className="absolute left-1 top-1 rounded bg-black/55 px-1.5 text-white" style={{ fontSize: 10 }}>{s.i + 1}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════ ページ本体 ═══════════════ */
 
 export function Recruit3() {
   // MV以下のコンテンツ領域（背景動画のスクロール進行の基準）
   const areaRef = useRef<HTMLDivElement>(null);
-  const mvVisible = txt("recruit3:mv.visible", "show");
+  const mvType = txt("recruit3:mv.type", "hero");
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden">
@@ -1297,15 +1442,31 @@ export function Recruit3() {
       {/* 動画が無い場合は採用2と同じパララックス背景 */}
       {!HAS_BG && <PageBg />}
 
-      {/* 1. メインビジュアル（ICELINE切り抜き帯は白）。MV表示中は背景動画より前面に置いて動画を隠す。
-          コンソールから要素ごと表示・非表示を切り替えられる（非公開時は編集プレビューでのみ描画し、
-          プレビューでは data-edit-selected 属性への CSS 反応で即時に表示が切り替わる） */}
-      <style>{`[data-edit-select="recruit3:mv.visible"][data-edit-selected="hidden"]{display:none}`}</style>
-      {(mvVisible !== "hidden" || EDIT_MODE) && (
-        <div className="relative z-20" {...edSel("recruit3:mv.visible", "メインビジュアルの表示", MV_VISIBLE_OPTS, mvVisible)}>
-          <Hero bandColor="#fff" extra={<HeroExtra />} />
-        </div>
-      )}
+      {/* 1. メインビジュアル（種類はコンソールのプルダウンで切替）。
+          MV表示中は背景動画より前面に置いて動画を隠す */}
+      <style>{MV_TYPE_CSS}</style>
+      <div className="relative z-20" data-mv-root="1" {...edSel("recruit3:mv.type", "メインビジュアルの種類", MV_TYPE_OPTS, mvType)}>
+        {(EDIT_MODE || mvType === "hero") && (
+          <div data-mv-variant="hero">
+            <Hero bandColor="#fff" extra={<HeroExtra />} />
+          </div>
+        )}
+        {(EDIT_MODE || mvType === "image") && (
+          <div data-mv-variant="image">
+            <MvImage />
+          </div>
+        )}
+        {(EDIT_MODE || mvType === "video") && (
+          <div data-mv-variant="video">
+            <MvVideo />
+          </div>
+        )}
+        {(EDIT_MODE || mvType === "slideshow") && (
+          <div data-mv-variant="slideshow">
+            <MvSlideshow />
+          </div>
+        )}
+      </div>
 
       {/* MV以下：スクロール追随の背景動画（fixed）＋新構成のコンテンツ */}
       <div ref={areaRef} className="relative">

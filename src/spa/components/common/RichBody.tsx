@@ -1,6 +1,19 @@
-import { CSSProperties } from "react";
-import { parseRich } from "../../lib/richText";
+import { CSSProperties, Fragment } from "react";
+import { parseRich, splitColorTokens } from "../../lib/richText";
 import { edRich } from "../../lib/editable";
+
+/** 1行を行内色トークン（[[red:文字]] / [[#rrggbb:文字]]）込みで描画する */
+function renderLine(line: string) {
+  const segs = splitColorTokens(line);
+  if (segs.length === 1 && !segs[0].color) return segs[0].text;
+  return segs.map((s, i) =>
+    s.color ? (
+      <span key={i} style={{ color: s.color }}>{s.text}</span>
+    ) : (
+      <Fragment key={i}>{s.text}</Fragment>
+    )
+  );
+}
 
 /**
  * 編集可能な本文ブロック（段落とリストの共存）。
@@ -31,11 +44,11 @@ export function RichBody({
         b.type === "ul" ? (
           <ul key={i}>
             {b.lines.map((l, j) => (
-              <li key={j}>{l}</li>
+              <li key={j}>{renderLine(l)}</li>
             ))}
           </ul>
         ) : (
-          <p key={i}>{b.lines[0] || " "}</p>
+          <p key={i}>{b.lines[0] ? renderLine(b.lines[0]) : " "}</p>
         )
       )}
     </div>
