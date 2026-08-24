@@ -109,5 +109,6 @@
   "anim:company:csr.1.title": "fade-r|0|40",
   "anim:company:csr.2.title": "fade-r|0|40",
   "anim:contact:submit": "fade-r|0|40",
-  "anim:division:ice.sec.0.2.body": "fade-l|0|40"
+  "anim:division:ice.sec.0.2.body": "fade-l|0|40",
+  "recruit3:header.logo": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/logo_white-JHoVsQh0RD2MYdLEtHfOW4KPA1bt2d.png"
 }
