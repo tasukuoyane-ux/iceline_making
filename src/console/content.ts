@@ -80,6 +80,12 @@ export interface RecruitJob {
   appeal: RecruitBlock;
   /** この仕事のPRポイント（H2＋任意個数の H3/本文/画像） */
   pr: { title: string; points: RecruitPrPoint[] };
+  /** 求める人物像（H2＋任意個数の H3/本文。PRポイントと同じ構造） */
+  persona: { title: string; points: RecruitPrPoint[] };
+  /** こんな方であればぜひご応募ください（同上） */
+  invite: { title: string; points: RecruitPrPoint[] };
+  /** 拠点（Googleマップ）。spots の各行が「拠点名＋住所」で、行ごとに地図を埋め込み表示 */
+  map: { title: string; spots: string[] };
   /** 職種別メッセージ（改行可・大きな黒文字で表示。エントリーフォーム直前に表示） */
   message: string;
   /** 選考の流れ（1日の流れと同じタイムライン形式・職種ごと） */
@@ -245,6 +251,15 @@ export function normalizeRecruit(r: any): RecruitData {
     body: String(v?.body ?? ""),
     image: String(v?.image ?? ""),
   });
+  // PRポイント・求める人物像・こんな方であれば… 共通（H2＋H3/本文/画像の一覧）
+  const prLike = (v: any, defTitle: string): { title: string; points: RecruitPrPoint[] } => ({
+    title: String(v?.title ?? "") || defTitle,
+    points: (Array.isArray(v?.points) ? v.points : []).map((p: any) => ({
+      title: String(p?.title ?? ""),
+      body: String(p?.body ?? ""),
+      image: String(p?.image ?? ""),
+    })),
+  });
   const sharedConditions = rows(r?.conditions);
   const sharedBenefits = rows(r?.benefits);
   // 旧・共通「選考の流れ」（文字列の配列）を職種別タイムラインの初期値に変換する
@@ -268,13 +283,12 @@ export function normalizeRecruit(r: any): RecruitData {
         career: timeline(j?.career),
         daywork: block(j?.daywork, "1日の仕事内容"),
         appeal: block(j?.appeal, "やりがい・特徴"),
-        pr: {
-          title: String(j?.pr?.title ?? "") || "この仕事のPRポイント",
-          points: (Array.isArray(j?.pr?.points) ? j.pr.points : []).map((p: any) => ({
-            title: String(p?.title ?? ""),
-            body: String(p?.body ?? ""),
-            image: String(p?.image ?? ""),
-          })),
+        pr: prLike(j?.pr, "この仕事のPRポイント"),
+        persona: prLike(j?.persona, "求める人物像"),
+        invite: prLike(j?.invite, "こんな方であればぜひご応募ください"),
+        map: {
+          title: String(j?.map?.title ?? "") || "拠点（Googleマップ）",
+          spots: (Array.isArray(j?.map?.spots) ? j.map.spots : []).map((s: any) => String(s ?? "")),
         },
         message: String(j?.message ?? ""),
         flow: flow.steps.length ? flow : { note: "", image: "", steps: clone(sharedFlowSteps) },

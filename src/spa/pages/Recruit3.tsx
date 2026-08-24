@@ -899,15 +899,24 @@ function OvBlockSec({ block, defTitle }: { block?: RecruitBlock; defTitle: strin
   );
 }
 
-/** この仕事のPRポイント（H2の下に H3＋本文＋画像（任意）の項目を任意の数表示）。
+/** H2の下に H3＋本文＋画像（任意）の項目を任意の数表示するセクション
+ * （この仕事のPRポイント／求める人物像／こんな方であればぜひご応募ください共用）。
  * 項目が1つも無い間は表示しない。 */
-function OvPrSec({ pr, accent }: { pr?: { title: string; points: RecruitPrPoint[] }; accent: string }) {
+function OvPrSec({
+  pr,
+  accent,
+  defTitle = "この仕事のPRポイント",
+}: {
+  pr?: { title: string; points: RecruitPrPoint[] };
+  accent: string;
+  defTitle?: string;
+}) {
   const points = (pr?.points ?? []).filter((p) => p.title.trim() !== "" || p.body.trim() !== "" || p.image.trim() !== "");
   if (points.length === 0) return null;
   return (
     <section className="mt-20">
       <h2 style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}>
-        {pr?.title || "この仕事のPRポイント"}
+        {pr?.title || defTitle}
       </h2>
       <div className="mt-6 space-y-6">
         {points.map((p, i) => {
@@ -931,6 +940,39 @@ function OvPrSec({ pr, accent }: { pr?: { title: string; points: RecruitPrPoint[
                   <ImageWithFallback src={p.image} alt={p.title} className="aspect-[4/3] w-full rounded-[0.625rem] object-cover" />
                 )}
               </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/** 拠点（Googleマップ）。spots の各行（拠点名＋住所）ごとに地図を埋め込み表示する。
+ * 拠点が1つも無い間は表示しない。 */
+function OvMapSec({ map }: { map?: { title: string; spots: string[] } }) {
+  const spots = (map?.spots ?? []).map((s) => s.trim()).filter(Boolean);
+  if (spots.length === 0) return null;
+  return (
+    <section className="mt-20">
+      <h2 style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}>
+        {map?.title || "拠点（Googleマップ）"}
+      </h2>
+      <div className={`mt-6 grid gap-6 ${spots.length > 1 ? "pc:grid-cols-2" : ""}`}>
+        {spots.map((s, i) => {
+          // 地図の検索クエリは「〒」以降（住所部分）を優先。拠点名は下のキャプションに表示
+          const q = s.includes("〒") ? s.slice(s.indexOf("〒")) : s;
+          return (
+            <div key={i} className="overflow-hidden rounded-[0.75rem] bg-white shadow-[0_16px_36px_rgba(15,42,51,0.10)]">
+              <iframe
+                src={`https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed&hl=ja`}
+                title={s}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+                className="block aspect-[4/3] w-full border-0 bg-secondary pc:aspect-[16/9]"
+              />
+              <p className="px-5 py-4" style={{ fontSize: 14, fontWeight: 700, color: PAL.ink, lineHeight: 1.7 }}>{s}</p>
             </div>
           );
         })}
@@ -1012,11 +1054,20 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
         {/* この仕事のPRポイント（H2＋任意個数の H3/本文/画像。項目が無い間は非表示） */}
         <OvPrSec pr={job.pr} accent={accent} />
 
+        {/* 求める人物像（PRポイントと同じ構造。項目が無い間は非表示） */}
+        <OvPrSec pr={job.persona} accent={accent} defTitle="求める人物像" />
+
+        {/* こんな方であればぜひご応募ください（同上） */}
+        <OvPrSec pr={job.invite} accent={accent} defTitle="こんな方であればぜひご応募ください" />
+
         {/* 諸条件（職種ごと。旧データは共通テンプレートにフォールバック） */}
         <section className="mt-24">
           <OvHead en="CONDITIONS" jp="諸条件" base="recruit3:ov.conditions" />
           <RowsTable rows={job.conditions?.length ? job.conditions : data.conditions} tint="teal" />
         </section>
+
+        {/* 拠点（Googleマップ）。住所が設定されている職種のみ表示 */}
+        <OvMapSec map={job.map} />
 
         {/* 福利厚生（職種ごと・諸条件の色違い） */}
         <section className="mt-20">
@@ -1103,7 +1154,7 @@ function JobsSection() {
     <Sec id="jobs" className="scroll-mt-20">
       <Head base="recruit3:jobs" en="RECRUIT" jp="募集職種一覧" center />
       <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
-        <Ed as="span" path="recruit3:jobs.lead" def="職種名を選ぶと、業務内容・1日の流れ・キャリアパス・諸条件をご覧いただけます。" label="募集職種 リード" />
+        <Ed as="span" path="recruit3:jobs.lead" def="職種名を選ぶと、業務内容・PRポイント・諸条件・選考の流れなどの詳細をご覧いただけます。" label="募集職種 リード" />
       </p>
 
       {jobs.length === 0 ? (

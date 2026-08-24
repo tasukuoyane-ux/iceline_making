@@ -129,6 +129,34 @@ function PrEditor({ value, onChange }: { value: { title: string; points: Recruit
   );
 }
 
+/** 拠点（Googleマップ）のエディタ（H2＋拠点行の一覧。各行が1つの地図として埋め込まれる） */
+function MapEditor({ value, onChange }: { value: { title: string; spots: string[] }; onChange: (v: { title: string; spots: string[] }) => void }) {
+  const spots = value.spots;
+  const setSpots = (spots: string[]) => onChange({ ...value, spots });
+  return (
+    <div className="space-y-3">
+      <Field label="見出し（H2）">
+        <TextInput value={value.title} onChange={(e) => onChange({ ...value, title: e.target.value })} />
+      </Field>
+      <Field label="拠点（1行＝1つの地図）" hint="例: 本社（青江）　〒700-0941　岡山市北区青江2丁目4-6。「〒」以降の住所で地図を検索します。拠点が1つも無い間は非表示です。">
+        <div className="space-y-2">
+          {spots.map((s, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <TextInput value={s} onChange={(e) => setSpots(spots.map((x, n) => (n === i ? e.target.value : x)))} placeholder="拠点名　〒000-0000　住所" />
+              <div className="flex shrink-0 gap-1">
+                <Button onClick={() => setSpots(moveItem(spots, i, -1))} disabled={i === 0}>↑</Button>
+                <Button onClick={() => setSpots(moveItem(spots, i, 1))} disabled={i === spots.length - 1}>↓</Button>
+                <Button variant="danger" onClick={() => setSpots(spots.filter((_, n) => n !== i))}>×</Button>
+              </div>
+            </div>
+          ))}
+          <Button onClick={() => setSpots([...spots, ""])}>＋ 拠点を追加</Button>
+        </div>
+      </Field>
+    </div>
+  );
+}
+
 /** 項目名＋内容 の表エディタ（諸条件・福利厚生共用） */
 function RowsEditor({ value, onChange, addLabel }: { value: RecruitRow[]; onChange: (v: RecruitRow[]) => void; addLabel: string }) {
   const update = (i: number, patch: Partial<RecruitRow>) => {
@@ -193,6 +221,17 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
         <PrEditor value={job.pr} onChange={(pr) => onChange({ ...job, pr })} />
       </Card>
 
+      <Card title="求める人物像">
+        <PrEditor value={job.persona} onChange={(persona) => onChange({ ...job, persona })} />
+      </Card>
+
+      <Card title="こんな方であればぜひご応募ください">
+        <PrEditor value={job.invite} onChange={(invite) => onChange({ ...job, invite })} />
+      </Card>
+
+      <Card title="拠点（Googleマップ）">
+        <MapEditor value={job.map} onChange={(map) => onChange({ ...job, map })} /></Card>
+
       <Card title="選考の流れ（タイムライン形式）">
         <TimelineEditor
           value={job.flow}
@@ -250,6 +289,9 @@ export function RecruitPanel({
       daywork: { title: "1日の仕事内容", body: "", image: "" },
       appeal: { title: "やりがい・特徴", body: "", image: "" },
       pr: { title: "この仕事のPRポイント", points: [] },
+      persona: { title: "求める人物像", points: [] },
+      invite: { title: "こんな方であればぜひご応募ください", points: [] },
+      map: { title: "拠点（Googleマップ）", spots: [] },
       message: "",
       flow: { note: "", image: "", steps: DEFAULT_RECRUIT_FLOW.map((s, i) => ({ time: `STEP${i + 1}`, task: s })) },
       // 諸条件・福利厚生はテンプレート（既定の共通内容）から複製して開始する

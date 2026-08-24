@@ -44,6 +44,12 @@ export interface RecruitJob {
   appeal?: RecruitBlock;
   /** この仕事のPRポイント（H2＋任意個数の H3/本文/画像。旧データでは未設定の場合がある） */
   pr?: { title: string; points: RecruitPrPoint[] };
+  /** 求める人物像（PRポイントと同じ構造。旧データでは未設定の場合がある） */
+  persona?: { title: string; points: RecruitPrPoint[] };
+  /** こんな方であればぜひご応募ください（同上） */
+  invite?: { title: string; points: RecruitPrPoint[] };
+  /** 拠点（Googleマップ）。spots の各行が「拠点名＋住所」で、行ごとに地図を埋め込み表示 */
+  map?: { title: string; spots: string[] };
   /** 選考の流れ（1日の流れと同じタイムライン形式。旧データでは未設定の場合がある） */
   flow?: RecruitTimeline;
   /** 諸条件（職種ごと。旧データでは未設定の場合がある） */
