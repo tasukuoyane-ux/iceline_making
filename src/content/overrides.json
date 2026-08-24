@@ -114,5 +114,6 @@
   "hide:recruit3:culture.2.title": "",
   "hide:recruit3:culture.2.body": "",
   "site:protect.enabled": "1",
-  "site:protect.hash": "46637337ac3a5aca2304ca005b831f428eec1a17efd4d909e9ce860e5d8f1417"
+  "site:protect.hash": "46637337ac3a5aca2304ca005b831f428eec1a17efd4d909e9ce860e5d8f1417",
+  "recruit3:people.lead": ""
 }
