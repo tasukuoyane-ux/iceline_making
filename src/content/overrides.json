@@ -123,5 +123,13 @@
   "color:videos:v1:title": "#ffffff",
   "color:videos:v2:title": "#ffffff",
   "color:videos:v3:title": "#ffffff",
-  "color:videos:v4:title": "#ffffff"
+  "color:videos:v4:title": "#ffffff",
+  "recruit3:deck.1.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/2-6WnxS4JAP6B1Z9lQOu0eJsAsRgWMS7.jpg",
+  "recruit3:deck.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/3-cFGofLnyAZ8mdg7X34KLUkK7ysIe1d.jpg",
+  "recruit3:deck.3.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/4-aUcoQehkQ4mJwwPtEQaqjILML1G58d.jpg",
+  "recruit3:deck.4.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-W7y4Sln90nVOPTHIctrXmPlmVp4VEn.jpg",
+  "recruit3:deck.5.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/6-LYqt0h4aSx1y8co2E5nfbPkfROFegR.jpg",
+  "recruit3:deck.6.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/7-zsHj9RMHgIqSnKqzXey2BRUUK9IL31.jpg",
+  "recruit3:deck.7.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/8-vEOYSWrUJyrP8yTvp1nKKKrXfhu6VZ.jpg",
+  "recruit3:deck.8.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/9-UmQT83nGzQGXxPmpnp4GjiOPxytmLg.jpg"
 }
