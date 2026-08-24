@@ -15,16 +15,19 @@ export function RichBody({
   label,
   className,
   style,
+  list,
 }: {
   path: string;
   text: string;
   label?: string;
   className?: string;
   style?: CSSProperties;
+  /** true なら「・」の有無に関係なく1行＝1リスト項目として表示（例：受賞歴） */
+  list?: boolean;
 }) {
   return (
-    <div className={className} style={style} {...edRich(path, label)} data-edit-default={text}>
-      {parseRich(text).map((b, i) =>
+    <div className={className} style={style} {...edRich(path, label, { list })} data-edit-default={text}>
+      {parseRich(text, list).map((b, i) =>
         b.type === "ul" ? (
           <ul key={i}>
             {b.lines.map((l, j) => (

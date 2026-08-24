@@ -28,9 +28,18 @@ const NAV: { to: string; label: string }[] = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  // 採用3ページでは帯をブランドレッドにし、ナビ文字色を白へ反転する。
+  // ロゴもこのページ専用に差し替え可能（recruit3:header.logo）。
+  const r3 = pathname.startsWith("/recruit3");
+  const logoSrc = img("header:logo", logo);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b backdrop-blur",
+        r3 ? "border-white/25 bg-[#E60012]" : "border-border bg-background/90",
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 pc:h-20 pc:px-8">
         <Link
           to="/"
@@ -38,12 +47,21 @@ export function Header() {
           onClick={() => setOpen(false)}
           aria-label={SITE.name}
         >
-          <img
-            {...edImg("header:logo", "ロゴ")}
-            src={img("header:logo", logo)}
-            alt={SITE.name}
-            className="h-9 w-auto pc:h-11"
-          />
+          {r3 ? (
+            <img
+              {...edImg("recruit3:header.logo", "採用ページ ヘッダーロゴ")}
+              src={img("recruit3:header.logo", logoSrc)}
+              alt={SITE.name}
+              className="h-9 w-auto pc:h-11"
+            />
+          ) : (
+            <img
+              {...edImg("header:logo", "ロゴ")}
+              src={logoSrc}
+              alt={SITE.name}
+              className="h-9 w-auto pc:h-11"
+            />
+          )}
         </Link>
 
         {/* PC nav */}
@@ -53,14 +71,19 @@ export function Header() {
             href={SHOP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mr-4 rounded-full border border-brand px-4 py-1.5 text-brand transition-colors hover:bg-brand hover:text-brand-foreground"
+            className={cn(
+              "mr-4 rounded-full border px-4 py-1.5 transition-colors",
+              r3
+                ? "border-white text-white hover:bg-white hover:text-[#E60012]"
+                : "border-brand text-brand hover:bg-brand hover:text-brand-foreground",
+            )}
             style={{ fontSize: 14 }}
           >
             <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "SHOP")}</span>
           </a>
 
           {/* サービス4項目：角丸の下地でひとかたまりに。アクティブ項目は白チップ */}
-          <div className="mr-2 flex items-center rounded-full bg-secondary p-1">
+          <div className={cn("mr-2 flex items-center rounded-full p-1", r3 ? "bg-white/15" : "bg-secondary")}>
             {SERVICE_NAV.map((n, i) => {
               const active = pathname.startsWith(n.to);
               return (
@@ -70,8 +93,12 @@ export function Header() {
                   className={cn(
                     "rounded-full px-3.5 py-1.5 transition-colors",
                     active
-                      ? "bg-background text-brand shadow-sm"
-                      : "text-foreground hover:text-brand",
+                      ? r3
+                        ? "bg-white text-[#E60012] shadow-sm"
+                        : "bg-background text-brand shadow-sm"
+                      : r3
+                        ? "text-white hover:text-white/75"
+                        : "text-foreground hover:text-brand",
                   )}
                   style={{ fontSize: 14 }}
                 >
@@ -88,14 +115,16 @@ export function Header() {
                 key={n.to}
                 to={n.to}
                 className={cn(
-                  "relative px-3 py-2 transition-colors hover:text-brand",
-                  active ? "text-brand" : "text-foreground",
+                  "relative px-3 py-2 transition-colors",
+                  r3
+                    ? cn("text-white hover:text-white/75", active && "text-white")
+                    : cn("hover:text-brand", active ? "text-brand" : "text-foreground"),
                 )}
                 style={{ fontSize: 14 }}
               >
                 <span {...ed(`header:nav.${i}.label`, "ナビ項目")}>{txt(`header:nav.${i}.label`, n.label)}</span>
                 {active && (
-                  <span className="absolute inset-x-3 -bottom-px h-0.5 bg-brand" />
+                  <span className={cn("absolute inset-x-3 -bottom-px h-0.5", r3 ? "bg-white" : "bg-brand")} />
                 )}
               </Link>
             );
@@ -103,7 +132,12 @@ export function Header() {
           {/* 採用情報は採用3（採用2踏襲＋動画背景）を表示する */}
           <Link
             to="/recruit3"
-            className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-brand-dark"
+            className={cn(
+              "ml-3 inline-flex items-center px-5 py-2.5 transition-colors",
+              r3
+                ? "bg-white text-[#E60012] hover:bg-white/90"
+                : "bg-brand text-brand-foreground hover:bg-brand-dark",
+            )}
             style={{ fontSize: 14 }}
           >
             <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
@@ -113,7 +147,7 @@ export function Header() {
         {/* Mobile toggle */}
         <button
           aria-label="メニュー"
-          className="pc:hidden"
+          className={cn("pc:hidden", r3 && "text-white")}
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X size={26} /> : <Menu size={26} />}

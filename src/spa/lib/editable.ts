@@ -59,9 +59,10 @@ export function ed(path: string, label?: string, opts?: EdOpts): Record<string, 
  * 値はプレーンテキストのまま保存し、行頭「・」「- 」の行をリスト表示する。
  * data-edit-rich を見て editBridge が textContent 書き換えではなく
  * p/ul の再構築でプレビュー反映する。 */
-export function edRich(path: string, label?: string): Record<string, string> {
+export function edRich(path: string, label?: string, opts?: { list?: boolean }): Record<string, string> {
   if (isCommon(path)) return {};
-  const a: Record<string, string> = { "data-edit": path, "data-edit-multi": "1", "data-edit-rich": "1" };
+  // data-edit-rich="list" は「・」の有無に関係なく1行＝1リスト項目として表示するモード
+  const a: Record<string, string> = { "data-edit": path, "data-edit-multi": "1", "data-edit-rich": opts?.list ? "list" : "1" };
   if (label) a["data-edit-label"] = label;
   return a;
 }

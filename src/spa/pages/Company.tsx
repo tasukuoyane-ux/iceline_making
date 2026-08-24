@@ -4,7 +4,8 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { CEO_MESSAGE, COMPANY_PROFILE, HISTORY, PHILOSOPHY, CSR } from "../data/company";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { RichBody } from "../components/common/RichBody";
 
 export function Company() {
   return (
@@ -101,6 +102,23 @@ export function Company() {
           ))}
         </div>
       </Section>
+
+      {/* 受賞歴（1行につき1件をリスト表示。未入力の間は公開ページでは非表示） */}
+      {(txt("company:awards.items", "") !== "" || EDIT_MODE) && (
+        <Section heat={HEAT.csr}>
+          <SectionTitle en="AWARDS" jp="受賞歴" path="sectionEn:company.awards" />
+          <div className="mt-10 rounded-2xl border border-border bg-card p-8">
+            <RichBody
+              list
+              path="company:awards.items"
+              text={txt("company:awards.items", "") || "（未入力：受賞歴を1行に1件ずつ入力してください）"}
+              label="受賞歴（1行に1件）"
+              className={txt("company:awards.items", "") ? "text-foreground/80" : "text-muted-foreground"}
+              style={{ fontSize: 15, lineHeight: 2.05 }}
+            />
+          </div>
+        </Section>
+      )}
     </>
   );
 }

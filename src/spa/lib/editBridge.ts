@@ -75,7 +75,7 @@ function applyRatioVars(overrides: Record<string, string>) {
  * 行頭「・」「- 」の行は ul>li、それ以外は p（RichBody と同じ規則）。 */
 function renderRichInto(el: HTMLElement, value: string) {
   el.textContent = "";
-  for (const b of parseRich(value)) {
+  for (const b of parseRich(value, el.getAttribute("data-edit-rich") === "list")) {
     if (b.type === "ul") {
       const ul = document.createElement("ul");
       for (const line of b.lines) {

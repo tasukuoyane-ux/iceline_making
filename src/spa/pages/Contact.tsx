@@ -13,16 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { ed, txt } from "../lib/editable";
+import { ed, txt, EDIT_MODE } from "../lib/editable";
+import { RichBody } from "../components/common/RichBody";
 
 const TOPICS = [
-  "氷・雪氷・氷カフェ・フラペリッチ",
-  "業務用食材",
+  "氷・雪氷・かき氷",
+  "業務用資材",
   "ドライアイス",
-  "低温物流センター",
-  "採用について",
+  "倉庫利用について",
   "その他",
 ];
+
+// 電話問い合わせ（H3＋本文）の枠数
+const TEL_SLOTS = 5;
 
 export function Contact() {
   const [type, setType] = useState("");
@@ -61,6 +64,7 @@ export function Contact() {
   };
 
   return (
+    <>
     <Section heat={HEAT.contactForm}>
       <div className="mx-auto max-w-2xl">
         <SectionTitle en="CONTACT" jp="お問い合わせ" align="center" path="sectionEn:contact.main" />
@@ -109,5 +113,52 @@ export function Contact() {
         </form>
       </div>
     </Section>
+
+    {/* お電話でのお問い合わせ（H3＋本文×5。本文が入力された項目だけ公開） */}
+    {(Array.from({ length: TEL_SLOTS }, (_, i) => txt(`contact:tel.${i}.body`, "")).some((v) => v !== "") ||
+      EDIT_MODE) && (
+      <Section heat={HEAT.contactForm}>
+        <div className="mx-auto max-w-4xl">
+          <SectionTitle en="TEL" jp="お電話でのお問い合わせ" align="center" path="sectionEn:contact.tel" />
+          <div className="mt-10 grid gap-5 tab:grid-cols-2">
+            {Array.from({ length: TEL_SLOTS }, (_, i) => {
+              const body = txt(`contact:tel.${i}.body`, "");
+              if (body === "" && !EDIT_MODE) return null;
+              return (
+                <div key={i} className="rounded-2xl border border-border bg-card p-7">
+                  <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`contact:tel.${i}.title`, `電話問い合わせ${i + 1} 見出し`)}>
+                    {txt(`contact:tel.${i}.title`, "（見出し）")}
+                  </h3>
+                  <RichBody
+                    path={`contact:tel.${i}.body`}
+                    text={body || "（未入力：電話番号・受付時間などを入力してください）"}
+                    label={`電話問い合わせ${i + 1} 内容`}
+                    className={`mt-3 ${body ? "text-foreground/80" : "text-muted-foreground"}`}
+                    style={{ fontSize: 15, lineHeight: 2 }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </Section>
+    )}
+
+    {/* プライバシーポリシー（簡素な1段落。未入力の間は非表示） */}
+    {(txt("contact:privacy.body", "") !== "" || EDIT_MODE) && (
+      <Section heat={HEAT.contactForm}>
+        <div className="mx-auto max-w-2xl">
+          <SectionTitle en="PRIVACY POLICY" jp="プライバシーポリシー" align="center" path="sectionEn:contact.privacy" />
+          <RichBody
+            path="contact:privacy.body"
+            text={txt("contact:privacy.body", "") || "（未入力：プライバシーポリシーに関する案内文を入力してください）"}
+            label="プライバシーポリシー 本文"
+            className={`mt-8 ${txt("contact:privacy.body", "") ? "text-foreground/80" : "text-muted-foreground"}`}
+            style={{ fontSize: 14, lineHeight: 2 }}
+          />
+        </div>
+      </Section>
+    )}
+    </>
   );
 }

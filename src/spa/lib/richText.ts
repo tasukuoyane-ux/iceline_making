@@ -10,15 +10,17 @@ export interface RichBlock {
 
 const LIST_PREFIX = /^(?:・|-\s+)\s*(.*)$/;
 
-export function parseRich(value: string): RichBlock[] {
+export function parseRich(value: string, forceList = false): RichBlock[] {
   const blocks: RichBlock[] = [];
   for (const raw of (value || "").split("\n")) {
     const m = raw.match(LIST_PREFIX);
-    if (m) {
+    if (m || (forceList && raw.trim() !== "")) {
+      // forceList（例：受賞歴）は「・」の有無に関係なく1行＝1項目のリストにする
+      const line = m ? m[1] : raw;
       const last = blocks[blocks.length - 1];
-      if (last && last.type === "ul") last.lines.push(m[1]);
-      else blocks.push({ type: "ul", lines: [m[1]] });
-    } else {
+      if (last && last.type === "ul") last.lines.push(line);
+      else blocks.push({ type: "ul", lines: [line] });
+    } else if (!forceList) {
       blocks.push({ type: "p", lines: [raw] });
     }
   }
