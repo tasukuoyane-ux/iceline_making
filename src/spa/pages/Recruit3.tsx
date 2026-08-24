@@ -231,6 +231,25 @@ function BizLinks() {
         ))}
       </div>
 
+      {/* 企業理念（4枚のカードの下・H3＋本文。本文が入力されるまで公開ページでは非表示） */}
+      {(txt("recruit3:bizlink.philosophy.body", "") !== "" || EDIT_MODE) && (
+        <div className="mx-auto mt-12 max-w-3xl text-center">
+          <h3
+            style={{ fontSize: "clamp(18px, 2.4vw, 24px)", fontWeight: 900, color: PAL.ink }}
+            {...ed("recruit3:bizlink.philosophy.title", "企業理念 見出し（H3）")}
+          >
+            {txt("recruit3:bizlink.philosophy.title", "企業理念")}
+          </h3>
+          <p
+            className="mt-4"
+            style={{ fontSize: 15, lineHeight: 2.1, color: "#1c2b30", whiteSpace: "pre-line" }}
+            {...ed("recruit3:bizlink.philosophy.body", "企業理念 本文", { multiline: true })}
+          >
+            {txt("recruit3:bizlink.philosophy.body", "") || "（本文を入力してください）"}
+          </p>
+        </div>
+      )}
+
       {/* 編集モード限定：カードクリックで開く展開内容（オーバーレイ）の常時展開表示。
           公開ページではオーバーレイは開いている間しかDOMに無く、編集モードでは
           カードのクリックが要素選択に使われて開けないため、ここで編集できるようにする */}
@@ -357,7 +376,6 @@ const CULTURE_DEFAULTS = [
     body: "氷の製造から、食材の卸、物流、品質管理まで。アイスラインは、食品に関わるあらゆる仕事が一つの会社の中にあります。誰かの食卓を、誰かの店を、誰かの日常を——表に出なくても、確かに支えている。この仕事を続けた時間は、知識としてではなく、体の感覚として残っていきます。",
   },
 ];
-const CULTURE_NUMS = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"];
 // 項目数はコンソールの「項目数」プルダウンで 1〜8 に変更できる（既定3）
 const MAX_CULTURE = 8;
 
@@ -375,14 +393,8 @@ function Culture() {
         {...rep.attrs}
       >
         {items.map((c, i) => (
-          <li key={i} className="flex gap-5 p-6 pc:gap-8 pc:p-9">
-            <span
-              aria-hidden
-              className="shrink-0"
-              style={{ fontSize: "clamp(28px, 3.4vw, 40px)", fontWeight: 900, color: ACCENTS[i % ACCENTS.length], lineHeight: 1.2 }}
-            >
-              {CULTURE_NUMS[i]}
-            </span>
+          <li key={i} className="p-6 pc:p-9">
+            {/* 丸数字（①②③）の番号表記は 2026-08 改修で廃止 */}
             <div>
               <h3 style={{ fontSize: "clamp(18px, 2.4vw, 24px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.5 }} {...ed(`recruit3:culture.${i}.title`, `カルチャー${i + 1} 見出し`)}>
                 {txt(`recruit3:culture.${i}.title`, c.title)}
@@ -701,6 +713,25 @@ function FaqList({ items }: { items: { q: string; a: string }[] }) {
   );
 }
 
+/** 選考の流れ：フローチャート（角丸ボックス＋矢印で文字列をつなぐ） */
+function FlowChart({ steps, accent }: { steps: string[]; accent: string }) {
+  return (
+    <div className="mt-8 flex flex-wrap items-center gap-y-4">
+      {steps.map((s, i) => (
+        <div key={i} className="flex items-center">
+          <div
+            className="flex min-h-[56px] items-center rounded-[0.625rem] border-l-4 bg-white px-5 py-3 shadow-[0_10px_24px_rgba(15,42,51,0.10)] ring-1 ring-black/5"
+            style={{ borderColor: accent }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 800, color: PAL.ink, lineHeight: 1.7, whiteSpace: "pre-line" }}>{s}</span>
+          </div>
+          {i < steps.length - 1 && <ArrowRight size={20} className="mx-2.5 shrink-0" style={{ color: PAL.teal }} />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** 職種の詳細オーバーレイ（業務内容〜エントリーフォーム） */
 function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobIndex: number; data: RecruitView; onClose: () => void }) {
   useBodyLock(true);
@@ -784,6 +815,14 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
           <OvHead en="BENEFITS" jp="福利厚生" />
           <RowsTable rows={job.benefits?.length ? job.benefits : data.benefits} tint="coral" />
         </section>
+
+        {/* 選考の流れ（全職種共通・コンソール「採用」タブで編集） */}
+        {(data.flow ?? []).filter((s) => s.trim() !== "").length > 0 && (
+          <section className="mt-20">
+            <OvHead en="FLOW" jp="選考の流れ" />
+            <FlowChart steps={(data.flow ?? []).filter((s) => s.trim() !== "")} accent={accent} />
+          </section>
+        )}
 
         {/* よくある質問（現状踏襲） */}
         <section className="mt-20">
@@ -994,8 +1033,9 @@ function Movie3() {
             className="mt-2 break-all rounded bg-white/85 px-2 py-1"
             style={{ fontSize: 11, color: PAL.ink }}
             {...ed("recruit3:movie.url", "埋め込み動画URL")}
+            data-edit-video="1"
           >
-            {url || "（動画URLを入力：YouTube/Vimeoの共有URL、または mp4 等の直リンク）"}
+            {url || "（動画URLを入力：YouTube/Vimeoの共有URL、または動画ファイルをアップロード）"}
           </p>
         )}
       </div>
@@ -1029,10 +1069,10 @@ function Deck3() {
       <Head base="recruit3:deck.head" en="COMPANY DECK" jp="カンパニーデック" center />
       <div className="mx-auto mt-10 w-full max-w-[800px]">
         {EDIT_MODE ? (
-          /* 編集用：全枠をグリッド表示（画像をクリックして差し替え） */
-          <div className="grid grid-cols-2 gap-2 tab:grid-cols-3">
+          /* 編集用：全枠を1行の横スクロールで表示（画像をクリックして差し替え） */
+          <div className="flex gap-2 overflow-x-auto pb-3">
             {all.map((s) => (
-              <div key={s.i} className="relative aspect-video overflow-hidden rounded bg-secondary">
+              <div key={s.i} className="relative aspect-video w-56 shrink-0 overflow-hidden rounded bg-secondary">
                 <ImageWithFallback
                   src={s.src || PH}
                   alt={`スライド${s.i + 1}`}

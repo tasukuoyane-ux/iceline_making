@@ -261,6 +261,20 @@ export function RecruitPanel({
         ))}
       </div>
 
+      {/* ── 選考の流れ ── */}
+      <Collapsible title="選考の流れ（全職種共通）">
+        <Field
+          label="ステップ（1行にひとつ）"
+          hint="職種詳細の「福利厚生」と「よくある質問」の間に、フローチャート（ボックス→矢印）として表示されます。空行は無視されます。"
+        >
+          <TextArea
+            rows={5}
+            value={(recruit.flow ?? []).join("\n")}
+            onChange={(e) => set({ flow: e.target.value.split("\n") })}
+          />
+        </Field>
+      </Collapsible>
+
       {/* ── よくある質問 ── */}
       <Collapsible title="よくある質問（全職種共通・/recruit と共通データ）">
         <div className="space-y-3">

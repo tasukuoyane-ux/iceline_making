@@ -37,6 +37,14 @@ export function buildHideCss(overrides: Record<string, string>): string {
       const path = esc(key.slice('color:'.length))
       colors.push(`[data-edit="${path}"]{color:${value} !important}`)
     }
+    // セクションごと非表示（コンソールのアコーディオン見出しのトグル）。
+    // `hidesec:<セクション先頭フィールドのパス>` = "1" のとき、そのフィールドを
+    // 含む section / header 要素を丸ごと隠す（:has() で特定）。
+    if (key.startsWith('hidesec:') && value === '1') {
+      const path = esc(key.slice('hidesec:'.length))
+      const inner = `[data-edit="${path}"],[data-edit-img="${path}"],[data-edit-select="${path}"]`
+      colors.push(`section:has(${inner}),main header:has(${inner}){display:none !important}`)
+    }
   }
   const rules: string[] = []
   if (sp.length) {

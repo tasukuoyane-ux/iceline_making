@@ -1,9 +1,51 @@
 // ページ単位エディタ：現在プレビュー中ページの編集可能要素を、
 // セクションごとのアコーディオン（既定は閉じた状態）で表示して編集する。
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Content, getValueByPath, setValueByPath } from "./content";
 import { Select, TextArea, TextInput } from "./ui";
 import { ImageField } from "./ImageField";
+import { uploadImage } from "./api";
+
+/** 動画ファイルのアップロードボタン（動画URLフィールド用。Blobへ保存してURLを反映） */
+function VideoUploadButton({ onDone }: { onDone: (url: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  return (
+    <div className="mt-1.5 flex items-center gap-2">
+      <input
+        ref={ref}
+        type="file"
+        accept="video/*,.webm,.mp4,.mov,.m4v,.ogv"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setErr(null);
+          setBusy(true);
+          try {
+            const { url } = await uploadImage(file); // 任意のファイル種別に対応（Blobへ保存）
+            onDone(url);
+          } catch (x: any) {
+            setErr(x?.message || "アップロードに失敗しました");
+          } finally {
+            setBusy(false);
+            if (ref.current) ref.current.value = "";
+          }
+        }}
+      />
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => ref.current?.click()}
+        className="rounded border border-slate-300 bg-white px-2 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+      >
+        {busy ? "アップロード中…" : "動画ファイルをアップロード"}
+      </button>
+      {err && <span className="text-[11px] text-red-600">{err}</span>}
+    </div>
+  );
+}
 
 // アニメーションの選択肢（値は "種類|開始オフセットpx|移動量px" で overrides の anim:<パス> に保存）
 const ANIM_OPTS: { value: string; label: string }[] = [
@@ -89,6 +131,8 @@ export interface PageField {
   ratio?: { path: string; def: number; first: boolean };
   /** 所属セクションの表示名（アコーディオングルーピング用・editBridgeが付与） */
   section?: string;
+  /** true なら動画URLフィールド（動画ファイルのアップロードボタンを表示） */
+  video?: boolean;
 }
 
 interface FieldGroup {
@@ -324,6 +368,10 @@ export function PageFields({
         ) : (
           <TextInput value={val(f)} onChange={(e) => onChange(setValueByPath(draft, f.path, e.target.value))} />
         )}
+        {/* 動画URLフィールド：ファイルの直接アップロードにも対応 */}
+        {f.kind === "text" && f.video && (
+          <VideoUploadButton onDone={(url) => onChange(setValueByPath(draft, f.path, url))} />
+        )}
       </div>
     );
   }
@@ -342,35 +390,62 @@ export function PageFields({
         const dirtyCount = g.fields.filter(
           (f) => (getValueByPath(draft, f.path) ?? "") !== (getValueByPath(base, f.path) ?? "")
         ).length;
+        // セクションごとの表示/非表示（overrides の hidesec:<先頭フィールドのパス>）
+        const secKey = `hidesec:${g.fields[0].path}`;
+        const secHidden = (getValueByPath(draft, secKey) || "") === "1";
         return (
           <div key={`${gi}:${g.label}`} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <button
-              type="button"
-              aria-expanded={isOpen}
-              onClick={() =>
-                setOpen((prev) => {
-                  const next = new Set(prev);
-                  if (next.has(gi)) next.delete(gi);
-                  else next.add(gi);
-                  return next;
-                })
-              }
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-slate-50"
-            >
-              <span
-                className={"text-[10px] text-slate-400 transition-transform " + (isOpen ? "rotate-90" : "")}
-                aria-hidden
+            <div className="flex w-full items-center gap-2 px-3 py-2 transition-colors hover:bg-slate-50">
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() =>
+                  setOpen((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(gi)) next.delete(gi);
+                    else next.add(gi);
+                    return next;
+                  })
+                }
+                className="flex min-w-0 flex-1 items-center gap-2 py-0.5 text-left"
               >
-                ▶
-              </span>
-              <span className="min-w-0 flex-1 truncate text-[12px] font-bold text-slate-700">{g.label}</span>
+                <span
+                  className={"text-[10px] text-slate-400 transition-transform " + (isOpen ? "rotate-90" : "")}
+                  aria-hidden
+                >
+                  ▶
+                </span>
+                <span className={"min-w-0 flex-1 truncate text-[12px] font-bold " + (secHidden ? "text-slate-400 line-through" : "text-slate-700")}>
+                  {g.label}
+                </span>
+              </button>
               {dirtyCount > 0 && (
-                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">未公開 {dirtyCount}</span>
+                <span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">未公開 {dirtyCount}</span>
               )}
-              <span className="text-[10px] text-slate-400">{g.fields.length}項目</span>
-            </button>
+              <span className="shrink-0 text-[10px] text-slate-400">{g.fields.length}項目</span>
+              {/* セクションごとの表示/非表示トグル */}
+              <button
+                type="button"
+                aria-pressed={secHidden}
+                title={secHidden ? "このセクションを表示する" : "このセクションを非表示にする"}
+                onClick={() => onChange(setValueByPath(draft, secKey, secHidden ? "" : "1"))}
+                className={
+                  "shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors " +
+                  (secHidden
+                    ? "border-rose-500 bg-rose-500 text-white"
+                    : "border-slate-300 bg-white text-slate-500 hover:bg-slate-50")
+                }
+              >
+                {secHidden ? "非表示中" : "表示中"}
+              </button>
+            </div>
             {isOpen && (
               <div className="space-y-3 border-t border-slate-100 bg-slate-50/60 p-2.5">
+                {secHidden && (
+                  <p className="rounded bg-rose-50 px-2 py-1 text-[11px] text-rose-600">
+                    このセクションは公開ページで非表示になっています（「非表示中」を押すと戻せます）。
+                  </p>
+                )}
                 {g.fields.map((f, fi) => renderField(f, g.start + fi))}
               </div>
             )}

@@ -79,7 +79,12 @@ export interface RecruitData {
   conditions: RecruitRow[];
   /** 福利厚生のテンプレート（同上） */
   benefits: RecruitRow[];
+  /** 選考の流れ（全職種共通。1要素=フローチャートの1ステップ） */
+  flow: string[];
 }
+
+/** 選考の流れの既定ステップ（旧データに flow が無い場合のフォールバック） */
+export const DEFAULT_RECRUIT_FLOW = ["エントリー", "書類選考", "面接（1〜2回）", "内定"];
 
 // 注意: お知らせ（news）は Payload CMS（/admin）へ移行済み。
 // コンソールの下書き・公開対象から外している（news.json はもうコミットしない）。
@@ -238,6 +243,7 @@ export function normalizeRecruit(r: any): RecruitData {
     }),
     conditions: sharedConditions,
     benefits: sharedBenefits,
+    flow: Array.isArray(r?.flow) ? r.flow.map((s: any) => String(s ?? "")) : clone(DEFAULT_RECRUIT_FLOW),
   };
 }
 

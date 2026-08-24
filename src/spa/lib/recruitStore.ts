@@ -44,6 +44,8 @@ export interface RecruitView {
   conditions: RecruitRow[];
   benefits: RecruitRow[];
   faq: FaqItem[];
+  /** 選考の流れ（全職種共通のフローチャートのステップ） */
+  flow?: string[];
 }
 
 /** ビルド同梱データ（公開状態） */
@@ -52,6 +54,7 @@ const PUBLISHED: RecruitView = {
   conditions: ((recruitJson as any).conditions ?? []) as RecruitRow[],
   benefits: ((recruitJson as any).benefits ?? []) as RecruitRow[],
   faq: (((sectionsJson as any).recruitFaq?.items ?? []) as FaqItem[]),
+  flow: ((recruitJson as any).flow ?? ["エントリー", "書類選考", "面接（1〜2回）", "内定"]) as string[],
 };
 
 let preview: RecruitView | null = null;
