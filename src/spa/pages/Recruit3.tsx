@@ -122,13 +122,7 @@ function BgVideos({ urls, areaRef }: { urls: string[]; areaRef: React.RefObject<
           }}
         />
       ))}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(217,236,242,0.50) 0%, rgba(255,255,255,0.38) 45%, rgba(217,236,242,0.50) 100%)",
-        }}
-      />
+      {/* ティントは敷かない：背景動画は元動画の色味のまま表示する（2026-08 改修） */}
     </div>
   );
 }
@@ -234,6 +228,50 @@ function BizLinks() {
           </button>
         ))}
       </div>
+
+      {/* 編集モード限定：カードクリックで開く展開内容（オーバーレイ）の常時展開表示。
+          公開ページではオーバーレイは開いている間しかDOMに無く、編集モードでは
+          カードのクリックが要素選択に使われて開けないため、ここで編集できるようにする */}
+      {EDIT_MODE && (
+        <div className="mt-10 space-y-6">
+          <p className="text-center" style={{ fontSize: 12, fontWeight: 700, color: PAL.ink, opacity: 0.65 }}>
+            ▼ 編集用の展開表示（公開ページではカードをクリックしたときのオーバーレイに表示されます）
+          </p>
+          {BIZ_LINKS.map((l, i) => (
+            <div key={l.to} className="rounded-[0.625rem] bg-white/95 p-6 shadow-md">
+              <p style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.2em", color: PAL.red }} {...ed(`recruit3:bizlink.${i}.en`, `英語ラベル（${l.name}）`)}>
+                {txt(`recruit3:bizlink.${i}.en`, l.en)}
+              </p>
+              <h3 className="mt-1" style={{ fontSize: 20, fontWeight: 900, color: PAL.ink }}>
+                {txt(`recruit3:bizlink.${i}.name`, l.name)}
+              </h3>
+              <div className="mt-4 grid gap-6 pc:grid-cols-2 pc:gap-8">
+                {([
+                  ["h1", "t1", l.h1, l.t1],
+                  ["h2", "t2", l.h2, l.t2],
+                ] as const).map(([hk, tk, hDef, tDef]) => (
+                  <div key={hk}>
+                    <h4
+                      className="border-l-4 pl-3"
+                      style={{ borderColor: ACCENTS[i % ACCENTS.length], fontSize: 16, fontWeight: 800, color: PAL.ink }}
+                      {...ed(`recruit3:bizlink.${i}.${hk}`, `展開見出し（${l.name}）`)}
+                    >
+                      {txt(`recruit3:bizlink.${i}.${hk}`, hDef)}
+                    </h4>
+                    <p
+                      className="mt-3"
+                      style={{ fontSize: 14, lineHeight: 2.0, color: "#1c2b30", whiteSpace: "pre-line" }}
+                      {...ed(`recruit3:bizlink.${i}.${tk}`, `展開本文（${l.name}）`, { multiline: true })}
+                    >
+                      {txt(`recruit3:bizlink.${i}.${tk}`, tDef)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* オーバーレイ：上部に画像、下部に見出し＋文章（PC=2カラム / SP=1カラム）。
           ページ側のスタッキングコンテキスト（relative z-10）に閉じ込められて
@@ -850,9 +888,10 @@ function HeroExtra() {
 /* ═══════════════ 数字で見るアイスライン ═══════════════ */
 
 // 画像の中に H3＋p を重ねたタイルを gap:1px で敷き詰める。
-// 最大12枠で、いずれか（画像・見出し・説明）が入力された枠だけが公開される
-// （＝任意の数のセットを追加できる）。全枠未入力の間はセクションごと非表示。
+// 最初の3枠は常に表示（最低3枚）。4枠目以降は入力された枠だけが公開され、
+// 入力を空に戻せば減らせる（最大12枠まで追加・削減可能）。
 const MAX_STATS = 12;
+const MIN_STATS = 3;
 
 function Stats3() {
   const items = Array.from({ length: MAX_STATS }, (_, i) => ({
@@ -861,13 +900,13 @@ function Stats3() {
     h3: txt(`recruit3:stats.${i}.h3`, ""),
     p: txt(`recruit3:stats.${i}.p`, ""),
   }));
-  const filled = items.filter((s) => s.image !== "" || s.h3 !== "" || s.p !== "");
-  if (filled.length === 0 && !EDIT_MODE) return null;
-  const shown = EDIT_MODE ? items : filled;
+  const shown = EDIT_MODE
+    ? items
+    : items.filter((s) => s.i < MIN_STATS || s.image !== "" || s.h3 !== "" || s.p !== "");
   return (
     <Sec>
       <Head base="recruit3:stats.head" en="COMPANY DECK" jp="数字で見るアイスライン" />
-      <div className="mt-10 grid grid-cols-2 gap-[1px] tab:grid-cols-3 pc:grid-cols-4">
+      <div className="mt-10 grid grid-cols-2 gap-[1px] tab:grid-cols-3">
         {shown.map((s) => (
           <div key={s.i} className="relative aspect-[4/3] overflow-hidden bg-secondary">
             <ImageWithFallback
@@ -936,12 +975,12 @@ export function Recruit3() {
         <div className="relative z-10">
           {/* 2. 事業へのリンク */}
           <BizLinks />
+          {/* 2.5. 数字で見るアイスライン（最低3枚のタイル・最大12枚まで追加可能） */}
+          <Stats3 />
           {/* 3. カルチャー */}
           <Culture />
           {/* 4. 仕事の魅力 */}
           <Charm3 />
-          {/* 4.5. 数字で見るアイスライン（タイルが入力されるまで非表示） */}
-          <Stats3 />
           {/* 5. 人を知る */}
           <People3D />
           {/* 6. 募集職種一覧 */}
