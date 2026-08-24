@@ -55,6 +55,17 @@ export function ed(path: string, label?: string, opts?: EdOpts): Record<string, 
   return a;
 }
 
+/** リッチ本文（p＋リスト共存）の編集対象属性。RichBody コンポーネントが使う。
+ * 値はプレーンテキストのまま保存し、行頭「・」「- 」の行をリスト表示する。
+ * data-edit-rich を見て editBridge が textContent 書き換えではなく
+ * p/ul の再構築でプレビュー反映する。 */
+export function edRich(path: string, label?: string): Record<string, string> {
+  if (isCommon(path)) return {};
+  const a: Record<string, string> = { "data-edit": path, "data-edit-multi": "1", "data-edit-rich": "1" };
+  if (label) a["data-edit-label"] = label;
+  return a;
+}
+
 /** 画像編集対象の属性を付与（ImageWithFallback / img に展開される） */
 export function edImg(path: string, label?: string): Record<string, string> {
   if (isCommon(path)) return {};

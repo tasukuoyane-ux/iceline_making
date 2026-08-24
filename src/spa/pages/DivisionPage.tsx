@@ -5,6 +5,7 @@ import { ArrowRight, ChevronRight, ChevronDown, Search } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
+import { RichBody } from "../components/common/RichBody";
 import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
@@ -606,9 +607,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
               {txt(`${base}.title`, it.title)}
             </h3>
           )}
-          <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
-            {bodyText}
-          </p>
+          <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <ImageWithFallback
@@ -651,9 +650,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
               {txt(`${base}.title`, it.title)}
             </h3>
           )}
-          <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
-            {bodyText}
-          </p>
+          <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
         </div>
         {it.splitImage ? (
           /* 縦長画像2枚を斜めの区切りで並べ、全体で従来の 4:3 の枠に収める */
@@ -702,9 +699,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
               {txt(`${base}.title`, it.title)}
             </h3>
           )}
-          <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "本文", { multiline: true })}>
-            {bodyText}
-          </p>
+          <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
         </div>
         <ImageWithFallback
           src={img(`${base}.image`, IMG_PLACEHOLDER)}
@@ -722,13 +717,13 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
           {txt(`${base}.title`, it.title)}
         </h3>
       )}
-      <p
+      <RichBody
+        path={`${base}.body`}
+        text={bodyText}
+        label={it.pending ? "本文（要確認・未確定）" : "本文"}
         className={`mt-3 ${it.pending && !value ? "text-muted-foreground" : "text-foreground/80"}`}
-        style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }}
-        {...ed(`${base}.body`, it.pending ? "本文（要確認・未確定）" : "本文", { multiline: true })}
-      >
-        {bodyText}
-      </p>
+        style={{ fontSize: 15, lineHeight: 2.05 }}
+      />
     </div>
   );
 }
@@ -740,7 +735,7 @@ function DetailSectionBlock({ division, si, sec, heat }: { division: Division; s
   if (!visible && !EDIT_MODE) return null;
   return (
     <Section heat={heat}>
-      <SectionTitle en={sec.en} jp={sec.jp} path={`division:${division}.sec.${sk}.en`} />
+      <SectionTitle en={sec.en} jp={sec.jp} path={`division:${division}.sec.${sk}`} />
       <div className="mt-12 space-y-10">
         {sec.items.map((it, ii) => (
           <DetailItemBlock key={ii} division={division} sk={sk} ii={ii} it={it} secJp={sec.jp} />
@@ -809,10 +804,14 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分。赤帯はタイトル＋本文まで） */}
       <Section heat={bizHeat} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`division:${division}.overview.en`} />
-          <p className="mt-6 text-left text-white/90 pc:text-center" style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`division:${division}.overview`, "事業概要", { multiline: true })}>
-            {txt(`division:${division}.overview`, OVERVIEW[division])}
-          </p>
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`division:${division}.overview`} />
+          <RichBody
+            path={`division:${division}.overview`}
+            text={txt(`division:${division}.overview`, OVERVIEW[division])}
+            label="事業概要"
+            className="mt-6 text-left text-white/90 pc:text-center"
+            style={{ fontSize: 16, lineHeight: 2.1 }}
+          />
         </div>
       </Section>
 
@@ -835,7 +834,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 氷・氷菓：製品ラインナップ（シートのカテゴリ分け通り） ── */}
       {division === "ice" && (
         <Section heat={listHeat} id="ice-lineup">
-          <SectionTitle en="LINEUP" jp="製品ラインナップ" path="division:ice.lineup.en" />
+          <SectionTitle en="LINEUP" jp="製品ラインナップ" path="division:ice.lineup" />
           <div className="mt-12 space-y-16">
             {/* ドライアイス（内容は「ドライアイスの販売」ページ準拠・詳細はECサイトへ） */}
             <div>
@@ -894,7 +893,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 業務用食材：取り扱い商品カテゴリ（検索モックアップ） ── */}
       {division === "food" && (
         <Section heat={listHeat}>
-          <SectionTitle en="PRODUCTS" jp="取り扱い商品カテゴリ" path="division:food.products.en" />
+          <SectionTitle en="PRODUCTS" jp="取り扱い商品カテゴリ" path="division:food.products" />
           <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.products.intro", "取り扱い商品カテゴリ 説明", { multiline: true })}>
             {txt("division:food.products.intro", "取扱商品の主要カテゴリは食用油・輸入鶏肉をはじめとする業務用食材です。")}
           </p>
@@ -911,7 +910,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 業務用食材：おすすめパッケージ ── */}
       {division === "food" && (
         <Section heat={reasonHeat} id="packages">
-          <SectionTitle en="PACKAGES" jp="おすすめパッケージ" path="division:food.packages.en" />
+          <SectionTitle en="PACKAGES" jp="おすすめパッケージ" path="division:food.packages" />
           <p className="mt-4 text-muted-foreground" style={{ fontSize: 14, lineHeight: 1.9 }}>
             業態や季節に合わせて、よく使われる商品を組み合わせたおすすめのセットをご提案しています。
           </p>
@@ -941,7 +940,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* ── 氷・氷菓：活用提案・メニューレシピ ── */}
       {division === "ice" && (
         <Section heat={HEAT.iceRecipe} id="ice-recipe">
-          <SectionTitle en="RECIPE IDEAS" jp="活用提案・メニューレシピ" path="division:ice.recipeIdeas.en" />
+          <SectionTitle en="RECIPE IDEAS" jp="活用提案・メニューレシピ" path="division:ice.recipeIdeas" />
           {/* 氷カフェが生まれた理由 */}
           <div className="mt-10 rounded-2xl border border-border bg-card p-8">
             <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed("division:ice.recipeIdeas.storyTitle", "見出し")}>
@@ -1019,7 +1018,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* よくあるご質問（回答が未確定の設問は公開ページでは非表示） */}
       {(FAQ[division].some((f, i) => !f.pending || txt(`division:${division}.faq.${i}.a`, "") !== "") || EDIT_MODE) && (
         <Section heat={reasonHeat}>
-          <SectionTitle en="FAQ" jp="よくあるご質問" path={`division:${division}.faq.en`} />
+          <SectionTitle en="FAQ" jp="よくあるご質問" path={`division:${division}.faq`} />
           <div className="mt-10 space-y-4">
             {FAQ[division].map((f, i) => {
               const a = txt(`division:${division}.faq.${i}.a`, f.pending ? "" : f.a ?? "");

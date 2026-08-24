@@ -209,3 +209,18 @@ html.cookie-open .video-cta {
     bottom: 88px;
   }
 }
+
+/* 編集可能な本文（RichBody）：行頭「・」「- 」の行はリスト、それ以外は段落。
+   値はプレーンテキストのまま保存され、表示時に p / ul>li へ展開される */
+[data-edit-rich] p {
+  margin: 0;
+  white-space: pre-line;
+}
+[data-edit-rich] ul {
+  margin: 0;
+  padding-left: 1.5em;
+  list-style: disc;
+}
+[data-edit-rich] li {
+  white-space: pre-line;
+}

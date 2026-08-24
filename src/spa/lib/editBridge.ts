@@ -5,6 +5,7 @@
 // を行う。通常閲覧時は完全に無効（副作用なし）。
 
 import { EDIT_MODE } from "./editable";
+import { parseRich } from "./richText";
 import { buildHideCss, HIDE_STYLE_ID } from "../../components/HideOverridesStyle";
 
 const OUTLINE_STYLE_ID = "iceline-edit-style";
@@ -70,6 +71,27 @@ function applyRatioVars(overrides: Record<string, string>) {
   });
 }
 
+/** リッチ本文（data-edit-rich）の中身を値から再構築する。
+ * 行頭「・」「- 」の行は ul>li、それ以外は p（RichBody と同じ規則）。 */
+function renderRichInto(el: HTMLElement, value: string) {
+  el.textContent = "";
+  for (const b of parseRich(value)) {
+    if (b.type === "ul") {
+      const ul = document.createElement("ul");
+      for (const line of b.lines) {
+        const li = document.createElement("li");
+        li.textContent = line;
+        ul.appendChild(li);
+      }
+      el.appendChild(ul);
+    } else {
+      const p = document.createElement("p");
+      p.textContent = b.lines[0] || " ";
+      el.appendChild(p);
+    }
+  }
+}
+
 function applyOverrides(overrides: Record<string, string>) {
   lastOverrides = overrides;
   applyHideStyle(overrides);
@@ -79,7 +101,15 @@ function applyOverrides(overrides: Record<string, string>) {
   for (const [path, value] of Object.entries(overrides)) {
     if (path.startsWith("hide:") || path.startsWith("anim:")) continue; // 専用モジュールで処理済み
     document.querySelectorAll<HTMLElement>(`[data-edit="${cssEscape(path)}"]`).forEach((el) => {
-      if (el.textContent !== value) el.textContent = value;
+      if (el.hasAttribute("data-edit-rich")) {
+        // リッチ本文：textContent の書き換えでは p/li 構造が壊れるため再構築する
+        if (el.getAttribute("data-edit-default") !== value) {
+          renderRichInto(el, value);
+          el.setAttribute("data-edit-default", value);
+        }
+      } else if (el.textContent !== value) {
+        el.textContent = value;
+      }
     });
     document.querySelectorAll<HTMLElement>(`[data-edit-img="${cssEscape(path)}"]`).forEach((el) => {
       const im = el.tagName === "IMG" ? (el as HTMLImageElement) : el.querySelector("img");
@@ -141,6 +171,9 @@ function scanFields(): PageField[] {
     } else if (isImg) {
       const im = el.tagName === "IMG" ? (el as HTMLImageElement) : el.querySelector("img");
       value = im?.getAttribute("src") || "";
+    } else if (el.hasAttribute("data-edit-rich")) {
+      // リッチ本文は textContent だと改行が失われるため、元の値を属性から拾う
+      value = el.getAttribute("data-edit-default") || "";
     } else {
       value = el.textContent || "";
     }

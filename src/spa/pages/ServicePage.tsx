@@ -10,6 +10,7 @@ import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
+import { RichBody } from "../components/common/RichBody";
 import { HEAT } from "../data/heatMap";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 
@@ -35,11 +36,17 @@ interface ServiceSectionItem {
   pending?: boolean;
   /** true なら画像＋テキストの交互レイアウトで表示 */
   image?: boolean;
+  /** true なら本文の下にCTAボタン（文言・リンク先はコンソールで編集可能） */
+  cta?: boolean;
 }
 interface ServiceSection {
   en: string;
   jp: string;
   items: ServiceSectionItem[];
+  /** 編集パス用のセクションキー。未指定なら表示順の添字を使う。
+   * セクションの追加・削除で既存の編集パス（service:*.sec.<キー>.*）が
+   * ずれないよう、並びを変えたセクションには明示的に付与すること。 */
+  pathKey?: string;
 }
 interface ServiceConfig {
   en: string;
@@ -122,10 +129,22 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
     lead: "必要なとき、必要な量を。",
     overview:
       "ドライアイスは、二酸化炭素を固体にしたもので、約-79℃という極低温の保冷材です。溶けても水が残らないため、食品や精密機器の輸送にも安心してお使いいただけます。\nアイスラインでは40年以上にわたり、ドライアイスの販売を行っています。低温物流・葬儀・スイーツ輸送など、幅広い用途に対応しており、お客様のご要望に合わせたサイズへのカット加工にも対応しています。アイスラインの窓口での直接購入も可能です。",
+    // 2026-08 改修：ドライアイスについて／主な用途／ご利用上の注意／購入の流れ／店舗情報を追加。
+    // 既存セクション（製品ラインナップ・サービスの特徴・販売サイト）は pathKey で
+    // 再編前の編集パス（sec.0 / sec.1 / sec.2）を維持する。
     sections: [
+      // ドライアイスについて（業務用食材「サプライチェーン」と同じ画像＋文章レイアウト。
+      // 本文が入力されるまで公開ページでは非表示）
+      {
+        en: "ABOUT",
+        jp: "ドライアイスについて",
+        pathKey: "about",
+        items: [{ title: "（見出し）", pending: true, image: true }],
+      },
       {
         en: "LINEUP",
         jp: "製品ラインナップ",
+        pathKey: "0",
         items: [
           {
             title: "取り扱いサイズ・形状",
@@ -133,8 +152,16 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
             image: true,
           },
           { pending: true },
+        ],
+      },
+      // 主な用途（旧・製品ラインナップ内の項目を独立セクション化。
+      // 画像＋文章レイアウトで、文章側は行頭「・」によりリスト（li）表示）
+      {
+        en: "USES",
+        jp: "主な用途",
+        pathKey: "uses",
+        items: [
           {
-            title: "主な用途",
             body:
               "・低温物流・冷凍食品の輸送保冷\n・葬儀・遺体保冷\n・スイーツ・ケーキの輸送\n・その他、冷却・保冷が必要な用途全般",
             image: true,
@@ -144,6 +171,7 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
       {
         en: "SERVICE",
         jp: "サービスの特徴",
+        pathKey: "1",
         items: [
           {
             title: "カット加工対応",
@@ -156,13 +184,39 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
           {
             title: "個人向けECサイト",
             body: "個人のお客様向けには、ECサイトからもご購入いただけます。",
+            cta: true,
           },
           { pending: true },
         ],
       },
       {
+        en: "NOTES",
+        jp: "ご利用上の注意",
+        pathKey: "notes",
+        items: [{ pending: true }],
+      },
+      {
+        en: "FLOW",
+        jp: "購入の流れ",
+        pathKey: "purchase",
+        items: [{ pending: true }],
+      },
+      // 店舗情報（H3＋本文の組を4つ。入力されるまで公開ページでは非表示）
+      {
+        en: "STORES",
+        jp: "店舗情報",
+        pathKey: "stores",
+        items: [
+          { title: "（見出し）", pending: true },
+          { title: "（見出し）", pending: true },
+          { title: "（見出し）", pending: true },
+          { title: "（見出し）", pending: true },
+        ],
+      },
+      {
         en: "SHOP",
         jp: "販売サイト",
+        pathKey: "2",
         items: [{ pending: true }],
       },
     ],
@@ -221,14 +275,14 @@ export function ServicePage({ service }: { service: ServiceId }) {
       {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分） */}
       <Section heat={HEAT.foodBiz} className="bg-[#E60012] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`${base}.overview.en`} />
-          <p
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`${base}.overview`} />
+          <RichBody
+            path={`${base}.overview`}
+            text={txt(`${base}.overview`, s.overview)}
+            label="事業概要"
             className="mt-6 text-left text-white/90 pc:text-center"
-            style={{ fontSize: 16, lineHeight: 2.1, whiteSpace: "pre-line" }}
-            {...ed(`${base}.overview`, "事業概要", { multiline: true })}
-          >
-            {txt(`${base}.overview`, s.overview)}
-          </p>
+            style={{ fontSize: 16, lineHeight: 2.1 }}
+          />
           {/* ドライアイス：ECサイトへの導線ボタン */}
           {s.shopUrl && (
             <div className="mt-8">
@@ -251,17 +305,41 @@ export function ServicePage({ service }: { service: ServiceId }) {
 
       {/* シート構成に沿った各セクション（要確認スロットは未入力の間、公開ページでは非表示） */}
       {s.sections.map((sec, si) => {
+        const sk = sec.pathKey ?? String(si);
         const visible =
-          sec.items.some((it, ii) => !it.pending || txt(`${base}.sec.${si}.${ii}.body`, "") !== "") || EDIT_MODE;
+          sec.items.some((it, ii) => !it.pending || txt(`${base}.sec.${sk}.${ii}.body`, "") !== "") || EDIT_MODE;
         if (!visible) return null;
         return (
         <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
-          <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${si}.en`} />
+          <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${sk}`} />
           <div className="mt-12 space-y-10">
             {sec.items.map((it, ii) => {
-              const value = txt(`${base}.sec.${si}.${ii}.body`, it.pending ? "" : it.body ?? "");
+              const ib = `${base}.sec.${sk}.${ii}`;
+              const value = txt(`${ib}.body`, it.pending ? "" : it.body ?? "");
               if (it.pending && !value && !EDIT_MODE) return null;
               const bodyText = value || (it.pending ? PENDING_HINT : "");
+              // 本文下のCTAボタン（文言・リンク先はコンソールで編集可能）
+              const ctaBtn = it.cta && (
+                <div className="mt-6 [direction:ltr]">
+                  <a
+                    href={txt(`${ib}.cta.url`, s.shopUrl || "/contact")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
+                    style={{ fontSize: 15 }}
+                  >
+                    <span {...ed(`${ib}.cta.label`, "CTAボタン文言")}>
+                      {txt(`${ib}.cta.label`, "オンラインショップで購入する")}
+                    </span>
+                    <ArrowRight size={16} />
+                  </a>
+                  {EDIT_MODE && (
+                    <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(`${ib}.cta.url`, "CTAリンク先URL")}>
+                      {txt(`${ib}.cta.url`, s.shopUrl || "/contact")}
+                    </p>
+                  )}
+                </div>
+              );
               return it.image ? (
                 <motion.div
                   key={ii}
@@ -270,40 +348,46 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
                   className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
-                  style={{ ["--ratio" as any]: ratioCols(`${base}.sec.${si}.${ii}.ratio`, 60, false) }}
-          {...ratioAttrs(`${base}.sec.${si}.${ii}.ratio`, 60, false)}
+                  style={{ ["--ratio" as any]: ratioCols(`${ib}.ratio`, 60, false) }}
+          {...ratioAttrs(`${ib}.ratio`, 60, false)}
                 >
                   <div className="[direction:ltr] pc:px-12">
                     {it.title && (
-                      <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.sec.${si}.${ii}.title`, "見出し")}>
-                        {txt(`${base}.sec.${si}.${ii}.title`, it.title)}
+                      <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${ib}.title`, "見出し")}>
+                        {txt(`${ib}.title`, it.title)}
                       </h3>
                     )}
-                    <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.sec.${si}.${ii}.body`, "本文", { multiline: true })}>
-                      {bodyText}
-                    </p>
+                    <RichBody
+                      path={`${ib}.body`}
+                      text={bodyText}
+                      label="本文"
+                      className="mt-3 text-foreground/80"
+                      style={{ fontSize: 15, lineHeight: 2.05 }}
+                    />
+                    {ctaBtn}
                   </div>
                   <ImageWithFallback
-                    src={img(`${base}.sec.${si}.${ii}.image`, IMG_PLACEHOLDER)}
+                    src={img(`${ib}.image`, IMG_PLACEHOLDER)}
                     alt={it.title || sec.jp}
                     className="aspect-[4/3] w-full rounded-2xl border border-border object-cover [direction:ltr]"
-                    {...edImg(`${base}.sec.${si}.${ii}.image`, `${it.title || sec.jp} 画像`)}
+                    {...edImg(`${ib}.image`, `${it.title || sec.jp} 画像`)}
                   />
                 </motion.div>
               ) : (
                 <div key={ii} className={it.title ? "rounded-2xl border border-border bg-card p-8" : "max-w-3xl"}>
                   {it.title && (
-                    <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.sec.${si}.${ii}.title`, "見出し")}>
-                      {txt(`${base}.sec.${si}.${ii}.title`, it.title)}
+                    <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${ib}.title`, "見出し")}>
+                      {txt(`${ib}.title`, it.title)}
                     </h3>
                   )}
-                  <p
+                  <RichBody
+                    path={`${ib}.body`}
+                    text={bodyText}
+                    label={it.pending ? "本文（要確認・未確定）" : "本文"}
                     className={`mt-3 ${it.pending && !value ? "text-muted-foreground" : "text-foreground/80"}`}
-                    style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }}
-                    {...ed(`${base}.sec.${si}.${ii}.body`, it.pending ? "本文（要確認・未確定）" : "本文", { multiline: true })}
-                  >
-                    {bodyText}
-                  </p>
+                    style={{ fontSize: 15, lineHeight: 2.05 }}
+                  />
+                  {ctaBtn}
                 </div>
               );
             })}
@@ -317,7 +401,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
 
       {/* よくあるご質問 */}
       <Section heat={HEAT.foodReason}>
-        <SectionTitle en="FAQ" jp="よくあるご質問" path={`${base}.faq.en`} />
+        <SectionTitle en="FAQ" jp="よくあるご質問" path={`${base}.faq`} />
         <div className="mt-10 space-y-4">
           {s.faq.map((f, i) => {
             const a = txt(`${base}.faq.${i}.a`, f.pending ? "" : f.a ?? "");
@@ -353,7 +437,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
           if (shown.length === 0) return null;
           return (
             <Section heat={HEAT.foodList}>
-              <SectionTitle en="GALLERY" jp="施設写真" path={`${base}.gallery.en`} />
+              <SectionTitle en="GALLERY" jp="施設写真" path={`${base}.gallery`} />
               <div className="mt-10 columns-2 gap-5 pc:columns-3">
                 {shown.map((p) => (
                   <figure key={p.i} className="mb-5 break-inside-avoid">

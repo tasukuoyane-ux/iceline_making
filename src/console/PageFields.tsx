@@ -122,6 +122,7 @@ export function PageFields({
       <p className="text-[11px] leading-relaxed text-slate-500">
         プレビュー内の見出し・本文・画像をクリックすると、その項目がここで開きます。
         「SPで非表示」「PCで非表示」でその要素を画面幅ごとに隠せます。
+        本文では行頭に「・」を付けるとその行がリスト（箇条書き）で表示されます。
       </p>
       {fields.map((f, i) => {
         const active = selectedPath === f.path;
