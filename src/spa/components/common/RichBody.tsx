@@ -1,18 +1,19 @@
 import { CSSProperties, Fragment } from "react";
-import { parseRich, splitColorTokens } from "../../lib/richText";
+import { parseRich, sizeStyle, splitColorTokens } from "../../lib/richText";
 import { edRich } from "../../lib/editable";
 
-/** 1行を行内色トークン（[[red:文字]] / [[#rrggbb:文字]]）込みで描画する */
+/** 1行を行内装飾トークン（[[red:文字]] / [[特大:文字]] / [[特大,red:文字]] 等）込みで描画する */
 function renderLine(line: string) {
   const segs = splitColorTokens(line);
-  if (segs.length === 1 && !segs[0].color) return segs[0].text;
-  return segs.map((s, i) =>
-    s.color ? (
-      <span key={i} style={{ color: s.color }}>{s.text}</span>
+  if (segs.length === 1 && !segs[0].color && !segs[0].size) return segs[0].text;
+  return segs.map((s, i) => {
+    const style: CSSProperties = { ...(sizeStyle(s.size) ?? {}), ...(s.color ? { color: s.color } : {}) };
+    return Object.keys(style).length > 0 ? (
+      <span key={i} style={style}>{s.text}</span>
     ) : (
       <Fragment key={i}>{s.text}</Fragment>
-    )
-  );
+    );
+  });
 }
 
 /**

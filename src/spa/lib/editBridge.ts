@@ -5,7 +5,7 @@
 // を行う。通常閲覧時は完全に無効（副作用なし）。
 
 import { EDIT_MODE } from "./editable";
-import { parseRich, splitColorTokens } from "./richText";
+import { parseRich, sizeStyle, splitColorTokens } from "./richText";
 import { buildHideCss, HIDE_STYLE_ID } from "../../components/HideOverridesStyle";
 
 const OUTLINE_STYLE_ID = "iceline-edit-style";
@@ -71,12 +71,18 @@ function applyRatioVars(overrides: Record<string, string>) {
   });
 }
 
-/** 行内の文字色トークン（[[red:文字]] / [[#rrggbb:文字]]）を span へ展開して流し込む */
+/** 行内の装飾トークン（[[red:文字]] / [[特大:文字]] / [[特大,red:文字]] 等）を span へ展開して流し込む */
 function fillLine(node: HTMLElement, line: string) {
   for (const seg of splitColorTokens(line)) {
-    if (seg.color) {
+    if (seg.color || seg.size) {
       const sp = document.createElement("span");
-      sp.style.color = seg.color;
+      if (seg.color) sp.style.color = seg.color;
+      const sz = sizeStyle(seg.size);
+      if (sz) {
+        sp.style.fontSize = sz.fontSize;
+        if (sz.fontWeight) sp.style.fontWeight = String(sz.fontWeight);
+        if (sz.lineHeight) sp.style.lineHeight = String(sz.lineHeight);
+      }
       sp.textContent = seg.text;
       node.appendChild(sp);
     } else {

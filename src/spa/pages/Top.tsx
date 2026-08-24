@@ -17,7 +17,7 @@ const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュア�
 // MVのストライプ・白パネル・グラデーション加工は 2026-08 改修で削除
 //（src/lib/mvStripes.ts は不使用になった）。
 // MVテキストの既定文言はサーバ先行描画（TopShell）と共用する
-import { TOP_MV_LG_DEFAULT, TOP_MV_XL_DEFAULT } from "../../lib/topMvDefaults";
+import { TOP_MV_TEXT_DEFAULT } from "../../lib/topMvDefaults";
 
 // 「私たちの強み」画像の差し替え用プレースホルダー（編集前のグレー枠）
 const STRENGTH_PLACEHOLDER =
@@ -78,34 +78,18 @@ function Hero() {
       />
       {/* ストライプ・白パネル・グラデーションの加工は 2026-08 改修で削除
           （画像をそのまま表示する） */}
-      {/* MVテキスト（特大・大・小の3段階。[[red:文字]] や [[#0000ff:文字]] で行内の
-          文字色を変えられる）。SPでは画像の下に流し、タブレット以上で画像に重ねる */}
+      {/* MVテキスト（1つのボックス）。[[特大:文字]] [[大:文字]] で文字サイズ、
+          [[red:文字]] [[#0000ff:文字]] で文字色を行内で自在に指定できる
+          （[[特大,red:文字]] のように併用可。指定なしの部分は小＝基準サイズ）。
+          SPでは画像の下に流し、タブレット以上で画像に重ねる */}
       <div className="bg-white tab:absolute tab:inset-0 tab:flex tab:items-center tab:bg-transparent">
         <div className="w-full px-6 py-8 tab:max-w-[62%] tab:py-0 tab:pl-[4.5%] tab:pr-0">
           <RichBody
             path="top:mv.title"
-            text={txt("top:mv.title", TOP_MV_XL_DEFAULT)}
-            label="MVテキスト（特大）"
-            style={{ fontSize: "clamp(24px, 3.4vw, 46px)", fontWeight: 900, lineHeight: 1.6, color: "#101c24" }}
+            text={txt("top:mv.title", TOP_MV_TEXT_DEFAULT)}
+            label="MVテキスト"
+            style={{ fontSize: "clamp(12px, 1.1vw, 15px)", fontWeight: 500, lineHeight: 2.0, color: "#101c24" }}
           />
-          {(txt("top:mv.lg", TOP_MV_LG_DEFAULT) !== "" || EDIT_MODE) && (
-            <RichBody
-              path="top:mv.lg"
-              text={txt("top:mv.lg", TOP_MV_LG_DEFAULT) || "（大テキスト）"}
-              label="MVテキスト（大）"
-              className="mt-5 tab:mt-[3%]"
-              style={{ fontSize: "clamp(12px, 1.35vw, 18px)", fontWeight: 700, lineHeight: 2.0, color: "#101c24" }}
-            />
-          )}
-          {(txt("top:mv.sm", "") !== "" || EDIT_MODE) && (
-            <RichBody
-              path="top:mv.sm"
-              text={txt("top:mv.sm", "") || "（小テキスト）"}
-              label="MVテキスト（小）"
-              className="mt-4 tab:mt-[2%]"
-              style={{ fontSize: "clamp(11px, 1vw, 14px)", fontWeight: 500, lineHeight: 2.0, color: "#101c24" }}
-            />
-          )}
         </div>
       </div>
     </section>
