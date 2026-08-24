@@ -115,5 +115,13 @@
   "hide:recruit3:culture.2.body": "",
   "site:protect.enabled": "1",
   "site:protect.hash": "46637337ac3a5aca2304ca005b831f428eec1a17efd4d909e9ce860e5d8f1417",
-  "recruit3:people.lead": ""
+  "recruit3:people.lead": "",
+  "color:recruit3:deck.head.jp": "#000000",
+  "color:recruit3:jobs.jp": "#ffffff",
+  "color:recruit3:jobs.lead": "#ffffff",
+  "color:recruit3:videos.head.jp": "#ffffff",
+  "color:videos:v1:title": "#ffffff",
+  "color:videos:v2:title": "#ffffff",
+  "color:videos:v3:title": "#ffffff",
+  "color:videos:v4:title": "#ffffff"
 }
