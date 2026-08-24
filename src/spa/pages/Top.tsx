@@ -8,6 +8,7 @@ import { useNews } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { RichBody } from "../components/common/RichBody";
 import { InlineMovieTag } from "../components/common/MovieBadge";
 
 // トップページ メインビジュアル（TOP専用キーで編集対象を明確化）
@@ -15,6 +16,8 @@ const TOP_MV = { img: IMG.topMv, alt: "アイスライン メインビジュア�
 
 // MVのストライプ・白パネル・グラデーション加工は 2026-08 改修で削除
 //（src/lib/mvStripes.ts は不使用になった）。
+// MVテキストの既定文言はサーバ先行描画（TopShell）と共用する
+import { TOP_MV_LG_DEFAULT, TOP_MV_XL_DEFAULT } from "../../lib/topMvDefaults";
 
 // 「私たちの強み」画像の差し替え用プレースホルダー（編集前のグレー枠）
 const STRENGTH_PLACEHOLDER =
@@ -75,15 +78,35 @@ function Hero() {
       />
       {/* ストライプ・白パネル・グラデーションの加工は 2026-08 改修で削除
           （画像をそのまま表示する） */}
-      {/* MV見出し（H2相当・コンソールの「ページ編集」から文言を変更できる） */}
-      <div className="absolute inset-y-0 left-0 flex w-1/3 items-center">
-        <h2
-          className="w-full px-[9%]"
-          style={{ fontSize: "clamp(18px, 3.4vw, 46px)", fontWeight: 900, lineHeight: 1.6, color: "#101c24", whiteSpace: "pre-line" }}
-          {...ed("top:mv.title", "MV 見出し", { multiline: true })}
-        >
-          {txt("top:mv.title", "氷と食で、\n日々に応える。")}
-        </h2>
+      {/* MVテキスト（特大・大・小の3段階。[[red:文字]] や [[#0000ff:文字]] で行内の
+          文字色を変えられる）。SPでは画像の下に流し、タブレット以上で画像に重ねる */}
+      <div className="bg-white tab:absolute tab:inset-0 tab:flex tab:items-center tab:bg-transparent">
+        <div className="w-full px-6 py-8 tab:max-w-[62%] tab:py-0 tab:pl-[4.5%] tab:pr-0">
+          <RichBody
+            path="top:mv.title"
+            text={txt("top:mv.title", TOP_MV_XL_DEFAULT)}
+            label="MVテキスト（特大）"
+            style={{ fontSize: "clamp(24px, 3.4vw, 46px)", fontWeight: 900, lineHeight: 1.6, color: "#101c24" }}
+          />
+          {(txt("top:mv.lg", TOP_MV_LG_DEFAULT) !== "" || EDIT_MODE) && (
+            <RichBody
+              path="top:mv.lg"
+              text={txt("top:mv.lg", TOP_MV_LG_DEFAULT) || "（大テキスト）"}
+              label="MVテキスト（大）"
+              className="mt-5 tab:mt-[3%]"
+              style={{ fontSize: "clamp(12px, 1.35vw, 18px)", fontWeight: 700, lineHeight: 2.0, color: "#101c24" }}
+            />
+          )}
+          {(txt("top:mv.sm", "") !== "" || EDIT_MODE) && (
+            <RichBody
+              path="top:mv.sm"
+              text={txt("top:mv.sm", "") || "（小テキスト）"}
+              label="MVテキスト（小）"
+              className="mt-4 tab:mt-[2%]"
+              style={{ fontSize: "clamp(11px, 1vw, 14px)", fontWeight: 500, lineHeight: 2.0, color: "#101c24" }}
+            />
+          )}
+        </div>
       </div>
     </section>
   );
