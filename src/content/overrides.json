@@ -113,6 +113,6 @@
   "recruit3:header.logo": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/logo_white-JHoVsQh0RD2MYdLEtHfOW4KPA1bt2d.png",
   "hide:recruit3:culture.2.title": "",
   "hide:recruit3:culture.2.body": "",
-  "site:protect.enabled": "",
+  "site:protect.enabled": "1",
   "site:protect.hash": "46637337ac3a5aca2304ca005b831f428eec1a17efd4d909e9ce860e5d8f1417"
 }
