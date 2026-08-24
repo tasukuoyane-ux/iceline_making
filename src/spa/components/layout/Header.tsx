@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { Menu, X } from "lucide-react";
 import { SITE } from "../../data/company";
@@ -27,6 +27,29 @@ const NAV: { to: string; label: string }[] = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  // スクロールダウンで上へスライドアウト、スクロールアップで上からスライドイン。
+  // ページ上部（ヘッダー高さ以内）では常に表示。小さな揺れで震えないよう
+  // 6px 以上の移動で方向を判定する。
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const d = y - lastY;
+        if (y < 80) setHidden(false);
+        else if (d > 6) setHidden(true);
+        else if (d < -6) setHidden(false);
+        lastY = y;
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const { pathname } = useLocation();
   // 採用3ページでは帯をブランドレッドにし、ナビ文字色を白へ反転する。
   // ロゴもこのページ専用に差し替え可能（recruit3:header.logo）。
@@ -36,7 +59,9 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b backdrop-blur",
+        "sticky top-0 z-50 w-full border-b backdrop-blur transition-transform duration-300",
+        // SPメニュー展開中はスライドアウトしない（操作途中で消えないように）
+        hidden && !open ? "-translate-y-full" : "translate-y-0",
         r3 ? "border-white/25 bg-[#E60012]" : "border-border bg-background/90",
       )}
     >
