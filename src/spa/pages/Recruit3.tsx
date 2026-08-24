@@ -946,54 +946,76 @@ function HeroExtra() {
 
 /* ═══════════════ 数字で見るアイスライン ═══════════════ */
 
-// 画像の中に H3＋p を重ねたタイルを gap:1px で敷き詰める。
-// 最初の3枠は常に表示（最低3枚）。4枠目以降は入力された枠だけが公開され、
-// 入力を空に戻せば減らせる（最大12枠まで追加・削減可能）。
+// 横長の白カードを縦に積み、カードを左右交互に少しずらして配置する（2026-08 モック準拠。
+// スマホでも少しずらす）。カード内は左＝赤の縦罫付き見出し＋本文、右＝赤い円
+// （大きな白文字）と左に重なる水色の円（透過PNG）。
+// カード数はコンソールの「追加」「削除」で 1〜12 に変更できる（既定3）。
 const MAX_STATS = 12;
-const MIN_STATS = 3;
 
 function Stats3() {
-  const items = Array.from({ length: MAX_STATS }, (_, i) => ({
-    i,
-    image: img(`recruit3:stats.${i}.image`, ""),
-    h3: txt(`recruit3:stats.${i}.h3`, ""),
-    p: txt(`recruit3:stats.${i}.p`, ""),
-  }));
-  const shown = EDIT_MODE
-    ? items
-    : items.filter((s) => s.i < MIN_STATS || s.image !== "" || s.h3 !== "" || s.p !== "");
+  const rep = repeatSel("recruit3:stats.count", 3, MAX_STATS, "数字タイルの数");
   return (
     <Sec>
       <Head base="recruit3:stats.head" en="COMPANY DECK" jp="数字で見るアイスライン" />
-      <div className="mt-10 grid grid-cols-2 gap-[1px] tab:grid-cols-3">
-        {shown.map((s) => (
-          <div key={s.i} className="relative aspect-[4/3] overflow-hidden bg-secondary">
-            <ImageWithFallback
-              src={s.image || PH}
-              alt={s.h3 || `数字で見るアイスライン ${s.i + 1}`}
-              sizes="(min-width: 1025px) 25vw, 50vw"
-              className="absolute inset-0 h-full w-full object-cover"
-              {...edImg(`recruit3:stats.${s.i}.image`, `数字タイル${s.i + 1} 画像`)}
-            />
-            {/* 文字の可読性用のグラデーション */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-black/10" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center text-white">
-              <h3
-                style={{ fontSize: "clamp(18px, 2.3vw, 28px)", fontWeight: 900, lineHeight: 1.3, textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}
-                {...ed(`recruit3:stats.${s.i}.h3`, `数字タイル${s.i + 1} 見出し`)}
-              >
-                {s.h3 || (EDIT_MODE ? "（見出し）" : "")}
-              </h3>
-              <p
-                className="mt-1"
-                style={{ fontSize: 12, lineHeight: 1.7, whiteSpace: "pre-line", textShadow: "0 1px 8px rgba(0,0,0,0.45)" }}
-                {...ed(`recruit3:stats.${s.i}.p`, `数字タイル${s.i + 1} 説明`, { multiline: true })}
-              >
-                {s.p || (EDIT_MODE ? "（説明）" : "")}
-              </p>
+      <div className="mt-10 space-y-6" {...rep.attrs}>
+        {Array.from({ length: MAX_STATS }, (_, i) => {
+          const base = `recruit3:stats.${i}`;
+          const icon = img(`${base}.image`, "");
+          return (
+            <div
+              key={i}
+              className={
+                "flex w-[92%] items-center gap-5 rounded-[0.875rem] bg-white px-6 py-7 shadow-[0_16px_36px_rgba(15,42,51,0.10)] pc:w-[72%] pc:gap-8 pc:px-9 " +
+                (i % 2 ? "ml-auto" : "mr-auto")
+              }
+            >
+              {/* 左：見出し（赤の縦罫）＋本文 */}
+              <div className="min-w-0 flex-1">
+                <h3
+                  className="border-l-4 pl-3"
+                  style={{ borderColor: PAL.red, fontSize: 17, fontWeight: 900, color: PAL.red, lineHeight: 1.5 }}
+                  {...ed(`${base}.h3`, `数字タイル${i + 1} 見出し`)}
+                >
+                  {txt(`${base}.h3`, "（見出し）")}
+                </h3>
+                <p
+                  className="mt-3 pl-3"
+                  style={{ fontSize: 13, lineHeight: 1.95, color: "#1c2b30", whiteSpace: "pre-line" }}
+                  {...ed(`${base}.p`, `数字タイル${i + 1} 本文`, { multiline: true })}
+                >
+                  {txt(`${base}.p`, "（本文）")}
+                </p>
+              </div>
+              {/* 右：赤い円（大きな白文字）＋左に重なる水色の円（透過PNG画像） */}
+              <div className="relative h-32 w-40 shrink-0 pc:h-44 pc:w-56">
+                <div
+                  className="absolute right-0 top-0 flex h-32 w-32 items-center justify-center rounded-full px-4 text-center pc:h-44 pc:w-44 pc:px-5"
+                  style={{ background: PAL.red }}
+                >
+                  <span
+                    style={{ color: "#fff", fontSize: "clamp(20px, 2.4vw, 32px)", fontWeight: 900, lineHeight: 1.3, whiteSpace: "pre-line" }}
+                    {...ed(`${base}.circle`, `数字タイル${i + 1} 円内テキスト`)}
+                  >
+                    {txt(`${base}.circle`, "00")}
+                  </span>
+                </div>
+                <div
+                  className="absolute left-0 top-1/2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full pc:h-20 pc:w-20"
+                  style={{ background: "#cfe6f2" }}
+                >
+                  {(icon !== "" || EDIT_MODE) && (
+                    <ImageWithFallback
+                      src={icon || PH}
+                      alt=""
+                      className="h-9 w-9 rounded-full object-contain pc:h-12 pc:w-12"
+                      {...edImg(`${base}.image`, `数字タイル${i + 1} アイコン画像（透過PNG）`)}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Sec>
   );

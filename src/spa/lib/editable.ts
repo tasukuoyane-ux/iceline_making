@@ -114,7 +114,14 @@ export function repeatSel(
   const options = Array.from({ length: max }, (_, i) => ({ value: String(i + 1), label: `${i + 1}項目` }));
   return {
     count,
-    attrs: { ...edSel(path, label, options, String(count)), "data-repeat": "1" },
+    attrs: {
+      ...edSel(path, label, options, String(count)),
+      "data-repeat": "1",
+      // コンソールの「追加」「削除」ボタン用メタ情報：
+      // 項目パスの接頭辞（例 "recruit3:culture."）と枠の上限
+      "data-repeat-prefix": path.replace(/count$/, ""),
+      "data-repeat-max": String(max),
+    },
   };
 }
 

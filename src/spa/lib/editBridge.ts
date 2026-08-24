@@ -136,6 +136,8 @@ interface PageField {
   section?: string;
   /** true なら動画URLフィールド（コンソールに動画ファイルのアップロードボタンを表示） */
   video?: boolean;
+  /** 繰り返しセクションの「項目数」フィールドのメタ情報（追加・削除ボタン用） */
+  repeat?: { prefix: string; max: number };
 }
 
 /** 要素が属するセクションの表示名（見出しテキスト）を求める */
@@ -220,6 +222,14 @@ function scanFields(): PageField[] {
       ...(isSel ? { options: parseOptions(el.getAttribute("data-edit-options")) } : {}),
       ...(ratio ? { ratio } : {}),
       ...(el.hasAttribute("data-edit-video") ? { video: true } : {}),
+      ...(isSel && el.hasAttribute("data-repeat")
+        ? {
+            repeat: {
+              prefix: el.getAttribute("data-repeat-prefix") || "",
+              max: parseInt(el.getAttribute("data-repeat-max") || "0", 10) || 0,
+            },
+          }
+        : {}),
     });
   }
   return fields;

@@ -1,6 +1,6 @@
 // ページ単位エディタ：現在プレビュー中ページの編集可能要素を、
 // セクションごとのアコーディオン（既定は閉じた状態）で表示して編集する。
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Content, getValueByPath, setValueByPath } from "./content";
 import { Select, TextArea, TextInput } from "./ui";
 import { ImageField } from "./ImageField";
@@ -133,6 +133,15 @@ export interface PageField {
   section?: string;
   /** true なら動画URLフィールド（動画ファイルのアップロードボタンを表示） */
   video?: boolean;
+  /** 繰り返しセクションの「項目数」フィールドのメタ情報（追加・削除ボタン用） */
+  repeat?: { prefix: string; max: number };
+}
+
+/** 繰り返しセクション：パスから項目番号を求める（項目でなければ null） */
+function repeatIndexOf(path: string, prefix: string): number | null {
+  if (!prefix || !path.startsWith(prefix)) return null;
+  const seg = path.slice(prefix.length).split(".")[0];
+  return /^\d+$/.test(seg) ? parseInt(seg, 10) : null;
 }
 
 interface FieldGroup {
@@ -376,6 +385,107 @@ export function PageFields({
     );
   }
 
+  /** グループ内フィールドの描画。繰り返しセクション（項目数フィールドを含む）は
+   * フロントエンドに表示されている項目だけを「項目n」ごとに区切って表示し、
+   * 「追加」「削除」ボタンで項目数を操作できるようにする。 */
+  function renderGroupFields(g: FieldGroup): ReactNode {
+    const rf = g.fields.find((f) => f.repeat);
+    if (!rf || !rf.repeat) return g.fields.map((f, fi) => renderField(f, g.start + fi));
+    const { prefix, max } = rf.repeat;
+    const countRaw = parseInt(getValueByPath(draft, rf.path) ?? rf.value, 10);
+    const count = Math.min(max, Math.max(1, Number.isNaN(countRaw) ? 1 : countRaw));
+
+    // 項目番号ごとに振り分け（項目数フィールド自体はボタンで操作するため非表示）
+    const baseFields: PageField[] = [];
+    const items = new Map<number, PageField[]>();
+    for (const f of g.fields) {
+      if (f.path === rf.path) continue;
+      const idx = repeatIndexOf(f.path, prefix);
+      if (idx === null) baseFields.push(f);
+      else {
+        if (!items.has(idx)) items.set(idx, []);
+        items.get(idx)!.push(f);
+      }
+    }
+
+    // 値と付随設定（非表示・アニメ・色・比率）をまとめて書き換えるヘルパー
+    const auxPrefixes = ["hide:", "anim:", "color:"] as const;
+    const clearItem = (next: Content, fs: PageField[]): Content => {
+      for (const f of fs) {
+        next = setValueByPath(next, f.path, "");
+        for (const pre of auxPrefixes) next = setValueByPath(next, pre + f.path, "");
+        if (f.ratio) {
+          next = setValueByPath(next, f.ratio.path, "");
+          next = setValueByPath(next, "anim:" + f.ratio.path, "");
+        }
+      }
+      return next;
+    };
+
+    const removeItem = (idx: number) => {
+      if (!confirm(`項目${idx + 1}を削除しますか？（後ろの項目が繰り上がります）`)) return;
+      let next = draft;
+      // idx 以降へ、次の項目の内容（表示中の実効値）と付随設定を繰り上げコピー
+      for (let n = idx; n < count - 1; n++) {
+        for (const f of items.get(n + 1) ?? []) {
+          const toP = f.path.replace(prefix + (n + 1) + ".", prefix + n + ".");
+          next = setValueByPath(next, toP, (getValueByPath(next, f.path) ?? f.value) ?? "");
+          for (const pre of auxPrefixes) {
+            next = setValueByPath(next, pre + toP, getValueByPath(next, pre + f.path) ?? "");
+          }
+          if (f.ratio) {
+            const rTo = f.ratio.path.replace(prefix + (n + 1) + ".", prefix + n + ".");
+            next = setValueByPath(next, rTo, getValueByPath(next, f.ratio.path) ?? "");
+            next = setValueByPath(next, "anim:" + rTo, getValueByPath(next, "anim:" + f.ratio.path) ?? "");
+          }
+        }
+      }
+      // 末尾の項目は初期状態に戻し、項目数を1減らす
+      next = clearItem(next, items.get(count - 1) ?? []);
+      next = setValueByPath(next, rf.path, String(count - 1));
+      onChange(next);
+    };
+
+    const addItem = () => {
+      // 新しく表示する枠は初期状態（以前の入力の残りをクリア）で始める
+      let next = clearItem(draft, items.get(count) ?? []);
+      next = setValueByPath(next, rf.path, String(count + 1));
+      onChange(next);
+    };
+
+    let n = g.start;
+    const out: ReactNode[] = baseFields.map((f) => renderField(f, n++));
+    const sortedIdx = [...items.keys()].sort((a, b) => a - b).filter((i) => i < count);
+    for (const idx of sortedIdx) {
+      out.push(
+        <div key={`hdr-${idx}`} className="flex items-center justify-between pt-1">
+          <span className="text-[11px] font-bold text-slate-500">項目 {idx + 1}</span>
+          <button
+            type="button"
+            onClick={() => removeItem(idx)}
+            disabled={count <= 1}
+            className="rounded border border-rose-300 bg-white px-2 py-0.5 text-[10px] font-medium text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-40"
+          >
+            削除
+          </button>
+        </div>
+      );
+      for (const f of items.get(idx)!) out.push(renderField(f, n++));
+    }
+    out.push(
+      <button
+        key="add-item"
+        type="button"
+        onClick={addItem}
+        disabled={count >= max}
+        className="w-full rounded border border-dashed border-slate-300 bg-white py-2 text-[11px] font-medium text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-40"
+      >
+        ＋ 項目を追加（{count}/{max}）
+      </button>
+    );
+    return out;
+  }
+
   return (
     <div className="space-y-2">
       <p className="text-[11px] leading-relaxed text-slate-500">
@@ -446,7 +556,7 @@ export function PageFields({
                     このセクションは公開ページで非表示になっています（「非表示中」を押すと戻せます）。
                   </p>
                 )}
-                {g.fields.map((f, fi) => renderField(f, g.start + fi))}
+                {renderGroupFields(g)}
               </div>
             )}
           </div>
