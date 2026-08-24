@@ -606,17 +606,24 @@ function People3D() {
 /* ═══════════════ 6. 募集職種一覧（CMS管理） ═══════════════ */
 
 /** オーバーレイ内のセクション見出し */
-function OvHead({ en, jp }: { en: string; jp: string }) {
+function OvHead({ en, jp, base }: { en: string; jp: string; base?: string }) {
+  // base を渡すと英字ラベル（<base>.en）と見出し（<base>.jp）がコンソールから
+  // 編集可能になり、セクション単位の機能（非表示・文字色など）も各ページと同様に使える
   return (
     <div>
       <span
         className="inline-block rounded-full px-4 py-1 text-white"
         style={{ background: PAL.red, fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.16em" }}
+        {...(base ? ed(`${base}.en`, "英字ラベル") : {})}
       >
-        {en}
+        {base ? txt(`${base}.en`, en) : en}
       </span>
-      <h3 className="mt-3" style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}>
-        {jp}
+      <h3
+        className="mt-3"
+        style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}
+        {...(base ? ed(`${base}.jp`, "見出し") : {})}
+      >
+        {base ? txt(`${base}.jp`, jp) : jp}
       </h3>
     </div>
   );
@@ -713,52 +720,53 @@ function FaqList({ items }: { items: { q: string; a: string }[] }) {
   );
 }
 
-/** 選考の流れ：フローチャート（角丸ボックス＋矢印で文字列をつなぐ） */
-function FlowChart({ steps, accent }: { steps: string[]; accent: string }) {
-  return (
-    <div className="mt-8 flex flex-wrap items-center gap-y-4">
-      {steps.map((s, i) => (
-        <div key={i} className="flex items-center">
-          <div
-            className="flex min-h-[56px] items-center rounded-[0.625rem] border-l-4 bg-white px-5 py-3 shadow-[0_10px_24px_rgba(15,42,51,0.10)] ring-1 ring-black/5"
-            style={{ borderColor: accent }}
-          >
-            <span style={{ fontSize: 14, fontWeight: 800, color: PAL.ink, lineHeight: 1.7, whiteSpace: "pre-line" }}>{s}</span>
-          </div>
-          {i < steps.length - 1 && <ArrowRight size={20} className="mx-2.5 shrink-0" style={{ color: PAL.teal }} />}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 /** 職種の詳細オーバーレイ（業務内容〜エントリーフォーム） */
 function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobIndex: number; data: RecruitView; onClose: () => void }) {
   useBodyLock(true);
   const accent = ACCENTS[jobIndex % ACCENTS.length];
+  // スクロールダウンでヘッダー右上に「エントリー」への追尾アンカーボタンを表示
+  const [showEntryCta, setShowEntryCta] = useState(false);
+  const entryRef = useRef<HTMLElement | null>(null);
   // ページ側のスタッキングコンテキストに閉じ込められないよう body 直下へポータル描画
   return createPortal(
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[80] overflow-y-auto bg-[#f4f9fb]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[80] overflow-y-auto bg-[#f4f9fb]"
+      onScroll={(e) => setShowEntryCta((e.target as HTMLElement).scrollTop > 240)}
+    >
       {/* ヘッダー（スクロールしても閉じられるよう sticky） */}
       <div className="sticky top-0 z-10 border-b border-black/5 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1000px] items-center gap-3 px-6 py-4">
           <span className="rounded-full px-3 py-1 text-white" style={{ background: accent, fontSize: 12, fontWeight: 700 }}>{job.dept}</span>
-          <span style={{ fontSize: 18, fontWeight: 900, color: PAL.ink }}>{job.title}</span>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
-          >
-            <X size={22} style={{ color: PAL.ink }} />
-          </button>
+          <span className="truncate" style={{ fontSize: 18, fontWeight: 900, color: PAL.ink }}>{job.title}</span>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            {showEntryCta && (
+              <button
+                type="button"
+                onClick={() => entryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                className="rounded-full px-4 py-2 text-white transition-opacity hover:opacity-85"
+                style={{ background: PAL.red, fontSize: 13, fontWeight: 800 }}
+              >
+                エントリー
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="閉じる"
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
+            >
+              <X size={22} style={{ color: PAL.ink }} />
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-[1000px] px-6 pb-24 pt-12">
         {/* 業務内容 */}
         <section>
-          <OvHead en="POSITION" jp="業務内容" />
+          <OvHead en="POSITION" jp="業務内容" base="recruit3:ov.position" />
           <div className="mt-8 grid items-center gap-8 rounded-[0.875rem] bg-white p-6 shadow-[0_16px_36px_rgba(15,42,51,0.12)] pc:grid-cols-2 pc:gap-10 pc:p-9">
             <div className="pc:order-2">
               {job.image ? (
@@ -777,13 +785,13 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
 
         {/* 1日の流れ */}
         <section className="mt-20">
-          <OvHead en="A DAY" jp="1日の流れ" />
+          <OvHead en="A DAY" jp="1日の流れ" base="recruit3:ov.day" />
           <Timeline t={job.day} timeWidth={64} />
         </section>
 
         {/* キャリアパス */}
         <section className="mt-20">
-          <OvHead en="CAREER PATH" jp="キャリアパス" />
+          <OvHead en="CAREER PATH" jp="キャリアパス" base="recruit3:ov.career" />
           <Timeline t={job.career} timeWidth={96} />
         </section>
 
@@ -806,32 +814,49 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
 
         {/* 諸条件（職種ごと。旧データは共通テンプレートにフォールバック） */}
         <section className="mt-24">
-          <OvHead en="CONDITIONS" jp="諸条件" />
+          <OvHead en="CONDITIONS" jp="諸条件" base="recruit3:ov.conditions" />
           <RowsTable rows={job.conditions?.length ? job.conditions : data.conditions} tint="teal" />
         </section>
 
         {/* 福利厚生（職種ごと・諸条件の色違い） */}
         <section className="mt-20">
-          <OvHead en="BENEFITS" jp="福利厚生" />
+          <OvHead en="BENEFITS" jp="福利厚生" base="recruit3:ov.benefits" />
           <RowsTable rows={job.benefits?.length ? job.benefits : data.benefits} tint="coral" />
         </section>
 
-        {/* 選考の流れ（全職種共通・コンソール「採用」タブで編集） */}
-        {(data.flow ?? []).filter((s) => s.trim() !== "").length > 0 && (
-          <section className="mt-20">
-            <OvHead en="FLOW" jp="選考の流れ" />
-            <FlowChart steps={(data.flow ?? []).filter((s) => s.trim() !== "")} accent={accent} />
-          </section>
-        )}
+        {/* 選考の流れ（1日の流れと同じタイムライン形式・職種ごと。
+            旧データは共通「選考の流れ」（文字列）をステップに変換して表示） */}
+        {(() => {
+          const flowT: RecruitTimeline =
+            job.flow && job.flow.steps?.length
+              ? job.flow
+              : {
+                  note: "",
+                  image: "",
+                  steps: (data.flow ?? [])
+                    .filter((s) => s.trim() !== "")
+                    .map((s, i) => ({ time: `STEP${i + 1}`, task: s })),
+                };
+          if (flowT.steps.length === 0) return null;
+          return (
+            <section className="mt-20">
+              <OvHead en="FLOW" jp="選考の流れ" base="recruit3:ov.flow" />
+              <Timeline t={flowT} timeWidth={96} />
+            </section>
+          );
+        })()}
 
         {/* よくある質問（現状踏襲） */}
         <section className="mt-20">
-          <OvHead en="FAQ" jp="よくある質問" />
+          <OvHead en="FAQ" jp="よくある質問" base="recruit3:ov.faq" />
           <FaqList items={data.faq} />
         </section>
 
         {/* エントリーフォーム（現状踏襲） */}
-        <section className="mt-20 overflow-hidden rounded-[0.875rem] shadow-[0_16px_36px_rgba(15,42,51,0.10)]">
+        <section
+          ref={entryRef as any}
+          className="mt-20 overflow-hidden rounded-[0.875rem] shadow-[0_16px_36px_rgba(15,42,51,0.10)]"
+        >
           <EntryForm />
         </section>
       </div>
@@ -1078,9 +1103,9 @@ function Deck3() {
   const [idx, setIdx] = useState(0);
   const cur = slides.length > 0 ? idx % slides.length : 0;
 
-  // 5秒ごとに自動送り（2枚以上あるときだけ）
+  // 5秒ごとに自動送り（2枚以上あるときだけ。プレビューでも本番と同じ挙動）
   useEffect(() => {
-    if (EDIT_MODE || slides.length < 2) return;
+    if (slides.length < 2) return;
     const t = setInterval(() => setIdx((v) => v + 1), 5000);
     return () => clearInterval(t);
   }, [slides.length]);
@@ -1090,24 +1115,8 @@ function Deck3() {
     <Sec>
       <Head base="recruit3:deck.head" en="COMPANY DECK" jp="カンパニーデック" center />
       <div className="mx-auto mt-10 w-full max-w-[800px]">
-        {EDIT_MODE ? (
-          /* 編集用：全枠を1行の横スクロールで表示（画像をクリックして差し替え） */
-          <div className="flex gap-2 overflow-x-auto pb-3">
-            {all.map((s) => (
-              <div key={s.i} className="relative aspect-video w-56 shrink-0 overflow-hidden rounded bg-secondary">
-                <ImageWithFallback
-                  src={s.src || PH}
-                  alt={`スライド${s.i + 1}`}
-                  className="h-full w-full object-cover"
-                  {...edImg(`recruit3:deck.${s.i}.image`, `デッキ スライド${s.i + 1}`)}
-                />
-                <span className="absolute left-1 top-1 rounded bg-black/55 px-1.5 text-white" style={{ fontSize: 10 }}>
-                  {s.i + 1}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
+        {/* 本番と同じスライドショー表示（プレビューでも同じ見た目）。 */}
+        {slides.length > 0 ? (
           <div className="relative">
             <div className="relative aspect-video w-full overflow-hidden rounded-[0.625rem] bg-secondary shadow-[0_14px_30px_rgba(15,42,51,0.14)]">
               {slides.map((s, n) => (
@@ -1154,6 +1163,30 @@ function Deck3() {
                 </div>
               </>
             )}
+          </div>
+        ) : (
+          /* 画像未設定（編集モードのみ到達）：空のプレースホルダー */
+          <div className="flex aspect-video w-full items-center justify-center rounded-[0.625rem] bg-secondary" style={{ fontSize: 13, color: "#7a8a92" }}>
+            （下の編集用の枠に16:9画像を追加するとスライドショーが表示されます）
+          </div>
+        )}
+
+        {/* 編集用：全枠を1行の横スクロールで表示（画像をクリックして差し替え） */}
+        {EDIT_MODE && (
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-3">
+            {all.map((s) => (
+              <div key={s.i} className="relative aspect-video w-56 shrink-0 overflow-hidden rounded bg-secondary">
+                <ImageWithFallback
+                  src={s.src || PH}
+                  alt={`スライド${s.i + 1}`}
+                  className="h-full w-full object-cover"
+                  {...edImg(`recruit3:deck.${s.i}.image`, `デッキ スライド${s.i + 1}`)}
+                />
+                <span className="absolute left-1 top-1 rounded bg-black/55 px-1.5 text-white" style={{ fontSize: 10 }}>
+                  {s.i + 1}
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </div>

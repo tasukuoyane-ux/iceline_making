@@ -64,6 +64,8 @@ export interface RecruitJob {
   career: RecruitTimeline;
   /** 職種別メッセージ（改行可・大きな黒文字で表示） */
   message: string;
+  /** 選考の流れ（1日の流れと同じタイムライン形式・職種ごと） */
+  flow: RecruitTimeline;
   /** 諸条件（表・職種ごと） */
   conditions: RecruitRow[];
   /** 福利厚生（諸条件の色違いの表・職種ごと） */
@@ -222,10 +224,16 @@ export function normalizeRecruit(r: any): RecruitData {
   });
   const sharedConditions = rows(r?.conditions);
   const sharedBenefits = rows(r?.benefits);
+  // 旧・共通「選考の流れ」（文字列の配列）を職種別タイムラインの初期値に変換する
+  const sharedFlowSteps = (Array.isArray(r?.flow) && r.flow.length ? r.flow : DEFAULT_RECRUIT_FLOW)
+    .map((s: any) => String(s ?? ""))
+    .filter((s: string) => s.trim() !== "")
+    .map((s: string, i: number) => ({ time: `STEP${i + 1}`, task: s }));
   return {
     jobs: (Array.isArray(r?.jobs) ? r.jobs : []).map((j: any) => {
       const cond = rows(j?.conditions);
       const bene = rows(j?.benefits);
+      const flow = timeline(j?.flow);
       return {
         id: String(j?.id ?? ""),
         title: String(j?.title ?? ""),
@@ -236,6 +244,7 @@ export function normalizeRecruit(r: any): RecruitData {
         day: timeline(j?.day),
         career: timeline(j?.career),
         message: String(j?.message ?? ""),
+        flow: flow.steps.length ? flow : { note: "", image: "", steps: clone(sharedFlowSteps) },
         // 旧データ（職種ごとの設定がない）は共通テンプレートを引き継ぐ
         conditions: cond.length ? cond : clone(sharedConditions),
         benefits: bene.length ? bene : clone(sharedBenefits),

@@ -180,30 +180,31 @@ export function Hero({ bandColor = "#1ec8dd", extra }: { bandColor?: string; ext
   return (
     <header className="relative flex h-[88vh] min-h-[560px] items-center justify-center overflow-hidden" style={{ background: PAL.blue }}>
       {/* レイヤー1（下）：4枚の画像スライド。
-          通常時 … 継ぎ足されながら右→左へ流れ続けるマーキー（pronets風）。
-          編集時 … 全4枚を静止した横1行（4列）で表示し、コンソールから1枚ずつ差し替え可能にする。 */}
-      {EDIT_MODE ? (
-        <div className="absolute inset-0 grid grid-cols-4 grid-rows-1">
+          継ぎ足されながら右→左へ流れ続けるマーキー（pronets風）。
+          編集プレビューでも本番と同じ見た目で表示し、差し替えは
+          左下の編集用サムネイル（編集モード限定）から行う。 */}
+      <div className="pointer-events-none absolute inset-0 flex items-stretch overflow-hidden">
+        <div className="r2-marquee flex h-full items-stretch" style={{ width: "max-content" }}>
+          {[...slides, ...slides].map((src, i) => (
+            // 各スライドは縦横比 9:16（高さ88vh基準）の縦長
+            <div key={i} className="h-full shrink-0" style={{ width: "calc(88vh * 9 / 16)" }} aria-hidden={i >= slides.length}>
+              <img src={src} alt="" className="h-full w-full object-cover" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* 編集用サムネイル（編集モード限定・左下）：クリックで各スライドを差し替え */}
+      {EDIT_MODE && (
+        <div className="absolute bottom-4 left-4 z-30 flex gap-1.5 rounded-md bg-white/80 p-1.5 shadow">
           {slides.map((src, i) => (
             <img
               key={i}
               {...edImg(`recruit2:mv.slide.${i}`, `MVスライド画像${i + 1}`)}
               src={src}
               alt=""
-              className="h-full w-full object-cover"
+              className="h-16 w-9 rounded object-cover"
             />
           ))}
-        </div>
-      ) : (
-        <div className="pointer-events-none absolute inset-0 flex items-stretch overflow-hidden">
-          <div className="r2-marquee flex h-full items-stretch" style={{ width: "max-content" }}>
-            {[...slides, ...slides].map((src, i) => (
-              // 各スライドは縦横比 9:16（高さ88vh基準）の縦長
-              <div key={i} className="h-full shrink-0" style={{ width: "calc(88vh * 9 / 16)" }} aria-hidden={i >= slides.length}>
-                <img src={src} alt="" className="h-full w-full object-cover" />
-              </div>
-            ))}
-          </div>
         </div>
       )}
 

@@ -145,7 +145,8 @@ function sectionLabelFor(el: HTMLElement): string {
   const sec = el.closest<HTMLElement>("section, header");
   if (sec) {
     if (sec.tagName === "HEADER") return "メインビジュアル";
-    const h = sec.querySelector("h2, h1");
+    // h2 → h1 → h3 の優先順（職種オーバーレイのセクション見出しは h3）
+    const h = sec.querySelector("h2") ?? sec.querySelector("h1") ?? sec.querySelector("h3");
     const t = (h?.textContent || "").trim().replace(/\s+/g, " ");
     if (t) return t.length > 24 ? t.slice(0, 24) + "…" : t;
   }
@@ -285,6 +286,9 @@ export function initEditBridge() {
   document.addEventListener(
     "click",
     (e) => {
+      // 職種オーバーレイなど、クリックで後からDOMに現れる編集対象を拾えるよう、
+      // どのクリックでも少し待ってから一覧を再送信する
+      setTimeout(postFields, 700);
       const hit = findEditable(e.target);
       if (!hit) return;
       // クリックスルー対象（タブ等）は選択ハイライトだけ行い、

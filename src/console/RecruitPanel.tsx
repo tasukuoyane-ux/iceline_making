@@ -4,7 +4,7 @@
 //  - 諸条件・福利厚生: 表の行（項目名＋内容）を編集
 //  - よくある質問: sections.json の recruitFaq を編集（旧採用ページと共通データ）
 // 変更は左のプレビュー（採用3）へ即時反映され、「更新（本番へ公開）」で確定する。
-import { Content, RecruitData, RecruitJob, RecruitRow, RecruitStep, RecruitTimeline, clone } from "./content";
+import { Content, RecruitData, RecruitJob, RecruitRow, RecruitStep, RecruitTimeline, clone, DEFAULT_RECRUIT_FLOW } from "./content";
 import { Field, TextInput, TextArea, Button, Card, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { genId } from "./panels";
@@ -133,6 +133,16 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
         />
       </Card>
 
+      <Card title="選考の流れ（1日の流れと同じタイムライン形式）">
+        <TimelineEditor
+          value={job.flow}
+          onChange={(flow) => onChange({ ...job, flow })}
+          noteLabel="メモ（時計アイコンの横に表示・任意）"
+          timeLabel="ステップ"
+          imageLabel="選考の流れ 画像（任意）"
+        />
+      </Card>
+
       <Card title="職種別メッセージ">
         <Field label="メッセージ" hint="短い文を改行で区切って入力します。大きな黒文字で表示されます。">
           <TextArea rows={4} value={job.message} onChange={(e) => onChange({ ...job, message: e.target.value })} />
@@ -178,6 +188,7 @@ export function RecruitPanel({
       day: { note: "", image: "", steps: [{ time: "始業", task: "出社" }] },
       career: { note: "", image: "", steps: [{ time: "1年目", task: "基礎を習得" }] },
       message: "",
+      flow: { note: "", image: "", steps: DEFAULT_RECRUIT_FLOW.map((s, i) => ({ time: `STEP${i + 1}`, task: s })) },
       // 諸条件・福利厚生はテンプレート（既定の共通内容）から複製して開始する
       conditions: clone(recruit.conditions),
       benefits: clone(recruit.benefits),
@@ -260,20 +271,6 @@ export function RecruitPanel({
           </Collapsible>
         ))}
       </div>
-
-      {/* ── 選考の流れ ── */}
-      <Collapsible title="選考の流れ（全職種共通）">
-        <Field
-          label="ステップ（1行にひとつ）"
-          hint="職種詳細の「福利厚生」と「よくある質問」の間に、フローチャート（ボックス→矢印）として表示されます。空行は無視されます。"
-        >
-          <TextArea
-            rows={5}
-            value={(recruit.flow ?? []).join("\n")}
-            onChange={(e) => set({ flow: e.target.value.split("\n") })}
-          />
-        </Field>
-      </Collapsible>
 
       {/* ── よくある質問 ── */}
       <Collapsible title="よくある質問（全職種共通・/recruit と共通データ）">

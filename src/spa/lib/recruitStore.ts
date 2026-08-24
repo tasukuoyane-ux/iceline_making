@@ -26,6 +26,8 @@ export interface RecruitJob {
   day: RecruitTimeline;
   career: RecruitTimeline;
   message: string;
+  /** 選考の流れ（1日の流れと同じタイムライン形式。旧データでは未設定の場合がある） */
+  flow?: RecruitTimeline;
   /** 諸条件（職種ごと。旧データでは未設定の場合がある） */
   conditions?: RecruitRow[];
   /** 福利厚生（職種ごと。旧データでは未設定の場合がある） */
