@@ -1038,8 +1038,9 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
               )}
             </div>
             <div className="pc:order-1">
-              <p style={{ color: PAL.red, fontWeight: 800, fontSize: 15 }}>{job.dept}</p>
-              <h4 className="mt-2" style={{ color: PAL.teal, fontWeight: 900, fontSize: "clamp(20px, 2.6vw, 26px)", lineHeight: 1.45 }}>{job.title}</h4>
+              {/* 部門・職種名はstickyヘッダーと重複するため表示せず、
+                  全職種共通の黒太文字見出し「仕事内容」にする（2026-08 改修） */}
+              <h4 style={{ color: PAL.ink, fontWeight: 900, fontSize: "clamp(20px, 2.6vw, 26px)", lineHeight: 1.45 }}>仕事内容</h4>
               <p className="mt-4" style={{ color: "#1c2b30", fontSize: 15, lineHeight: 2.0, whiteSpace: "pre-line" }}>{job.body}</p>
             </div>
           </div>
