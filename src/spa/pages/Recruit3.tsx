@@ -18,7 +18,7 @@ import { Link, useSearchParams } from "react-router";
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
+import { ed, edImg, edSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { useRecruitData, RecruitJob, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { INTERVIEWS } from "../data/recruit";
@@ -800,9 +800,16 @@ function JobsSection() {
 
 /* ═══════════════ ページ本体 ═══════════════ */
 
+// メインビジュアルの表示・非表示（コンソールのプルダウンで切り替え）
+const MV_VISIBLE_OPTS = [
+  { value: "show", label: "表示" },
+  { value: "hidden", label: "非表示" },
+];
+
 export function Recruit3() {
   // MV以下のコンテンツ領域（背景動画のスクロール進行の基準）
   const areaRef = useRef<HTMLDivElement>(null);
+  const mvVisible = txt("recruit3:mv.visible", "show");
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden">
@@ -810,10 +817,15 @@ export function Recruit3() {
       {/* 動画が無い場合は採用2と同じパララックス背景 */}
       {!HAS_BG && <PageBg />}
 
-      {/* 1. メインビジュアル（ICELINE切り抜き帯は白）。MV表示中は背景動画より前面に置いて動画を隠す */}
-      <div className="relative z-20">
-        <Hero bandColor="#fff" />
-      </div>
+      {/* 1. メインビジュアル（ICELINE切り抜き帯は白）。MV表示中は背景動画より前面に置いて動画を隠す。
+          コンソールから要素ごと表示・非表示を切り替えられる（非公開時は編集プレビューでのみ描画し、
+          プレビューでは data-edit-selected 属性への CSS 反応で即時に表示が切り替わる） */}
+      <style>{`[data-edit-select="recruit3:mv.visible"][data-edit-selected="hidden"]{display:none}`}</style>
+      {(mvVisible !== "hidden" || EDIT_MODE) && (
+        <div className="relative z-20" {...edSel("recruit3:mv.visible", "メインビジュアルの表示", MV_VISIBLE_OPTS, mvVisible)}>
+          <Hero bandColor="#fff" />
+        </div>
+      )}
 
       {/* MV以下：スクロール追随の背景動画（fixed）＋新構成のコンテンツ */}
       <div ref={areaRef} className="relative">

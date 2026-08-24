@@ -9,11 +9,15 @@ import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
+import { ContactSection } from "../components/common/ContactSection";
 import { HEAT } from "../data/heatMap";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 
 // 要確認スロットの案内文（未入力の間、公開ページでは項目ごと非表示になる）
 const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
+
+// 施設写真（倉庫事業）のマーソンリー表示枠の上限
+const MAX_GALLERY_PHOTOS = 10;
 
 // ＋画像の差し替え可能なプレースホルダー（編集前に表示するグレー枠）
 const IMG_PLACEHOLDER =
@@ -308,27 +312,8 @@ export function ServicePage({ service }: { service: ServiceId }) {
         );
       })}
 
-      {/* 施設写真（倉庫事業のみ・キャプションはシート指定） */}
-      {s.photos && (
-        <Section heat={HEAT.foodList}>
-          <SectionTitle en="GALLERY" jp="施設写真" path={`${base}.gallery.en`} />
-          <div className="mt-10 grid grid-cols-2 gap-5 pc:grid-cols-3">
-            {s.photos.map((cap, i) => (
-              <figure key={i}>
-                <ImageWithFallback
-                  src={img(`${base}.photo.${i}.image`, IMG_PLACEHOLDER)}
-                  alt={txt(`${base}.photo.${i}.caption`, cap)}
-                  className="aspect-[4/3] w-full rounded-xl border border-border object-cover"
-                  {...edImg(`${base}.photo.${i}.image`, `施設写真${i + 1}`)}
-                />
-                <figcaption className="mt-2 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.7 }} {...ed(`${base}.photo.${i}.caption`, `施設写真${i + 1} キャプション`)}>
-                  {txt(`${base}.photo.${i}.caption`, cap)}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </Section>
-      )}
+      {/* お問い合わせ（倉庫事業：よくあるご質問の前。未入力の間は非表示） */}
+      {service === "warehouse" && <ContactSection base={base} heat={HEAT.foodList} />}
 
       {/* よくあるご質問 */}
       <Section heat={HEAT.foodReason}>
@@ -354,6 +339,44 @@ export function ServicePage({ service }: { service: ServiceId }) {
           })}
         </div>
       </Section>
+
+      {/* 施設写真（倉庫事業のみ・よくあるご質問の後・最大10枚のマーソンリー表示。
+          画像が設定された枠だけを公開ページに表示する） */}
+      {s.photos &&
+        (() => {
+          const slots = Array.from({ length: MAX_GALLERY_PHOTOS }, (_, i) => ({
+            i,
+            image: img(`${base}.photo.${i}.image`, ""),
+            capDef: s.photos![i] ?? "",
+          }));
+          const shown = slots.filter((p) => p.image !== "" || EDIT_MODE);
+          if (shown.length === 0) return null;
+          return (
+            <Section heat={HEAT.foodList}>
+              <SectionTitle en="GALLERY" jp="施設写真" path={`${base}.gallery.en`} />
+              <div className="mt-10 columns-2 gap-5 pc:columns-3">
+                {shown.map((p) => (
+                  <figure key={p.i} className="mb-5 break-inside-avoid">
+                    <ImageWithFallback
+                      src={p.image || IMG_PLACEHOLDER}
+                      alt={txt(`${base}.photo.${p.i}.caption`, p.capDef)}
+                      sizes="(min-width: 1025px) 33vw, 50vw"
+                      className={(p.image ? "" : "aspect-[4/3] object-cover ") + "w-full rounded-xl border border-border"}
+                      {...edImg(`${base}.photo.${p.i}.image`, `施設写真${p.i + 1}`)}
+                    />
+                    <figcaption
+                      className="mt-2 text-muted-foreground"
+                      style={{ fontSize: 13, lineHeight: 1.7 }}
+                      {...ed(`${base}.photo.${p.i}.caption`, `施設写真${p.i + 1} キャプション`)}
+                    >
+                      {txt(`${base}.photo.${p.i}.caption`, p.capDef) || (EDIT_MODE ? "（キャプション・任意）" : "")}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </Section>
+          );
+        })()}
 
       {/* お問い合わせ導線（＋ドライアイスはオンラインショップ導線） */}
       <Section heat={HEAT.foodList}>
@@ -383,6 +406,9 @@ export function ServicePage({ service }: { service: ServiceId }) {
           </div>
         </div>
       </Section>
+
+      {/* お問い合わせ（ドライアイス：ページ最下部。未入力の間は非表示） */}
+      {service === "dryice" && <ContactSection base={base} heat={HEAT.foodReason} />}
     </>
   );
 }

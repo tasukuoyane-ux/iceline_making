@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ArrowRight, ChevronRight, ChevronDown, Search } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
+import { ContactSection } from "../components/common/ContactSection";
 import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
@@ -1041,6 +1042,9 @@ export function DivisionPage({ division }: { division: Division }) {
           </div>
         </Section>
       )}
+
+      {/* お問い合わせ（ページ別の問い合わせ先。未入力の間は非表示） */}
+      <ContactSection base={`division:${division}`} heat={listHeat} />
     </>
   );
 }
