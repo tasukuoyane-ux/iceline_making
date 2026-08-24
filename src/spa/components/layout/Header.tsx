@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { createPortal } from "react-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Menu, X } from "lucide-react";
 import { SITE } from "../../data/company";
 import logoImg from "../../../images/logo.png";
@@ -55,6 +56,28 @@ export function Header() {
   // ロゴもこのページ専用に差し替え可能（recruit3:header.logo）。
   const r3 = pathname.startsWith("/recruit3");
   const logoSrc = img("header:logo", logo);
+
+  // 「採用情報」CTAクリック時の円形トランジション：
+  // ボタン中心から #9cdff1 の真円がイーズインしながら1.2秒でビューポート全体を
+  // 埋め尽くし、その間に /recruit3 を読み込む（完成後はフェードアウトして消える）。
+  const navigate = useNavigate();
+  const [circle, setCircle] = useState<{ x: number; y: number; scale: number } | null>(null);
+  const startCtaTransition = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (circle) return; // 連打ガード
+    setOpen(false);
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    // ボタン中心からビューポートの最遠隅までの距離＝必要な円の半径
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+    // 基準10pxの円を必要倍率まで scale で拡大する（2%の余白）
+    setCircle({ x, y, scale: (radius * 2 * 1.02) / 10 });
+    // 円が広がっている1.2秒の間に採用3を読み込む
+    navigate("/recruit3");
+    // 拡大1.2秒＋フェードアウト0.4秒の後に片付ける
+    window.setTimeout(() => setCircle(null), 1700);
+  };
 
   return (
     <header
@@ -164,13 +187,16 @@ export function Header() {
               if (r3) {
                 e.preventDefault();
                 document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              } else {
+                // 採用情報：円形トランジションで /recruit3 へ
+                startCtaTransition(e);
               }
             }}
             className={cn(
               "ml-3 inline-flex items-center px-5 py-2.5 transition-colors",
               r3
                 ? "bg-white text-[#E60012] hover:bg-white/90"
-                : "bg-brand text-brand-foreground hover:bg-brand-dark",
+                : "bg-brand text-brand-foreground hover:bg-[#9CDFF1] hover:text-[#16232b]",
             )}
             style={{ fontSize: 14 }}
           >
@@ -244,9 +270,11 @@ export function Header() {
                 if (r3) {
                   e.preventDefault();
                   document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                } else {
+                  startCtaTransition(e);
                 }
               }}
-              className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground"
+              className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground transition-colors hover:bg-[#9CDFF1] hover:text-[#16232b]"
             >
               {r3 ? (
                 <span {...ed("recruit3:header.cta.label", "採用CTA（採用3・エントリー）")}>{txt("recruit3:header.cta.label", "エントリー")}</span>
@@ -257,6 +285,31 @@ export function Header() {
           </div>
         </nav>
       )}
+
+      {/* 円形トランジション：CTAボタン中心から #9cdff1 の真円がビューポート全体へ広がる。
+          ページ側のスタッキングコンテキストに閉じ込められないよう body 直下へポータル描画 */}
+      {circle &&
+        createPortal(
+          <div aria-hidden className="pointer-events-none fixed inset-0 z-[200] overflow-hidden">
+            <style>{`
+              .hdr-cta-circle {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                margin: -5px 0 0 -5px;
+                border-radius: 9999px;
+                background: #9cdff1;
+                animation:
+                  hdr-cta-expand 1.2s ease-in forwards,
+                  hdr-cta-fade 0.4s ease-out 1.2s forwards;
+              }
+              @keyframes hdr-cta-expand { from { transform: scale(0); } to { transform: scale(var(--cta-scale)); } }
+              @keyframes hdr-cta-fade { from { opacity: 1; } to { opacity: 0; } }
+            `}</style>
+            <div className="hdr-cta-circle" style={{ left: circle.x, top: circle.y, ["--cta-scale" as any]: circle.scale }} />
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }

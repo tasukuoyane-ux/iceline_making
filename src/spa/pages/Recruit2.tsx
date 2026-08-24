@@ -219,16 +219,20 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
       {!bare && <div className="pointer-events-none absolute inset-0" style={{ background: "rgba(15,42,51,0.30)" }} />}
 
       {/* レイヤー2（上）：ICELINEの形に切り抜かれたビビッド帯。帯・文字の高さ＝背景画像の高さ（88vh）。
-          横方向は画面に収まらなくてよいので maxWidth:none で自然幅のまま右→左ループ。 */}
-      <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
-        <div className="r2-fast flex items-center" style={{ width: "max-content", height: "88vh" }}>
-          <img src={iceKnock} alt="ICELINE" style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
-          <img src={iceKnock} alt="" aria-hidden style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
+          横方向は画面に収まらなくてよいので maxWidth:none で自然幅のまま右→左ループ。
+          bare（採用3）では ICELINE の白抜き帯も表示しない（2026-08 改修） */}
+      {!bare && (
+        <div className="pointer-events-none absolute inset-0 flex items-center overflow-hidden">
+          <div className="r2-fast flex items-center" style={{ width: "max-content", height: "88vh" }}>
+            <img src={iceKnock} alt="ICELINE" style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
+            <img src={iceKnock} alt="" aria-hidden style={{ height: "88vh", width: "auto", maxWidth: "none" }} />
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* キャッチコピー（＋ページ側から extra で追記できる：採用3のサブコピー等） */}
-      <div className="relative z-10 px-6 text-center">
+      {/* キャッチコピー（＋ページ側から extra で追記できる：採用3のサブコピー等）。
+          r2-mv-copy は採用3のイントロ演出（テキストのブラーイン）が参照する */}
+      <div className="r2-mv-copy relative z-10 px-6 text-center">
         <Ed
           as="p"
           path="recruit2:mv.title"

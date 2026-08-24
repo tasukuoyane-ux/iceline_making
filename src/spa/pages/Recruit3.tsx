@@ -130,6 +130,127 @@ function BgVideos({ urls, areaRef }: { urls: string[]; areaRef: React.RefObject<
   );
 }
 
+// ── イントロ背景動画（背景動画1） ──────────────────────────
+// ページ表示と同時に自動再生し、ビューポート全体を埋める（スクロール連動ではない）。
+//  - マウント時に0.5秒かけてブラーイン
+//  - 再生が始まったら onPlaying（MV上のテキストが1秒かけてブラーインする合図）
+//  - 最終フレームに到達するまで下方向へのスクロールをロックし、
+//    その間にスクロール操作が行われたら再生速度を2倍にする
+//  - 再生終了で opacity:0（フェード）になり、背後のスクロール連動動画（背景動画2以降）が現れる
+const INTRO_CSS = `
+@keyframes r3-blurin-video { from { opacity: 0; filter: blur(24px); } to { opacity: 1; filter: blur(0); } }
+.r3-intro-video { animation: r3-blurin-video 0.5s ease-out both; }
+@keyframes r3-blurin-text { from { opacity: 0; filter: blur(16px); } to { opacity: 1; filter: blur(0); } }
+[data-r3-intro="wait"] .r2-mv-copy { opacity: 0; }
+[data-r3-intro="playing"] .r2-mv-copy { animation: r3-blurin-text 1s ease-out both; }
+`;
+
+function IntroVideo({
+  url,
+  state,
+  onPlaying,
+  onDone,
+}: {
+  url: string;
+  state: "wait" | "playing" | "done";
+  onPlaying: () => void;
+  onDone: () => void;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    let finished = false;
+
+    // スクロール操作が行われたら再生速度を2倍にする
+    const speedUp = () => {
+      try {
+        v.playbackRate = 2;
+      } catch {
+        /* noop */
+      }
+    };
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY > 0) speedUp();
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      speedUp();
+    };
+    const SCROLL_KEYS = ["ArrowDown", "PageDown", "End", " ", "Spacebar"];
+    const onKey = (e: KeyboardEvent) => {
+      if (SCROLL_KEYS.includes(e.key)) {
+        e.preventDefault();
+        speedUp();
+      }
+    };
+    // スクロールバー操作など preventDefault できない経路の保険：位置を先頭へ戻す
+    const onScroll = () => {
+      if (window.scrollY > 0) {
+        window.scrollTo(0, 0);
+        speedUp();
+      }
+    };
+    const removeLocks = () => {
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll);
+    };
+    // 最終フレーム到達（またはエラー・再生不能）でロック解除して opacity:0 へ
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      removeLocks();
+      onDone();
+    };
+
+    // 遷移直後のスクロール位置が残っていても、イントロはページ先頭（MV）から始める。
+    // リスナー登録前に戻しておき、登録後の scroll イベントは「ユーザーの操作」として扱う
+    window.scrollTo(0, 0);
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onScroll);
+    v.addEventListener("ended", finish);
+    v.addEventListener("error", finish);
+
+    const p = v.play();
+    if (p) {
+      p.then(() => {
+        if (!finished) onPlaying();
+      }).catch(finish); // 自動再生がブロックされた環境ではイントロをスキップ
+    }
+    // 回線状況などで10秒たっても再生が始まらない場合の保険（ロックしたままにしない）
+    const t = window.setTimeout(() => {
+      if (v.currentTime === 0) finish();
+    }, 10000);
+
+    return () => {
+      window.clearTimeout(t);
+      removeLocks();
+      v.removeEventListener("ended", finish);
+      v.removeEventListener("error", finish);
+    };
+    // 初回マウント時のみ（コールバックは初回クロージャで十分：setStateは安定）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
+
+  return (
+    <div
+      aria-hidden
+      className={
+        "pointer-events-none fixed inset-0 z-[5] transition-opacity duration-500 " +
+        (state === "done" ? "opacity-0" : "opacity-100")
+      }
+    >
+      <video ref={ref} src={url} muted playsInline preload="auto" className="r3-intro-video h-full w-full object-cover" />
+    </div>
+  );
+}
+
 /** モーダル表示中は背面のスクロールを止める */
 function useBodyLock(locked: boolean) {
   useEffect(() => {
@@ -1530,26 +1651,44 @@ export function Recruit3() {
   const areaRef = useRef<HTMLDivElement>(null);
   const mvType = txt("recruit3:mv.type", "hero");
 
+  // イントロ演出（背景動画1）：ヒーローMVのときだけ有効。
+  // 編集モードではスクロールロックが編集の妨げになるため無効化し、
+  // 従来どおり全動画をスクロール連動で表示する。
+  const introEnabled = HAS_BG && !EDIT_MODE && mvType === "hero";
+  const [intro, setIntro] = useState<"wait" | "playing" | "done">(introEnabled ? "wait" : "done");
+  // 背景動画2以降は従来と同じスクロール連動（最上部=1フレーム目、最下部=最終フレーム）
+  const scrubUrls = introEnabled ? BG_VIDEOS.slice(1) : BG_VIDEOS;
+
   return (
-    <div className="relative isolate min-h-screen overflow-hidden">
+    <div className="relative isolate min-h-screen overflow-hidden" data-r3-intro={intro}>
       <R2Styles />
       {/* 動画が無い場合は採用2と同じパララックス背景 */}
       {!HAS_BG && <PageBg />}
 
       <style>{MV_TYPE_CSS}</style>
+      <style>{INTRO_CSS}</style>
 
       {/* メインビジュアル以下：スクロール追随の背景動画（fixed）＋新構成のコンテンツ。
-          2026-08 改修：MVを背景動画の領域内へ移し、「現状どおり（ICELINE帯）」は
-          独自背景（スライドマーキー・水色地・ティント）を持たない透過表示にして、
-          背景動画がメインビジュアルから適用されるようにした */}
+          2026-08 改修：MVを背景動画の領域内へ移し、「現状どおり」は独自背景
+          （スライドマーキー・水色地・ティント・ICELINE帯）を持たない透過表示にして、
+          背景動画がメインビジュアルから適用されるようにした。
+          背景動画1はイントロ（自動再生・z軸で背景動画2の上）、2以降がスクロール連動 */}
       <div ref={areaRef} className="relative">
-        {HAS_BG && <BgVideos urls={BG_VIDEOS} areaRef={areaRef} />}
+        {scrubUrls.length > 0 && <BgVideos urls={scrubUrls} areaRef={areaRef} />}
+        {introEnabled && (
+          <IntroVideo
+            url={BG_VIDEOS[0]}
+            state={intro}
+            onPlaying={() => setIntro("playing")}
+            onDone={() => setIntro("done")}
+          />
+        )}
         <div className="relative z-10">
           {/* 1. メインビジュアル（種類はコンソールのプルダウンで切替） */}
           <div data-mv-root="1" {...edSel("recruit3:mv.type", "メインビジュアルの種類", MV_TYPE_OPTS, mvType)}>
             {(EDIT_MODE || mvType === "hero") && (
               <div data-mv-variant="hero">
-                <Hero bandColor="#fff" bare extra={<HeroExtra />} />
+                <Hero bare extra={<HeroExtra />} />
               </div>
             )}
             {(EDIT_MODE || mvType === "image") && (
