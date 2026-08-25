@@ -276,5 +276,11 @@
   "division:food.sec.logistics.3.ratio": "40",
   "division:food.sec.quality.0.ratio": "40",
   "division:food.sec.quality.1.ratio": "40",
-  "division:food.sec.quality.2.ratio": "40"
+  "division:food.sec.quality.2.ratio": "40",
+  "service:warehouse.sec.0.0.ratio": "50",
+  "service:warehouse.sec.0.1.ratio": "50",
+  "service:dryice.sec.about.0.ratio": "50",
+  "service:dryice.sec.0.0.ratio": "40",
+  "service:dryice.sec.uses.0.ratio": "40",
+  "company:ceo.ratio": "35"
 }
