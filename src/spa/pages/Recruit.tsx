@@ -7,7 +7,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
 import { toEmbed } from "../lib/video";
 import { hasVideo } from "../data/blocks";
 import { MovieBadge } from "../components/common/MovieBadge";
@@ -138,7 +138,9 @@ export function Recruit() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className={`grid items-center gap-8 rounded-2xl border border-border bg-card p-8 pc:grid-cols-2 pc:p-12 ${i % 2 ? "pc:[direction:rtl]" : ""}`}
+              className={`grid items-center gap-8 rounded-2xl border border-border bg-card p-8 pc:p-12 pc:[grid-template-columns:var(--ratio)] ${i % 2 ? "pc:[direction:rtl]" : ""}`}
+              style={{ ["--ratio" as any]: ratioCols(`recruit:biz.${i}.ratio`, 50, false) }}
+              {...ratioAttrs(`recruit:biz.${i}.ratio`, 50, false, i % 2 === 1)}
             >
               <div className="[direction:ltr]">
                 <span className="text-brand" style={{ fontSize: 13, fontWeight: 700 }} {...ed(`recruit:biz.${i}.dept`, "事業部門名")}>{txt(`recruit:biz.${i}.dept`, b.dept)}</span>

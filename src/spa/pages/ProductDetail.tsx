@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { PRODUCTS } from "../data/products";
 import { PRODUCT_IMG } from "../data/images";
-import { ed, edImg, txt, img } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
 
 export function ProductDetail() {
   const { id } = useParams();
@@ -36,7 +36,12 @@ export function ProductDetail() {
         <ChevronLeft size={16} /> {p.division === "food" ? "食品事業部" : "アイス事業部"}へ戻る
       </Link>
 
-      <div className="mt-6 grid gap-10 pc:grid-cols-2">
+      {/* 画像＋情報の横並び（幅・左右はコンソールの「画像の幅」「左右入れ替え」で調整可能） */}
+      <div
+        className="mt-6 grid gap-10 pc:[grid-template-columns:var(--ratio)]"
+        style={{ ["--ratio" as any]: ratioCols(`${pre}:ratio`, 50, true) }}
+        {...ratioAttrs(`${pre}:ratio`, 50, true)}
+      >
         <ImageWithFallback
           src={img(`${pre}:image`, PRODUCT_IMG[p.id])}
           alt={p.name}

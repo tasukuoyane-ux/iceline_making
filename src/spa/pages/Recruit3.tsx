@@ -1200,38 +1200,34 @@ function HeroExtra() {
   if (sub === "" && h3 === "" && p === "" && !EDIT_MODE) return null;
   const shadow = "0 2px 10px rgba(0,0,0,0.35)";
   const ink = "#fff";
+  // リッチ本文（RichBody）なので [[red:文字]] [[特大:文字]] 等の行内トークンが使える
   return (
     <div className="mx-auto mt-5 max-w-[34em]" style={{ opacity: 0.95 }}>
       {(sub !== "" || EDIT_MODE) && (
-        <Ed
-          as="p"
+        <RichBody
           path="recruit3:mv.subcopy"
-          def="（サブコピー）"
+          text={sub || "（サブコピー）"}
           label="MV サブコピー"
-          multiline
-          style={{ color: ink, fontSize: "clamp(14px, 1.9vw, 20px)", fontWeight: 800, lineHeight: 1.8, whiteSpace: "pre-line", textShadow: shadow }}
+          style={{ color: ink, fontSize: "clamp(14px, 1.9vw, 20px)", fontWeight: 800, lineHeight: 1.8, textShadow: shadow }}
         />
       )}
       {(h3 !== "" || p !== "" || EDIT_MODE) && (
         <div className="mt-4">
           {(h3 !== "" || EDIT_MODE) && (
-            <Ed
-              as="h3"
+            <RichBody
               path="recruit3:mv.h3"
-              def="（見出し）"
+              text={h3 || "（見出し）"}
               label="MV 小見出し（H3）"
               style={{ color: ink, fontSize: "clamp(15px, 1.7vw, 19px)", fontWeight: 900, lineHeight: 1.6, textShadow: shadow }}
             />
           )}
           {(p !== "" || EDIT_MODE) && (
-            <Ed
-              as="p"
+            <RichBody
               path="recruit3:mv.p"
-              def="（本文）"
+              text={p || "（本文）"}
               label="MV 本文"
-              multiline
               className="mt-1.5"
-              style={{ color: ink, fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.9, whiteSpace: "pre-line", textShadow: shadow }}
+              style={{ color: ink, fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.9, textShadow: shadow }}
             />
           )}
         </div>

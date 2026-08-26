@@ -67,7 +67,12 @@ export function Company() {
       {/* 沿革（PC時：右50%に画像） */}
       <Section heat={HEAT.history}>
         <SectionTitle en="HISTORY" jp="沿革" path="sectionEn:company.history" />
-        <div className="mt-10 grid gap-10 pc:grid-cols-2">
+        {/* 年表＋画像の横並び（幅・左右はコンソールの「画像の幅」「左右入れ替え」で調整可能） */}
+        <div
+          className="mt-10 grid gap-10 pc:[grid-template-columns:var(--ratio)]"
+          style={{ ["--ratio" as any]: ratioCols("company:history.ratio", 50, false) }}
+          {...ratioAttrs("company:history.ratio", 50, false)}
+        >
           <ol className="border-l-2 border-border pl-6">
             {HISTORY.map((h, i) => (
               <li key={h.year} className="relative mb-8 last:mb-0">

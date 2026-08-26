@@ -9,6 +9,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Clock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { RichBody } from "../components/common/RichBody";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { toEmbed } from "../lib/video";
 import {
@@ -232,14 +233,13 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
 
       {/* キャッチコピー（＋ページ側から extra で追記できる：採用3のサブコピー等）。
           r2-mv-copy は採用3のイントロ演出（テキストのブラーイン）が参照する。
-          bare（採用3・背景動画の上）では文字色 #fff・透明度95%・薄い黒影で読みやすくする */}
+          bare（採用3・背景動画の上）では文字色 #fff・透明度95%・薄い黒影で読みやすくする。
+          リッチ本文（RichBody）なので [[red:文字]] [[特大:文字]] 等の行内トークンが使える */}
       <div className="r2-mv-copy relative z-10 px-6 text-center">
-        <Ed
-          as="p"
+        <RichBody
           path="recruit2:mv.title"
-          def={RECRUIT_MV.main}
+          text={txt("recruit2:mv.title", RECRUIT_MV.main)}
           label="キャッチコピー"
-          multiline
           className="mx-auto max-w-[20em]"
           style={{
             color: bare ? "#fff" : "#0b2530",
@@ -247,7 +247,6 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
             fontSize: "clamp(24px, 4.4vw, 56px)",
             fontWeight: 900,
             lineHeight: 1.4,
-            whiteSpace: "pre-line",
             textShadow: bare ? "0 2px 10px rgba(0,0,0,0.35)" : "0 2px 22px rgba(255,255,255,0.6)",
           }}
         />
@@ -447,7 +446,12 @@ export function Day() {
   return (
     <Sec>
       <Head base="recruit2:day" en="A DAY" jp="一日の流れ" />
-      <div className="mt-10 grid gap-10 pc:grid-cols-[1fr_1fr] pc:items-start">
+      {/* タイムライン＋画像の横並び（幅・左右はコンソールで調整可能） */}
+      <div
+        className="mt-10 grid gap-10 pc:items-start pc:[grid-template-columns:var(--ratio)]"
+        style={{ ["--ratio" as any]: ratioCols("recruit2:day.ratio", 50, false) }}
+        {...ratioAttrs("recruit2:day.ratio", 50, false)}
+      >
         <div>
           <p className="inline-flex items-center gap-2" style={{ fontSize: 14, color: PAL.teal, fontWeight: 700 }}>
             <Clock size={16} />
@@ -512,7 +516,11 @@ export function CareerPath() {
       {/* 各タブのコンテンツ（全タブをDOMに保持し、非アクティブは非表示＝consoleで全て編集可） */}
       {CAREER_PATHS.map((p, pi) => (
         <div key={pi} className={pi === tab ? "" : "hidden"}>
-          <div className="mt-8 grid gap-10 pc:grid-cols-[1fr_1fr] pc:items-start">
+          <div
+            className="mt-8 grid gap-10 pc:items-start pc:[grid-template-columns:var(--ratio)]"
+            style={{ ["--ratio" as any]: ratioCols(`recruit2:career.${pi}.ratio`, 50, false) }}
+            {...ratioAttrs(`recruit2:career.${pi}.ratio`, 50, false)}
+          >
             <div>
               <p className="inline-flex items-center gap-2" style={{ fontSize: 14, color: PAL.teal, fontWeight: 700 }}>
                 <Clock size={16} />
