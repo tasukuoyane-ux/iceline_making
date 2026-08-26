@@ -59,7 +59,8 @@ export function toBlock(b: any): Block | null {
       return { type: 'video', src, ...(b.caption ? { caption: String(b.caption) } : {}) }
     }
     case 'recruitLink': {
-      const job = String(b.job ?? '')
+      // 既存データに前後の空白が混入していてもリンクが壊れないよう除去
+      const job = String(b.job ?? '').trim()
       if (!job) return null
       return { type: 'recruitLink', job, ...(b.label ? { label: String(b.label) } : {}) }
     }

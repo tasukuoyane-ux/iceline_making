@@ -1152,9 +1152,13 @@ function JobsSection() {
   // 職種ごとに固有のURLになり、共有・リロード・戻る操作でも同じ職種が開く。
   // 既存のクエリ（編集モードの __edit 等）は保持する。
   const [searchParams, setSearchParams] = useSearchParams();
-  const openId = searchParams.get("job");
+  // 前後の空白（%20）が混入したリンクでも該当職種を開けるように除去して照合する
+  const openId = (searchParams.get("job") || "").trim();
   const setOpenId = (id: string | null) => {
     const next = new URLSearchParams(searchParams);
+    // 一覧からの遷移は /recruit?job=◯◯ のみ（&entry=1 は付けない）。
+    // 記事のエントリーリンク経由で付いた entry=1 も引き継がずに消す
+    next.delete("entry");
     if (id) next.set("job", id);
     else next.delete("job");
     setSearchParams(next);

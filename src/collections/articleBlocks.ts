@@ -93,6 +93,10 @@ export const ARTICLE_BLOCKS: Block[] = [
         admin: {
           description: `採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: ${RECRUIT_JOB_OPTIONS.map((o) => `${o.value}＝${o.label}`).join(' ／ ')}`,
         },
+        hooks: {
+          // コピー＆ペースト由来の前後の空白でリンクが壊れないように保存時に除去
+          beforeValidate: [({ value }) => (typeof value === 'string' ? value.trim() : value)],
+        },
       },
       {
         name: 'label',

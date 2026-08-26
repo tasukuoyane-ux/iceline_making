@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useInterviews } from "../data/interviews";
 import { hasVideo } from "../data/blocks";
@@ -90,27 +90,8 @@ export function Interview() {
         </motion.div>
       </div>
 
-      {/* ===== フッターCTA ===== */}
-      <section className="border-t border-border bg-secondary/60">
-        <div className="mx-auto max-w-[760px] px-5 py-16 text-center pc:py-20">
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.2em", fontSize: 12 }} {...ed("sectionEn:interview.joinus", "英語見出し（補助）")}>{txt("sectionEn:interview.joinus", "JOIN US")}</p>
-          <p className="mt-3" style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.5 }}>
-            あなたの「正直さ」を、ここで活かしませんか。
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/recruit#entry"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
-              style={{ fontSize: 14, fontWeight: 700 }}
-            >
-              エントリーする <ArrowRight size={16} />
-            </Link>
-            <Link to="/recruit" className="text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
-              採用情報トップへ
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* フッター前のCTAセクション（JOIN US）は 2026-08 改修で削除。
+          エントリー導線は本文の「求人エントリーリンク」ブロックで記事ごとに設置する */}
     </article>
   );
 }
