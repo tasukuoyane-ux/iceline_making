@@ -86,14 +86,15 @@ function Hero() {
       {/* MVテキスト（1つのボックス）。[[特大:文字]] [[大:文字]] で文字サイズ、
           [[red:文字]] [[#0000ff:文字]] で文字色を行内で自在に指定できる
           （[[特大,red:文字]] のように併用可。指定なしの部分は小＝基準サイズ）。
-          SPでは画像の下に流し、タブレット以上で画像に重ねる */}
-      <div className="bg-white tab:absolute tab:inset-0 tab:flex tab:items-center tab:bg-transparent">
-        <div className="w-full px-6 py-8 tab:max-w-[62%] tab:py-0 tab:pl-[4.5%] tab:pr-0">
+          SPでもPCと同じ構造でMVの中に重ねる（画像と同様に文字も画面幅に比例して
+          縮むよう、基準サイズは vw 駆動の clamp にしている） */}
+      <div className="absolute inset-0 flex items-center">
+        <div className="w-full max-w-[62%] pl-[4.5%]">
           <RichBody
             path="top:mv.title"
             text={txt("top:mv.title", TOP_MV_TEXT_DEFAULT)}
             label="MVテキスト"
-            style={{ fontSize: "clamp(12px, 1.1vw, 15px)", fontWeight: 500, lineHeight: 2.0, color: "#101c24" }}
+            style={{ fontSize: "clamp(6px, 1.1vw, 15px)", fontWeight: 500, lineHeight: 2.0, color: "#101c24" }}
           />
         </div>
       </div>

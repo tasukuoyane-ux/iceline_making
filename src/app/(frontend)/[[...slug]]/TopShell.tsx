@@ -15,19 +15,16 @@ const OVERRIDES = overridesData as Record<string, string>
 // Tailwind に依存しないインラインCSSで再現している（Hero 変更時はここも追従させること）。
 // MVテキストは1つのボックスで、[[特大:文字]] [[red:文字]] 等の行内トークンにより
 // 文字サイズ・文字色を混在できる（2026-08 改修）。
-// SP（600px未満）では画像の下の白地に、タブレット以上では画像に重ねて表示する。
+// SPでもPCと同じ構造でMVの中に重ねる（基準サイズは vw 駆動で画像と一緒に縮む）。
 const SHELL_CSS = `
 #top-shell{pointer-events:none}
 #top-shell .ts-hd{height:64px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)}
 #top-shell .ts-mv{position:relative;overflow:hidden;background:#101c24}
 #top-shell .ts-img{display:block;width:100%;height:auto;aspect-ratio:1920/800;object-fit:cover}
-#top-shell .ts-titlewrap{background:#fff;padding:32px 24px}
-#top-shell .ts-text p{margin:0;white-space:pre-line}
-#top-shell .ts-base{font-size:clamp(12px,1.1vw,15px);font-weight:500;line-height:2;color:#101c24}
-@media (min-width:600px){
-#top-shell .ts-titlewrap{position:absolute;inset:0;display:flex;align-items:center;background:transparent;padding:0}
+#top-shell .ts-titlewrap{position:absolute;inset:0;display:flex;align-items:center}
 #top-shell .ts-tinner{width:100%;max-width:62%;padding-left:4.5%}
-}
+#top-shell .ts-text p{margin:0;white-space:pre-line}
+#top-shell .ts-base{font-size:clamp(6px,1.1vw,15px);font-weight:500;line-height:2;color:#101c24}
 @media (min-width:1025px){#top-shell .ts-hd{height:80px}}
 `
 

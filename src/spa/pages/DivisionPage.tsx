@@ -280,7 +280,8 @@ const ICE_CATEGORIES: { name: string; desc: string; skus: string; products: stri
 // ─────────────────────────────────────────────────────────
 const ICE_LINEUP_NAV: { name: string; href: string; img: string; body: string }[] = [
   {
-    name: "無色透明\nかち割り氷",
+    // タイトルに改行は入れない（幅いっぱいまでは自然に折り返す）
+    name: "無色透明かち割り氷",
     href: "/ice/products/rocky-ice",
     img: IMG.iceClose,
     body: "純度の高い原料水を低温でじっくり凍らせた、硬く透明で溶けにくい業務用かち割り氷です。溶けても飲み物の味を損なわず、食品本来のおいしさを届けます。",
@@ -690,7 +691,8 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
   }
 
   // 白カードの中に画像と文章が横並び（製造体制・こだわり）。
-  // 左右はコンソールの「左右入れ替え」、幅は「画像の幅」スライダーで調整できる
+  // カードごとに画像とテキストの左右が交互に入れ替わる（奇数番目は画像が左）。
+  // 左右はコンソールの「左右入れ替え」、幅は「画像の幅」スライダーでも調整できる
   if (it.card) {
     return (
       <motion.div
@@ -701,11 +703,11 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         className="rounded-2xl border border-border bg-card p-6 pc:p-8"
       >
         <div
-          className="grid items-center gap-6 pc:gap-8 pc:[grid-template-columns:var(--ratio)]"
+          className={`grid items-center gap-6 pc:gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
           style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 45, false) }}
-          {...ratioAttrs(`${base}.ratio`, 45, false)}
+          {...ratioAttrs(`${base}.ratio`, 45, false, ii % 2 === 1)}
         >
-          <div>
+          <div className="[direction:ltr]">
             {it.title && (
               <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
                 {txt(`${base}.title`, it.title)}
@@ -716,7 +718,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
           <ImageWithFallback
             src={img(`${base}.image`, IMG_PLACEHOLDER)}
             alt={it.title || secJp}
-            className="aspect-[4/3] w-full rounded-xl object-cover"
+            className="aspect-[4/3] w-full rounded-xl object-cover [direction:ltr]"
             {...edImg(`${base}.image`, `${it.title || secJp} 画像`)}
           />
         </div>
