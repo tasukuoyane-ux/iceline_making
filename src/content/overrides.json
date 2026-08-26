@@ -284,7 +284,7 @@
   "service:dryice.sec.uses.0.ratio": "40",
   "company:ceo.ratio": "35",
   "recruit3:work.ratio": "41",
-  "hide:recruit3:work.image": "pc,sp",
+  "hide:recruit3:work.image": "",
   "division:ice.sec.0.1.body": "製氷方法は、工場と製品によって異なります。\n二日市工場ではカングリット製法を採用しています。135kgの大きな氷の塊からカットして加工していく方法で、かち割り氷や小さな氷など多様なサイズに対応できることが特徴です。製氷に時間を要しますが、大型の氷から精密に加工できる点が強みです。\n西大寺工場ではターボ製氷（氷柱方式）を採用しています。90〜120分という短いサイクルで製氷できるため、需要の変動に柔軟に対応できる生産体制を整えています。",
   "division:ice.sec.0.0.body": "西大寺工場では、逆浸透膜（RO膜）でろ過した水を使用しています。不純物を除去した純度の高い水を原料とすることで、安定した品質の氷を製造しています。氷の品質は、不純物をどれだけ取り除けるかで決まります。水の純度が高いほど透明で硬く、溶けにくい氷になります。ロッキーアイスが「溶けにくい」のは、原料水の純度を高め、低温でじっくり凍らせる工程を徹底しているからです。",
   "division:ice.sec.0.2.ratio": "35",
@@ -319,5 +319,6 @@
   "service:warehouse.sec.facphotos.photo.2.caption": "これはダミーテキストです。これはダミーテキストです。",
   "service:warehouse.sec.facphotos.photo.3.caption": "これはダミーテキストです。これはダミーテキストです。",
   "service:warehouse.sec.facphotos.photo.4.caption": "これはダミーテキストです。これはダミーテキストです。",
-  "service:warehouse.sec.facphotos.photo.5.caption": "これはダミーテキストです。これはダミーテキストです。"
+  "service:warehouse.sec.facphotos.photo.5.caption": "これはダミーテキストです。これはダミーテキストです。",
+  "ar:service:warehouse.sec.facphotos.photo.3.image": ""
 }
