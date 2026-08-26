@@ -85,13 +85,18 @@ export const ARTICLE_BLOCKS: Block[] = [
       {
         // DB上は text 型（select にすると Postgres の enum になり、
         // コンソールで職種を追加するたびに DB マイグレーションが必要になるため）。
-        // 選択肢の案内は下の説明文に自動で列挙される（デプロイ時点の採用データ）。
+        // 管理画面ではカスタムコンポーネント（JobSelectField）により、
+        // /console で登録されている職種のドロップダウンとして表示される。
         name: 'job',
         type: 'text',
         required: true,
-        label: '職種ID',
+        label: '職種',
         admin: {
-          description: `採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: ${RECRUIT_JOB_OPTIONS.map((o) => `${o.value}＝${o.label}`).join(' ／ ')}`,
+          description:
+            '採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種の追加・変更は公開（デプロイ）後に選択肢へ反映されます。',
+          components: {
+            Field: '/components/payload/JobSelectField#JobSelectField',
+          },
         },
         hooks: {
           // コピー＆ペースト由来の前後の空白でリンクが壊れないように保存時に除去
