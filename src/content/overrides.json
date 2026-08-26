@@ -307,5 +307,17 @@
   "division:ice.sec.kodawari.1.title": "これはダミーテキストです。",
   "division:ice.sec.kodawari.1.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
   "division:ice.sec.kodawari.2.title": "これはダミーテキストです。",
-  "division:ice.sec.kodawari.2.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。"
+  "division:ice.sec.kodawari.2.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
+  "service:warehouse.sec.facphotos.photo.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-y7N1K3lkw2oijT47gCgy38417gu0SH.jpg",
+  "service:warehouse.sec.facphotos.photo.1.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-y7N1K3lkw2oijT47gCgy38417gu0SH.jpg",
+  "service:warehouse.sec.facphotos.photo.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-y7N1K3lkw2oijT47gCgy38417gu0SH.jpg",
+  "service:warehouse.sec.facphotos.photo.3.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-y7N1K3lkw2oijT47gCgy38417gu0SH.jpg",
+  "service:warehouse.sec.facphotos.photo.4.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-y7N1K3lkw2oijT47gCgy38417gu0SH.jpg",
+  "service:warehouse.sec.facphotos.photo.5.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/5-y7N1K3lkw2oijT47gCgy38417gu0SH.jpg",
+  "service:warehouse.sec.facphotos.photo.0.caption": "これはダミーテキストです。これはダミーテキストです。",
+  "service:warehouse.sec.facphotos.photo.1.caption": "これはダミーテキストです。これはダミーテキストです。",
+  "service:warehouse.sec.facphotos.photo.2.caption": "これはダミーテキストです。これはダミーテキストです。",
+  "service:warehouse.sec.facphotos.photo.3.caption": "これはダミーテキストです。これはダミーテキストです。",
+  "service:warehouse.sec.facphotos.photo.4.caption": "これはダミーテキストです。これはダミーテキストです。",
+  "service:warehouse.sec.facphotos.photo.5.caption": "これはダミーテキストです。これはダミーテキストです。"
 }
