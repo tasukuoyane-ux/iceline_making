@@ -1,14 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import recruitJson from '../content/recruit.json'
-
-// 求人エントリーリンク用の職種一覧（採用CMSのデータから生成。
-// 職種の追加・変更は次のデプロイで選択肢に反映される）
-const RECRUIT_JOB_OPTIONS = ((recruitJson as any).jobs ?? []).map(
-  (j: { id: string; title: string; dept: string }) => ({
-    value: j.id,
-    label: `${j.title}（${j.dept}）`,
-  }),
-)
+import { ARTICLE_BLOCKS } from './articleBlocks'
 
 /** 日付（ISO文字列）を日本時間の YYYY-MM-DD にする（slug 自動生成用）。 */
 function jstDatePart(iso: string): string {
@@ -123,95 +114,8 @@ export const News: CollectionConfig = {
       type: 'blocks',
       label: '本文',
       minRows: 1,
-      blocks: [
-        {
-          slug: 'paragraph',
-          labels: { singular: '段落', plural: '段落' },
-          fields: [
-            {
-              name: 'text',
-              type: 'textarea',
-              required: true,
-              label: '本文',
-              admin: {
-                description:
-                  '**太字**、==マーカー== が使えます。改行はそのまま反映されます。',
-              },
-            },
-          ],
-        },
-        {
-          slug: 'h2',
-          labels: { singular: '見出し（大）', plural: '見出し（大）' },
-          fields: [{ name: 'text', type: 'text', required: true, label: '見出し' }],
-        },
-        {
-          slug: 'h3',
-          labels: { singular: '見出し（中）', plural: '見出し（中）' },
-          fields: [{ name: 'text', type: 'text', required: true, label: '見出し' }],
-        },
-        {
-          slug: 'image',
-          labels: { singular: '画像', plural: '画像' },
-          fields: [
-            {
-              name: 'media',
-              type: 'upload',
-              relationTo: 'media',
-              label: '画像',
-              admin: { description: '通常はこちらにアップロードしてください。' },
-            },
-            {
-              name: 'src',
-              type: 'text',
-              label: '画像URL（外部/移行データ用）',
-              admin: {
-                description: '通常は上の「画像」を使用。両方ある場合は「画像」が優先されます。',
-              },
-            },
-            { name: 'href', type: 'text', label: 'リンク先URL' },
-            { name: 'alt', type: 'text', label: 'キャプション（alt）' },
-          ],
-        },
-        {
-          slug: 'video',
-          labels: { singular: '動画', plural: '動画' },
-          fields: [
-            {
-              name: 'src',
-              type: 'text',
-              required: true,
-              label: '動画URL',
-              admin: { description: 'YouTube/Vimeo の共有URL、または mp4 直リンク。' },
-            },
-            { name: 'caption', type: 'text', label: 'キャプション' },
-          ],
-        },
-        {
-          slug: 'recruitLink',
-          labels: { singular: '求人エントリーリンク', plural: '求人エントリーリンク' },
-          fields: [
-            {
-              // DB上は text 型（select にすると Postgres の enum になり、
-              // コンソールで職種を追加するたびに DB マイグレーションが必要になるため）。
-              // 選択肢の案内は下の説明文に自動で列挙される（デプロイ時点の採用データ）。
-              name: 'job',
-              type: 'text',
-              required: true,
-              label: '職種ID',
-              admin: {
-                description: `採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: ${RECRUIT_JOB_OPTIONS.map((o: { value: string; label: string }) => `${o.value}＝${o.label}`).join(' ／ ')}`,
-              },
-            },
-            {
-              name: 'label',
-              type: 'text',
-              label: 'ボタン文言',
-              admin: { description: '空欄なら「この職種にエントリーする」と表示されます。' },
-            },
-          ],
-        },
-      ],
+      // ブロック定義は採用記事（interviews）と共通（articleBlocks.ts）
+      blocks: ARTICLE_BLOCKS,
     },
   ],
 }

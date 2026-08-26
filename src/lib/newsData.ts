@@ -31,8 +31,8 @@ export function formatDateJST(iso: string): string {
     .replace(/\//g, '.')
 }
 
-/** Payload の blocks フィールド1件 → 公開サイトの Block 型。 */
-function toBlock(b: any): Block | null {
+/** Payload の blocks フィールド1件 → 公開サイトの Block 型（採用記事と共用）。 */
+export function toBlock(b: any): Block | null {
   switch (b?.blockType) {
     case 'paragraph':
       return { type: 'paragraph', text: String(b.text ?? '') }

@@ -12,7 +12,7 @@ import { Button, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { PageFields, PageField } from "./PageFields";
 import { RecruitPanel } from "./RecruitPanel";
-import { VideosPanel, InterviewsPanel, ContactSettingsPanel, Recruit3BgPanel } from "./panels";
+import { VideosPanel, ContactSettingsPanel, Recruit3BgPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 const VIEWPORT_KEY = "iceline-console-viewport";
@@ -460,15 +460,25 @@ function PageManagers({
       node: <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />,
     });
   }
-  // 採用ページ（/recruit＝旧採用3）：背景動画とインタビューの管理
+  // 採用ページ（/recruit＝旧採用3）：背景動画の管理。
+  // 採用記事（社員インタビュー）は Payload（/admin の「採用記事」）で管理する
   if (route === "/recruit") {
     items.push({
       title: "採用 背景動画",
       node: <Recruit3BgPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />,
     });
     items.push({
-      title: "社員インタビュー（追加・削除）",
-      node: <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />,
+      title: "採用記事（社員インタビュー）",
+      node: (
+        <p className="text-[12px] leading-relaxed text-slate-500">
+          採用記事（「人を知る」のカードと /recruit/interview/◯◯）は、記事管理（
+          <a href="/admin" target="_blank" rel="noopener noreferrer" className="text-emerald-700 underline">
+            /admin
+          </a>
+          ）の「採用記事」で追加・編集・削除できます。カテゴリー分けや、職種の
+          エントリーフォームへ誘導する「求人エントリーリンク」もそちらで設定します。
+        </p>
+      ),
     });
   }
   if (route === "/contact") {

@@ -30,10 +30,16 @@ type EdOpts = { label?: string; multiline?: boolean; clickThrough?: boolean };
 
 // 各ページの編集対象にしないパス:
 //  - header: / footer: … 全ページ共通の要素（ヘッダー・フッター）
-//  - news: … お知らせ記事は Payload CMS（/admin）へ移行済み。ここで編集させると
-//             overrides.json に値が落ちて「公開しても反映されない」事故になる。
+//  - news: / interviews: … 記事（お知らせ・採用記事）は Payload CMS（/admin）へ
+//    移行済み。ここで編集させると overrides.json に値が落ちて
+//    「公開しても反映されない」事故になる。
 function isCommon(path: string): boolean {
-  return path.startsWith("header:") || path.startsWith("footer:") || path.startsWith("news:");
+  return (
+    path.startsWith("header:") ||
+    path.startsWith("footer:") ||
+    path.startsWith("news:") ||
+    path.startsWith("interviews:")
+  );
 }
 
 // data-edit 属性は編集モードに関係なく常に出力する（isCommon を除く）。

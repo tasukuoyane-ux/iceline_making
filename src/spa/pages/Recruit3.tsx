@@ -21,7 +21,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, edImg, edSel, repeatSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { useRecruitData, RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
-import { INTERVIEWS } from "../data/recruit";
+import { useInterviews } from "../data/interviews";
 import { VIDEOS, VideoItem } from "../data/news";
 import { toEmbed } from "../lib/video";
 import { R2Styles, PageBg, Hero, EntryForm, Sec, Head, Ed, PAL, ACCENTS, PH } from "./Recruit2";
@@ -587,7 +587,9 @@ function Work3() {
 
 function People3D() {
   const [idx, setIdx] = useState(0);
-  const n = INTERVIEWS.length;
+  // 採用記事は Payload（/admin の「採用記事」）から取得（取得完了までは同梱データ）
+  const { items: interviews } = useInterviews();
+  const n = interviews.length;
   if (n === 0) return null;
 
   // i枚目の「中央からの符号付き距離」（循環）
@@ -610,7 +612,7 @@ function People3D() {
       {/* 3Dカルーセル：3枚が見えていて、中央の1枚だけが正面を向く */}
       <div className="relative mt-10" style={{ height: "min(120vw, 480px)" }}>
         <div className="absolute inset-0" style={{ perspective: 1200 }}>
-          {INTERVIEWS.map((iv, i) => {
+          {interviews.map((iv, i) => {
             const d = rel(i);
             const visible = Math.abs(d) <= 1;
             const center = d === 0;
@@ -620,14 +622,13 @@ function People3D() {
                   src={iv.image || PH}
                   alt={iv.name}
                   className="h-full w-full object-cover"
-                  {...(center ? edImg(`interviews:${iv.id}:image`, "インタビュー画像") : {})}
                 />
-                {/* 画像の中にタイトルと名前 */}
+                {/* 画像の中にカテゴリー・タイトル・名前 */}
                 <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/15 to-transparent p-6 text-left">
                   <span className="w-fit rounded-full px-2.5 py-0.5 text-white" style={{ background: ACCENTS[i % ACCENTS.length], fontSize: 11, fontWeight: 700 }}>
-                    INTERVIEW
+                    {iv.category || "INTERVIEW"}
                   </span>
-                  <span className="mt-3 text-white" style={{ fontSize: "clamp(17px, 2.2vw, 22px)", fontWeight: 900, lineHeight: 1.5, textShadow: "0 2px 10px rgba(0,0,0,0.5)" }} {...(center ? ed(`interviews:${iv.id}:lead`, "タイトル") : {})}>
+                  <span className="mt-3 text-white" style={{ fontSize: "clamp(17px, 2.2vw, 22px)", fontWeight: 900, lineHeight: 1.5, textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>
                     {iv.lead}
                   </span>
                   <span className="mt-1.5 text-white/85" style={{ fontSize: 13 }}>
@@ -693,7 +694,7 @@ function People3D() {
 
       {/* 現在位置インジケーター */}
       <div className="mt-6 flex justify-center gap-2">
-        {INTERVIEWS.map((iv, i) => (
+        {interviews.map((iv, i) => (
           <button
             key={iv.id}
             type="button"

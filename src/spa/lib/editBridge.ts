@@ -37,9 +37,14 @@ function cssEscape(s: string): string {
 
 // 各ページの編集対象から除外するパス:
 //  - header: / footer: … 全ページ共通の要素
-//  - news: … お知らせ記事は Payload CMS（/admin）へ移行済み
+//  - news: / interviews: … 記事（お知らせ・採用記事）は Payload CMS（/admin）へ移行済み
 function isExcludedPath(path: string): boolean {
-  return path.startsWith("header:") || path.startsWith("footer:") || path.startsWith("news:");
+  return (
+    path.startsWith("header:") ||
+    path.startsWith("footer:") ||
+    path.startsWith("news:") ||
+    path.startsWith("interviews:")
+  );
 }
 
 /** 「SPで非表示」「PCで非表示」（hide:）の下書きをプレビューへ反映する。

@@ -12,6 +12,7 @@
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
     "migrate:news": "node --env-file=.env --import tsx scripts/migrate-news.ts",
+    "migrate:interviews": "node --env-file=.env --import tsx scripts/migrate-interviews.ts",
     "hash-password": "node scripts/hash-password.mjs"
   },
   "dependencies": {

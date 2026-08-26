@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { INTERVIEWS } from "../data/recruit";
+import { useInterviews } from "../data/interviews";
 import { hasVideo } from "../data/blocks";
 import { ed, edImg, txt } from "../lib/editable";
 import { BlockContent } from "../components/common/BlockContent";
@@ -10,9 +10,13 @@ import { MovieBadge } from "../components/common/MovieBadge";
 
 export function Interview() {
   const { id } = useParams();
-  const iv = INTERVIEWS.find((x) => x.id === id);
+  // 記事は Payload（/admin の「採用記事」）から取得。取得完了までは同梱データで即時描画
+  const { items, ready } = useInterviews();
+  const iv = items.find((x) => x.id === id);
 
   if (!iv) {
+    // Payload 側にだけある新しい記事の可能性があるため、取得完了までは判定しない
+    if (!ready) return null;
     return (
       <div className="mx-auto max-w-3xl px-5 py-32 text-center">
         <p>記事が見つかりませんでした。</p>

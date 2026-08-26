@@ -38,6 +38,12 @@ function migrationNames() {
 const APPLIED_PROBES = {
   // initial（news / media / users）: news テーブルが存在すれば適用済み
   '20260820_061026_initial': "select to_regclass('public.news') is not null as ok",
+  // 求人エントリーリンクブロック: news_blocks_recruit_link テーブルがあれば適用済み
+  '20260826_092841_recruit_link_block':
+    "select to_regclass('public.news_blocks_recruit_link') is not null as ok",
+  // 採用記事（interviews）コレクション: interviews テーブルがあれば適用済み
+  '20260826_103039_interviews_collection':
+    "select to_regclass('public.interviews') is not null as ok",
 }
 
 /** DB を確認・修復し、migrate の実行が必要かを返す。 */

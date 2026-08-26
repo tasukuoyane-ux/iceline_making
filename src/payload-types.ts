@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     news: News;
+    interviews: Interview;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     news: NewsSelect<false> | NewsSelect<true>;
+    interviews: InterviewsSelect<false> | InterviewsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -229,6 +231,112 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * 採用ページの「人を知る」と記事ページ（/recruit/interview/◯◯）に表示される記事。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "interviews".
+ */
+export interface Interview {
+  id: number;
+  name: string;
+  /**
+   * 記事のURL（/recruit/interview/◯◯）になります。空のまま保存すると自動で作られます。公開後の変更はリンク切れのもとになるので避けてください。
+   */
+  slug?: string | null;
+  /**
+   * 記事の分類（例: 社員インタビュー／座談会／仕事紹介）。一覧の絞り込みと、採用ページのカードのラベルに使われます。
+   */
+  category: string;
+  /**
+   * 採用ページのカルーセルの並び順（小さい順）。同じ値は作成順。
+   */
+  order?: number | null;
+  /**
+   * 例: アイス事業部 製造｜オペレーター
+   */
+  role?: string | null;
+  /**
+   * 例: 入社5年目（任意）
+   */
+  years?: string | null;
+  lead: string;
+  subtitle?: string | null;
+  /**
+   * 記事ページのヒーローと「人を知る」カードに表示。通常はこちらにアップロード。
+   */
+  image?: (number | null) | Media;
+  /**
+   * 通常は上の「メイン画像」を使用。両方ある場合は「メイン画像」が優先されます。
+   */
+  imageSrc?: string | null;
+  blocks?:
+    | (
+        | {
+            /**
+             * **太字**、==マーカー== が使えます。改行はそのまま反映されます。
+             */
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'paragraph';
+          }
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'h2';
+          }
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'h3';
+          }
+        | {
+            /**
+             * 通常はこちらにアップロードしてください。
+             */
+            media?: (number | null) | Media;
+            /**
+             * 通常は上の「画像」を使用。両方ある場合は「画像」が優先されます。
+             */
+            src?: string | null;
+            href?: string | null;
+            alt?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'image';
+          }
+        | {
+            /**
+             * YouTube/Vimeo の共有URL、または mp4 直リンク。
+             */
+            src: string;
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'video';
+          }
+        | {
+            /**
+             * 採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: job-dryice＝ドライアイス加工・配送スタッフ（正社員）（ドライアイスチーム） ／ job-keiri-zaimu＝経理財務（正社員）（本社） ／ job-saiyo-koho＝採用広報（正社員）（本社） ／ job-route-sales＝ルート営業スタッフ（正社員）（食品事業部） ／ job-shohin-kaihatsu＝商品開発（正社員）（西大寺工場） ／ job-jinji-romu＝人事労務（正社員）（本社） ／ job-seisan-gijutsu＝生産技術（正社員）（西大寺・二日市工場） ／ job-futsukaichi-seizo＝製造オペレーター／ラインマネージャー（正社員）（二日市工場） ／ job-hinshitsu-kanri＝品質管理（正社員）（西大寺工場） ／ job-souko＝倉庫作業スタッフ（正社員）（西大寺工場） ／ job-seizo＝製造スタッフ（正社員）（西大寺工場） ／ job-seizo-hojo-saidaiji＝製造補助スタッフ（パート）（西大寺工場） ／ job-seizo-hojo-futsukaichi＝製造補助スタッフ（パート）（二日市工場）
+             */
+            job: string;
+            /**
+             * 空欄なら「この職種にエントリーする」と表示されます。
+             */
+            label?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'recruitLink';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * 記事管理画面（/admin）にログインできるメンバー。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -283,6 +391,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news';
         value: number | News;
+      } | null)
+    | ({
+        relationTo: 'interviews';
+        value: number | Interview;
       } | null)
     | ({
         relationTo: 'media';
@@ -343,6 +455,76 @@ export interface NewsSelect<T extends boolean = true> {
   slug?: T;
   date?: T;
   category?: T;
+  blocks?:
+    | T
+    | {
+        paragraph?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        h2?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        h3?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        image?:
+          | T
+          | {
+              media?: T;
+              src?: T;
+              href?: T;
+              alt?: T;
+              id?: T;
+              blockName?: T;
+            };
+        video?:
+          | T
+          | {
+              src?: T;
+              caption?: T;
+              id?: T;
+              blockName?: T;
+            };
+        recruitLink?:
+          | T
+          | {
+              job?: T;
+              label?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "interviews_select".
+ */
+export interface InterviewsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  category?: T;
+  order?: T;
+  role?: T;
+  years?: T;
+  lead?: T;
+  subtitle?: T;
+  image?: T;
+  imageSrc?: T;
   blocks?:
     | T
     | {

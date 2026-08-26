@@ -9,6 +9,7 @@ import { ja } from '@payloadcms/translations/languages/ja'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { Interviews } from './collections/Interviews'
 import { Media } from './collections/Media'
 import { News } from './collections/News'
 import { Users } from './collections/Users'
@@ -60,7 +61,7 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  collections: [News, Media, Users],
+  collections: [News, Interviews, Media, Users],
 
   // 管理画面は日本語を既定にする（個人ごとに英語へ切り替えも可能）。
   i18n: {
