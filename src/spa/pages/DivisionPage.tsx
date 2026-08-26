@@ -892,15 +892,15 @@ export function DivisionPage({ division }: { division: Division }) {
         </div>
       </section>
 
-      {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分。赤帯はタイトル＋本文まで） */}
-      <Section heat={bizHeat} className="bg-[#E60012] py-10 tab:py-12">
+      {/* 事業概要（淡いブルーグレー #ccd9e2 の帯・上下パディングは通常の半分。帯はタイトル＋本文まで） */}
+      <Section heat={bizHeat} className="bg-[#ccd9e2] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`division:${division}.overview`} />
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" path={`division:${division}.overview`} />
           <RichBody
             path={`division:${division}.overview`}
             text={txt(`division:${division}.overview`, OVERVIEW[division])}
             label="事業概要"
-            className="mt-6 text-left text-white/90 pc:text-center"
+            className="mt-6 text-left text-foreground/85 pc:text-center"
             style={{ fontSize: 16, lineHeight: 2.1 }}
           />
         </div>

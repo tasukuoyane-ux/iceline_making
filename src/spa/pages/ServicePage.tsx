@@ -288,15 +288,15 @@ export function ServicePage({ service }: { service: ServiceId }) {
         </div>
       </section>
 
-      {/* 事業概要（ブランドレッド背景・上下パディングは通常の半分） */}
-      <Section heat={HEAT.foodBiz} className="bg-[#E60012] py-10 tab:py-12">
+      {/* 事業概要（淡いブルーグレー #ccd9e2 の帯・上下パディングは通常の半分） */}
+      <Section heat={HEAT.foodBiz} className="bg-[#ccd9e2] py-10 tab:py-12">
         <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" invert path={`${base}.overview`} />
+          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" path={`${base}.overview`} />
           <RichBody
             path={`${base}.overview`}
             text={txt(`${base}.overview`, s.overview)}
             label="事業概要"
-            className="mt-6 text-left text-white/90 pc:text-center"
+            className="mt-6 text-left text-foreground/85 pc:text-center"
             style={{ fontSize: 16, lineHeight: 2.1 }}
           />
           {/* ドライアイス：ECサイトへの導線ボタン */}
@@ -306,7 +306,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                 href={s.shopUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white px-8 py-3.5 text-brand transition-colors hover:bg-white/90"
+                className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
                 style={{ fontSize: 15, fontWeight: 700 }}
               >
                 <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>

@@ -142,7 +142,7 @@ export function Header() {
             <Link
               to="/recruit3#jobs"
               onClick={scrollToJobs}
-              className="ml-2 inline-flex items-center bg-white px-5 py-2.5 text-[#E60012] shadow-md transition-colors hover:bg-white/90"
+              className="ml-2 inline-flex items-center rounded-full bg-white px-6 py-2.5 text-[#E60012] shadow-md transition-colors hover:bg-white/90"
               style={{ fontSize: 14, fontWeight: 700 }}
             >
               <span {...ed("recruit3:header.cta.label", "採用CTA（採用3・エントリー）")}>{txt("recruit3:header.cta.label", "エントリー")}</span>
@@ -158,7 +158,7 @@ export function Header() {
               className="mr-4 rounded-full border border-brand px-4 py-1.5 text-brand transition-colors hover:bg-brand hover:text-brand-foreground"
               style={{ fontSize: 14 }}
             >
-              <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "SHOP")}</span>
+              <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "オンラインショップ")}</span>
             </a>
 
             {/* サービス：ホバーで4項目のドロップダウンを開く */}
@@ -256,7 +256,7 @@ export function Header() {
                 <Link
                   to="/recruit3#jobs"
                   onClick={scrollToJobs}
-                  className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground"
+                  className="mt-4 inline-flex items-center justify-center rounded-full bg-brand py-3.5 text-brand-foreground"
                 >
                   <span {...ed("recruit3:header.cta.label", "採用CTA（採用3・エントリー）")}>{txt("recruit3:header.cta.label", "エントリー")}</span>
                 </Link>
@@ -272,7 +272,7 @@ export function Header() {
                   className="inline-flex w-fit rounded-full border border-brand px-5 py-2 text-brand"
                   style={{ fontSize: 14 }}
                 >
-                  <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "SHOP")}</span>
+                  <span {...ed("header:shop.label", "SHOPボタン")}>{txt("header:shop.label", "オンラインショップ")}</span>
                 </a>
 
                 {/* サービス4項目：ラベル付きのひとかたまり */}
