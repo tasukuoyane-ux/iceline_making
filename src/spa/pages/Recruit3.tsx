@@ -1192,14 +1192,16 @@ function JobsSection() {
 /* ═══════════════ MV内の追記（サブコピー＋H3・本文） ═══════════════ */
 
 // メインビジュアルのキャッチコピー下に表示する追記。未入力の間は公開ページでは非表示。
+// 背景動画の上に載るため、文字色 #fff・透明度95%・薄い黒影で読みやすくする（2026-08 改修）
 function HeroExtra() {
   const sub = txt("recruit3:mv.subcopy", "");
   const h3 = txt("recruit3:mv.h3", "");
   const p = txt("recruit3:mv.p", "");
   if (sub === "" && h3 === "" && p === "" && !EDIT_MODE) return null;
-  const shadow = "0 2px 18px rgba(255,255,255,0.65)";
+  const shadow = "0 2px 10px rgba(0,0,0,0.35)";
+  const ink = "#fff";
   return (
-    <div className="mx-auto mt-5 max-w-[34em]">
+    <div className="mx-auto mt-5 max-w-[34em]" style={{ opacity: 0.95 }}>
       {(sub !== "" || EDIT_MODE) && (
         <Ed
           as="p"
@@ -1207,7 +1209,7 @@ function HeroExtra() {
           def="（サブコピー）"
           label="MV サブコピー"
           multiline
-          style={{ color: "#0b2530", fontSize: "clamp(14px, 1.9vw, 20px)", fontWeight: 800, lineHeight: 1.8, whiteSpace: "pre-line", textShadow: shadow }}
+          style={{ color: ink, fontSize: "clamp(14px, 1.9vw, 20px)", fontWeight: 800, lineHeight: 1.8, whiteSpace: "pre-line", textShadow: shadow }}
         />
       )}
       {(h3 !== "" || p !== "" || EDIT_MODE) && (
@@ -1218,7 +1220,7 @@ function HeroExtra() {
               path="recruit3:mv.h3"
               def="（見出し）"
               label="MV 小見出し（H3）"
-              style={{ color: "#0b2530", fontSize: "clamp(15px, 1.7vw, 19px)", fontWeight: 900, lineHeight: 1.6, textShadow: shadow }}
+              style={{ color: ink, fontSize: "clamp(15px, 1.7vw, 19px)", fontWeight: 900, lineHeight: 1.6, textShadow: shadow }}
             />
           )}
           {(p !== "" || EDIT_MODE) && (
@@ -1229,7 +1231,7 @@ function HeroExtra() {
               label="MV 本文"
               multiline
               className="mt-1.5"
-              style={{ color: "#0b2530", fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.9, whiteSpace: "pre-line", textShadow: shadow }}
+              style={{ color: ink, fontSize: "clamp(12px, 1.4vw, 15px)", lineHeight: 1.9, whiteSpace: "pre-line", textShadow: shadow }}
             />
           )}
         </div>

@@ -46,6 +46,13 @@ export function buildHideCss(overrides: Record<string, string>): string {
       const inner = `[data-edit="${path}"],[data-edit-img="${path}"],[data-edit-select="${path}"]`
       colors.push(`section:has(${inner}),main header:has(${inner}){display:none !important}`)
     }
+    // 画像の縦横比（コンソールの「縦横比」プルダウン。`ar:<画像パス>` → "1:1"|"4:3"|"3:2"|"16:9"）。
+    // 各デザインの既定比率（Tailwindの aspect クラス）に勝てるよう !important を付ける。
+    if (key.startsWith('ar:') && /^(1:1|4:3|3:2|16:9)$/.test(value)) {
+      const path = esc(key.slice('ar:'.length))
+      const [w, h] = value.split(':')
+      colors.push(`[data-edit-img="${path}"]{aspect-ratio:${w}/${h} !important}`)
+    }
     // 画像＋文章の横並びグリッドの「左右入れ替え」（`flip:<比率パス>` = "1"）。
     // PC幅でグリッドの direction を既定と反対向きにして列順を反転する。
     // 既定で direction:rtl のグリッドは data-ratio-rtl="1" が付いており ltr へ反転。

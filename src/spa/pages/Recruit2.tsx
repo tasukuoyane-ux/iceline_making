@@ -231,7 +231,8 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
       )}
 
       {/* キャッチコピー（＋ページ側から extra で追記できる：採用3のサブコピー等）。
-          r2-mv-copy は採用3のイントロ演出（テキストのブラーイン）が参照する */}
+          r2-mv-copy は採用3のイントロ演出（テキストのブラーイン）が参照する。
+          bare（採用3・背景動画の上）では文字色 #fff・透明度95%・薄い黒影で読みやすくする */}
       <div className="r2-mv-copy relative z-10 px-6 text-center">
         <Ed
           as="p"
@@ -240,7 +241,15 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
           label="キャッチコピー"
           multiline
           className="mx-auto max-w-[20em]"
-          style={{ color: "#0b2530", fontSize: "clamp(24px, 4.4vw, 56px)", fontWeight: 900, lineHeight: 1.4, whiteSpace: "pre-line", textShadow: "0 2px 22px rgba(255,255,255,0.6)" }}
+          style={{
+            color: bare ? "#fff" : "#0b2530",
+            opacity: bare ? 0.95 : undefined,
+            fontSize: "clamp(24px, 4.4vw, 56px)",
+            fontWeight: 900,
+            lineHeight: 1.4,
+            whiteSpace: "pre-line",
+            textShadow: bare ? "0 2px 10px rgba(0,0,0,0.35)" : "0 2px 22px rgba(255,255,255,0.6)",
+          }}
         />
         {extra}
       </div>
@@ -254,7 +263,8 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
             fontSize: 12,
             letterSpacing: "0.24em",
             fontWeight: 700,
-            color: "#0b2530",
+            color: bare ? "#fff" : "#0b2530",
+            textShadow: bare ? "0 1px 6px rgba(0,0,0,0.4)" : undefined,
           }}
         >
           Scroll

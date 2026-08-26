@@ -47,6 +47,8 @@ interface DetailItem {
   sideImage?: boolean;
   /** true なら本文の右側（SPでは下）に画像3枚のマーソンリーを表示 */
   masonryImages?: boolean;
+  /** true なら白カードの中に画像と文章を横並びで表示（製造体制・こだわり） */
+  card?: boolean;
   /** 既存アップロード画像を引き継ぐ場合の明示キー */
   imgKey?: string;
 }
@@ -125,18 +127,28 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
     },
   ],
   ice: [
-    // 選ばれる理由（「業務用食材」の「万全の物流体制」と同じ画像交互レイアウト・3点）。
-    // 3点とも要確認スロット：本文が入力されるまで公開ページでは非表示。
-    // pathKey "reasons"：後から挿入したセクションなので、既存セクションの
-    // 編集パス（sec.0 / sec.2）を変えないよう添字ではなく固有キーを使う。
+    // 旧「選ばれる理由」は 2026-08 改修で「製造体制」「こだわり」の2セクション（H2×2）に分割。
+    // いずれもカードの中に画像と文章が横並びのレイアウト・各3点の要確認スロット
+    // （本文が入力されるまで公開ページでは非表示）。
+    // pathKey は固有キーで、既存セクションの編集パス（sec.0 / sec.2）に影響しない。
     {
-      en: "REASONS",
-      jp: "選ばれる理由",
-      pathKey: "reasons",
+      en: "PRODUCTION SYSTEM",
+      jp: "製造体制",
+      pathKey: "system",
       items: [
-        { title: "（見出し）", pending: true, image: true },
-        { title: "（見出し）", pending: true, image: true },
-        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, card: true },
+        { title: "（見出し）", pending: true, card: true },
+        { title: "（見出し）", pending: true, card: true },
+      ],
+    },
+    {
+      en: "COMMITMENT",
+      jp: "こだわり",
+      pathKey: "kodawari",
+      items: [
+        { title: "（見出し）", pending: true, card: true },
+        { title: "（見出し）", pending: true, card: true },
+        { title: "（見出し）", pending: true, card: true },
       ],
     },
     {
@@ -266,10 +278,25 @@ const ICE_CATEGORIES: { name: string; desc: string; skus: string; products: stri
 // リンク先は「#〜」でページ内アンカー、「/〜」でサイト内ページ、
 // 「https://〜」で外部サイト（別タブ）として扱う。
 // ─────────────────────────────────────────────────────────
-const ICE_LINEUP_NAV: { name: string; href: string; img: string }[] = [
-  { name: "無色透明\nかち割り氷", href: "/ice/products/rocky-ice", img: IMG.iceClose },
-  { name: "味・色付き氷", href: "/ice/products/ice-cafe", img: IMG.icedCoffee },
-  { name: "コンビニ向け", href: "#ice-lineup", img: IMG.iceBlue },
+const ICE_LINEUP_NAV: { name: string; href: string; img: string; body: string }[] = [
+  {
+    name: "無色透明\nかち割り氷",
+    href: "/ice/products/rocky-ice",
+    img: IMG.iceClose,
+    body: "純度の高い原料水を低温でじっくり凍らせた、硬く透明で溶けにくい業務用かち割り氷です。溶けても飲み物の味を損なわず、食品本来のおいしさを届けます。",
+  },
+  {
+    name: "味・色付き氷",
+    href: "/ice/products/ice-cafe",
+    img: IMG.icedCoffee,
+    body: "コーヒーや果汁を凍らせた氷カフェ・カクテル用アイスなど、溶けるほどに味が深まる氷菓シリーズ。特別な機械なしで新メニューを導入できます。",
+  },
+  {
+    name: "コンビニ向け",
+    href: "#ice-lineup",
+    img: IMG.iceBlue,
+    body: "コンビニエンスストア向けのカップ氷をはじめ、全国の店頭に並ぶ製品を安定した品質で製造・供給しています。",
+  },
 ];
 
 // ─────────────────────────────────────────────────────────
@@ -471,39 +498,55 @@ function EditableLinkHint({ path, label, href }: { path: string; label: string; 
   );
 }
 
-/** 商品ラインナップ導線タイル（画像＋グレーオーバーレイ＋白文字。全体がボタン） */
-function LineupNavTile({ i, def }: { i: number; def: { name: string; href: string; img: string } }) {
+/** 商品ラインナップ導線タイル（見出し＋画像＋文言の縦組み。2026-08 改修）。
+ * 見出しは下線付き、画像クリックと「詳細を見る」でリンク先へ。 */
+function LineupNavTile({ i, def }: { i: number; def: { name: string; href: string; img: string; body: string } }) {
   const base = `ice:lineupNav.${i}`;
   const name = txt(`${base}.name`, def.name);
   const href = txt(`${base}.href`, def.href);
-  const inner = (
-    <>
+  const linkCls = "group block";
+  const image = (
+    <div className="aspect-[16/9] w-full overflow-hidden rounded-xl border border-border bg-secondary">
       <ImageWithFallback
         src={img(`${base}.image`, def.img || IMG_PLACEHOLDER)}
         alt={name}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         {...edImg(`${base}.image`, `ラインナップ導線${i + 1} 画像`)}
       />
-      {/* グレーのオーバーレイ */}
-      <div className="absolute inset-0 bg-ink/50 transition-colors group-hover:bg-ink/35" />
-      <span
-        className="absolute inset-0 flex items-center justify-center px-4 text-center text-white"
-        style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.6, whiteSpace: "pre-line" }}
+    </div>
+  );
+  const wrap = (children: React.ReactNode) =>
+    /^https?:/i.test(href) ? (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={linkCls}>{children}</a>
+    ) : href.startsWith("#") ? (
+      <a href={href} className={linkCls}>{children}</a>
+    ) : (
+      <Link to={href} className={linkCls}>{children}</Link>
+    );
+  return (
+    <div className="flex flex-col">
+      {/* タイトル（下線付き見出し） */}
+      <h3
+        className="border-b border-border pb-3"
+        style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-line" }}
         {...ed(`${base}.name`, `ラインナップ導線${i + 1} 名称`)}
       >
         {name}
-      </span>
-    </>
-  );
-  const cls = "group relative block aspect-[16/9] overflow-hidden rounded-xl border border-border";
-  return (
-    <div>
-      {/^https?:/i.test(href) ? (
-        <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
-      ) : href.startsWith("#") ? (
-        <a href={href} className={cls}>{inner}</a>
-      ) : (
-        <Link to={href} className={cls}>{inner}</Link>
+      </h3>
+      {/* 画像 */}
+      <div className="mt-5">{wrap(image)}</div>
+      {/* 文言 */}
+      <p
+        className="mt-4 flex-1 text-foreground/80"
+        style={{ fontSize: 14, lineHeight: 2.0, whiteSpace: "pre-line" }}
+        {...ed(`${base}.body`, `ラインナップ導線${i + 1} 文言`, { multiline: true })}
+      >
+        {txt(`${base}.body`, def.body)}
+      </p>
+      {wrap(
+        <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13, fontWeight: 600 }}>
+          詳細を見る <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+        </span>
       )}
       <EditableLinkHint path={`${base}.href`} label={`ラインナップ導線${i + 1} リンク先URL`} href={href} />
     </div>
@@ -640,6 +683,41 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
             alt={`${it.title || secJp} 画像3`}
             className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
             {...edImg(`${base}.image3`, `${it.title || secJp} 画像3`)}
+          />
+        </div>
+      </motion.div>
+    );
+  }
+
+  // 白カードの中に画像と文章が横並び（製造体制・こだわり）。
+  // 左右はコンソールの「左右入れ替え」、幅は「画像の幅」スライダーで調整できる
+  if (it.card) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="rounded-2xl border border-border bg-card p-6 pc:p-8"
+      >
+        <div
+          className="grid items-center gap-6 pc:gap-8 pc:[grid-template-columns:var(--ratio)]"
+          style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 45, false) }}
+          {...ratioAttrs(`${base}.ratio`, 45, false)}
+        >
+          <div>
+            {it.title && (
+              <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
+                {txt(`${base}.title`, it.title)}
+              </h3>
+            )}
+            <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
+          </div>
+          <ImageWithFallback
+            src={img(`${base}.image`, IMG_PLACEHOLDER)}
+            alt={it.title || secJp}
+            className="aspect-[4/3] w-full rounded-xl object-cover"
+            {...edImg(`${base}.image`, `${it.title || secJp} 画像`)}
           />
         </div>
       </motion.div>
@@ -831,7 +909,7 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* 氷・氷菓：商品ラインナップ導線（赤帯の外・画像＋グレーオーバーレイ＋白文字のボタン） */}
       {division === "ice" && (
         <Section heat={bizHeat} className="bg-transparent py-10 tab:py-12">
-          <div className="mx-auto grid max-w-5xl gap-5 tab:grid-cols-3">
+          <div className="mx-auto grid max-w-5xl gap-8 tab:grid-cols-3">
             {ICE_LINEUP_NAV.map((def, i) => (
               <LineupNavTile key={i} i={i} def={def} />
             ))}

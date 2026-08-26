@@ -120,7 +120,7 @@ function applyOverrides(overrides: Record<string, string>) {
   // アニメーション設定は animate モジュールが要素へ反映する（DOMパッチ対象外）
   import("./animate").then((m) => m.setAnimOverrides(overrides));
   for (const [path, value] of Object.entries(overrides)) {
-    if (path.startsWith("hide:") || path.startsWith("hidesec:") || path.startsWith("anim:") || path.startsWith("color:") || path.startsWith("flip:")) continue; // 専用処理（style/animate）で反映済み
+    if (path.startsWith("hide:") || path.startsWith("hidesec:") || path.startsWith("anim:") || path.startsWith("color:") || path.startsWith("flip:") || path.startsWith("ar:")) continue; // 専用処理（style/animate）で反映済み
     document.querySelectorAll<HTMLElement>(`[data-edit="${cssEscape(path)}"]`).forEach((el) => {
       if (el.hasAttribute("data-edit-rich")) {
         // リッチ本文：textContent の書き換えでは p/li 構造が壊れるため再構築する

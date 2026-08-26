@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowRight, Building2, ShoppingBag, Snowflake, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
@@ -7,7 +7,7 @@ import { IMG, PRODUCT_IMG } from "../data/images";
 import { useNews } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { PRODUCT_GENRES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
 import { RichBody } from "../components/common/RichBody";
 import { InlineMovieTag } from "../components/common/MovieBadge";
 
@@ -30,31 +30,36 @@ const STRENGTH_PLACEHOLDER =
 const STRENGTH_BODY_DEFAULT =
   "アイスラインが選ばれる理由は、一言で言えば「欠かさない」ことです。需要が読めないときでも、季節が外れているときでも、営業と製造と物流が動いて、約束した量を届ける。それを積み重ねてきた120年があります。\nFSSC・ISO認証に裏打ちされた品質と、5,000品目を超える商品ラインアップで、これからも食を支え続けます。";
 
-// 事業一覧（現在のサイト構成に対応）。倉庫・ドライアイスの画像は各事業ページの
-// MV画像（service:*.mv.image）を共有し、コンソールで設定すればトップにも反映される。
-const SERVICES: { to: string; en: string; title: string; lead: string; imgKey?: string; imgDefault?: string }[] = [
-  { to: "/ice", en: "ICE", title: "氷・氷菓の製造販売", lead: "冷たいものなら、アイスライン。", imgDefault: IMG.iceMv },
-  { to: "/food", en: "FOOD", title: "業務用食材の販売", lead: "食の現場に、深く根を張る。", imgDefault: IMG.foodMv },
-  { to: "/warehouse", en: "WAREHOUSE", title: "倉庫事業", lead: "食を預かる、冷たい倉庫。", imgKey: "service:warehouse.mv.image" },
-  { to: "/dryice", en: "DRY ICE", title: "ドライアイスの販売", lead: "必要なとき、必要な量を。", imgKey: "service:dryice.mv.image" },
+// 事業一覧（現在のサイト構成に対応）。画像・小見出し・本文はコンソールから編集できる。
+// 倉庫・ドライアイスの画像既定は各事業ページのMV画像（service:*.mv.image）を共有。
+const SERVICES: { to: string; title: string; body: string; imgKey?: string; imgDefault?: string }[] = [
+  {
+    to: "/ice",
+    title: "氷・氷菓の製造販売",
+    body: "業務用かち割り氷から味付き氷・氷菓まで、自社工場で製造し全国の飲食店・量販店へ届けています。冷たいものなら、アイスライン。",
+    imgDefault: IMG.iceMv,
+  },
+  {
+    to: "/food",
+    title: "業務用食材の販売",
+    body: "岡山県内トップシェアの食品商社として、5,000品目を超える業務用食材をホテル・飲食店・食品メーカーへ提案・配送しています。",
+    imgDefault: IMG.foodMv,
+  },
+  {
+    to: "/warehouse",
+    title: "倉庫事業",
+    body: "冷凍・冷蔵倉庫で食品をお預かりし、入出庫・在庫管理まで低温物流の基盤を支えています。食を預かる、冷たい倉庫です。",
+    imgKey: "service:warehouse.mv.image",
+  },
+  {
+    to: "/dryice",
+    title: "ドライアイスの販売",
+    body: "ドライアイスの製造・加工・販売。食品の鮮度保持や低温輸送に欠かせない冷熱を、必要なときに必要な量だけお届けします。",
+    imgKey: "service:dryice.mv.image",
+  },
 ];
 
-// MV下の導線（4つ）。label が1行目、note が2行目（括弧内の補足。無い導線は空文字）。
-// アイコン（SVG/画像）・文言・リンク先はすべてコンソールから編集できる
-// （キー: top:audience.{i}.icon / .label / .note / .to）。
-const AUDIENCE = [
-  { icon: Building2, label: "お取引企業様", note: "氷/氷菓・食材・ドライアイス・倉庫", to: "/contact" },
-  { icon: Snowflake, label: "一般のお客様", note: "氷/氷菓", to: "/ice" },
-  { icon: ShoppingBag, label: "ドライアイスオンラインショップ", note: "", to: "https://www.dry-ice.jp/" },
-  { icon: Users, label: "採用情報", note: "", to: "/recruit3" },
-];
-
-// 導線アイコンの差し替え用プレースホルダー（編集前の小さな「＋」枠）
-const AUDIENCE_ICON_PH =
-  "data:image/svg+xml;charset=utf-8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" rx="8" fill="#f1f1f3"/><text x="50%" y="54%" font-size="28" fill="#bcbcc2" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">＋</text></svg>'
-  );
+// MV直下の対象者別導線（導線1〜4）は 2026-08 改修で削除した。
 
 function Hero() {
   // メインビジュアル：トリミングせず全体表示（PC・SP共通）。
@@ -102,62 +107,7 @@ export function Top() {
     <>
       <Hero />
 
-      {/* ヒーロー：対象者別4導線（アイコン・文言・リンク先はコンソールから編集可能） */}
-      <Section heat={HEAT.topHero}>
-        <div className="grid gap-4 tab:grid-cols-2 pc:grid-cols-4">
-          {AUDIENCE.map((a, i) => {
-            const cls = "group flex h-full items-center justify-between border border-border bg-card p-6 transition-colors hover:border-brand";
-            // アイコン：画像（SVG可）が設定されていればそれを、無ければ既定のアイコンを表示
-            const iconSrc = img(`top:audience.${i}.icon`, "");
-            // リンク先：コンソールで編集可能。「https://…」は外部サイト（別タブ）
-            const href = txt(`top:audience.${i}.to`, a.to);
-            const external = /^https?:/i.test(href);
-            const inner = (
-              <>
-                <div className="flex min-w-0 items-center gap-4">
-                  {iconSrc !== "" || EDIT_MODE ? (
-                    <ImageWithFallback
-                      src={iconSrc || AUDIENCE_ICON_PH}
-                      alt=""
-                      className="h-8 w-8 shrink-0 object-contain"
-                      {...edImg(`top:audience.${i}.icon`, `導線${i + 1} アイコン画像（SVG可）`)}
-                    />
-                  ) : (
-                    <a.icon className="shrink-0 text-brand" size={28} />
-                  )}
-                  <div className="min-w-0">
-                    <p style={{ fontSize: 15 }} {...ed(`top:audience.${i}.label`, `導線${i + 1} ラベル`)}>{txt(`top:audience.${i}.label`, a.label)}</p>
-                    {/* 2行目（括弧内の補足）。空の導線では表示しない */}
-                    {(txt(`top:audience.${i}.note`, a.note) || EDIT_MODE) && (
-                      <p className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`top:audience.${i}.note`, `導線${i + 1} サブラベル`)}>{txt(`top:audience.${i}.note`, a.note)}</p>
-                    )}
-                  </div>
-                </div>
-                <ArrowRight className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-brand" size={20} />
-              </>
-            );
-            return (
-              <div key={i}>
-                {external ? (
-                  <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
-                    {inner}
-                  </a>
-                ) : (
-                  <Link to={href} className={cls}>
-                    {inner}
-                  </Link>
-                )}
-                {/* 編集モード限定：リンク先URLの編集行 */}
-                {EDIT_MODE && (
-                  <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(`top:audience.${i}.to`, `導線${i + 1} リンク先URL`)}>
-                    {href}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </Section>
+      {/* MV直下の対象者別導線（導線1〜4）は 2026-08 改修で削除 */}
 
       {/* 新着情報 */}
       <Section heat={HEAT.topNews}>
@@ -222,29 +172,45 @@ export function Top() {
         </div>
       </Section>
 
-      {/* 事業内容（現在のサイト構成：4事業への導線） */}
+      {/* 事業内容（画像・小見出し・本文・リンクの縦組みカード。2026-08 改修） */}
       <Section heat={HEAT.topGenre}>
         <SectionTitle en="OUR SERVICES" jp="事業内容" path="sectionEn:top.services" />
-        <div className="mt-10 grid gap-5 tab:grid-cols-2">
-          {SERVICES.map((s, i) => (
-            <Link key={s.to} to={s.to} className="group relative overflow-hidden rounded-lg">
-              <div className="aspect-[16/8] w-full overflow-hidden bg-secondary">
-                <ImageWithFallback
-                  src={s.imgKey ? img(s.imgKey, STRENGTH_PLACEHOLDER) : s.imgDefault!}
-                  alt={s.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+        <div className="mt-10 grid gap-x-8 gap-y-12 tab:grid-cols-2">
+          {SERVICES.map((s, i) => {
+            const title = txt(`top:services.${i}.title`, s.title);
+            return (
+              <div key={s.to} className="flex flex-col">
+                {/* 画像 */}
+                <Link to={s.to} className="group block">
+                  <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-secondary">
+                    <ImageWithFallback
+                      src={img(`top:services.${i}.image`, s.imgKey ? img(s.imgKey, STRENGTH_PLACEHOLDER) : s.imgDefault!)}
+                      alt={title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      {...edImg(`top:services.${i}.image`, `事業内容${i + 1} 画像`)}
+                    />
+                  </div>
+                </Link>
+                {/* 小見出し */}
+                <h3 className="mt-5" style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.6 }} {...ed(`top:services.${i}.title`, "事業名")}>
+                  {title}
+                </h3>
+                {/* 本文 */}
+                <p
+                  className="mt-2 flex-1 text-foreground/80"
+                  style={{ fontSize: 13.5, lineHeight: 2.0, whiteSpace: "pre-line" }}
+                  {...ed(`top:services.${i}.body`, "事業内容 本文", { multiline: true })}
+                >
+                  {txt(`top:services.${i}.body`, s.body)}
+                </p>
+                {/* リンク（事業名＋矢印） */}
+                <Link to={s.to} className="group mt-3 inline-flex w-fit items-center gap-1.5 text-brand" style={{ fontSize: 13, fontWeight: 600 }}>
+                  <span>{title}</span>
+                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                </Link>
               </div>
-              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/80 via-ink/30 to-transparent p-6">
-                <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.18em" }} {...ed(`top:services.${i}.en`, "英語ラベル")}>{txt(`top:services.${i}.en`, s.en)}</span>
-                <span className="mt-1 flex items-center gap-2 text-white" style={{ fontSize: 20, fontWeight: 700 }}>
-                  <span {...ed(`top:services.${i}.title`, "事業名")}>{txt(`top:services.${i}.title`, s.title)}</span>
-                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                </span>
-                <span className="mt-1 text-white/80" style={{ fontSize: 13 }} {...ed(`top:services.${i}.lead`, "事業リード")}>{txt(`top:services.${i}.lead`, s.lead)}</span>
-              </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </Section>
 

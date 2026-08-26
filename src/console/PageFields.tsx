@@ -332,6 +332,28 @@ export function PageFields({
         ) : f.kind === "image" ? (
           <>
             <ImageField label="" value={val(f)} onChange={(url) => onChange(setValueByPath(draft, f.path, url))} />
+            {/* 画像の縦横比（overrides の `ar:<パス>`。空＝各デザインの既定比率のまま） */}
+            {(() => {
+              const arKey = `ar:${f.path}`;
+              const arVal = getValueByPath(draft, arKey) || "";
+              return (
+                <div className="mt-2 flex items-center gap-1.5">
+                  <span className="shrink-0 text-[11px] font-medium text-slate-500">縦横比</span>
+                  <select
+                    value={arVal}
+                    onChange={(e) => onChange(setValueByPath(draft, arKey, e.target.value))}
+                    aria-label="画像の縦横比"
+                    className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[11px] text-slate-600 outline-none"
+                  >
+                    <option value="">既定のまま</option>
+                    <option value="1:1">1:1（正方形）</option>
+                    <option value="4:3">4:3</option>
+                    <option value="3:2">3:2</option>
+                    <option value="16:9">16:9</option>
+                  </select>
+                </div>
+              );
+            })()}
             {/* 画像と文章の横並びグリッド内の画像には、幅の比率スライダーを統合表示。
                 ドラッグ中の値は左のプレビューへ即時反映される（editBridge が --ratio を更新） */}
             {f.ratio && (() => {
@@ -431,8 +453,8 @@ export function PageFields({
       }
     }
 
-    // 値と付随設定（非表示・アニメ・色・比率）をまとめて書き換えるヘルパー
-    const auxPrefixes = ["hide:", "anim:", "color:"] as const;
+    // 値と付随設定（非表示・アニメ・色・縦横比・比率）をまとめて書き換えるヘルパー
+    const auxPrefixes = ["hide:", "anim:", "color:", "ar:"] as const;
     const clearItem = (next: Content, fs: PageField[]): Content => {
       for (const f of fs) {
         next = setValueByPath(next, f.path, "");

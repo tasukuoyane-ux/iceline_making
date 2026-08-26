@@ -27,6 +27,13 @@ const IMG_PLACEHOLDER =
     '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#f1f1f3"/><text x="50%" y="50%" font-size="30" fill="#bcbcc2" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">＋ 画像</text></svg>'
   );
 
+// ピクトグラムの差し替え用プレースホルダー（小さな「＋」）
+const PICTO_PLACEHOLDER =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><text x="50%" y="54%" font-size="30" fill="#bcbcc2" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif">＋</text></svg>'
+  );
+
 export type ServiceId = "warehouse" | "dryice";
 
 interface ServiceSectionItem {
@@ -47,6 +54,11 @@ interface ServiceSection {
    * セクションの追加・削除で既存の編集パス（service:*.sec.<キー>.*）が
    * ずれないよう、並びを変えたセクションには明示的に付与すること。 */
   pathKey?: string;
+  /** true なら「写真＋キャプション1行」×6枚のグリッド（items は使わない。
+   * 写真が1枚も設定されるまで公開ページでは非表示） */
+  photoGrid?: boolean;
+  /** true なら「ピクトグラム＋1行キャプション」のグリッド（items の title がキャプションの既定値） */
+  pictos?: boolean;
 }
 interface ServiceConfig {
   en: string;
@@ -72,6 +84,8 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
       {
         en: "FACILITIES",
         jp: "施設・設備",
+        // 後続セクションの追加でも編集パスがずれないよう添字を固定
+        pathKey: "0",
         items: [
           {
             title: "拠点",
@@ -87,9 +101,19 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
           { title: "セキュリティ・管理体制", pending: true },
         ],
       },
+      // 施設・設備の下：写真＋キャプション1行 ×6枚のグリッド（2026-08 追加）
+      {
+        en: "PHOTOS",
+        jp: "フォトギャラリー",
+        pathKey: "facphotos",
+        items: [],
+        photoGrid: true,
+      },
       {
         en: "PRICE",
         jp: "ご利用料金",
+        // 添字ベースだった旧編集パス（sec.1.*）を維持する固定キー
+        pathKey: "1",
         items: [
           {
             body:
@@ -168,25 +192,17 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
           },
         ],
       },
+      // サービスの特徴：ピクトグラム＋1行キャプションの組み合わせ（2026-08 改修。
+      // カード・ボタン風の表示を廃止。title がキャプションの既定値）
       {
         en: "SERVICE",
         jp: "サービスの特徴",
         pathKey: "1",
+        pictos: true,
         items: [
-          {
-            title: "カット加工対応",
-            body: "お客様のご要望に合わせてサイズをカットしてお届けします。用途や容器に合わせた細かなサイズ指定にも対応しています。",
-          },
-          {
-            title: "窓口での直接購入",
-            body: "アイスラインの窓口にお越しいただき、直接ご購入いただくことも可能です。",
-          },
-          {
-            title: "個人向けECサイト",
-            body: "個人のお客様向けには、ECサイトからもご購入いただけます。",
-            cta: true,
-          },
-          { pending: true },
+          { title: "カット加工対応" },
+          { title: "窓口での直接購入" },
+          { title: "個人向けECサイト" },
         ],
       },
       {
@@ -306,6 +322,78 @@ export function ServicePage({ service }: { service: ServiceId }) {
       {/* シート構成に沿った各セクション（要確認スロットは未入力の間、公開ページでは非表示） */}
       {s.sections.map((sec, si) => {
         const sk = sec.pathKey ?? String(si);
+
+        // 写真＋キャプション1行 ×6枚のグリッド（倉庫事業「フォトギャラリー」）。
+        // 写真が1枚も設定されるまで公開ページでは非表示
+        if (sec.photoGrid) {
+          const slots = Array.from({ length: 6 }, (_, i) => ({
+            i,
+            image: img(`${base}.sec.${sk}.photo.${i}.image`, ""),
+          })).filter((p) => p.image !== "" || EDIT_MODE);
+          if (slots.length === 0) return null;
+          return (
+            <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
+              <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${sk}`} />
+              <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 pc:grid-cols-3">
+                {slots.map((p) => (
+                  <figure key={p.i}>
+                    <ImageWithFallback
+                      src={p.image || IMG_PLACEHOLDER}
+                      alt={txt(`${base}.sec.${sk}.photo.${p.i}.caption`, "")}
+                      sizes="(min-width: 1025px) 33vw, 50vw"
+                      className="aspect-[4/3] w-full rounded-xl border border-border object-cover"
+                      {...edImg(`${base}.sec.${sk}.photo.${p.i}.image`, `写真${p.i + 1}`)}
+                    />
+                    <figcaption
+                      className="mt-2 text-muted-foreground"
+                      style={{ fontSize: 13, lineHeight: 1.7 }}
+                      {...ed(`${base}.sec.${sk}.photo.${p.i}.caption`, `写真${p.i + 1} キャプション`)}
+                    >
+                      {txt(`${base}.sec.${sk}.photo.${p.i}.caption`, "") || (EDIT_MODE ? "（キャプション）" : "")}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </Section>
+          );
+        }
+
+        // ピクトグラム＋1行キャプションのグリッド（ドライアイス「サービスの特徴」）。
+        // カード・ボタン風の表示は使わない
+        if (sec.pictos) {
+          const slots = Array.from({ length: 6 }, (_, i) => ({
+            i,
+            icon: img(`${base}.sec.${sk}.pic.${i}.icon`, ""),
+            caption: txt(`${base}.sec.${sk}.pic.${i}.caption`, sec.items[i]?.title ?? ""),
+          })).filter((p) => p.caption !== "" || p.icon !== "" || EDIT_MODE);
+          return (
+            <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
+              <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${sk}`} />
+              <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-x-6 gap-y-10 tab:grid-cols-3">
+                {slots.map((p) => (
+                  <div key={p.i} className="flex flex-col items-center text-center">
+                    <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-secondary">
+                      <ImageWithFallback
+                        src={p.icon || PICTO_PLACEHOLDER}
+                        alt=""
+                        className="h-11 w-11 object-contain"
+                        {...edImg(`${base}.sec.${sk}.pic.${p.i}.icon`, `特徴${p.i + 1} ピクトグラム`)}
+                      />
+                    </div>
+                    <p
+                      className="mt-3"
+                      style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.6 }}
+                      {...ed(`${base}.sec.${sk}.pic.${p.i}.caption`, `特徴${p.i + 1} キャプション`)}
+                    >
+                      {p.caption || (EDIT_MODE ? "（キャプション）" : "")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          );
+        }
+
         const visible =
           sec.items.some((it, ii) => !it.pending || txt(`${base}.sec.${sk}.${ii}.body`, "") !== "") || EDIT_MODE;
         if (!visible) return null;
