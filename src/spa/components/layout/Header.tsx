@@ -55,7 +55,7 @@ export function Header() {
   // 採用3ページではヘッダーの帯を持たない透過表示にし、
   // ナビは「コーポレートサイト」「エントリー」の2つのみにする。
   // ロゴはこのページ専用に差し替え可能（recruit3:header.logo）。
-  const r3 = pathname.startsWith("/recruit3");
+  const r3 = pathname === "/recruit";
   const logoSrc = img("header:logo", logo);
   // 透過ヘッダー上の文字を読みやすくする影
   const r3Shadow = "0 1px 8px rgba(0,0,0,0.45)";
@@ -78,7 +78,7 @@ export function Header() {
     // 基準10pxの円を必要倍率まで scale で拡大する（2%の余白）
     setCircle({ x, y, scale: (radius * 2 * 1.02) / 10 });
     // 塗りつぶし完了（1.2秒）後に採用3へ遷移し、円はフェードアウトして消える
-    window.setTimeout(() => navigate("/recruit3"), 1200);
+    window.setTimeout(() => navigate("/recruit"), 1200);
     window.setTimeout(() => setCircle(null), 1700);
   };
 
@@ -140,7 +140,7 @@ export function Header() {
               </span>
             </Link>
             <Link
-              to="/recruit3#jobs"
+              to="/recruit#jobs"
               onClick={scrollToJobs}
               className="ml-2 inline-flex items-center rounded-full bg-white px-6 py-2.5 text-[#E60012] shadow-md transition-colors hover:bg-white/90"
               style={{ fontSize: 14, fontWeight: 700 }}
@@ -215,7 +215,7 @@ export function Header() {
 
             {/* 採用情報は採用3（採用2踏襲＋動画背景）を表示する */}
             <Link
-              to="/recruit3"
+              to="/recruit"
               onClick={startCtaTransition}
               className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-[#9CDFF1] hover:text-[#16232b]"
               style={{ fontSize: 14 }}
@@ -254,7 +254,7 @@ export function Header() {
                   </span>
                 </Link>
                 <Link
-                  to="/recruit3#jobs"
+                  to="/recruit#jobs"
                   onClick={scrollToJobs}
                   className="mt-4 inline-flex items-center justify-center rounded-full bg-brand py-3.5 text-brand-foreground"
                 >
@@ -306,7 +306,7 @@ export function Header() {
                 </div>
 
                 <Link
-                  to="/recruit3"
+                  to="/recruit"
                   onClick={startCtaTransition}
                   className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground transition-colors hover:bg-[#9CDFF1] hover:text-[#16232b]"
                 >

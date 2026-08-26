@@ -1,4 +1,7 @@
-// 記事本文ブロックの公開側レンダラー（段落 / H2 / H3 / 画像[リンク可] / 動画）。
+// 記事本文ブロックの公開側レンダラー
+// （段落 / H2 / H3 / 画像[リンク可] / 動画 / 求人エントリーリンク）。
+import { Link } from "react-router";
+import { ArrowRight } from "lucide-react";
 import { Block } from "../../data/blocks";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { toEmbed } from "../../lib/video";
@@ -100,6 +103,20 @@ export function BlockContent({ blocks, className = "" }: { blocks: Block[]; clas
                 </figcaption>
               )}
             </figure>
+          );
+        }
+        if (b.type === "recruitLink") {
+          // 採用ページの該当職種オーバーレイを開き、エントリーフォームまで自動スクロールする
+          return (
+            <div key={i} className="pt-2">
+              <Link
+                to={`/recruit?job=${encodeURIComponent(b.job)}&entry=1`}
+                className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
+                style={{ fontSize: 15, fontWeight: 700 }}
+              >
+                {b.label || "この職種にエントリーする"} <ArrowRight size={16} />
+              </Link>
+            </div>
           );
         }
         // paragraph

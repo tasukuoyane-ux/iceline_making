@@ -988,6 +988,16 @@ function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobInde
   // スクロールダウンでヘッダー右上に「エントリー」への追尾アンカーボタンを表示
   const [showEntryCta, setShowEntryCta] = useState(false);
   const entryRef = useRef<HTMLElement | null>(null);
+  // 記事の「求人エントリーリンク」（/recruit?job=◯◯&entry=1）から開かれたときは、
+  // オーバーレイ表示後にエントリーフォームまで自動スクロールする
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("entry") !== "1") return;
+    const t = window.setTimeout(() => {
+      entryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 400);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // ページ側のスタッキングコンテキストに閉じ込められないよう body 直下へポータル描画
   return createPortal(
     <div
@@ -1704,7 +1714,13 @@ export function Recruit3() {
   // イントロ演出（背景動画1）：ヒーローMVのときだけ有効。
   // 編集モードではスクロールロックが編集の妨げになるため無効化し、
   // 従来どおり全動画をスクロール連動で表示する。
-  const introEnabled = HAS_BG && !EDIT_MODE && mvType === "hero";
+  // 記事のエントリーリンク等から職種指定（?job=◯◯）で着地した場合も、
+  // オーバーレイの操作を妨げないためイントロをスキップする。
+  const introEnabled =
+    HAS_BG &&
+    !EDIT_MODE &&
+    mvType === "hero" &&
+    (typeof window === "undefined" || !new URLSearchParams(window.location.search).has("job"));
   const [intro, setIntro] = useState<"wait" | "playing" | "done">(introEnabled ? "wait" : "done");
   // 背景動画2以降は従来と同じスクロール連動（最上部=1フレーム目、最下部=最終フレーム）
   const scrubUrls = introEnabled ? BG_VIDEOS.slice(1) : BG_VIDEOS;

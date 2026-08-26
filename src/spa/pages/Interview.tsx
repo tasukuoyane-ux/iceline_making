@@ -16,7 +16,7 @@ export function Interview() {
     return (
       <div className="mx-auto max-w-3xl px-5 py-32 text-center">
         <p>記事が見つかりませんでした。</p>
-        <Link to="/recruit3" className="mt-4 inline-block text-brand">採用情報へ戻る</Link>
+        <Link to="/recruit" className="mt-4 inline-block text-brand">採用情報へ戻る</Link>
       </div>
     );
   }
@@ -71,7 +71,7 @@ export function Interview() {
 
       {/* ===== 本文（エディトリアル） ===== */}
       <div className="mx-auto max-w-[760px] px-5 py-16 pc:py-24">
-        <Link to="/recruit3" className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
+        <Link to="/recruit" className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
           <ChevronLeft size={16} /> 採用情報へ戻る
         </Link>
 
@@ -101,7 +101,7 @@ export function Interview() {
             >
               エントリーする <ArrowRight size={16} />
             </Link>
-            <Link to="/recruit3" className="text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
+            <Link to="/recruit" className="text-muted-foreground transition-colors hover:text-brand" style={{ fontSize: 13 }}>
               採用情報トップへ
             </Link>
           </div>

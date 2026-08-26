@@ -12,7 +12,7 @@ import { Button, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { PageFields, PageField } from "./PageFields";
 import { RecruitPanel } from "./RecruitPanel";
-import { VideosPanel, InterviewsPanel, ProfileSlidesPanel, ContactSettingsPanel, SectionVideoPanel, Recruit3BgPanel } from "./panels";
+import { VideosPanel, InterviewsPanel, ContactSettingsPanel, Recruit3BgPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 const VIEWPORT_KEY = "iceline-console-viewport";
@@ -52,8 +52,6 @@ const PAGES: { label: string; path: string }[] = [
   { label: "お知らせ一覧", path: "/news" },
   { label: "動画で知る", path: "/videos" },
   { label: "採用情報", path: "/recruit" },
-  { label: "採用情報2", path: "/recruit2" },
-  { label: "採用情報3", path: "/recruit3" },
   { label: "会社情報", path: "/company" },
   { label: "お問い合わせ", path: "/contact" },
 ];
@@ -268,9 +266,9 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
               type="button"
               onClick={() => {
                 setTab(t.id);
-                // 採用タブは採用3ページの内容を編集するため、プレビューも合わせる
-                if (t.id === "recruit" && previewPath !== "/recruit3") {
-                  setPreviewPath("/recruit3");
+                // 採用タブは採用ページ（/recruit）の内容を編集するため、プレビューも合わせる
+                if (t.id === "recruit" && previewPath !== "/recruit") {
+                  setPreviewPath("/recruit");
                   setFields([]);
                   setSelectedPath(null);
                 }
@@ -462,35 +460,15 @@ function PageManagers({
       node: <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />,
     });
   }
-  if (route === "/recruit" || route === "/recruit2") {
+  // 採用ページ（/recruit＝旧採用3）：背景動画とインタビューの管理
+  if (route === "/recruit") {
     items.push({
-      title: route === "/recruit" ? "採用 紹介動画" : "採用2 紹介動画",
-      node: (
-        <SectionVideoPanel
-          value={draft.sections}
-          onChange={(v) => setSlice("sections", v)}
-          sectionKey={route === "/recruit" ? "recruitIntroVideo" : "recruit2Video"}
-          title={
-            route === "/recruit"
-              ? "採用ページ 紹介動画（ヒーローメッセージと事業紹介の間に表示）"
-              : "採用2 紹介動画（「人を知る」に表示）"
-          }
-        />
-      ),
-    });
-    items.push({
-      title: "会社紹介資料（スライド）",
-      node: <ProfileSlidesPanel value={draft.profileSlides} onChange={(v) => setSlice("profileSlides", v)} />,
+      title: "採用 背景動画",
+      node: <Recruit3BgPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />,
     });
     items.push({
       title: "社員インタビュー（追加・削除）",
       node: <InterviewsPanel value={draft.interviews} onChange={(v) => setSlice("interviews", v)} />,
-    });
-  }
-  if (route === "/recruit3") {
-    items.push({
-      title: "採用3 背景動画",
-      node: <Recruit3BgPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />,
     });
   }
   if (route === "/contact") {

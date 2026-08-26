@@ -326,7 +326,7 @@ export function RecruitPanel({
   return (
     <div className="space-y-5">
       <p className="text-[11px] leading-relaxed text-slate-500">
-        採用3ページ（/recruit3）の「募集職種一覧」と、職種をクリックしたときに開く詳細を管理します。
+        採用ページ（/recruit）の「募集職種一覧」と、職種をクリックしたときに開く詳細を管理します。
         業務内容・1日の仕事内容・やりがい・特徴・PRポイント・メッセージ・諸条件・福利厚生は職種ごとに、
         よくある質問は全職種共通で設定します。変更は左のプレビューに反映され、「更新（本番へ公開）」で本番に公開されます。
       </p>

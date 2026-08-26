@@ -1,12 +1,16 @@
 // 記事本文のブロック型。お知らせ・社員インタビューで共通利用。
-// 段落 / 見出し(H2,H3) / 画像（任意でリンク付き）を自由な順番で並べられる。
+// 段落 / 見出し(H2,H3) / 画像（任意でリンク付き）/ 動画 /
+// 求人エントリーリンク（特定職種のエントリーフォームへの導線）を自由な順番で並べられる。
 
 export type Block =
   | { type: "paragraph"; text: string }
   | { type: "h2"; text: string }
   | { type: "h3"; text: string }
   | { type: "image"; src: string; href?: string; alt?: string }
-  | { type: "video"; src: string; caption?: string };
+  | { type: "video"; src: string; caption?: string }
+  // job は採用データ（recruit.json）の職種ID。/recruit?job=<id>&entry=1 へリンクし、
+  // 職種オーバーレイを開いてエントリーフォームまで自動スクロールする
+  | { type: "recruitLink"; job: string; label?: string };
 
 /** ブロック配列に動画ブロックが含まれるか（記事一覧の +MOVIE バッジ判定に使用） */
 export function hasVideo(blocks: Block[]): boolean {

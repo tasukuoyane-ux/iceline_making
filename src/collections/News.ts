@@ -1,4 +1,14 @@
 import type { CollectionConfig } from 'payload'
+import recruitJson from '../content/recruit.json'
+
+// 求人エントリーリンク用の職種一覧（採用CMSのデータから生成。
+// 職種の追加・変更は次のデプロイで選択肢に反映される）
+const RECRUIT_JOB_OPTIONS = ((recruitJson as any).jobs ?? []).map(
+  (j: { id: string; title: string; dept: string }) => ({
+    value: j.id,
+    label: `${j.title}（${j.dept}）`,
+  }),
+)
 
 /** 日付（ISO文字列）を日本時間の YYYY-MM-DD にする（slug 自動生成用）。 */
 function jstDatePart(iso: string): string {
@@ -175,6 +185,30 @@ export const News: CollectionConfig = {
               admin: { description: 'YouTube/Vimeo の共有URL、または mp4 直リンク。' },
             },
             { name: 'caption', type: 'text', label: 'キャプション' },
+          ],
+        },
+        {
+          slug: 'recruitLink',
+          labels: { singular: '求人エントリーリンク', plural: '求人エントリーリンク' },
+          fields: [
+            {
+              // DB上は text 型（select にすると Postgres の enum になり、
+              // コンソールで職種を追加するたびに DB マイグレーションが必要になるため）。
+              // 選択肢の案内は下の説明文に自動で列挙される（デプロイ時点の採用データ）。
+              name: 'job',
+              type: 'text',
+              required: true,
+              label: '職種ID',
+              admin: {
+                description: `採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: ${RECRUIT_JOB_OPTIONS.map((o: { value: string; label: string }) => `${o.value}＝${o.label}`).join(' ／ ')}`,
+              },
+            },
+            {
+              name: 'label',
+              type: 'text',
+              label: 'ボタン文言',
+              admin: { description: '空欄なら「この職種にエントリーする」と表示されます。' },
+            },
           ],
         },
       ],

@@ -185,6 +185,19 @@ export interface News {
             blockName?: string | null;
             blockType: 'video';
           }
+        | {
+            /**
+             * 採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: job-dryice＝ドライアイス加工・配送スタッフ（正社員）（ドライアイスチーム） ／ job-keiri-zaimu＝経理財務（正社員）（本社） ／ job-saiyo-koho＝採用広報（正社員）（本社） ／ job-route-sales＝ルート営業スタッフ（正社員）（食品事業部） ／ job-shohin-kaihatsu＝商品開発（正社員）（西大寺工場） ／ job-jinji-romu＝人事労務（正社員）（本社） ／ job-seisan-gijutsu＝生産技術（正社員）（西大寺・二日市工場） ／ job-futsukaichi-seizo＝製造オペレーター／ラインマネージャー（正社員）（二日市工場） ／ job-hinshitsu-kanri＝品質管理（正社員）（西大寺工場） ／ job-souko＝倉庫作業スタッフ（正社員）（西大寺工場） ／ job-seizo＝製造スタッフ（正社員）（西大寺工場） ／ job-seizo-hojo-saidaiji＝製造補助スタッフ（パート）（西大寺工場） ／ job-seizo-hojo-futsukaichi＝製造補助スタッフ（パート）（二日市工場）
+             */
+            job: string;
+            /**
+             * 空欄なら「この職種にエントリーする」と表示されます。
+             */
+            label?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'recruitLink';
+          }
       )[]
     | null;
   updatedAt: string;
@@ -369,6 +382,14 @@ export interface NewsSelect<T extends boolean = true> {
           | {
               src?: T;
               caption?: T;
+              id?: T;
+              blockName?: T;
+            };
+        recruitLink?:
+          | T
+          | {
+              job?: T;
+              label?: T;
               id?: T;
               blockName?: T;
             };

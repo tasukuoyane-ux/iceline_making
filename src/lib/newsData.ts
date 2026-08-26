@@ -58,6 +58,11 @@ function toBlock(b: any): Block | null {
       if (!src) return null
       return { type: 'video', src, ...(b.caption ? { caption: String(b.caption) } : {}) }
     }
+    case 'recruitLink': {
+      const job = String(b.job ?? '')
+      if (!job) return null
+      return { type: 'recruitLink', job, ...(b.label ? { label: String(b.label) } : {}) }
+    }
     default:
       return null
   }

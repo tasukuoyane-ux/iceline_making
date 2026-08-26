@@ -826,27 +826,6 @@ export function PageBg() {
   );
 }
 
-export function Recruit2() {
-  return (
-    <div className="relative isolate min-h-screen overflow-hidden">
-      <R2Styles />
-      {/* 背景：ティール→白のグラデーション＋ぼかし要素 */}
-      <PageBg />
-      <Hero />
-      <Biz />
-      <Philosophy />
-      <CeoMessage />
-      <Locations />
-      <Charm />
-      <Day />
-      <CareerPath />
-      <Jobs />
-      <CompanyProfile />
-      <DeckVideo />
-      <People />
-      <ApplyCta />
-      <Conditions />
-      <EntryForm />
-    </div>
-  );
-}
+// 旧「採用2」ページ（Recruit2 コンポーネント）は 2026-08 改修で削除。
+// このファイルは採用ページ（/recruit＝旧採用3）が使う共有部品
+// （Hero・EntryForm・Sec・Head・PageBg 等）のライブラリとして残している。

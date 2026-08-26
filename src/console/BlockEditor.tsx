@@ -1,10 +1,12 @@
-// 記事本文のブロック編集（段落 / 見出しH2 / 見出しH3 / 画像[リンク可]）。
-// 追加・並べ替え・削除に対応。お知らせ・社員インタビューで共通利用。
+// 記事本文のブロック編集（段落 / 見出しH2 / 見出しH3 / 画像[リンク可] / 動画 /
+// 求人エントリーリンク）。追加・並べ替え・削除に対応。社員インタビューで利用
+// （お知らせ記事は Payload の /admin で編集）。
 import { useRef, useState } from "react";
 import { Block } from "./content";
-import { Field, TextInput, TextArea, Button } from "./ui";
+import { Field, TextInput, TextArea, Button, Select } from "./ui";
 import { ImageField } from "./ImageField";
 import { uploadImage } from "./api";
+import recruitJson from "../content/recruit.json";
 
 const TYPE_LABEL: Record<Block["type"], string> = {
   paragraph: "段落",
@@ -12,7 +14,13 @@ const TYPE_LABEL: Record<Block["type"], string> = {
   h3: "見出し（中）",
   image: "画像",
   video: "動画",
+  recruitLink: "求人エントリーリンク",
 };
+
+// 求人エントリーリンクの職種選択肢（公開中の採用データから生成）
+const JOB_OPTIONS: { value: string; label: string }[] = ((recruitJson as any).jobs ?? []).map(
+  (j: { id: string; title: string; dept: string }) => ({ value: j.id, label: `${j.title}（${j.dept}）` })
+);
 
 // 動画ファイル（mov/mp4/webm等）を直接アップロードして公開URLを返すボタン
 function VideoUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
@@ -105,6 +113,8 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
         ? { type: "image", src: "", href: "", alt: "" }
         : type === "video"
         ? { type: "video", src: "", caption: "" }
+        : type === "recruitLink"
+        ? { type: "recruitLink", job: JOB_OPTIONS[0]?.value ?? "", label: "" }
         : { type, text: "" };
     onChange([...blocks, block]);
   }
@@ -145,6 +155,19 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
                   <TextInput value={b.caption ?? ""} onChange={(e) => update(i, { caption: e.target.value })} />
                 </Field>
               </div>
+            ) : b.type === "recruitLink" ? (
+              <div className="space-y-2">
+                <Field label="職種" hint="採用ページの該当職種のエントリーフォームへのリンクボタンになります">
+                  <Select value={b.job} onChange={(e) => update(i, { job: e.target.value })}>
+                    {JOB_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </Select>
+                </Field>
+                <Field label="ボタン文言（任意）" hint="空欄なら「この職種にエントリーする」と表示されます">
+                  <TextInput value={b.label ?? ""} onChange={(e) => update(i, { label: e.target.value })} />
+                </Field>
+              </div>
             ) : b.type === "paragraph" ? (
               <ParagraphEditor value={b.text} onChange={(text) => update(i, { text })} />
             ) : (
@@ -165,6 +188,7 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
         <Button onClick={() => add("h3")}>＋ 見出し（中）</Button>
         <Button onClick={() => add("image")}>＋ 画像</Button>
         <Button onClick={() => add("video")}>＋ 動画</Button>
+        <Button onClick={() => add("recruitLink")}>＋ 求人エントリーリンク</Button>
       </div>
     </div>
   );
