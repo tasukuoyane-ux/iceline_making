@@ -30,8 +30,8 @@
   "recruit:locations.2.address": "〒101-0064　千代田区神田猿楽町1丁目3-1北村ビル403",
   "recruit:charm.0.title": "失敗を隠さなくていい",
   "recruit:charm.1.title": "続けることが形になる",
-  "top:strengthV2.body": "① 120年以上の実績と信頼\t\t\t\n明治38年（1905年）の創業から120年以上。時代の変化に対応しながら、氷と食の分野で事業を続けてきました。\t\n\t\t\n② 氷を祖業に、低温のプロフェッショナルとして広がった事業\t\t\t\n天然氷の製造・販売から始まった当社は、そこで培った低温管理の技術を土台に、食品卸・冷凍冷蔵倉庫・ドライアイスへと事業を広げてきました。氷づくりで培った「モノを一定温度に保ち、品質を守る」というノウハウが、そのまま食品物流の安定供給を支えています。祖業である氷事業と、そこから広がった食品物流事業。この二つは別々の柱ではなく、同じ低温管理の技術でつながっています。\t\t\t\n\n③ 4つの事業をワンストップで\t\t\t\n業務用食材の販売、氷・氷菓の製造販売、冷凍冷蔵倉庫業、ドライアイスの販売。食と低温にまつわる4つの事業を自社で一貫して手がけているため、お客様の多様なニーズにワンストップで対応できます。\t\t\t",
-  "top:strengthV2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/________-eqXCWvqxVWIDYyNVQFeIzYNuhh6XhD.png",
+  "top:strengthV2.body": "明治38年（1905年）、天然氷の製造・販売から創業して120年以上。そこで培った「モノを一定温度に保ち、品質を守る」低温管理の技術を軸に、事業を広げてきました。\n\n今手がけている業務用食材の販売、氷・氷菓の製造販売、冷凍冷蔵倉庫業、ドライアイスの販売という4つの事業は、別々に生まれたものではなく、すべて同じ低温管理の技術からつながっています。だからこそ、お客様の多様なニーズに、1社でワンストップに応えられます。",
+  "top:strengthV2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/strength-02-final-v2-EdUQYO8zG08rdNmdKSY2SF4w9jaDcV.png",
   "division:ice.supplyChain.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/__________________-8ODh3dFUHy9nQujGTDEtgIBywEyhzF.jpg",
   "recruit:days.1.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_____-TjGAKsKlnZYpIE7NUcwpnNGK98IzeA.jpg",
   "recruit2:mv.slide.0": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/428c1aed6af8f53e5a84e3a2fbab4d32-5sKZwYmPR3RAIryEDvNXucK5bA9TP9.webp",
@@ -325,6 +325,9 @@
   "service:dryice.sec.1.pic.0.icon": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/dryice_cut_icon-SHQZBXTAnuJtqHdspWtQWJWG0ACyKs.png",
   "service:dryice.sec.1.pic.2.icon": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/________-rpslq8JCCtoMtGlpwVYhmhCi7gJICJ.jpeg",
   "service:dryice.sec.1.pic.1.icon": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/reception_counter_icon-ce1uUVRXBBClhyEEqhRkV9s5M52R1u.png",
-  "top:strengthV2.subhead": "② 氷を祖業に、低温のプロフェッショナルとして広がった事業",
-  "top:strengthV2.title": "あ"
+  "top:strengthV2.subhead": " 氷を祖業に、低温のプロフェッショナルとして広がった事業",
+  "top:strengthV2.title": "アイスラインの特徴",
+  "sectionEn:top.strength": "OUR BUSINESS",
+  "top:services.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_______-rvUoKLnpqPvC1tdydZHkYs7enZukgL.webp",
+  "top:services.3.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/__________-nLETW1nNwxOPZn8h5TLGeJprFAYafE.webp"
 }
