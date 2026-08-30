@@ -246,7 +246,7 @@
   "service:warehouse.sec.0.2.body": "〇〇（要確認：入出庫管理の方法・セキュリティ体制など）",
   "service:warehouse.contact.body": "青江物流センター：086-224-3533（代）\n営業時間：月〜金 8:15〜17:00／土 8:15〜12:00（日・祝・年末年始休み）\n\n西大寺物流センター：086-944-8833（代）\n営業時間：月〜土・祝 8:15〜17:00（日・年末年始休み）",
   "service:dryice.sec.about.0.body": "ドライアイスは、二酸化炭素を固体にしたもので、約-79℃という極低温の保冷材です。昇華（気化）するため水分が残らず、食品保冷、冷凍・冷蔵品の輸送、工業用途、葬儀用途など、幅広い分野でご利用いただいています。お客様のご要望に合わせたサイズへのカット加工にも対応しています。",
-  "service:dryice.sec.about.0.title": "",
+  "service:dryice.sec.about.0.title": "多様な用途に対応できる保冷剤",
   "service:dryice.sec.0.0.body": "お客様のご要望に合わせてサイズをカットしてお届けします。業務用の大ロットから小口まで対応しています。お気軽にお問い合わせくださいませ。\n\nスライスタイプ：1kg／2.5kg／3kg／5kg／10kg／15kg／20kg\n大量購入セット：20kg〜300kg（スライス1kg・2.5kgより選択）\n氷商品：ロッキーアイス（1kg×12、3kg×4）、ブロックアイス（3.75kg×4）、アイス平（1.7kg×6）、プレミアムな氷オンザロックICE（6個×8）など\n（出典：ECサイト dry-ice.jp の商品ラインナップ）",
   "service:dryice.sec.uses.0.body": "・低温物流・冷凍食品の輸送保冷\t\t\t\n・葬儀・遺体保冷\t\t\t\n・スイーツ・ケーキの輸送\t\t\t\n・柿の渋抜き\t\t\t\n・医療品、検体の輸送\t\t\t\n・溶接\t\t\t\nサイズや数量はお客様のご要望に応じてご提案いたします。ご不明な点がございましたら、お気軽にお問い合わせください。\t\t\t",
   "service:dryice.sec.1.2.body": "個人のお客様向けには、ECサイトからもご購入いただけます。全品送料無料。当日14時までの注文で当日出荷（土日祝を除く、ヤマト運輸クール宅急便）。北海道・沖縄県等の離島は配送対象外です。\nhttps://www.dry-ice.jp/\nお問い合わせ：0120-557-771（月〜金 9:00〜16:00）",
@@ -279,7 +279,7 @@
   "division:food.sec.quality.2.ratio": "30",
   "service:warehouse.sec.0.0.ratio": "45",
   "service:warehouse.sec.0.1.ratio": "45",
-  "service:dryice.sec.about.0.ratio": "45",
+  "service:dryice.sec.about.0.ratio": "40",
   "service:dryice.sec.0.0.ratio": "40",
   "service:dryice.sec.uses.0.ratio": "40",
   "company:ceo.ratio": "35",
@@ -386,5 +386,7 @@
   "service:dryice.mv.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-TtXEAfYcuuhgbLPSumwqTti5keD2k0.jpg",
   "ar:division:food.sec.features.3.image": "16:9",
   "ar:division:food.sec.quality.1.image": "16:9",
-  "division:food.sec.features.3.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_09-d2QnuLnBAUYmFT5WnwC7JCSiK0RvxL.jpg"
+  "division:food.sec.features.3.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Photo_Album_1_-_09-d2QnuLnBAUYmFT5WnwC7JCSiK0RvxL.jpg",
+  "ar:service:dryice.sec.about.0.image": "",
+  "ar:service:dryice.sec.0.0.image": ""
 }
