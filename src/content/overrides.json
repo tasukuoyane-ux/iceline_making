@@ -285,7 +285,7 @@
   "company:ceo.ratio": "35",
   "recruit3:work.ratio": "41",
   "hide:recruit3:work.image": "",
-  "division:ice.sec.0.1.body": "製氷方法は、工場と製品によって異なります。\n二日市工場ではカングリット製法を採用しています。135kgの大きな氷の塊からカットして加工していく方法で、かち割り氷や小さな氷など多様なサイズに対応できることが特徴です。製氷に時間を要しますが、大型の氷から精密に加工できる点が強みです。\n西大寺工場ではターボ製氷（氷柱方式）を採用しています。90〜120分という短いサイクルで製氷できるため、需要の変動に柔軟に対応できる生産体制を整えています。",
+  "division:ice.sec.0.1.body": "製氷方法は、工場と製品によって異なります。\n二日市工場ではカングリット製法を採用しています。135kgの大きな氷の塊からカットして加工していく方法で、かち割り氷や小さな氷など多様なサイズに対応できることが特徴です。\n西大寺工場ではターボ製氷（氷柱方式）を採用しています。90〜120分という短いサイクルで製氷できるため、需要の変動に柔軟に対応できる生産体制を整えています。",
   "division:ice.sec.0.0.body": "西大寺工場では、逆浸透膜（RO膜）でろ過した水を使用しています。不純物を除去した純度の高い水を原料とすることで、安定した品質の氷を製造しています。氷の品質は、不純物をどれだけ取り除けるかで決まります。水の純度が高いほど透明で硬く、溶けにくい氷になります。ロッキーアイスが「溶けにくい」のは、原料水の純度を高め、低温でじっくり凍らせる工程を徹底しているからです。",
   "division:ice.sec.0.2.ratio": "35",
   "division:ice.mv.en": "ICE DIVISION　アイス事業部",
@@ -302,10 +302,10 @@
   "division:ice.sec.system.1.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
   "division:ice.sec.system.2.title": "これはダミーテキストです。",
   "division:ice.sec.system.2.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
-  "division:ice.sec.kodawari.0.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
-  "division:ice.sec.kodawari.0.title": "これはダミーテキストです。",
-  "division:ice.sec.kodawari.1.title": "これはダミーテキストです。",
-  "division:ice.sec.kodawari.1.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
+  "division:ice.sec.kodawari.0.body": "氷カフェ・フラペリッチなど、一般的な業務用氷にとどまらない商品開発を行っています。市場のニーズを捉えながら、新しい氷のかたちを生み出しています。営業が現場で得た声を開発側に即時フィードバックすることで、季節や用途に応じたニーズを商品開発に反映しています。\t\t\t",
+  "division:ice.sec.kodawari.0.title": "Only1を生み出す開発力",
+  "division:ice.sec.kodawari.1.title": "取引先ごとに合わせた商品づくり",
+  "division:ice.sec.kodawari.1.body": "飲食店、テーマパーク、量販店など、取引先によって求められる商品は異なります。ブレンダーマシンや水削機など専用機器を使わずに簡単にフローズンドリンクが作れる氷や、飲食店のデザート提案など、お客様のニーズに合わせた商品づくりを行っています。\t\t\t",
   "division:ice.sec.kodawari.2.title": "これはダミーテキストです。",
   "division:ice.sec.kodawari.2.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
   "service:warehouse.sec.facphotos.photo.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/________-ZVHKFqOptk7p9uLhN9IWOjTytmIUJU.jpg",
@@ -347,5 +347,6 @@
   "service:dryice.sec.0.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/__________-8cpX5MphFqp066pASTJtuHlYpFzDNC.webp",
   "service:dryice.sec.uses.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-ZZKl06J09xl2ILViGGa5wNnp8McaVD.jpg",
   "ar:top:strengthV2.image": "1:1",
-  "top:mv.title": "[[特大,red:氷]][[大:と]][[特大,red:食]][[特大:で、日々に応える。]]\n\n1905年の創業以来、築き上げた信頼と技術。\n株式会社アイスラインは「氷・氷菓」と「食」の可能性を追求し、\n岡山から全国へ、人々の豊かな暮らしと食文化を支え続けます。"
+  "top:mv.title": "[[特大,red:氷]][[大:と]][[特大,red:食]][[特大:で、日々に応える。]]\n\n1905年の創業以来、築き上げた信頼と技術。\n株式会社アイスラインは「氷・氷菓」と「食」の可能性を追求し、\n岡山から全国へ、人々の豊かな暮らしと食文化を支え続けます。",
+  "division:ice.sec.kodawari.jp": "氷・氷菓事業の特徴"
 }
