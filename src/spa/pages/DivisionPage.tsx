@@ -564,8 +564,14 @@ function IceProcessFlow() {
     };
   });
   const visible = steps.filter((s) => s.i === 0 || EDIT_MODE || s.title !== "" || s.body !== "" || s.image !== "");
+  // PCの列数：6個以上のときは半分の個数（四捨五入）で改行して行を揃える
+  // （例 6個→3+3、7個→4+3。5個以下は従来どおり最大5列の1行）。
+  const pcCols = visible.length >= 6 ? Math.round(visible.length / 2) : 5;
   return (
-    <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-10 tab:grid-cols-3 pc:grid-cols-5 pc:gap-x-8">
+    <div
+      className="mt-4 grid grid-cols-2 gap-x-6 gap-y-10 tab:grid-cols-3 pc:gap-x-8 pc:[grid-template-columns:repeat(var(--pcols),minmax(0,1fr))]"
+      style={{ ["--pcols" as any]: pcCols }}
+    >
       {visible.map((s, n) => (
         <div key={s.i} className="relative">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-border bg-secondary">
@@ -590,8 +596,8 @@ function IceProcessFlow() {
               {s.body || "（説明・任意）"}
             </p>
           )}
-          {/* 次の工程への矢印（行末で折り返す位置でも軽く見えるよう控えめに） */}
-          {n < visible.length - 1 && (
+          {/* 次の工程への矢印（PCの行末＝折り返し位置では表示しない） */}
+          {n < visible.length - 1 && (n + 1) % pcCols !== 0 && (
             <ChevronRight
               size={20}
               className="absolute top-[calc(37.5%-10px)] hidden text-brand pc:block"
