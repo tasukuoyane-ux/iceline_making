@@ -119,34 +119,24 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       en: "QUALITY",
       jp: "品質保証への取り組み",
       pathKey: "quality",
+      // 3項目目はコンソールの「消す」指定により削除（2026-08 改修）
       items: [
-        { title: "（見出し）", pending: true, image: true },
         { title: "（見出し）", pending: true, image: true },
         { title: "（見出し）", pending: true, image: true },
       ],
     },
   ],
   ice: [
-    // 旧「選ばれる理由」は 2026-08 改修で「製造体制」「こだわり」の2セクション（H2×2）に分割。
-    // いずれもカードの中に画像と文章が横並びのレイアウト・各3点の要確認スロット
+    // 旧「選ばれる理由」は 2026-08 改修で「製造体制」「こだわり」へ分割したのち、
+    // 「製造体制」セクションと「こだわり」の3項目目はコンソールの「消す」指定により削除。
+    // カードの中に画像と文章が横並びのレイアウト・要確認スロット
     // （本文が入力されるまで公開ページでは非表示）。
     // pathKey は固有キーで、既存セクションの編集パス（sec.0 / sec.2）に影響しない。
-    {
-      en: "PRODUCTION SYSTEM",
-      jp: "製造体制",
-      pathKey: "system",
-      items: [
-        { title: "（見出し）", pending: true, card: true },
-        { title: "（見出し）", pending: true, card: true },
-        { title: "（見出し）", pending: true, card: true },
-      ],
-    },
     {
       en: "COMMITMENT",
       jp: "こだわり",
       pathKey: "kodawari",
       items: [
-        { title: "（見出し）", pending: true, card: true },
         { title: "（見出し）", pending: true, card: true },
         { title: "（見出し）", pending: true, card: true },
       ],
