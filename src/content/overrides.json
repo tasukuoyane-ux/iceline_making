@@ -31,7 +31,7 @@
   "recruit:charm.0.title": "失敗を隠さなくていい",
   "recruit:charm.1.title": "続けることが形になる",
   "top:strengthV2.body": "明治38年（1905年）、天然氷の製造・販売から創業して120年以上。そこで培った「モノを一定温度に保ち、品質を守る」低温管理の技術を軸に、事業を広げてきました。\n\n今手がけている業務用食材の販売、氷・氷菓の製造販売、冷凍冷蔵倉庫業、ドライアイスの販売という4つの事業は、別々に生まれたものではなく、すべて同じ低温管理の技術からつながっています。だからこそ、お客様の多様なニーズに、1社でワンストップに応えられます。",
-  "top:strengthV2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/strength-02-final-v2-EdUQYO8zG08rdNmdKSY2SF4w9jaDcV.png",
+  "top:strengthV2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/strength-02-final-MJH9ZIC67OKwhb6rULYMgkjdYgWvya.png",
   "division:ice.supplyChain.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/__________________-8ODh3dFUHy9nQujGTDEtgIBywEyhzF.jpg",
   "recruit:days.1.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_____-TjGAKsKlnZYpIE7NUcwpnNGK98IzeA.jpg",
   "recruit2:mv.slide.0": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/428c1aed6af8f53e5a84e3a2fbab4d32-5sKZwYmPR3RAIryEDvNXucK5bA9TP9.webp",
@@ -345,5 +345,6 @@
   "service:warehouse.photo.9.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_______-L4N9fWj5tlcqp9MlvxJ7arD0psuRnm.webp",
   "service:dryice.sec.about.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-TtIo8i6FxBpi6nZ0KVTRQnyAc9JKth.jpg",
   "service:dryice.sec.0.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/__________-8cpX5MphFqp066pASTJtuHlYpFzDNC.webp",
-  "service:dryice.sec.uses.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-ZZKl06J09xl2ILViGGa5wNnp8McaVD.jpg"
+  "service:dryice.sec.uses.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-ZZKl06J09xl2ILViGGa5wNnp8McaVD.jpg",
+  "ar:top:strengthV2.image": "1:1"
 }
