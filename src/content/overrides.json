@@ -342,5 +342,8 @@
   "service:warehouse.photo.6.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_______-e8DpCoA85NKi5OhTAO5yNJZJFkzRlD.webp",
   "service:warehouse.photo.7.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/________-lbGRvjfFihwRyPt0WJCpOcLq877BNG.jpg",
   "service:warehouse.photo.8.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/________-vOxJCIPppnMcqteaIpF7BeAnze796i.jpg",
-  "service:warehouse.photo.9.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_______-L4N9fWj5tlcqp9MlvxJ7arD0psuRnm.webp"
+  "service:warehouse.photo.9.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/_______-L4N9fWj5tlcqp9MlvxJ7arD0psuRnm.webp",
+  "service:dryice.sec.about.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-TtIo8i6FxBpi6nZ0KVTRQnyAc9JKth.jpg",
+  "service:dryice.sec.0.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/__________-8cpX5MphFqp066pASTJtuHlYpFzDNC.webp",
+  "service:dryice.sec.uses.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-ZZKl06J09xl2ILViGGa5wNnp8McaVD.jpg"
 }
