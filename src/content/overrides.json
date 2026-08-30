@@ -149,8 +149,8 @@
   "division:food.sec.quality.0.body": "数十年にわたり社内での試食会を継続しており、直近6年で実施頻度をさらに高めています。各メーカーによるプレゼンテーションの場としても機能しており、新商品やリニューアル品を中心に、仕入れ担当者が市場動向と照らし合わせながら取り扱いを判断しています。確認を通じて、お客様に商品の特長や使い方をより具体的にお伝えできるようにしています。",
   "division:food.sec.quality.1.title": "幅広い調達網（200社以上・世界中）",
   "division:food.sec.quality.1.body": "取り扱う商品は、国内メーカーのものだけでなく、海外からの輸入品も多く含まれます。幅広い調達先を持つことで、天候や情勢に左右されにくい安定調達を実現し、欠品なく一定の品質でお届けできる体制を整えています。",
-  "division:food.sec.quality.2.title": "衛生管理",
-  "division:food.sec.quality.2.body": "物流センター内は常に整理整頓された状態を維持しています。通路に物を置かず棚に収めるというルールを全従業員が徹底し、安全で衛生的な保管・出荷環境を確保しています。",
+  "division:food.sec.quality.2.title": "消す",
+  "division:food.sec.quality.2.body": "消す",
   "division:food.sec.10.0.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
   "division:food.sec.11.0.body": "これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。これはダミーテキストです。",
   "division:ice.sec.reasons.0.title": "2つの工場による生産体制",
@@ -381,7 +381,7 @@
   "ar:division:food.sec.logistics.3.image": "16:9",
   "division:food.sec.logistics.2.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/4-1-drLYbIr4kTZxEElHuF1TXMsqXOmig8.jpeg",
   "ar:division:food.sec.logistics.2.image": "16:9",
-  "division:food.sec.supply.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Gemini_Generated_Image_n6e433n6e433n6e4-UtsT61HiDEnH0Mbq90SIraiE1seY8s.jpeg",
+  "division:food.sec.supply.0.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Gemini_Generated_Image_1yf2511yf2511yf2-mmV8evJYx1024W3gJFQBH9HQb2Moe3.jpeg",
   "ar:division:food.sec.supply.0.image": "16:9",
   "service:dryice.mv.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/___________-TtXEAfYcuuhgbLPSumwqTti5keD2k0.jpg",
   "ar:division:food.sec.features.3.image": "16:9",
@@ -405,5 +405,6 @@
   "division:ice.process.step.5.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Gemini_Generated_Image_8ysavw8ysavw8ysa-wBPJzU7Who755CYXxOAV8rniMSl63b.jpeg",
   "division:food.mv.en": "FOOD DIVISION　食品事業部",
   "service:warehouse.mv.en": "FOOD DIVISION　食品事業部",
-  "service:dryice.mv.en": "FOOD DIVISION　食品事業部"
+  "service:dryice.mv.en": "FOOD DIVISION　食品事業部",
+  "division:food.sec.quality.1.image": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/uploads/Gemini_Generated_Image_huxevmhuxevmhuxe-bdLcTe9ptMsXYaQGE8IDhTOucaZMRa.jpeg"
 }
