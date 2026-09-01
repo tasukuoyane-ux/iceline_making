@@ -37,10 +37,20 @@ const BG_VIDEOS: string[] = (Array.isArray(BG_RAW.videos) ? BG_RAW.videos : [])
 const HAS_BG = BG_VIDEOS.length > 0;
 
 // ── 背景動画レイヤー（従来実装のまま） ──────────────────────
-function BgVideos({ urls, areaRef }: { urls: string[]; areaRef: React.RefObject<HTMLDivElement> }) {
+function BgVideos({
+  urls,
+  areaRef,
+  onAllFailed,
+}: {
+  urls: string[];
+  areaRef: React.RefObject<HTMLDivElement>;
+  /** 全本の読み込みに失敗したとき（配信元の障害等）に呼ぶ。呼び出し側はパララックス背景へ切り替える */
+  onAllFailed?: () => void;
+}) {
   const vids = useRef<(HTMLVideoElement | null)[]>([]);
   const [active, setActive] = useState(0);
   const syncRef = useRef<() => void>(() => {});
+  const failed = useRef(new Set<number>());
 
   useEffect(() => {
     if (urls.length === 0) return;
@@ -117,6 +127,10 @@ function BgVideos({ urls, areaRef }: { urls: string[]; areaRef: React.RefObject<
           className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
           style={{ opacity: i === active ? 1 : 0 }}
           onLoadedMetadata={() => syncRef.current()}
+          onError={() => {
+            failed.current.add(i);
+            if (failed.current.size >= urls.length) onAllFailed?.();
+          }}
           onLoadedData={(e) => {
             const v = e.currentTarget;
             v.play()
@@ -1769,12 +1783,14 @@ export function Recruit3() {
   const [intro, setIntro] = useState<"wait" | "playing" | "done">(introEnabled ? "wait" : "done");
   // 背景動画2以降は従来と同じスクロール連動（最上部=1フレーム目、最下部=最終フレーム）
   const scrubUrls = introEnabled ? BG_VIDEOS.slice(1) : BG_VIDEOS;
+  // 背景動画が1本も再生できない（配信元の障害・ファイル未配置など）ときはパララックス背景へ切り替える
+  const [bgFailed, setBgFailed] = useState(false);
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden" data-r3-intro={intro}>
       <R2Styles />
-      {/* 動画が無い場合は採用2と同じパララックス背景 */}
-      {!HAS_BG && <PageBg />}
+      {/* 動画が無い（または全て読み込めない）場合は採用2と同じパララックス背景 */}
+      {(!HAS_BG || bgFailed) && <PageBg />}
 
       <style>{MV_TYPE_CSS}</style>
       <style>{INTRO_CSS}</style>
@@ -1785,7 +1801,7 @@ export function Recruit3() {
           背景動画がメインビジュアルから適用されるようにした。
           背景動画1はイントロ（自動再生・z軸で背景動画2の上）、2以降がスクロール連動 */}
       <div ref={areaRef} className="relative">
-        {scrubUrls.length > 0 && <BgVideos urls={scrubUrls} areaRef={areaRef} />}
+        {scrubUrls.length > 0 && !bgFailed && <BgVideos urls={scrubUrls} areaRef={areaRef} onAllFailed={() => setBgFailed(true)} />}
         {introEnabled && (
           <IntroVideo
             url={BG_VIDEOS[0]}
