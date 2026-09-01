@@ -843,36 +843,29 @@ export function DivisionPage({ division }: { division: Division }) {
 
   return (
     <>
-      {/* メインビジュアル（高さは会社情報ページに合わせる・タイトル中央・タイトルも編集可能） */}
-      <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
+      {/* メインビジュアル（画像はオーバーレイなしでそのまま見せる・タイトル中央・
+          タイトル直下に旧「事業概要」の本文を置く。文章量に応じて高さが伸びる。2026-09 改修） */}
+      <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
         <ImageWithFallback src={MV[division].img} alt={divTitle} loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像")} />
-        <div className="absolute inset-0 bg-ink/50" />
-        <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1400px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`division:${division}.mv.en`, "英語見出し（補助）")}>
               {txt(`division:${division}.mv.en`, mv.en)}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`division:${division}.mv.title`, "ページタイトル")}>
               {divTitle}
             </h1>
-            <p className="mt-4 text-white/85" style={{ fontSize: 16 }} {...ed(`division:${division}:mvLead`, "MVリード文")}>{txt(`division:${division}:mvLead`, mv.lead)}</p>
+            {/* 旧「事業概要」セクションの本文（編集パスは従来のまま） */}
+            <RichBody
+              path={`division:${division}.overview`}
+              text={txt(`division:${division}.overview`, OVERVIEW[division])}
+              label="ページ本文（タイトル直下）"
+              className="mx-auto mt-6 max-w-3xl text-left pc:text-center"
+              style={{ fontSize: 16, lineHeight: 2.1, color: "rgba(255,255,255,0.95)" }}
+            />
           </motion.div>
         </div>
       </section>
-
-      {/* 事業概要（淡いブルーグレー #ccd9e2 の帯・上下パディングは通常の半分。帯はタイトル＋本文まで） */}
-      <Section heat={bizHeat} className="bg-[#ccd9e2] py-10 tab:py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" path={`division:${division}.overview`} />
-          <RichBody
-            path={`division:${division}.overview`}
-            text={txt(`division:${division}.overview`, OVERVIEW[division])}
-            label="事業概要"
-            className="mt-6 text-left text-foreground/85 pc:text-center"
-            style={{ fontSize: 16, lineHeight: 2.1 }}
-          />
-        </div>
-      </Section>
 
       {/* 氷・氷菓：商品ラインナップ導線（赤帯の外・画像＋グレーオーバーレイ＋白文字のボタン） */}
       {division === "ice" && (

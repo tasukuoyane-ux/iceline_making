@@ -262,8 +262,9 @@ export function ServicePage({ service }: { service: ServiceId }) {
 
   return (
     <>
-      {/* メインビジュアル（事業部ページと同じ高さ・タイトル中央） */}
-      <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
+      {/* メインビジュアル（画像はオーバーレイなしでそのまま見せる・タイトル中央・
+          タイトル直下に旧「事業概要」の本文を置く。文章量に応じて高さが伸びる。2026-09 改修） */}
+      <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
         <ImageWithFallback
           src={img(`${base}.mv.image`, IMG_PLACEHOLDER)}
           alt={s.title}
@@ -272,52 +273,42 @@ export function ServicePage({ service }: { service: ServiceId }) {
           className="absolute inset-0 h-full w-full object-cover"
           {...edImg(`${base}.mv.image`, "メインビジュアル画像")}
         />
-        <div className="absolute inset-0 bg-ink/50" />
-        <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1400px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`${base}.mv.en`, "英語見出し（補助）")}>
               {txt(`${base}.mv.en`, s.en)}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`${base}.mv.title`, "ページタイトル")}>
               {txt(`${base}.mv.title`, s.title)}
             </h1>
-            <p className="mt-4 text-white/85" style={{ fontSize: 16 }} {...ed(`${base}.mv.lead`, "MVリード文")}>
-              {txt(`${base}.mv.lead`, s.lead)}
-            </p>
+            {/* 旧「事業概要」セクションの本文（編集パスは従来のまま） */}
+            <RichBody
+              path={`${base}.overview`}
+              text={txt(`${base}.overview`, s.overview)}
+              label="ページ本文（タイトル直下）"
+              className="mx-auto mt-6 max-w-3xl text-left pc:text-center"
+              style={{ fontSize: 16, lineHeight: 2.1, color: "rgba(255,255,255,0.95)" }}
+            />
+            {/* ドライアイス：ECサイトへの導線ボタン（旧事業概要セクションから移設） */}
+            {s.shopUrl && (
+              <div className="mt-8" style={{ textShadow: "none" }}>
+                <a
+                  href={s.shopUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
+                  style={{ fontSize: 15, fontWeight: 700 }}
+                >
+                  <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
+                    {txt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
+                  </span>
+                  <ArrowRight size={16} />
+                </a>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
-
-      {/* 事業概要（淡いブルーグレー #ccd9e2 の帯・上下パディングは通常の半分） */}
-      <Section heat={HEAT.foodBiz} className="bg-[#ccd9e2] py-10 tab:py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <SectionTitle en="OUR BUSINESS" jp="事業概要" align="center" path={`${base}.overview`} />
-          <RichBody
-            path={`${base}.overview`}
-            text={txt(`${base}.overview`, s.overview)}
-            label="事業概要"
-            className="mt-6 text-left text-foreground/85 pc:text-center"
-            style={{ fontSize: 16, lineHeight: 2.1 }}
-          />
-          {/* ドライアイス：ECサイトへの導線ボタン */}
-          {s.shopUrl && (
-            <div className="mt-8">
-              <a
-                href={s.shopUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
-                style={{ fontSize: 15, fontWeight: 700 }}
-              >
-                <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
-                  {txt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
-                </span>
-                <ArrowRight size={16} />
-              </a>
-            </div>
-          )}
-        </div>
-      </Section>
 
       {/* シート構成に沿った各セクション（要確認スロットは未入力の間、公開ページでは非表示） */}
       {s.sections.map((sec, si) => {
