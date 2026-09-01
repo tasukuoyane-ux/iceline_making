@@ -8,8 +8,8 @@
   "recruit2Video": "",
   "recruit3Bg": {
     "videos": [
-      "\\videos\\ICELINE_Recrit_6_60fps.mp4",
-      "\\videos\\ICELINE_Recrit__2_2026-08-23_03-32-56.mp4",
+      "/videos/ICELINE_Recrit_6_60fps.mp4",
+      "/videos/ICELINE_Recrit__2_2026-08-23_03-32-56.mp4",
       ""
     ]
   },

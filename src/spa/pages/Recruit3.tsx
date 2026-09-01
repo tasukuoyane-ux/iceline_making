@@ -33,6 +33,8 @@ const BG_MAX = 5;
 const BG_RAW: any = (sectionsJson as any).recruit3Bg ?? {};
 const BG_VIDEOS: string[] = (Array.isArray(BG_RAW.videos) ? BG_RAW.videos : [])
   .filter((v: any) => typeof v === "string" && v.trim() !== "")
+  // コンソールで「\videos\xxx.mp4」のように Windows 風に入力されても動くよう、区切りと先頭の / を正規化
+  .map((v: string) => v.trim().replace(/\\/g, "/").replace(/^(?!\/|https?:)/, "/"))
   .slice(0, BG_MAX);
 const HAS_BG = BG_VIDEOS.length > 0;
 
