@@ -114,3 +114,15 @@ export function Card({ title, children, action }: { title?: string; children: Re
     </div>
   );
 }
+
+/** 動画URL欄の案内（2026-09 改修：コンソールからの動画アップロードは廃止。
+ * 動画は容量が大きく Blob の転送量を圧迫するため、リポジトリの public/videos/ に配置する） */
+export function VideoPathHint() {
+  return (
+    <p className="mt-1 rounded bg-slate-50 px-2 py-1.5 text-[11px] leading-relaxed text-slate-500">
+      動画ファイルは <code className="rounded bg-white px-1">public/videos/</code> に配置し（エンジニアに依頼）、
+      URL欄に <code className="rounded bg-white px-1">/videos/ファイル名.mp4</code> と入力してください。
+      YouTube・Vimeo の共有URLも使えます。コンソールからの動画ファイルのアップロードは廃止しました。
+    </p>
+  );
+}

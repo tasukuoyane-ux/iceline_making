@@ -1,51 +1,11 @@
 // ページ単位エディタ：現在プレビュー中ページの編集可能要素を、
 // セクションごとのアコーディオン（既定は閉じた状態）で表示して編集する。
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Content, getValueByPath, setValueByPath } from "./content";
-import { Select, TextArea, TextInput } from "./ui";
+import { Select, TextArea, TextInput, VideoPathHint } from "./ui";
 import { ImageField } from "./ImageField";
-import { uploadImage } from "./api";
 
-/** 動画ファイルのアップロードボタン（動画URLフィールド用。Blobへ保存してURLを反映） */
-function VideoUploadButton({ onDone }: { onDone: (url: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  return (
-    <div className="mt-1.5 flex items-center gap-2">
-      <input
-        ref={ref}
-        type="file"
-        accept="video/*,.webm,.mp4,.mov,.m4v,.ogv"
-        className="hidden"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          setErr(null);
-          setBusy(true);
-          try {
-            const { url } = await uploadImage(file); // 任意のファイル種別に対応（Blobへ保存）
-            onDone(url);
-          } catch (x: any) {
-            setErr(x?.message || "アップロードに失敗しました");
-          } finally {
-            setBusy(false);
-            if (ref.current) ref.current.value = "";
-          }
-        }}
-      />
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => ref.current?.click()}
-        className="rounded border border-slate-300 bg-white px-2 py-1 text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
-      >
-        {busy ? "アップロード中…" : "動画ファイルをアップロード"}
-      </button>
-      {err && <span className="text-[11px] text-red-600">{err}</span>}
-    </div>
-  );
-}
+// 動画ファイルのアップロードボタンは 2026-09 改修で廃止（動画は public/videos/ に配置）。
 
 // アニメーションの選択肢（値は "種類|開始オフセットpx|移動量px" で overrides の anim:<パス> に保存）
 const ANIM_OPTS: { value: string; label: string }[] = [
@@ -422,10 +382,8 @@ export function PageFields({
         ) : (
           <TextInput value={val(f)} onChange={(e) => onChange(setValueByPath(draft, f.path, e.target.value))} />
         )}
-        {/* 動画URLフィールド：ファイルの直接アップロードにも対応 */}
-        {f.kind === "text" && f.video && (
-          <VideoUploadButton onDone={(url) => onChange(setValueByPath(draft, f.path, url))} />
-        )}
+        {/* 動画URLフィールド：配置先の案内 */}
+        {f.kind === "text" && f.video && <VideoPathHint />}
       </div>
     );
   }

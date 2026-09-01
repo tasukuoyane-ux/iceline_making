@@ -145,9 +145,9 @@ export async function GET(req: Request): Promise<Response> {
       ([k, v]) => /READ_WRITE_TOKEN$/.test(k) && v?.startsWith('vercel_blob_rw_'),
     )
     push({
-      id: 'env-blob', no: '—', title: 'Vercel Blob 接続',
+      id: 'env-blob', no: '—', title: 'Vercel Blob 接続（/admin の記事添付用）',
       status: blob ? 'ok' : 'ng',
-      detail: blob ? '読み書きトークンあり' : 'トークンが見つからない（画像・動画のアップロード不可）',
+      detail: blob ? '読み書きトークンあり' : 'トークンが見つからない（/admin の記事添付が保存できない。サイトの画像は public/uploads/ なので影響なし）',
       fix: blob ? undefined : 'Storage > Blob で public ストアを作成して Connect（詳細は /api/diag）',
     })
   }

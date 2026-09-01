@@ -2,43 +2,13 @@
 // ページ編集タブで、プレビュー中のページに応じて右パネルへ差し込まれる
 // 「構造化マネージャ」（追加・削除・並べ替えを伴う編集）の実装。
 // ※ お知らせ（旧 NewsPanel）は Payload CMS（/admin）へ移行済み。
-import { useRef, useState } from "react";
 import { VideoItem, InterviewItem } from "./content";
-import { Field, TextInput, Button, Card, Collapsible } from "./ui";
+import { Field, TextInput, Button, Card, Collapsible, VideoPathHint } from "./ui";
 import { ImageField } from "./ImageField";
 import { BlockEditor } from "./BlockEditor";
-import { uploadImage } from "./api";
 
-/** 動画ファイル（webm/mp4等）を直接アップロードして公開URLを返すボタン */
-function VideoUploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  async function handle(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setError(null);
-    setUploading(true);
-    try {
-      const { url } = await uploadImage(file); // 任意のファイル種別に対応（Blobへ保存）
-      onUploaded(url);
-    } catch (err: any) {
-      setError(err.message || "アップロードに失敗しました");
-    } finally {
-      setUploading(false);
-      if (ref.current) ref.current.value = "";
-    }
-  }
-  return (
-    <div className="space-y-1">
-      <input ref={ref} type="file" accept="video/*,.webm,.mp4,.mov,.m4v,.ogv" className="hidden" onChange={handle} />
-      <Button type="button" onClick={() => ref.current?.click()} disabled={uploading}>
-        {uploading ? "アップロード中…" : "動画ファイルをアップロード"}
-      </Button>
-      {error && <p className="text-[12px] text-red-600">{error}</p>}
-    </div>
-  );
-}
+// 動画ファイルのアップロードボタンは 2026-09 改修で廃止（動画は public/videos/ に配置）。
+// 案内文は ui.tsx の VideoPathHint。
 
 export function genId(prefix: string): string {
   // 時刻に依存しない簡易ユニークID
@@ -68,15 +38,15 @@ export function SectionVideoPanel({
       <Card title={title}>
         <Field
           label="動画URL"
-          hint="YouTube・Vimeo の共有URL、または mp4・webm・mov 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄ならセクション自体を非表示。"
+          hint="YouTube・Vimeo の共有URL、または /videos/ファイル名.mp4（public/videos/ に配置した動画）。空欄ならセクション自体を非表示。"
         >
           <div className="space-y-2">
             <TextInput
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://… または .mp4 / .webm / .mov"
+              placeholder="https://… または /videos/xxx.mp4"
             />
-            <VideoUploadButton onUploaded={setUrl} />
+            <VideoPathHint />
           </div>
         </Field>
       </Card>
@@ -165,15 +135,15 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
         >
           <Field
             label="動画URL"
-            hint="mp4・webm 等の直リンク（同一オリジン or CORS 許可が必要）。下のボタンから動画ファイルを直接アップロードもできます。YouTube・Vimeo の共有URLはスクロール追随できないため使用できません。"
+            hint="public/videos/ に配置した mp4・webm のパス（例: /videos/recruit-bg-1.mp4）。YouTube・Vimeo の共有URLはスクロール追随できないため使用できません。"
           >
             <div className="space-y-2">
               <TextInput
                 value={url}
                 onChange={(e) => setVideo(i, e.target.value)}
-                placeholder="https://… .mp4 / .webm"
+                placeholder="/videos/xxx.mp4"
               />
-              <VideoUploadButton onUploaded={(u) => setVideo(i, u)} />
+              <VideoPathHint />
             </div>
           </Field>
         </Card>
@@ -209,10 +179,10 @@ export function VideosPanel({ value, onChange }: { value: VideoItem[]; onChange:
               <TextInput value={v.title} onChange={(e) => update(i, { title: e.target.value })} />
             </Field>
             <div className="mt-3">
-              <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄なら「準備中」表示。">
+              <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または /videos/ファイル名.mp4（public/videos/ に配置した動画）。空欄なら「準備中」表示。">
                 <div className="space-y-2">
-                  <TextInput value={v.videoUrl} onChange={(e) => update(i, { videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=... または .webm / .mp4" />
-                  <VideoUploadButton onUploaded={(url) => update(i, { videoUrl: url })} />
+                  <TextInput value={v.videoUrl} onChange={(e) => update(i, { videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=... または /videos/xxx.mp4" />
+                  <VideoPathHint />
                 </div>
               </Field>
             </div>

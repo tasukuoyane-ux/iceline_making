@@ -13,7 +13,8 @@
     "generate:importmap": "payload generate:importmap",
     "migrate:news": "node --env-file=.env --import tsx scripts/migrate-news.ts",
     "migrate:interviews": "node --env-file=.env --import tsx scripts/migrate-interviews.ts",
-    "hash-password": "node scripts/hash-password.mjs"
+    "hash-password": "node scripts/hash-password.mjs",
+    "migrate:blob": "node scripts/migrate-blob-to-public.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

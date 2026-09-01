@@ -1,6 +1,9 @@
 // 画像フィールド：プレビュー＋URL直接入力＋ファイルアップロード。
+// アップロードした画像はリポジトリの public/uploads/ に保存され（同名は上書き）、
+// 「更新（本番へ公開）」のデプロイ完了後に本番URL（/uploads/…）が有効になる。
+// それまではブラウザ内の object URL（previewUrl）でプレビューする。
 import { useRef, useState } from "react";
-import { uploadImage } from "./api";
+import { uploadImage, previewUrl } from "./api";
 import { Field, TextInput, Button } from "./ui";
 
 export function ImageField({
@@ -41,13 +44,13 @@ export function ImageField({
           <div className="h-20 w-28 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-100">
             {value ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={value} alt="" className="h-full w-full object-cover" />
+              <img src={previewUrl(value)} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-400">画像なし</div>
             )}
           </div>
           <div className="flex-1 space-y-2">
-            <TextInput value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://… 画像URL" />
+            <TextInput value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://… または /uploads/… 画像URL" />
             <div className="flex items-center gap-2">
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
               <Button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}>
@@ -59,6 +62,9 @@ export function ImageField({
                 </Button>
               )}
             </div>
+            <p className="text-[10px] leading-relaxed text-slate-400">
+              画像は1枚4MBまで。同じファイル名は上書きされます。本番には「更新（本番へ公開）」後に反映されます。
+            </p>
           </div>
         </div>
       </Field>

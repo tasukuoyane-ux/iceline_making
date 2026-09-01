@@ -6,7 +6,7 @@
 // お知らせ記事は Payload CMS（/admin）で管理する（ヘッダーの「お知らせ管理」から）。
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { AuthUser, clearAuth, publish } from "./api";
+import { AuthUser, clearAuth, publish, mapPreviewDeep } from "./api";
 import { Content, baseline, baselineSig, buildOverrides, changedFiles, clone, getValueByPath, healDraft, setValueByPath } from "./content";
 import { Button, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
@@ -153,14 +153,15 @@ export function Editor({ user, onLogout }: { user: AuthUser; onLogout: () => voi
   }, []);
 
   const sendOverrides = useCallback(() => {
-    postToFrame({ type: "draft", overrides: buildOverrides(draft) });
+    // アップロード直後（未デプロイ）の画像は object URL に置き換えてプレビューする（mapPreviewDeep）
+    postToFrame({ type: "draft", overrides: mapPreviewDeep(buildOverrides(draft)) });
     // 採用（募集職種）の下書き。件数・並び順が変わるためページ側は React 再描画で反映する
     postToFrame({
       type: "recruit",
-      recruit: {
+      recruit: mapPreviewDeep({
         ...draft.recruit,
         faq: Array.isArray(draft.sections?.recruitFaq?.items) ? draft.sections.recruitFaq.items : [],
-      },
+      }),
     });
   }, [draft, postToFrame]);
 

@@ -41,6 +41,13 @@
   └─ 手動確認リスト: Neon の console_check テーブルに保存（DB未接続時は端末ローカル）
 ```
 
+- **画像・動画の置き場（2026-09 改修）**: /console からアップロードした画像は Vercel Blob ではなく
+  リポジトリの `public/uploads/` に GitHub 経由でコミットされる（同名ファイルは上書き・1枚 4MB まで）。
+  アップロード時のコミットは `[vercel skip]` 付きでデプロイされず、「更新（本番へ公開）」のデプロイで
+  一緒に公開される。動画（採用ページ背景動画・MV動画・動画一覧の mp4 等）は容量が大きいため
+  コンソールからはアップロードできず、エンジニアが `public/videos/` に置いて（1本 50MB 以下推奨、
+  100MB 超は GitHub が拒否）URL 欄に `/videos/ファイル名.mp4` を入力する。Vercel Blob を使うのは
+  /admin の記事添付だけ。Blob 上の旧ファイルの取り込みは `pnpm migrate:blob`（Blob ブロック解除後に実行）。
 - ページの文言・画像の実データは `src/content/*.json`
   （`videos.json` / `interviews.json` / `images.json` / `sections.json` / `overrides.json` /
   `profileSlides.json` / `contact.json`）。
