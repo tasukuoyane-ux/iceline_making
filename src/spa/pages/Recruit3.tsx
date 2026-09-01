@@ -280,220 +280,41 @@ function useBodyLock(locked: boolean) {
   }, [locked]);
 }
 
-/* ═══════════════ 2. 事業へのリンク ═══════════════ */
+/* ═══════════════ 2. アイスラインとは？ ═══════════════ */
 
-// メニューの4事業に対応。タイル画像の既定はサイト各所の既存画像を流用（差し替え可）。
-const BIZ_LINKS = [
-  {
-    to: "/ice",
-    en: "ICE",
-    name: "氷・氷菓",
-    imgDef: () => img("recruit3:bizlink.0.image", IMG.iceMv || PH),
-    h1: "事業について",
-    t1: "業務用の氷からコンビニ向けのカップ氷、味や色のついた氷まで。岡山から全国の飲食・レジャー施設へ届けています。",
-    h2: "この事業で働く",
-    t2: "製造スタッフ・品質管理職が活躍中。「氷といえばアイスライン」の棚を全国につくる挑戦を、現場から支えます。",
-  },
-  {
-    to: "/food",
-    en: "FOOD",
-    name: "業務用食材",
-    imgDef: () => img("recruit3:bizlink.1.image", IMG.foodMv || PH),
-    h1: "事業について",
-    t1: "飲食店・食品メーカー・食品問屋へ、業務用食材をルート配送と提案営業で届けます。岡山県内トップシェアの食品商社事業です。",
-    h2: "この事業で働く",
-    t2: "営業職が活躍中。毎日現場に通うからこそ気づける困りごとに、伴走しながら応えます。",
-  },
-  {
-    to: "/warehouse",
-    en: "WAREHOUSE",
-    name: "倉庫事業",
-    imgDef: () => img("recruit3:bizlink.2.image", img("service:warehouse.mv.image", PH)),
-    h1: "事業について",
-    t1: "冷凍・冷蔵倉庫で食品をお預かりし、低温物流の基盤を支えています。食を預かる、冷たい倉庫です。",
-    h2: "この事業で働く",
-    t2: "在庫管理・入出庫のオペレーションを通じて、食の安定供給を裏側から支える仕事です。",
-  },
-  {
-    to: "/dryice",
-    en: "DRY ICE",
-    name: "ドライアイス",
-    imgDef: () => img("recruit3:bizlink.3.image", img("service:dryice.mv.image", PH)),
-    h1: "事業について",
-    t1: "ドライアイスの製造・加工・販売。食品の鮮度保持や低温輸送に欠かせない存在です。",
-    h2: "この事業で働く",
-    t2: "製造・加工スタッフが活躍中。手順を守り、安全に、確実に。その積み重ねが信頼になります。",
-  },
-];
-
-function BizLinks() {
-  const [open, setOpen] = useState<number | null>(null);
-  useBodyLock(open !== null);
-  const b = open !== null ? BIZ_LINKS[open] : null;
-
+// 旧「事業を知る」（4事業のタイル）の位置に置く、中央寄せの H2（赤文字なし）＋本文＋画像。
+// 画像はコンソールで設定するまで公開ページでは表示しない。
+function About3() {
+  const image = img("recruit3:about.image", "");
   return (
     <Sec>
-      <Head base="recruit3:bizlink" en="OUR BUSINESS" jp="事業を知る" center />
-      <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
-        <Ed as="span" path="recruit3:bizlink.lead" def="4つの事業が、食の日常を支えています。クリックすると詳細が開きます。" label="事業リンク リード" />
-      </p>
-
-      {/* 4マスのグリッド（SP=2列 / PC=4列） */}
-      <div className="mt-10 grid grid-cols-2 gap-4 pc:grid-cols-4 pc:gap-5">
-        {BIZ_LINKS.map((l, i) => (
-          <button
-            key={l.to}
-            type="button"
-            onClick={() => setOpen(i)}
-            aria-haspopup="dialog"
-            className="group relative block overflow-hidden rounded-[0.625rem] text-left shadow-[0_14px_30px_rgba(15,42,51,0.14)]"
-          >
-            <div className="aspect-[3/4] w-full overflow-hidden bg-secondary">
-              <ImageWithFallback
-                src={l.imgDef()}
-                alt={txt(`recruit3:bizlink.${i}.name`, l.name)}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                {...edImg(`recruit3:bizlink.${i}.image`, `事業画像（${l.name}）`)}
-              />
-            </div>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/65 via-black/15 to-transparent p-4 pb-5 text-center">
-              <span style={{ fontFamily: "var(--font-accent)", fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.85)" }}>{l.en}</span>
-              <span
-                className="mt-1 text-white"
-                style={{ fontSize: "clamp(16px, 2vw, 20px)", fontWeight: 900, textShadow: "0 2px 10px rgba(0,0,0,0.45)" }}
-                {...ed(`recruit3:bizlink.${i}.name`, "事業名")}
-              >
-                {txt(`recruit3:bizlink.${i}.name`, l.name)}
-              </span>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* 企業理念（4枚のカードの下・H3＋本文。本文が入力されるまで公開ページでは非表示） */}
-      {(txt("recruit3:bizlink.philosophy.body", "") !== "" || EDIT_MODE) && (
-        <div className="mx-auto mt-12 max-w-3xl text-center">
-          <h3
-            style={{ fontSize: "clamp(18px, 2.4vw, 24px)", fontWeight: 900, color: PAL.ink }}
-            {...ed("recruit3:bizlink.philosophy.title", "企業理念 見出し（H3）")}
-          >
-            {txt("recruit3:bizlink.philosophy.title", "企業理念")}
-          </h3>
-          <p
-            className="mt-4"
-            style={{ fontSize: 15, lineHeight: 2.1, color: "#1c2b30", whiteSpace: "pre-line" }}
-            {...ed("recruit3:bizlink.philosophy.body", "企業理念 本文", { multiline: true })}
-          >
-            {txt("recruit3:bizlink.philosophy.body", "") || "（本文を入力してください）"}
-          </p>
-        </div>
-      )}
-
-      {/* 編集モード限定：カードクリックで開く展開内容（オーバーレイ）の常時展開表示。
-          公開ページではオーバーレイは開いている間しかDOMに無く、編集モードでは
-          カードのクリックが要素選択に使われて開けないため、ここで編集できるようにする */}
-      {EDIT_MODE && (
-        <div className="mt-10 space-y-6">
-          <p className="text-center" style={{ fontSize: 12, fontWeight: 700, color: PAL.ink, opacity: 0.65 }}>
-            ▼ 編集用の展開表示（公開ページではカードをクリックしたときのオーバーレイに表示されます）
-          </p>
-          {BIZ_LINKS.map((l, i) => (
-            <div key={l.to} className="rounded-[0.625rem] bg-white/95 p-6 shadow-md">
-              <p style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.2em", color: PAL.red }} {...ed(`recruit3:bizlink.${i}.en`, `英語ラベル（${l.name}）`)}>
-                {txt(`recruit3:bizlink.${i}.en`, l.en)}
-              </p>
-              <h3 className="mt-1" style={{ fontSize: 20, fontWeight: 900, color: PAL.ink }}>
-                {txt(`recruit3:bizlink.${i}.name`, l.name)}
-              </h3>
-              <div className="mt-4 grid gap-6 pc:grid-cols-2 pc:gap-8">
-                {([
-                  ["h1", "t1", l.h1, l.t1],
-                  ["h2", "t2", l.h2, l.t2],
-                ] as const).map(([hk, tk, hDef, tDef]) => (
-                  <div key={hk}>
-                    <h4
-                      className="border-l-4 pl-3"
-                      style={{ borderColor: ACCENTS[i % ACCENTS.length], fontSize: 16, fontWeight: 800, color: PAL.ink }}
-                      {...ed(`recruit3:bizlink.${i}.${hk}`, `展開見出し（${l.name}）`)}
-                    >
-                      {txt(`recruit3:bizlink.${i}.${hk}`, hDef)}
-                    </h4>
-                    <p
-                      className="mt-3"
-                      style={{ fontSize: 14, lineHeight: 2.0, color: "#1c2b30", whiteSpace: "pre-line" }}
-                      {...ed(`recruit3:bizlink.${i}.${tk}`, `展開本文（${l.name}）`, { multiline: true })}
-                    >
-                      {txt(`recruit3:bizlink.${i}.${tk}`, tDef)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* オーバーレイ：上部に画像、下部に見出し＋文章（PC=2カラム / SP=1カラム）。
-          ページ側のスタッキングコンテキスト（relative z-10）に閉じ込められて
-          サイトヘッダーの背面に潜らないよう、body 直下へポータル描画する */}
-      {b && open !== null && createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(null);
-          }}
+      <div className="mx-auto max-w-3xl text-center">
+        <h2
+          style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, lineHeight: 1.4, color: PAL.ink }}
+          {...ed("recruit3:about.title", "見出し（H2）")}
         >
-          <div className="relative max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-[0.75rem] bg-white shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setOpen(null)}
-              aria-label="閉じる"
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md transition-colors hover:bg-white"
-            >
-              <X size={20} style={{ color: PAL.ink }} />
-            </button>
-            {/* 上部：画像 */}
-            <div className="aspect-[16/7] w-full overflow-hidden bg-secondary">
-              <ImageWithFallback src={b.imgDef()} alt={txt(`recruit3:bizlink.${open}.name`, b.name)} className="h-full w-full object-cover" />
-            </div>
-            {/* 下部：見出し＋文章（2カラム、SPは1カラム） */}
-            <div className="p-6 pc:p-9">
-              <p style={{ fontFamily: "var(--font-accent)", fontSize: 12, letterSpacing: "0.2em", color: PAL.red }} {...ed(`recruit3:bizlink.${open}.en`, "英語ラベル")}>{txt(`recruit3:bizlink.${open}.en`, b.en)}</p>
-              <h3 className="mt-1" style={{ fontSize: 24, fontWeight: 900, color: PAL.ink }}>
-                {txt(`recruit3:bizlink.${open}.name`, b.name)}
-              </h3>
-              <div className="mt-6 grid gap-6 pc:grid-cols-2 pc:gap-8">
-                {([
-                  ["h1", "t1", b.h1, b.t1],
-                  ["h2", "t2", b.h2, b.t2],
-                ] as const).map(([hk, tk, hDef, tDef]) => (
-                  <div key={hk}>
-                    <h4
-                      className="border-l-4 pl-3"
-                      style={{ borderColor: ACCENTS[open % ACCENTS.length], fontSize: 17, fontWeight: 800, color: PAL.ink }}
-                      {...ed(`recruit3:bizlink.${open}.${hk}`, "オーバーレイ見出し")}
-                    >
-                      {txt(`recruit3:bizlink.${open}.${hk}`, hDef)}
-                    </h4>
-                    <p
-                      className="mt-3"
-                      style={{ fontSize: 14, lineHeight: 2.0, color: "#1c2b30", whiteSpace: "pre-line" }}
-                      {...ed(`recruit3:bizlink.${open}.${tk}`, "オーバーレイ本文", { multiline: true })}
-                    >
-                      {txt(`recruit3:bizlink.${open}.${tk}`, tDef)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <Link to={b.to} className="mt-8 inline-flex items-center gap-2" style={{ fontSize: 14, fontWeight: 800, color: PAL.teal }}>
-                事業ページを見る <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </div>,
-        document.body,
+          {txt("recruit3:about.title", "アイスラインとは？")}
+        </h2>
+        <p
+          className="mt-4"
+          style={{ fontSize: 15, lineHeight: 2.0, color: "#1c2b30", whiteSpace: "pre-line" }}
+          {...ed("recruit3:about.body", "本文", { multiline: true })}
+        >
+          {txt(
+            "recruit3:about.body",
+            "アイスラインは氷・食・物流の3つの要素から、人の生活を築き上げてきました。\n毎日の食卓の安心を届けることが、私たちの使命です。"
+          )}
+        </p>
+      </div>
+      {(image !== "" || EDIT_MODE) && (
+        <div className="mx-auto mt-10 max-w-2xl">
+          <ImageWithFallback
+            src={image || PH}
+            alt={txt("recruit3:about.title", "アイスラインとは？")}
+            className="mx-auto block max-w-full"
+            {...edImg("recruit3:about.image", "画像（中央寄せ）")}
+          />
+        </div>
       )}
     </Sec>
   );
@@ -1281,8 +1102,9 @@ function HeroExtra() {
 /* ═══════════════ 数字で見るアイスライン ═══════════════ */
 
 // 横長の白カードを縦に積み、カードを左右交互に少しずらして配置する（2026-08 モック準拠。
-// スマホでも少しずらす）。カード内は左＝赤の縦罫付き見出し＋本文、右＝赤い円
-// （大きな白文字）と左に重なる水色の円（透過PNG）。
+// スマホでも少しずらす）。カード内は左＝画像（列幅いっぱい）とその下の数字テキスト、
+// 右＝赤の縦罫付き見出し＋本文（2026-09 改修で左右を入れ替え、赤い円を廃止）。
+// 数字テキストは [[特大,red:121]] のように大きな赤字と通常の黒字を組み合わせられる。
 // カード数はコンソールの「追加」「削除」で 1〜12 に変更できる（既定3）。
 const MAX_STATS = 12;
 
@@ -1299,11 +1121,31 @@ function Stats3() {
             <div
               key={i}
               className={
-                "flex w-[92%] items-center gap-5 rounded-[0.875rem] bg-white px-6 py-7 shadow-[0_16px_36px_rgba(15,42,51,0.10)] pc:w-[72%] pc:gap-8 pc:px-9 " +
+                "flex w-[92%] flex-col gap-5 rounded-[0.875rem] bg-white px-6 py-7 shadow-[0_16px_36px_rgba(15,42,51,0.10)] pc:w-[72%] pc:flex-row pc:items-center pc:gap-8 pc:px-9 " +
                 (i % 2 ? "ml-auto" : "mr-auto")
               }
             >
-              {/* 左：見出し（赤の縦罫）＋本文 */}
+              {/* 左（SPは上・中央寄せ）：画像（数字テキストの列幅いっぱい）＋その下に数字テキスト */}
+              <div className="w-40 shrink-0 self-center pc:w-52 pc:self-auto">
+                {(icon !== "" || EDIT_MODE) && (
+                  <div className="aspect-square w-full overflow-hidden rounded-[0.5rem]" style={{ background: "#f5f5f5" }}>
+                    <ImageWithFallback
+                      src={icon || PH}
+                      alt=""
+                      className="h-full w-full object-contain p-3"
+                      {...edImg(`${base}.image`, `数字タイル${i + 1} 画像（透過PNG）`)}
+                    />
+                  </div>
+                )}
+                <RichBody
+                  path={`${base}.circle`}
+                  text={txt(`${base}.circle`, "創業 [[特大,red:121]] 年")}
+                  label={`数字タイル${i + 1} 数字テキスト`}
+                  className="mt-3 text-center"
+                  style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.3, color: "#1c2b30" }}
+                />
+              </div>
+              {/* 右：見出し（赤の縦罫）＋本文 */}
               <div className="min-w-0 flex-1">
                 <h3
                   className="border-l-4 pl-3"
@@ -1319,33 +1161,6 @@ function Stats3() {
                 >
                   {txt(`${base}.p`, "（本文）")}
                 </p>
-              </div>
-              {/* 右：赤い円（大きな白文字）＋左に重なる水色の円（透過PNG画像） */}
-              <div className="relative h-32 w-40 shrink-0 pc:h-44 pc:w-56">
-                <div
-                  className="absolute right-0 top-0 flex h-32 w-32 items-center justify-center rounded-full px-4 text-center pc:h-44 pc:w-44 pc:px-5"
-                  style={{ background: PAL.red }}
-                >
-                  <span
-                    style={{ color: "#fff", fontSize: "clamp(20px, 2.4vw, 32px)", fontWeight: 900, lineHeight: 1.3, whiteSpace: "pre-line" }}
-                    {...ed(`${base}.circle`, `数字タイル${i + 1} 円内テキスト`)}
-                  >
-                    {txt(`${base}.circle`, "00")}
-                  </span>
-                </div>
-                <div
-                  className="absolute left-0 top-1/2 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full pc:h-20 pc:w-20"
-                  style={{ background: "#cfe6f2" }}
-                >
-                  {(icon !== "" || EDIT_MODE) && (
-                    <ImageWithFallback
-                      src={icon || PH}
-                      alt=""
-                      className="h-9 w-9 rounded-full object-contain pc:h-12 pc:w-12"
-                      {...edImg(`${base}.image`, `数字タイル${i + 1} アイコン画像（透過PNG）`)}
-                    />
-                  )}
-                </div>
               </div>
             </div>
           );
@@ -1836,8 +1651,8 @@ export function Recruit3() {
               </div>
             )}
           </div>
-          {/* 2. 事業へのリンク */}
-          <BizLinks />
+          {/* 2. アイスラインとは？（旧「事業を知る」の位置） */}
+          <About3 />
           {/* 2.5. 数字で見るアイスライン（最低3枚のタイル・最大12枚まで追加可能） */}
           <Stats3 />
           {/* 3. アイスラインの仕事（画像＋文言の横並び。カルチャーの前） */}
