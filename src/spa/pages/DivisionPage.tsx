@@ -91,12 +91,22 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       pathKey: "supply",
       items: [{ title: "（見出し）", pending: true, image: true }],
     },
+    // 岡山県内トップシェア（2026-09 改修）：旧「事業の特徴」の1項目目を独立した
+    // H2 セクションに格上げ。本文・画像は features.0 から topshare.0 へ移行済み
+    // （overrides.json）。見出しはセクション見出し（H2）として表示するため項目側に
+    // H3 は置かない。
+    {
+      en: "TOP SHARE",
+      jp: "岡山県内トップシェア",
+      pathKey: "topshare",
+      items: [{ pending: true, image: true }],
+    },
     {
       en: "FEATURES",
       jp: "事業の特徴",
       pathKey: "features",
+      // 旧1項目目（岡山県内トップシェア）は上の独立セクションへ移動（2026-09 改修）
       items: [
-        { title: "（見出し）", pending: true, image: true },
         { title: "（見出し）", pending: true, image: true },
         { title: "（見出し）", pending: true, image: true },
         { title: "（見出し）", pending: true, image: true },
@@ -289,21 +299,6 @@ const ICE_LINEUP_NAV: { name: string; href: string; img: string; body: string }[
     body: "コンビニエンスストア向けのカップ氷をはじめ、全国の店頭に並ぶ製品を安定した品質で製造・供給しています。",
   },
 ];
-
-// ─────────────────────────────────────────────────────────
-// 製品ラインナップに追加するドライアイス（製氷の上に表示）。
-// 内容は「ドライアイスの販売」ページに準拠。「詳細を見る」はECサイトへ。
-// インデックス式の ice:lineup.{ci}.* とは独立した ice:lineup.dryice.* キーで管理し、
-// 既存カテゴリの保存済みオーバーライドがずれないようにしている。
-// ─────────────────────────────────────────────────────────
-const DRYICE_LINEUP = {
-  name: "ドライアイス",
-  desc:
-    "ドライアイスは、二酸化炭素を固体にしたもので、約-79℃という極低温の保冷材です。溶けても水が残らないため、食品や精密機器の輸送にも安心してお使いいただけます。低温物流・葬儀・スイーツ輸送など幅広い用途に対応しており、お客様のご要望に合わせたサイズへのカット加工にも対応しています。個人のお客様向けには、ECサイトからもご購入いただけます。",
-  skus:
-    "・ブロック（1kg〜約20kg）\n・各種スライス加工\n・ご要望に応じたサイズへのカット対応\n\n【主な用途】\n・低温物流・冷凍食品の輸送保冷\n・葬儀・遺体保冷\n・スイーツ・ケーキの輸送\n・その他、冷却・保冷が必要な用途全般",
-  ecUrl: "https://www.dry-ice.jp/",
-};
 
 // 活用提案・メニューレシピ（シート準拠の確定原稿）
 const ICE_RECIPE_STORY =
@@ -610,31 +605,6 @@ function IceProcessFlow() {
   );
 }
 
-/** ドライアイスの商品カード（ECサイトへ外部リンク） */
-function DryIceLineupCard({ ecUrl }: { ecUrl: string }) {
-  const p = PRODUCTS.find((x) => x.id === "dry-ice");
-  if (!p) return null;
-  return (
-    <a
-      href={ecUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-lg"
-    >
-      <div className="aspect-[4/3] overflow-hidden bg-secondary">
-        <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
-      </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h4 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{txt(`product:${p.id}:name`, p.name)}</h4>
-        <p className="mt-1 flex-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{txt(`product:${p.id}:catch`, p.catch)}</p>
-        <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
-          詳細を見る（ECサイト） <ArrowRight size={14} />
-        </span>
-      </div>
-    </a>
-  );
-}
-
 /** 要確認スロット対応の項目レンダラ（sk はセクションの編集パスキー） */
 function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; sk: string; ii: number; it: DetailItem; secJp: string }) {
   const base = `division:${division}.sec.${sk}.${ii}`;
@@ -924,32 +894,9 @@ export function DivisionPage({ division }: { division: Division }) {
       {division === "ice" && (
         <Section heat={listHeat} id="ice-lineup">
           <SectionTitle en="LINEUP" jp="製品ラインナップ" path="division:ice.lineup" />
+          {/* 旧・先頭の「ドライアイス」カテゴリ（ECサイト導線付き）は 2026-09 改修で削除。
+              ドライアイスは「ドライアイスの販売」ページ（/dryice）で案内する */}
           <div className="mt-12 space-y-16">
-            {/* ドライアイス（内容は「ドライアイスの販売」ページ準拠・詳細はECサイトへ） */}
-            <div>
-              <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed("ice:lineup.dryice.name", "カテゴリ名")}>
-                {txt("ice:lineup.dryice.name", DRYICE_LINEUP.name)}
-              </h3>
-              <p className="mt-5 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed("ice:lineup.dryice.desc", "カテゴリ説明", { multiline: true })}>
-                {txt("ice:lineup.dryice.desc", DRYICE_LINEUP.desc)}
-              </p>
-              <div className="mt-8 grid gap-8 pc:grid-cols-[1fr_2fr]">
-                {/* 規格一覧 */}
-                <div className="rounded-2xl border border-border bg-card p-6">
-                  <p className="text-muted-foreground" style={{ fontSize: 12, letterSpacing: "0.08em" }}>規格一覧</p>
-                  <p className="mt-3" style={{ fontSize: 14, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("ice:lineup.dryice.skus", "規格一覧", { multiline: true })}>
-                    {txt("ice:lineup.dryice.skus", DRYICE_LINEUP.skus)}
-                  </p>
-                </div>
-                {/* ECサイトへの導線カード */}
-                <div className="grid content-start gap-5 tab:grid-cols-2 pc:grid-cols-3">
-                  <div>
-                    <DryIceLineupCard ecUrl={txt("ice:lineup.dryice.ecUrl", DRYICE_LINEUP.ecUrl)} />
-                    <EditableLinkHint path="ice:lineup.dryice.ecUrl" label="ドライアイス ECサイトURL" href={txt("ice:lineup.dryice.ecUrl", DRYICE_LINEUP.ecUrl)} />
-                  </div>
-                </div>
-              </div>
-            </div>
             {ICE_CATEGORIES.map((cat, ci) => (
               <div key={ci}>
                 <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`ice:lineup.${ci}.name`, "カテゴリ名")}>

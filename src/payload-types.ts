@@ -189,7 +189,7 @@ export interface News {
           }
         | {
             /**
-             * 採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: job-dryice＝ドライアイス加工・配送スタッフ（正社員）（ドライアイスチーム） ／ job-keiri-zaimu＝経理財務（正社員）（本社） ／ job-saiyo-koho＝採用広報（正社員）（本社） ／ job-route-sales＝ルート営業スタッフ（正社員）（食品事業部） ／ job-shohin-kaihatsu＝商品開発（正社員）（西大寺工場） ／ job-jinji-romu＝人事労務（正社員）（本社） ／ job-seisan-gijutsu＝生産技術（正社員）（西大寺・二日市工場） ／ job-futsukaichi-seizo＝製造オペレーター／ラインマネージャー（正社員）（二日市工場） ／ job-hinshitsu-kanri＝品質管理（正社員）（西大寺工場） ／ job-souko＝倉庫作業スタッフ（正社員）（西大寺工場） ／ job-seizo＝製造スタッフ（正社員）（西大寺工場） ／ job-seizo-hojo-saidaiji＝製造補助スタッフ（パート）（西大寺工場） ／ job-seizo-hojo-futsukaichi＝製造補助スタッフ（パート）（二日市工場）
+             * 採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種の追加・変更は公開（デプロイ）後に選択肢へ反映されます。
              */
             job: string;
             /**
@@ -207,7 +207,7 @@ export interface News {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * お知らせ記事の本文中で使う画像。
+ * 記事の本文中で使う画像と、採用記事のアイキャッチ動画（mp4 等）。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -262,13 +262,29 @@ export interface Interview {
   lead: string;
   subtitle?: string | null;
   /**
-   * 記事ページのヒーローと「人を知る」カードに表示。通常はこちらにアップロード。
+   * 記事ページのアイキャッチ画像内（氏名・所属の下）に表示されます。任意・改行可。
+   */
+  intro?: string | null;
+  /**
+   * 記事ページのアイキャッチ画像内（自己紹介の下）に「趣味：〜」として表示されます。任意。
+   */
+  hobby?: string | null;
+  /**
+   * 記事ページのアイキャッチと「人を知る」カードに表示。通常はこちらにアップロード。アイキャッチ動画を設定した場合は動画のポスター（静止画）として使われます（未設定なら動画の1フレーム目）。
    */
   image?: (number | null) | Media;
   /**
    * 通常は上の「メイン画像」を使用。両方ある場合は「メイン画像」が優先されます。
    */
   imageSrc?: string | null;
+  /**
+   * mp4 等の動画ファイル。設定すると記事のアイキャッチに再生ボタンが表示され、クリックで画面中央に大きく再生されます。「人を知る」カードには動画の1フレーム目（メイン画像がある場合はその画像）が表示されます。
+   */
+  video?: (number | null) | Media;
+  /**
+   * 通常は上の「アイキャッチ動画（ファイル）」を使用。両方ある場合はファイルが優先されます。
+   */
+  videoSrc?: string | null;
   blocks?:
     | (
         | {
@@ -319,7 +335,7 @@ export interface Interview {
           }
         | {
             /**
-             * 採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種ID: job-dryice＝ドライアイス加工・配送スタッフ（正社員）（ドライアイスチーム） ／ job-keiri-zaimu＝経理財務（正社員）（本社） ／ job-saiyo-koho＝採用広報（正社員）（本社） ／ job-route-sales＝ルート営業スタッフ（正社員）（食品事業部） ／ job-shohin-kaihatsu＝商品開発（正社員）（西大寺工場） ／ job-jinji-romu＝人事労務（正社員）（本社） ／ job-seisan-gijutsu＝生産技術（正社員）（西大寺・二日市工場） ／ job-futsukaichi-seizo＝製造オペレーター／ラインマネージャー（正社員）（二日市工場） ／ job-hinshitsu-kanri＝品質管理（正社員）（西大寺工場） ／ job-souko＝倉庫作業スタッフ（正社員）（西大寺工場） ／ job-seizo＝製造スタッフ（正社員）（西大寺工場） ／ job-seizo-hojo-saidaiji＝製造補助スタッフ（パート）（西大寺工場） ／ job-seizo-hojo-futsukaichi＝製造補助スタッフ（パート）（二日市工場）
+             * 採用ページの該当職種のエントリーフォームへのリンクボタンになります（記事の末尾に置くのがおすすめです）。職種の追加・変更は公開（デプロイ）後に選択肢へ反映されます。
              */
             job: string;
             /**
@@ -523,8 +539,12 @@ export interface InterviewsSelect<T extends boolean = true> {
   years?: T;
   lead?: T;
   subtitle?: T;
+  intro?: T;
+  hobby?: T;
   image?: T;
   imageSrc?: T;
+  video?: T;
+  videoSrc?: T;
   blocks?:
     | T
     | {

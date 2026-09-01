@@ -1,18 +1,21 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { motion } from "motion/react";
-import { ChevronLeft } from "lucide-react";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ChevronLeft, PlayCircle } from "lucide-react";
 import { useInterviews } from "../data/interviews";
 import { hasVideo } from "../data/blocks";
-import { ed, edImg, txt } from "../lib/editable";
+import { ed, txt } from "../lib/editable";
 import { BlockContent } from "../components/common/BlockContent";
 import { MovieBadge } from "../components/common/MovieBadge";
+import { VideoModal, VideoPoster } from "../components/common/VideoMedia";
 
 export function Interview() {
   const { id } = useParams();
   // 記事は Payload（/admin の「採用記事」）から取得。取得完了までは同梱データで即時描画
   const { items, ready } = useInterviews();
   const iv = items.find((x) => x.id === id);
+  // アイキャッチ動画のオーバーレイ再生（2026-09 改修）
+  const [playing, setPlaying] = useState(false);
 
   if (!iv) {
     // Payload 側にだけある新しい記事の可能性があるため、取得完了までは判定しない
@@ -37,10 +40,24 @@ export function Interview() {
           transition={{ duration: 1.4, ease: "easeOut" }}
           className="absolute inset-0"
         >
-          <ImageWithFallback src={iv.image} alt={iv.name} className="h-full w-full object-cover opacity-80" {...edImg(`${pre}:image`, "メイン画像")} />
+          {/* アイキャッチ：メイン画像。動画付きで画像が無い場合は動画の1フレーム目を表示 */}
+          <VideoPoster image={iv.image} video={iv.video} alt={iv.name} className="h-full w-full object-cover opacity-80" />
         </motion.div>
-        {hasVideo(iv.blocks) && <MovieBadge className="!right-5 !top-5" />}
+        {(hasVideo(iv.blocks) || iv.video !== "") && <MovieBadge className="!right-5 !top-5" />}
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/45 to-ink/10" />
+
+        {/* アイキャッチ動画の再生ボタン（クリックで画面中央のオーバーレイに大きく表示） */}
+        {iv.video !== "" && (
+          <button
+            type="button"
+            onClick={() => setPlaying(true)}
+            aria-label="アイキャッチ動画を再生"
+            className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full text-white transition-transform hover:scale-105"
+            style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.5))" }}
+          >
+            <PlayCircle size={84} strokeWidth={1.4} className="opacity-90 transition-opacity group-hover:opacity-100" />
+          </button>
+        )}
 
         <div className="relative mx-auto w-full max-w-[1100px] px-5 pb-16 pc:px-8 pc:pb-24">
           <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: "easeOut" }}>
@@ -69,9 +86,26 @@ export function Interview() {
               <span className="text-white/55" style={{ fontSize: 13 }} {...ed(`${pre}:role`, "所属・役職")}>{iv.role}</span>
               <span className="text-white/55" style={{ fontSize: 13 }} {...ed(`${pre}:years`, "在籍年数")}>{iv.years}</span>
             </div>
+            {/* 自己紹介・趣味（/admin の採用記事で入力。未入力の項目は非表示。2026-09 追加） */}
+            {(iv.intro !== "" || iv.hobby !== "") && (
+              <div className="mt-5 max-w-[34em] space-y-1.5 text-white/80" style={{ fontSize: 14, lineHeight: 1.9 }}>
+                {iv.intro !== "" && (
+                  <p style={{ whiteSpace: "pre-line" }}>{iv.intro}</p>
+                )}
+                {iv.hobby !== "" && (
+                  <p style={{ whiteSpace: "pre-line" }}>
+                    <span className="mr-2 text-brand" style={{ fontWeight: 700 }}>趣味</span>
+                    {iv.hobby}
+                  </p>
+                )}
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
+
+      {/* アイキャッチ動画のオーバーレイ再生 */}
+      {playing && iv.video !== "" && <VideoModal url={iv.video} title={iv.lead} onClose={() => setPlaying(false)} />}
 
       {/* ===== 本文（エディトリアル） ===== */}
       <div className="mx-auto max-w-[760px] px-5 py-16 pc:py-24">

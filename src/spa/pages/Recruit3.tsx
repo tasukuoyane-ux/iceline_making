@@ -19,11 +19,12 @@ import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Clock, PlayCircle, 
 import sectionsJson from "../../content/sections.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, edImg, edSel, repeatSel, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
-import { useRecruitData, RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
+import { useRecruitData, jobGroupColor, RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { IMG } from "../data/images";
 import { useInterviews } from "../data/interviews";
 import { VIDEOS, VideoItem } from "../data/news";
 import { toEmbed } from "../lib/video";
+import { VideoPoster } from "../components/common/VideoMedia";
 import { R2Styles, PageBg, Hero, EntryForm, Sec, Head, Ed, PAL, ACCENTS, PH } from "./Recruit2";
 import { RichBody } from "../components/common/RichBody";
 
@@ -604,13 +605,10 @@ function People3D() {
 
   return (
     <Sec>
-      <Head base="recruit3:people" en="PEOPLE" jp="人を知る" center />
-      <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
-        <Ed as="span" path="recruit3:people.lead" def="働く社員のインタビューを、カードをめくるように読めます。" label="人を知る リード" />
-      </p>
+      {/* 見出し（PEOPLE／人を知る）とリードは 2026-09 改修でカルーセルの下へ移動 */}
 
       {/* 3Dカルーセル：3枚が見えていて、中央の1枚だけが正面を向く */}
-      <div className="relative mt-10" style={{ height: "min(120vw, 480px)" }}>
+      <div className="relative" style={{ height: "min(120vw, 480px)" }}>
         <div className="absolute inset-0" style={{ perspective: 1200 }}>
           {interviews.map((iv, i) => {
             const d = rel(i);
@@ -618,11 +616,14 @@ function People3D() {
             const center = d === 0;
             const card = (
               <div className="relative h-full w-full overflow-hidden rounded-[0.75rem] bg-secondary shadow-[0_20px_50px_rgba(15,42,51,0.25)]">
-                <ImageWithFallback
-                  src={iv.image || PH}
-                  alt={iv.name}
-                  className="h-full w-full object-cover"
-                />
+                {/* アイキャッチ：メイン画像。動画付き記事で画像が無い場合は動画の1フレーム目 */}
+                <VideoPoster image={iv.image} video={iv.video} alt={iv.name} fallback={PH} className="h-full w-full object-cover" />
+                {/* アイキャッチに動画がある記事は中央に再生ボタンを薄めに表示 */}
+                {iv.video && (
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden>
+                    <PlayCircle size={64} className="text-white" style={{ opacity: 0.55, filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.45))" }} />
+                  </span>
+                )}
                 {/* 画像の中にカテゴリー・タイトル・名前 */}
                 <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/15 to-transparent p-6 text-left">
                   <span className="w-fit rounded-full px-2.5 py-0.5 text-white" style={{ background: ACCENTS[i % ACCENTS.length], fontSize: 11, fontWeight: 700 }}>
@@ -704,6 +705,14 @@ function People3D() {
             style={{ width: i === idx ? 22 : 8, background: i === idx ? PAL.red : "rgba(15,42,51,0.25)" }}
           />
         ))}
+      </div>
+
+      {/* セクション見出し＋リード（カルーセルの下に表示。2026-09 改修） */}
+      <div className="mt-10">
+        <Head base="recruit3:people" en="PEOPLE" jp="人を知る" center />
+        <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
+          <Ed as="span" path="recruit3:people.lead" def="働く社員のインタビューを、カードをめくるように読めます。" label="人を知る リード" />
+        </p>
       </div>
     </Sec>
   );
@@ -983,9 +992,10 @@ function OvMapSec({ map }: { map?: { title: string; spots: string[] } }) {
 }
 
 /** 職種の詳細オーバーレイ（業務内容〜エントリーフォーム） */
-function JobOverlay({ job, jobIndex, data, onClose }: { job: RecruitJob; jobIndex: number; data: RecruitView; onClose: () => void }) {
+function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: RecruitView; onClose: () => void }) {
   useBodyLock(true);
-  const accent = ACCENTS[jobIndex % ACCENTS.length];
+  // アクセント色は職種の分類（食品=赤／アイス=青／総務=グレー／未分類=黒）に合わせる（2026-09 改修）
+  const accent = jobGroupColor(job.group);
   // スクロールダウンでヘッダー右上に「エントリー」への追尾アンカーボタンを表示
   const [showEntryCta, setShowEntryCta] = useState(false);
   const entryRef = useRef<HTMLElement | null>(null);
@@ -1163,8 +1173,7 @@ function JobsSection() {
     else next.delete("job");
     setSearchParams(next);
   };
-  const openIndex = jobs.findIndex((j) => j.id === openId);
-  const openJob = openIndex >= 0 ? jobs[openIndex] : null;
+  const openJob = jobs.find((j) => j.id === openId) ?? null;
 
   return (
     <Sec id="jobs" className="scroll-mt-20">
@@ -1179,14 +1188,16 @@ function JobsSection() {
         </p>
       ) : (
         <ul className="mt-10 divide-y divide-black/5 overflow-hidden rounded-[0.75rem] bg-white/90 shadow-[0_16px_36px_rgba(15,42,51,0.12)] backdrop-blur">
-          {jobs.map((j, i) => (
+          {jobs.map((j) => (
             <li key={j.id}>
               <button
                 type="button"
                 onClick={() => setOpenId(j.id)}
                 className="group flex w-full flex-wrap items-center gap-3 px-6 py-5 text-left transition-colors hover:bg-[#f4f9fb] pc:gap-5 pc:px-9"
               >
-                <span className="rounded-full px-3 py-1 text-white" style={{ background: ACCENTS[i % ACCENTS.length], fontSize: 12, fontWeight: 700 }}>
+                {/* ピルの色は職種の分類（CMS「採用」タブの「分類」）で決まる：
+                    食品事業部=赤／アイス事業部=青／総務部=グレー／未分類=黒（2026-09 改修） */}
+                <span className="rounded-full px-3 py-1 text-white" style={{ background: jobGroupColor(j.group), fontSize: 12, fontWeight: 700 }}>
                   {j.dept}
                 </span>
                 <span style={{ fontSize: "clamp(16px, 2vw, 19px)", fontWeight: 800, color: PAL.ink }}>{j.title}</span>
@@ -1199,7 +1210,7 @@ function JobsSection() {
         </ul>
       )}
 
-      {openJob && <JobOverlay job={openJob} jobIndex={openIndex} data={data} onClose={() => setOpenId(null)} />}
+      {openJob && <JobOverlay job={openJob} data={data} onClose={() => setOpenId(null)} />}
     </Sec>
   );
 }
@@ -1335,6 +1346,7 @@ function Stats3() {
 // <video controls>（全画面ボタン付き）で再生される。
 function Movie3() {
   const url = txt("recruit3:movie.url", "");
+  const caption = txt("recruit3:movie.caption", "");
   const embed = toEmbed(url);
   if (!embed && !EDIT_MODE) return null;
   return (
@@ -1344,7 +1356,7 @@ function Movie3() {
           {embed?.type === "iframe" ? (
             <iframe
               src={embed.src}
-              title="紹介動画"
+              title={caption || "紹介動画"}
               className="h-full w-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -1357,6 +1369,16 @@ function Movie3() {
             </div>
           )}
         </div>
+        {/* キャプション（動画の下・未入力の間は公開ページでは非表示。2026-09 改修） */}
+        {(caption !== "" || EDIT_MODE) && (
+          <p
+            className="mt-3 text-center"
+            style={{ fontSize: 14, fontWeight: 700, color: PAL.ink, lineHeight: 1.8, whiteSpace: "pre-line" }}
+            {...ed("recruit3:movie.caption", "動画キャプション", { multiline: true })}
+          >
+            {caption || "（動画のキャプションを入力）"}
+          </p>
+        )}
         {EDIT_MODE && (
           <p
             className="mt-2 break-all rounded bg-white/85 px-2 py-1"
@@ -1392,10 +1414,21 @@ function Deck3() {
     return () => clearInterval(t);
   }, [slides.length]);
 
+  const lead = txt("recruit3:deck.lead", "");
   if (slides.length === 0 && !EDIT_MODE) return null;
   return (
     <Sec>
       <Head base="recruit3:deck.head" en="COMPANY DECK" jp="カンパニーデック" center />
+      {/* 見出し下の一文（「人を知る」のリードと同様。未入力の間は公開ページでは非表示。2026-09 改修） */}
+      {(lead !== "" || EDIT_MODE) && (
+        <p
+          className="mt-4 text-center"
+          style={{ fontSize: 14, color: PAL.ink, lineHeight: 1.9, whiteSpace: "pre-line" }}
+          {...ed("recruit3:deck.lead", "カンパニーデック リード", { multiline: true })}
+        >
+          {lead || "（見出し下の一文を入力）"}
+        </p>
+      )}
       <div className="mx-auto mt-10 w-full max-w-[800px]">
         {/* 本番と同じスライドショー表示（プレビューでも同じ見た目）。 */}
         {slides.length > 0 ? (
@@ -1511,8 +1544,15 @@ function Videos3() {
                 <PlayCircle size={48} className="text-white" />
               </div>
             </div>
-            <h3 className="mt-2" style={{ fontSize: 14, fontWeight: 800, color: PAL.ink }} {...ed(`videos:${v.id}:title`)}>
-              {v.title}
+            {/* キャプション（タイトル）。背景動画の明暗に関係なく読めるよう白いチップに載せる。
+                採用ページ専用の編集パスにして、/videos と独立に文言・文字色を変えられる
+                （既定は動画管理のタイトル。2026-09 改修） */}
+            <h3
+              className="mt-2 inline-block max-w-full rounded-md bg-white/90 px-3 py-1.5 shadow-sm"
+              style={{ fontSize: 14, fontWeight: 800, color: PAL.ink, lineHeight: 1.6 }}
+              {...ed(`recruit3:videos.${v.id}.title`, "動画キャプション")}
+            >
+              {txt(`recruit3:videos.${v.id}.title`, v.title)}
             </h3>
           </button>
         ))}

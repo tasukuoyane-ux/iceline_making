@@ -28,10 +28,30 @@ export interface RecruitPrPoint {
   body: string;
   image: string;
 }
+/** 職種の分類（募集職種一覧・オーバーレイのピルの色分けに使う。2026-09 改修）
+ *  - food : 食品事業部（ドライアイス・営業・倉庫）→ 赤
+ *  - ice  : アイス事業部（生産・品質・製造・商品開発）→ 青
+ *  - admin: 総務部 → グレー
+ *  - ""   : 未分類 → 黒
+ * CMS（採用タブ）の「分類」プルダウンで設定する。 */
+export type JobGroup = "food" | "ice" | "admin" | "";
+export const JOB_GROUPS: { value: JobGroup; label: string; color: string; hint: string }[] = [
+  { value: "food", label: "食品事業部", color: "#ff414d", hint: "ドライアイス・営業・倉庫" },
+  { value: "ice", label: "アイス事業部", color: "#2563eb", hint: "生産・品質・製造・商品開発" },
+  { value: "admin", label: "総務部", color: "#6b7a82", hint: "" },
+  { value: "", label: "未分類", color: "#111111", hint: "" },
+];
+/** 分類に対応するピルの色（未分類・不明な値は黒） */
+export function jobGroupColor(group: string | undefined): string {
+  return JOB_GROUPS.find((g) => g.value === (group ?? ""))?.color ?? "#111111";
+}
+
 export interface RecruitJob {
   id: string;
   title: string;
   dept: string;
+  /** 分類（ピルの色分け）。未設定・空は「未分類」 */
+  group?: JobGroup | string;
   active: boolean;
   body: string;
   image: string;

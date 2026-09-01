@@ -64,6 +64,9 @@ export interface RecruitJob {
   title: string;
   /** 部門名（例: 食品事業部） */
   dept: string;
+  /** 分類（ピルの色分け）: "food"=食品事業部（赤）/ "ice"=アイス事業部（青）/
+   * "admin"=総務部（グレー）/ ""=未分類（黒）。選択肢は spa/lib/recruitStore の JOB_GROUPS */
+  group: string;
   /** 募集中フラグ（OFFにすると公開ページに表示されない。データは残る） */
   active: boolean;
   /** 業務内容 本文 */
@@ -276,6 +279,7 @@ export function normalizeRecruit(r: any): RecruitData {
         id: String(j?.id ?? ""),
         title: String(j?.title ?? ""),
         dept: String(j?.dept ?? ""),
+        group: String(j?.group ?? ""),
         active: j?.active !== false,
         body: String(j?.body ?? ""),
         image: String(j?.image ?? ""),

@@ -7,9 +7,10 @@
 //    1階層目のアコーディオンとして表示される。
 // 変更は左のプレビュー（採用3）へ即時反映され、「更新（本番へ公開）」で確定する。
 import { Content, RecruitBlock, RecruitData, RecruitJob, RecruitPrPoint, RecruitRow, RecruitStep, RecruitTimeline, clone, DEFAULT_RECRUIT_FLOW } from "./content";
-import { Field, TextInput, TextArea, Button, Card, Collapsible } from "./ui";
+import { Field, TextInput, TextArea, Button, Card, Collapsible, Select } from "./ui";
 import { ImageField } from "./ImageField";
 import { genId } from "./panels";
+import { JOB_GROUPS } from "../spa/lib/recruitStore";
 
 /* ---------- 小さな共通部品 ---------- */
 
@@ -191,6 +192,26 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
         <Field label="職種名"><TextInput value={job.title} onChange={(e) => onChange({ ...job, title: e.target.value })} /></Field>
         <Field label="部門名" hint="例: 食品事業部"><TextInput value={job.dept} onChange={(e) => onChange({ ...job, dept: e.target.value })} /></Field>
       </div>
+      {/* 分類（募集職種一覧・職種詳細のピルの色分け。2026-09 改修） */}
+      <Field
+        label="分類（ピルの色）"
+        hint="食品事業部（ドライアイス・営業・倉庫）＝赤／アイス事業部（生産・品質・製造・商品開発）＝青／総務部＝グレー／未分類＝黒"
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-4 w-4 shrink-0 rounded-full"
+            style={{ background: JOB_GROUPS.find((g) => g.value === (job.group ?? ""))?.color ?? "#111111" }}
+            aria-hidden
+          />
+          <Select value={job.group ?? ""} onChange={(e) => onChange({ ...job, group: e.target.value })} className="max-w-[240px]">
+            {JOB_GROUPS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}{g.hint ? `（${g.hint}）` : ""}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </Field>
 
       <Card title="業務内容">
         <div className="space-y-3">
@@ -281,6 +302,7 @@ export function RecruitPanel({
       id: genId("job"),
       title: "新しい職種",
       dept: "部門名",
+      group: "",
       active: false,
       body: "業務内容を入力してください。",
       image: "",

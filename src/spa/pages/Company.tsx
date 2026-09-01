@@ -1,11 +1,126 @@
 import { motion } from "motion/react";
+import { ExternalLink, MapPin } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { CEO_MESSAGE, COMPANY_PROFILE, HISTORY, PHILOSOPHY, CSR } from "../data/company";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, repeatSel, EDIT_MODE } from "../lib/editable";
 import { RichBody } from "../components/common/RichBody";
+
+// ─────────────────────────────────────────────────────────
+// 拠点情報（2026-09 追加）。沿革とCSRの間に H2 セクションとして表示し、
+// 拠点ごとに Google マップ（住所で検索した埋め込み地図）＋住所・電話番号・
+// Google マップへのリンクを載せる。文言はすべてコンソールから編集でき、
+// 拠点の数は「拠点の数」（追加・削除ボタン）で 1〜MAX_LOCATIONS に変更できる。
+// ─────────────────────────────────────────────────────────
+const MAX_LOCATIONS = 8;
+const LOCATIONS: { name: string; address: string; tel: string; url: string }[] = [
+  {
+    name: "本社・食品事業部・青江物流センター",
+    address: "〒700-0941 岡山県岡山市北区青江2丁目4-6",
+    tel: "本社（総務部）：086-224-5235\n食品事業部 営業部：086-232-3197\n青江物流センター：086-224-3533",
+    url: "https://maps.google.com/?cid=4078151803003502361",
+  },
+  {
+    name: "ドライアイスチーム",
+    address: "〒700-0941 岡山県岡山市北区青江2丁目3-11",
+    tel: "TEL：086-224-5236",
+    url: "https://maps.google.com/?cid=17414659884876483349",
+  },
+  {
+    name: "アイス事業部・西大寺物流センター",
+    address: "〒704-8122 岡山県岡山市東区西大寺新地150-1",
+    tel: "TEL：086-944-8833",
+    url: "https://maps.google.com/?cid=4478222050823407717",
+  },
+  {
+    name: "アイス事業部 二日市工場",
+    address: "〒700-0843 岡山県岡山市北区二日市町8番",
+    tel: "TEL：086-944-8585",
+    url: "https://maps.google.com/?cid=15526115832655768239",
+  },
+  {
+    name: "東京オフィス",
+    address: "〒101-0064 東京都千代田区神田猿楽町1丁目3-1 北村ビル403",
+    tel: "",
+    url: "https://share.google/3Mren49rAnV5kmzyC",
+  },
+];
+
+function LocationCard({ i }: { i: number }) {
+  const def = LOCATIONS[i] ?? { name: "", address: "", tel: "", url: "" };
+  const base = `company:locations.${i}`;
+  const name = txt(`${base}.name`, def.name);
+  const address = txt(`${base}.address`, def.address);
+  const tel = txt(`${base}.tel`, def.tel);
+  const url = txt(`${base}.url`, def.url);
+  // 地図の検索クエリは「〒」以降（住所部分）。拠点名は下に表示する
+  const q = address.includes("〒") ? address.slice(address.indexOf("〒")) : address;
+  return (
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="aspect-[4/3] w-full bg-secondary">
+        {q.trim() !== "" ? (
+          <iframe
+            src={`https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed&hl=ja`}
+            title={`${name || "拠点"}の地図`}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+            className="block h-full w-full border-0"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground" style={{ fontSize: 13 }}>
+            （住所を入力すると地図が表示されます）
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <h3 style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.5 }} {...ed(`${base}.name`, `拠点${i + 1} 名称`)}>
+          {name || "（拠点名）"}
+        </h3>
+        <p className="mt-3 text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${base}.address`, `拠点${i + 1} 住所`, { multiline: true })}>
+          {address || "（住所）"}
+        </p>
+        {(tel !== "" || EDIT_MODE) && (
+          <p className="mt-2 text-foreground/80" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${base}.tel`, `拠点${i + 1} 電話番号`, { multiline: true })}>
+            {tel || "（電話番号・任意）"}
+          </p>
+        )}
+        {url !== "" && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-1 text-brand"
+            style={{ fontSize: 13, fontWeight: 600 }}
+          >
+            <MapPin size={14} /> Googleマップで見る <ExternalLink size={12} />
+          </a>
+        )}
+        {EDIT_MODE && (
+          <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(`${base}.url`, `拠点${i + 1} GoogleマップURL`)}>
+            {url || "（GoogleマップのURL・任意）"}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Locations() {
+  const rep = repeatSel("company:locations.count", LOCATIONS.length, MAX_LOCATIONS, "拠点の数");
+  return (
+    <Section heat={HEAT.companyProfile}>
+      <SectionTitle en="LOCATIONS" jp="拠点情報" path="sectionEn:company.locations" />
+      <div className="mt-10 grid gap-6 tab:grid-cols-2 pc:grid-cols-3" {...rep.attrs}>
+        {Array.from({ length: MAX_LOCATIONS }, (_, i) => (
+          <LocationCard key={i} i={i} />
+        ))}
+      </div>
+    </Section>
+  );
+}
 
 export function Company() {
   return (
@@ -94,6 +209,9 @@ export function Company() {
           </div>
         </div>
       </Section>
+
+      {/* 拠点情報（沿革とCSRの間・Googleマップ付き。2026-09 追加） */}
+      <Locations />
 
       {/* CSR */}
       <Section heat={HEAT.csr}>

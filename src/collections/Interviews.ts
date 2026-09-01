@@ -92,17 +92,55 @@ export const Interviews: CollectionConfig = {
     { name: 'lead', type: 'text', required: true, label: '見出しコピー（記事タイトル）' },
     { name: 'subtitle', type: 'text', label: 'サブタイトル' },
     {
+      // 自己紹介・趣味（2026-09 追加）：記事ページのアイキャッチ（メイン画像）内、
+      // 氏名・所属の下に表示される（任意・改行可）
+      name: 'intro',
+      type: 'textarea',
+      label: '自己紹介',
+      admin: { description: '記事ページのアイキャッチ画像内（氏名・所属の下）に表示されます。任意・改行可。' },
+    },
+    {
+      name: 'hobby',
+      type: 'textarea',
+      label: '趣味',
+      admin: { description: '記事ページのアイキャッチ画像内（自己紹介の下）に「趣味：〜」として表示されます。任意。' },
+    },
+    {
       name: 'image',
       type: 'upload',
       relationTo: 'media',
       label: 'メイン画像',
-      admin: { description: '記事ページのヒーローと「人を知る」カードに表示。通常はこちらにアップロード。' },
+      admin: {
+        description:
+          '記事ページのアイキャッチと「人を知る」カードに表示。通常はこちらにアップロード。アイキャッチ動画を設定した場合は動画のポスター（静止画）として使われます（未設定なら動画の1フレーム目）。',
+      },
     },
     {
       name: 'imageSrc',
       type: 'text',
       label: 'メイン画像URL（外部/移行データ用）',
       admin: { description: '通常は上の「メイン画像」を使用。両方ある場合は「メイン画像」が優先されます。' },
+    },
+    {
+      // アイキャッチ動画（2026-09 追加）。設定すると記事ページのアイキャッチに再生ボタンが出て、
+      // クリックで画面中央に大きく再生される。「人を知る」カードには中央に再生ボタンが薄く表示される。
+      name: 'video',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'アイキャッチ動画（ファイル）',
+      filterOptions: { mimeType: { contains: 'video' } },
+      admin: {
+        description:
+          'mp4 等の動画ファイル。設定すると記事のアイキャッチに再生ボタンが表示され、クリックで画面中央に大きく再生されます。「人を知る」カードには動画の1フレーム目（メイン画像がある場合はその画像）が表示されます。',
+      },
+    },
+    {
+      name: 'videoSrc',
+      type: 'text',
+      label: 'アイキャッチ動画URL（YouTube / Vimeo / mp4）',
+      admin: {
+        description: '通常は上の「アイキャッチ動画（ファイル）」を使用。両方ある場合はファイルが優先されます。',
+      },
     },
     {
       name: 'blocks',

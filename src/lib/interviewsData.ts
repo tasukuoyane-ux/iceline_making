@@ -16,13 +16,20 @@ export interface InterviewItemData {
   years: string
   lead: string
   subtitle: string
+  /** 自己紹介（アイキャッチ内に表示・任意） */
+  intro: string
+  /** 趣味（アイキャッチ内に表示・任意） */
+  hobby: string
   image: string
+  /** アイキャッチ動画のURL（アップロードファイル or 外部URL。空なら動画なし） */
+  video: string
   category: string
   blocks: Block[]
 }
 
 export function toInterviewItem(doc: any): InterviewItemData {
   const media = typeof doc.image === 'object' && doc.image ? doc.image : null
+  const vmedia = typeof doc.video === 'object' && doc.video ? doc.video : null
   return {
     id: String(doc.slug ?? doc.id),
     name: String(doc.name ?? ''),
@@ -30,7 +37,10 @@ export function toInterviewItem(doc: any): InterviewItemData {
     years: String(doc.years ?? ''),
     lead: String(doc.lead ?? ''),
     subtitle: String(doc.subtitle ?? ''),
+    intro: String(doc.intro ?? ''),
+    hobby: String(doc.hobby ?? ''),
     image: String(media?.url || doc.imageSrc || ''),
+    video: String(vmedia?.url || doc.videoSrc || ''),
     category: String(doc.category ?? '社員インタビュー'),
     blocks: (Array.isArray(doc.blocks) ? doc.blocks : [])
       .map(toBlock)
@@ -47,7 +57,10 @@ export function fallbackInterviews(): InterviewItemData[] {
     years: String(iv.years ?? ''),
     lead: String(iv.lead ?? ''),
     subtitle: String(iv.subtitle ?? ''),
+    intro: String(iv.intro ?? ''),
+    hobby: String(iv.hobby ?? ''),
     image: String(iv.image ?? ''),
+    video: String(iv.video ?? ''),
     category: '社員インタビュー',
     blocks: toBlocks(iv.blocks ?? iv.paragraphs),
   }))
