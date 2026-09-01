@@ -65,7 +65,8 @@ const SERVICES: { to: string; title: string; body: string; imgKey?: string; imgD
 // グリッドは 4列×10行の比率指定（gridArea は "行開始 / 列開始 / 行終了 / 列終了"）。
 // PC は写真にホバーで薄くなり黒文字の説明が出る。SP はタップでオーバーレイ表示。
 // ─────────────────────────────────────────────────────────
-const COLLAGE_HEAD_AREA = "1 / 2 / 4 / 4";
+// 見出しは左右の写真の上辺（2行目）に上端を揃える
+const COLLAGE_HEAD_AREA = "2 / 2 / 4 / 4";
 const COLLAGE_TILES: { area: string; title: string; body: string; imgKey?: string; imgDefault?: string }[] = [
   { area: "2 / 1 / 6 / 2", title: "無色透明かち割り氷", body: "硬く透明で溶けにくい業務用の氷。飲み物の味を損なわず、最後まで冷たさを保ちます。", imgDefault: IMG.iceClose },
   { area: "6 / 1 / 11 / 2", title: "氷カフェ", body: "コーヒーや果汁を凍らせた氷菓。牛乳を注ぐだけで、溶けるほどに味が深まる一杯に。", imgDefault: IMG.icedCoffee },
@@ -350,22 +351,23 @@ export function Top() {
             gap: "clamp(6px, 1.2vw, 16px)",
           }}
         >
-          {/* 見出し（英語補助・H2・直下のp）。幅に比例して縮む */}
-          <div className="min-w-0 self-start" style={{ gridArea: COLLAGE_HEAD_AREA }}>
+          {/* 見出し（英語補助・H2・直下のp＝2行）。上端を左右の写真の上辺に揃え、幅に比例して縮む。
+              余白は文字サイズ比（em）にして SP でも枠に収まるようにする */}
+          <div className="min-w-0 self-start" style={{ gridArea: COLLAGE_HEAD_AREA, lineHeight: 1 }}>
             <div
               className="text-brand"
-              style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(7px, 0.95vw, 13px)", letterSpacing: "0.18em" }}
+              style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(6px, 0.95vw, 13px)", lineHeight: 1.2, letterSpacing: "0.18em" }}
               {...ed("sectionEn:top.products.en", "英語見出し（補助）")}
             >
               {txt("sectionEn:top.products.en", "PRODUCTS")}
             </div>
-            <h2 className="mt-1" style={{ fontSize: "clamp(13px, 2.2vw, 30px)", fontWeight: 700, lineHeight: 1.35 }} {...ed("sectionEn:top.products.jp", "大見出し（H2）")}>
+            <h2 style={{ marginTop: "0.25em", fontSize: "clamp(11px, 2.2vw, 30px)", fontWeight: 700, lineHeight: 1.3 }} {...ed("sectionEn:top.products.jp", "大見出し（H2）")}>
               {txt("sectionEn:top.products.jp", "商品ジャンル")}
             </h2>
             <p
-              className="mt-2 text-foreground/80"
-              style={{ fontSize: "clamp(7px, 1vw, 14px)", lineHeight: 1.8, whiteSpace: "pre-line" }}
-              {...ed("top:collage.lead", "見出し直下の文章", { multiline: true })}
+              className="text-foreground/80"
+              style={{ marginTop: "0.6em", fontSize: "clamp(6px, 1vw, 14px)", lineHeight: 1.7, whiteSpace: "pre-line" }}
+              {...ed("top:collage.lead", "見出し直下の文章（2行）", { multiline: true })}
             >
               {txt("top:collage.lead", COLLAGE_LEAD_DEFAULT)}
             </p>

@@ -85,21 +85,21 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
   // 旧「万全の物流体制」「事業の特徴」と同じ画像＋テキストの交互配置。
   // pathKey は再編前の添字ベースの編集パス（sec.0〜3）と衝突しない固有キー。
   food: [
-    {
-      en: "SUPPLY CHAIN",
-      jp: "サプライチェーン",
-      pathKey: "supply",
-      items: [{ title: "（見出し）", pending: true, image: true }],
-    },
     // 岡山県内トップシェア（2026-09 改修）：旧「事業の特徴」の1項目目を独立した
     // H2 セクションに格上げ。本文・画像は features.0 から topshare.0 へ移行済み
     // （overrides.json）。見出しはセクション見出し（H2）として表示するため項目側に
-    // H3 は置かない。
+    // H3 は置かない。サプライチェーンより上に置く（2026-09 並び替え。pathKey で編集パスは不変）。
     {
       en: "TOP SHARE",
       jp: "岡山県内トップシェア",
       pathKey: "topshare",
       items: [{ pending: true, image: true }],
+    },
+    {
+      en: "SUPPLY CHAIN",
+      jp: "サプライチェーン",
+      pathKey: "supply",
+      items: [{ title: "（見出し）", pending: true, image: true }],
     },
     {
       en: "FEATURES",

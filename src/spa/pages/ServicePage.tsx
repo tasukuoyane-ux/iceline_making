@@ -211,11 +211,12 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
         pathKey: "notes",
         items: [{ pending: true }],
       },
+      // 購入の流れ：本文の下にECサイト（別タブ）へのボタン（文言・リンク先はコンソールで編集可能）
       {
         en: "FLOW",
         jp: "購入の流れ",
         pathKey: "purchase",
-        items: [{ pending: true }],
+        items: [{ pending: true, cta: true }],
       },
       // 店舗情報（H3＋本文の組を4つ。入力されるまで公開ページでは非表示）
       {
