@@ -426,5 +426,7 @@
   "top:services.3.body": "ドライアイスの製造・加工・販売。\nお客様の用途に合わせ、必要なときに必要な量だけお届けします。",
   "contact:intro": "商品について、お取引に関するご質問など、お気軽にお問い合わせください。",
   "recruit3:about.image": "/uploads/%E3%82%A2%E3%82%A4%E3%82%B9%E3%83%A9%E3%82%A4%E3%83%B3%E3%81%A8%E3%81%AF_v1_(1).jpeg?v=54d6af8",
-  "ar:recruit3:about.image": ""
+  "ar:recruit3:about.image": "",
+  "service:dryice.sec.1.pic.1.caption": "窓口での直接購入",
+  "service:dryice.sec.1.pic.0.caption": "カット加工対応"
 }
