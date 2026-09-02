@@ -157,7 +157,7 @@
   "recruit3:stats.0.p": "明治38年（1905年）、天然氷の販売から始まりました。氷を扱う技術を軸に、食品卸や物流へと事業を広げながら、120年以上にわたって岡山の食を支えています。時代とともに扱うものは変わっても、低温で品質を守るという仕事の芯は変わっていません。",
   "recruit3:stats.0.circle": "創業 [[特大,red:120]] 年",
   "recruit3:stats.1.h3": "40期連続黒字経営",
-  "recruit3:stats.1.p": "コロナ禍の影響を受けやすい業種ですが、40期連続で黒字が続いています。自己資本比率は52.8%。この間、減給やボーナスカットをせずに来られたのは、日々の積み重ねと、支えてくださったお客様のおかげです。",
+  "recruit3:stats.1.p": "感染症の流行、物価の高騰、海外情勢の変化。外部環境が揺れるなかでも、40期連続で黒字が続いています。自己資本比率は52.8%。この間、減給やボーナスカットをせずに来られたのは、日々の積み重ねと、支えてくださったお客様のおかげです。",
   "recruit3:stats.1.circle": "[[特大,red:40]] 期",
   "recruit3:stats.2.h3": "売上高65億円",
   "recruit3:stats.2.p": "令和8年1月期の実績です（連結86億円）。氷・氷菓の製造販売と業務用食材の卸という二本柱に、冷凍冷蔵倉庫とドライアイスを加えた4事業で、着実に成長してきました。目の前の業務を一つずつ積み上げてきた結果の数字です。",
@@ -305,7 +305,7 @@
   "service:warehouse.sec.facphotos.photo.4.caption": "これはダミーテキストです。これはダミーテキストです。",
   "service:warehouse.sec.facphotos.photo.5.caption": "これはダミーテキストです。これはダミーテキストです。",
   "ar:service:warehouse.sec.facphotos.photo.3.image": "",
-  "recruit3:stats.0.image": "",
+  "recruit3:stats.0.image": "/uploads/vvbfX0mM.jpeg?v=c76f463",
   "service:dryice.sec.1.pic.0.icon": "/uploads/dryice_cut_icon-SHQZBXTAnuJtqHdspWtQWJWG0ACyKs.webp",
   "service:dryice.sec.1.pic.2.icon": "/uploads/________-rpslq8JCCtoMtGlpwVYhmhCi7gJICJ.webp",
   "service:dryice.sec.1.pic.1.icon": "/uploads/reception_counter_icon-ce1uUVRXBBClhyEEqhRkV9s5M52R1u.webp",
@@ -424,5 +424,7 @@
   "top:banner.2.image": "/uploads/ICELINE_HP_-_03_(2).jpg?v=71026dd",
   "top:services.2.body": "冷凍・冷蔵倉庫で食品をお預かりし、入出庫・在庫管理まで低温物流の基盤を支えています。\n青江・西大寺の2拠点、合計6,380トンの収容能力でお預かりします。",
   "top:services.3.body": "ドライアイスの製造・加工・販売。\nお客様の用途に合わせ、必要なときに必要な量だけお届けします。",
-  "contact:intro": "商品について、お取引に関するご質問など、お気軽にお問い合わせください。"
+  "contact:intro": "商品について、お取引に関するご質問など、お気軽にお問い合わせください。",
+  "recruit3:about.image": "/uploads/%E3%82%A2%E3%82%A4%E3%82%B9%E3%83%A9%E3%82%A4%E3%83%B3%E3%81%A8%E3%81%AF_v1_(1).jpeg?v=54d6af8",
+  "ar:recruit3:about.image": ""
 }
