@@ -395,7 +395,7 @@
   "recruit3:stats.1.image": "/uploads/40_____-fy9yrhEjDi8ITGvEWSv5Yh4QQTWTC3.webp",
   "recruit3:stats.2.image": "/uploads/40_____-DxRqSVSsAtLsBw9tJaHudLdEe6HVIo.webp",
   "top:services.2.title": "冷蔵・冷凍倉庫事業（低温物流センター）",
-  "top:services.0.body": "業務用かち割り氷から味付き氷・氷菓まで。自社工場で製造し全国の飲食店・量販店へ届けています。",
+  "top:services.0.body": "業務用かち割り氷から味付き氷・氷菓まで。\n自社工場で製造し全国の飲食店・量販店へ届けています。",
   "sectionEn:top.products.jp": "自社開発商品",
   "top:collage.lead": "現場の声から生まれた、アイスラインのオリジナル商品とサービスをご紹介します。",
   "top:collage.0.image": "/uploads/ROCKYICE.jpg?v=8512ac9",
@@ -421,5 +421,7 @@
   "top:collage.5.body": "削った氷を個包装。\n機械いらずで、かき氷もスムージーも。",
   "top:banner.0.image": "/uploads/ICELINE_HP_-_06_(1).jpg?v=3f19720",
   "top:banner.1.image": "/uploads/Photo_Album_1_-_05.jpg?v=474c7eb",
-  "top:banner.2.image": "/uploads/ICELINE_HP_-_03_(2).jpg?v=71026dd"
+  "top:banner.2.image": "/uploads/ICELINE_HP_-_03_(2).jpg?v=71026dd",
+  "top:services.2.body": "冷凍・冷蔵倉庫で食品をお預かりし、入出庫・在庫管理まで低温物流の基盤を支えています。\n食を預かる、冷たい倉庫です。",
+  "top:services.3.body": "ドライアイスの製造・加工・販売。\nお客様の用途に合わせ、必要なときに必要な量だけお届けします。"
 }
