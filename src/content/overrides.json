@@ -149,8 +149,8 @@
   "division:ice.sec.reasons.0.title": "2つの工場による生産体制",
   "division:ice.sec.reasons.0.body": "西大寺工場・二日市工場の2拠点で、合計約94t/日の生産能力を持っています。1つの工場に依存せず2拠点で生産を分散させることで、天候や季節による需要の変動があっても、安定した供給を維持できる体制を整えています。街のカフェから大手コンビニエンスストアチェーンまで、発注のロットや頻度が大きく異なるお客様に対しても、幅広く対応できるのがこの生産体制の強みです。",
   "division:ice.sec.reasons.1.title": "Only1を生み出す開発力",
-  "recruit3:mv.subcopy": "スキルより、経歴より。アイスラインはそこから始まります。",
-  "recruit3:mv.p": "失敗したとき、話せる場所があるかどうか。それが、働く場所を選ぶときに大事なことだと思っています。隠さなくていい場所にいると、人は自然と前を向ける。困ったことを声に出せる。まじめに仕事と向き合える。その環境こそが、いい仕事につながると信じています。その文化を、一歩ずつ根付かせています。ここから先を、一緒につくっていきましょう。",
+  "recruit3:mv.subcopy": "つくった​自分より、​そのままの​自分。\nそこから、​すべてが​はじまります。",
+  "recruit3:mv.p": "つ​まずいた​ときに、​話せるか。\nかくさなくていい​場所で、\nこまった​ことは、​声に​出して。\nここから​先を、\nいっしょに​つくっていきましょう。",
   "recruit3:mv.h3": "",
   "recruit3:bizlink.philosophy.body": "",
   "recruit3:stats.0.h3": "創業120年以上",
@@ -428,5 +428,13 @@
   "recruit3:about.image": "/uploads/%E3%82%A2%E3%82%A4%E3%82%B9%E3%83%A9%E3%82%A4%E3%83%B3%E3%81%A8%E3%81%AF_v1_(1).jpeg?v=54d6af8",
   "ar:recruit3:about.image": "",
   "service:dryice.sec.1.pic.1.caption": "窓口での直接購入",
-  "service:dryice.sec.1.pic.0.caption": "カット加工対応"
+  "service:dryice.sec.1.pic.0.caption": "カット加工対応",
+  "flip:top:strengthV2.ratio": "",
+  "recruit2:mv.title": "すなおな心で、一歩前へ。\n必要なのは、笑顔とまっすぐさ。",
+  "ar:division:ice.process.step.0.image": "16:9",
+  "ar:division:ice.process.step.1.image": "16:9",
+  "ar:division:ice.process.step.2.image": "16:9",
+  "ar:division:ice.process.step.3.image": "16:9",
+  "ar:division:ice.process.step.4.image": "16:9",
+  "ar:division:ice.process.step.5.image": "16:9"
 }
