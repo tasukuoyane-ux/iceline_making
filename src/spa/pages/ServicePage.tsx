@@ -6,7 +6,7 @@
 // 管理コンソールからインライン編集できる。
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
@@ -45,6 +45,10 @@ interface ServiceSectionItem {
   image?: boolean;
   /** true なら本文の下にCTAボタン（文言・リンク先はコンソールで編集可能） */
   cta?: boolean;
+  /** true なら白い枠付きカードに画像＋文章を載せる（事業部ページの card レイアウトを流用。2026-09 改修） */
+  card?: boolean;
+  /** true なら画像と文章の左右を既定と逆にする（card / image のとき） */
+  flip?: boolean;
 }
 interface ServiceSection {
   en: string;
@@ -59,6 +63,12 @@ interface ServiceSection {
   photoGrid?: boolean;
   /** true なら「ピクトグラム＋1行キャプション」のグリッド（items の title がキャプションの既定値） */
   pictos?: boolean;
+  /** true なら見出し付き項目（カード）を PC で 2 列のグリッドに並べる（2026-09 改修） */
+  cardGrid?: boolean;
+  /** 手順タイル（STEP n・写真＋工程名＋説明）の枠数。氷ページ「氷ができるまで」の流用（2026-09 改修）。
+   * 各枠の文言・写真はコンソールで編集でき、stepDefaults が工程名の既定値 */
+  steps?: number;
+  stepDefaults?: string[];
 }
 interface ServiceConfig {
   en: string;
@@ -163,7 +173,7 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
         en: "ABOUT",
         jp: "ドライアイスについて",
         pathKey: "about",
-        items: [{ title: "（見出し）", pending: true, image: true }],
+        items: [{ title: "（見出し）", pending: true, image: true, card: true }],
       },
       {
         en: "LINEUP",
@@ -174,6 +184,8 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
             title: "取り扱いサイズ・形状",
             body: "お客様のご要望に合わせてサイズをカットしてお届けします。業務用の大ロットから小口まで対応しています。",
             image: true,
+            card: true,
+            flip: true,
           },
           { pending: true },
         ],
@@ -189,6 +201,7 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
             body:
               "・低温物流・冷凍食品の輸送保冷\n・葬儀・遺体保冷\n・スイーツ・ケーキの輸送\n・その他、冷却・保冷が必要な用途全般",
             image: true,
+            card: true,
           },
         ],
       },
@@ -211,18 +224,23 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
         pathKey: "notes",
         items: [{ pending: true }],
       },
-      // 購入の流れ：本文の下にECサイト（別タブ）へのボタン（文言・リンク先はコンソールで編集可能）
+      // 購入の流れ：本文の下にECサイト（別タブ）へのボタン（文言・リンク先はコンソールで編集可能）。
+      // 2026-09 改修：手順タイル（STEP 1〜3）を追加。工程名の既定値は既存の案内文
+      // （窓口・EC／カット加工／受け取り）に沿ったもので、写真・説明はコンソールから追記できる
       {
         en: "FLOW",
         jp: "購入の流れ",
         pathKey: "purchase",
         items: [{ pending: true, cta: true }],
+        steps: 3,
+        stepDefaults: ["ご注文・お問い合わせ（窓口・電話・ECサイト）", "サイズ・数量のご相談（カット加工対応）", "お受け取り（窓口・配送）"],
       },
-      // 店舗情報（H3＋本文の組を4つ。入力されるまで公開ページでは非表示）
+      // 店舗情報（H3＋本文の組を4つ。入力されるまで公開ページでは非表示。PC では 2 列のカード）
       {
         en: "STORES",
         jp: "店舗情報",
         pathKey: "stores",
+        cardGrid: true,
         items: [
           { title: "（見出し）", pending: true },
           { title: "（見出し）", pending: true },
@@ -257,6 +275,61 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
   },
 };
 
+/** 手順タイル（STEP n・写真＋工程名＋説明）。氷ページ「氷ができるまで」の流用（2026-09 改修）。
+ * 工程名の既定値は defaults。写真・説明は未入力の間は非表示（編集モードでは枠を表示）。 */
+function ServiceSteps({ base, count, defaults }: { base: string; count: number; defaults: string[] }) {
+  const steps = Array.from({ length: count }, (_, i) => {
+    const sb = `${base}.step.${i}`;
+    return {
+      sb,
+      i,
+      title: txt(`${sb}.title`, defaults[i] ?? ""),
+      body: txt(`${sb}.body`, ""),
+      image: img(`${sb}.image`, ""),
+    };
+  });
+  const visible = steps.filter((s) => EDIT_MODE || s.title !== "" || s.body !== "" || s.image !== "");
+  if (visible.length === 0) return null;
+  const cols = Math.min(5, Math.max(1, visible.length));
+  return (
+    <div
+      className="mt-12 grid grid-cols-1 gap-x-6 gap-y-8 tab:grid-cols-3 pc:gap-x-10 pc:[grid-template-columns:repeat(var(--pcols),minmax(0,1fr))]"
+      style={{ ["--pcols" as any]: cols }}
+    >
+      {visible.map((s, n) => (
+        <div key={s.i} className="relative rounded-2xl border border-border bg-card p-4">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-secondary">
+            <ImageWithFallback
+              src={s.image || IMG_PLACEHOLDER}
+              alt={s.title || `STEP ${n + 1}`}
+              className="h-full w-full object-cover"
+              {...edImg(`${s.sb}.image`, `手順${s.i + 1} 写真`)}
+            />
+            <span
+              className="absolute left-0 top-0 bg-brand px-2.5 py-1 text-brand-foreground"
+              style={{ fontFamily: "var(--font-accent)", fontSize: 11, letterSpacing: "0.08em" }}
+            >
+              STEP {n + 1}
+            </span>
+          </div>
+          <p className="mt-3" style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${s.sb}.title`, `手順${s.i + 1} 工程名`)}>
+            {s.title || (EDIT_MODE ? "（工程名）" : "")}
+          </p>
+          {(s.body || EDIT_MODE) && (
+            <p className="mt-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${s.sb}.body`, `手順${s.i + 1} 説明`, { multiline: true })}>
+              {s.body || "（説明・任意）"}
+            </p>
+          )}
+          {/* 次の手順への矢印（PC のみ・行末では表示しない） */}
+          {n < visible.length - 1 && (n + 1) % cols !== 0 && (
+            <ChevronRight size={20} className="absolute top-[calc(50%-10px)] hidden text-brand pc:block" style={{ right: -30 }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ServicePage({ service }: { service: ServiceId }) {
   const s = SERVICES[service];
   const base = `service:${service}`;
@@ -274,7 +347,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
           className="absolute inset-0 h-full w-full object-cover"
           {...edImg(`${base}.mv.image`, "メインビジュアル画像")}
         />
-        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1400px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
+        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`${base}.mv.en`, "英語見出し（補助）")}>
               {txt(`${base}.mv.en`, s.en)}
@@ -361,7 +434,9 @@ export function ServicePage({ service }: { service: ServiceId }) {
           return (
             <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
               <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${sk}`} />
-              <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-x-6 gap-y-10 tab:grid-cols-3">
+              {/* 白い座布団（外枠）に載せる（2026-09 改修） */}
+              <div className="mt-12 rounded-2xl border border-border bg-card p-6 pc:p-10">
+              <div className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-10 tab:grid-cols-3">
                 {slots.map((p) => (
                   <div key={p.i} className="flex flex-col items-center text-center">
                     <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-secondary">
@@ -382,17 +457,23 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   </div>
                 ))}
               </div>
+              </div>
             </Section>
           );
         }
 
+        const stepsVisible = !!sec.steps;
         const visible =
-          sec.items.some((it, ii) => !it.pending || txt(`${base}.sec.${sk}.${ii}.body`, "") !== "") || EDIT_MODE;
+          sec.items.some((it, ii) => !it.pending || txt(`${base}.sec.${sk}.${ii}.body`, "") !== "") ||
+          stepsVisible ||
+          EDIT_MODE;
         if (!visible) return null;
         return (
         <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
           <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${sk}`} />
-          <div className="mt-12 space-y-10">
+          {/* 手順タイル（購入の流れ）：本文より上に置く */}
+          {sec.steps && <ServiceSteps base={`${base}.sec.${sk}`} count={sec.steps} defaults={sec.stepDefaults ?? []} />}
+          <div className={sec.cardGrid ? "mt-12 grid gap-6 pc:grid-cols-2" : "mt-12 space-y-10"}>
             {sec.items.map((it, ii) => {
               const ib = `${base}.sec.${sk}.${ii}`;
               const value = txt(`${ib}.body`, it.pending ? "" : it.body ?? "");
@@ -420,6 +501,49 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   )}
                 </div>
               );
+              // 画像と文章の左右（既定：偶数番目は画像が右。flip で反転）
+              const rtl = (ii % 2 === 1) !== !!it.flip;
+              // 白い枠付きカード（事業部ページの card レイアウトを流用。2026-09 改修）
+              if (it.card) {
+                return (
+                  <motion.div
+                    key={ii}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className="rounded-2xl border border-border bg-card p-6 pc:p-8"
+                  >
+                    <div
+                      className={`grid items-center gap-6 pc:gap-8 pc:[grid-template-columns:var(--ratio)] ${rtl ? "pc:[direction:rtl]" : ""}`}
+                      style={{ ["--ratio" as any]: ratioCols(`${ib}.ratio`, 45, false) }}
+                      {...ratioAttrs(`${ib}.ratio`, 45, false, rtl)}
+                    >
+                      <div className="[direction:ltr]">
+                        {it.title && (
+                          <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${ib}.title`, "見出し")}>
+                            {txt(`${ib}.title`, it.title)}
+                          </h3>
+                        )}
+                        <RichBody
+                          path={`${ib}.body`}
+                          text={bodyText}
+                          label="本文"
+                          className="mt-3 text-foreground/80"
+                          style={{ fontSize: 15, lineHeight: 2.05 }}
+                        />
+                        {ctaBtn}
+                      </div>
+                      <ImageWithFallback
+                        src={img(`${ib}.image`, IMG_PLACEHOLDER)}
+                        alt={it.title || sec.jp}
+                        className="aspect-[4/3] w-full rounded-xl object-cover [direction:ltr]"
+                        {...edImg(`${ib}.image`, `${it.title || sec.jp} 画像`)}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              }
               return it.image ? (
                 <motion.div
                   key={ii}
@@ -427,9 +551,9 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
-                  className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${ii % 2 ? "pc:[direction:rtl]" : ""}`}
+                  className={`grid items-center gap-8 pc:[grid-template-columns:var(--ratio)] ${rtl ? "pc:[direction:rtl]" : ""}`}
                   style={{ ["--ratio" as any]: ratioCols(`${ib}.ratio`, 60, false) }}
-          {...ratioAttrs(`${ib}.ratio`, 60, false, ii % 2 === 1)}
+          {...ratioAttrs(`${ib}.ratio`, 60, false, rtl)}
                 >
                   <div className="[direction:ltr] pc:px-12">
                     {it.title && (

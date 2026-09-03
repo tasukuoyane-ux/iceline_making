@@ -9,15 +9,19 @@ interface SectionProps {
   className?: string;
   /** コンテナ幅を内側に適用するか */
   contained?: boolean;
+  /** true なら縦余白を 20% 詰める（業務用食材「お客様の声」「環境への取り組み」等。2026-09 改修） */
+  compact?: boolean;
   id?: string;
 }
 
-// 熱量プロファイルから余白・背景を派生させるセクションラッパ
-export function Section({ heat, children, className, contained = true, id }: SectionProps) {
+// 熱量プロファイルから余白・背景を派生させるセクションラッパ。
+// メインカラムの最大幅は 1150px（2026-09 改修：従来の 1400px から約 70/85 に縮小。
+// ヘッダー・フッターは従来幅のまま。MV 等で直接 max-w を書いているページも同じ値に揃えること）
+export function Section({ heat, children, className, contained = true, compact, id }: SectionProps) {
   const s = heatStyles(heat);
   return (
-    <section id={id} className={cn(s.sectionPadding, s.surface, className)}>
-      <div className={cn(contained && "mx-auto max-w-[1400px] px-5 pc:px-8")}>{children}</div>
+    <section id={id} className={cn(compact ? s.sectionPaddingCompact : s.sectionPadding, s.surface, className)}>
+      <div className={cn(contained && "mx-auto max-w-[1150px] px-5 pc:px-8")}>{children}</div>
     </section>
   );
 }

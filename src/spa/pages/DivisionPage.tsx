@@ -788,14 +788,27 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
 }
 
 /** セクション（全項目が未入力の要確認スロットなら公開ページでは丸ごと非表示） */
-function DetailSectionBlock({ division, si, sec, heat }: { division: Division; si: number; sec: DetailSection; heat: any }) {
+function DetailSectionBlock({
+  division,
+  si,
+  sec,
+  heat,
+  compact,
+}: {
+  division: Division;
+  si: number;
+  sec: DetailSection;
+  heat: any;
+  /** true なら縦マージン（セクション余白・見出し下・項目間）を 20% 詰める */
+  compact?: boolean;
+}) {
   const sk = sec.pathKey ?? String(si);
   const visible = sec.items.some((it, ii) => !it.pending || txt(`division:${division}.sec.${sk}.${ii}.body`, "") !== "");
   if (!visible && !EDIT_MODE) return null;
   return (
-    <Section heat={heat}>
+    <Section heat={heat} compact={compact}>
       <SectionTitle en={sec.en} jp={sec.jp} path={`division:${division}.sec.${sk}`} />
-      <div className="mt-12 space-y-10">
+      <div className={compact ? "mt-[2.4rem] space-y-8" : "mt-12 space-y-10"}>
         {sec.items.map((it, ii) => (
           <DetailItemBlock key={ii} division={division} sk={sk} ii={ii} it={it} secJp={sec.jp} />
         ))}
@@ -847,7 +860,7 @@ export function DivisionPage({ division }: { division: Division }) {
           タイトル直下に旧「事業概要」の本文を置く。文章量に応じて高さが伸びる。2026-09 改修） */}
       <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
         <ImageWithFallback src={MV[division].img} alt={divTitle} loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像")} />
-        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1400px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
+        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`division:${division}.mv.en`, "英語見出し（補助）")}>
               {txt(`division:${division}.mv.en`, mv.en)}
@@ -889,18 +902,20 @@ export function DivisionPage({ division }: { division: Division }) {
           <SectionTitle en="LINEUP" jp="製品ラインナップ" path="division:ice.lineup" />
           {/* 旧・先頭の「ドライアイス」カテゴリ（ECサイト導線付き）は 2026-09 改修で削除。
               ドライアイスは「ドライアイスの販売」ページ（/dryice）で案内する */}
-          <div className="mt-12 space-y-16">
+          {/* 見出し以外のコンテンツを白い座布団に載せ、業務用食材「取り扱い商品カテゴリ」と同じ外枠を付ける（2026-09 改修） */}
+          <div className="mt-12 rounded-2xl border border-border bg-card p-6 pc:p-8">
+          <div className="space-y-16">
             {ICE_CATEGORIES.map((cat, ci) => (
               <div key={ci}>
                 <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`ice:lineup.${ci}.name`, "カテゴリ名")}>
                   {txt(`ice:lineup.${ci}.name`, cat.name)}
                 </h3>
-                <p className="mt-5 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.desc`, "カテゴリ説明", { multiline: true })}>
+                <p className="mt-5 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.desc`, "カテゴリ説明", { multiline: true })}>
                   {txt(`ice:lineup.${ci}.desc`, cat.desc)}
                 </p>
                 <div className="mt-8 grid gap-8 pc:grid-cols-[1fr_2fr]">
                   {/* 規格一覧 */}
-                  <div className="rounded-2xl border border-border bg-card p-6">
+                  <div className="rounded-2xl border border-border bg-secondary/40 p-6">
                     <p className="text-muted-foreground" style={{ fontSize: 12, letterSpacing: "0.08em" }}>規格一覧</p>
                     <p className="mt-3" style={{ fontSize: 14, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.skus`, "規格一覧", { multiline: true })}>
                       {txt(`ice:lineup.${ci}.skus`, cat.skus)}
@@ -915,6 +930,7 @@ export function DivisionPage({ division }: { division: Division }) {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         </Section>
       )}
@@ -1039,9 +1055,17 @@ export function DivisionPage({ division }: { division: Division }) {
         </Section>
       )}
 
-      {/* 商品一覧より下のセクション（お客様の声・環境への取り組み） */}
+      {/* 商品一覧より下のセクション（お客様の声・環境への取り組み）。
+          業務用食材ではコンテンツの縦マージンを 20% 詰める（2026-09 改修） */}
       {DETAIL_POST[division].map((sec, si) => (
-        <DetailSectionBlock key={si} division={division} si={si + 10} sec={sec} heat={si % 2 ? reasonHeat : bizHeat} />
+        <DetailSectionBlock
+          key={si}
+          division={division}
+          si={si + 10}
+          sec={sec}
+          heat={si % 2 ? reasonHeat : bizHeat}
+          compact={division === "food"}
+        />
       ))}
 
       {/* よくあるご質問（回答が未確定の設問は公開ページでは非表示） */}

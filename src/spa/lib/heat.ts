@@ -52,11 +52,22 @@ const SECTION_PADDING: Record<HeatLevel, string> = {
   E: "py-28 tab:py-40",
 };
 
+// 上の 80%（Section の compact 指定時。2026-09 改修）
+const SECTION_PADDING_COMPACT: Record<HeatLevel, string> = {
+  A: "py-[2.8rem] tab:py-[3.2rem]",
+  B: "py-[3.2rem] tab:py-16",
+  C: "py-16 tab:py-[4.8rem]",
+  D: "py-[4.8rem] tab:py-[6.4rem]",
+  E: "py-[5.6rem] tab:py-32",
+};
+
 export interface HeatStyles {
   /** 要素の角丸クラス */
   radius: string;
   /** セクションの縦余白クラス */
   sectionPadding: string;
+  /** セクションの縦余白クラス（20% 詰めた版） */
+  sectionPaddingCompact: string;
   /** 背景クラス（淡泊な白〜リッチなグレー/ダーク） */
   surface: string;
   /** 主語の人称ヒント（コピー選択の指針） */
@@ -82,6 +93,7 @@ export function heatStyles(p: HeatProfile): HeatStyles {
   return {
     radius: ROUNDNESS[p.roundness],
     sectionPadding: SECTION_PADDING[p.emotion],
+    sectionPaddingCompact: SECTION_PADDING_COMPACT[p.emotion],
     surface,
     voice,
     motion: Math.min(1, rank(p.emotion) / 4 + rank(p.layout) / 8),

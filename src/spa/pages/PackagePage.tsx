@@ -99,7 +99,7 @@ export function PackagePage() {
     <>
       {/* ヘッダー（事業ページのMVよりコンパクトな帯） */}
       <section className="relative w-full overflow-hidden bg-ink">
-        <div className="mx-auto flex min-h-[240px] max-w-[1400px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8">
+        <div className="mx-auto flex min-h-[240px] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:package.mv", "英語見出し（補助）")}>
               {txt("sectionEn:package.mv", "RECOMMENDED PACKAGE")}

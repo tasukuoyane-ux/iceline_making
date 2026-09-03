@@ -10,7 +10,7 @@ export function RecipeDetail() {
 
   if (!recipe) {
     return (
-      <div className="mx-auto max-w-[1400px] px-5 py-32 text-center">
+      <div className="mx-auto max-w-[1150px] px-5 py-32 text-center">
         <p>レシピが見つかりませんでした。</p>
         <Link to="/ice" className="mt-4 inline-block text-brand">アイス事業部へ戻る</Link>
       </div>

@@ -128,7 +128,7 @@ export function Company() {
       <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
         <ImageWithFallback src={IMG.warehouse} alt="会社情報" className="absolute inset-0 h-full w-full object-cover opacity-70" {...edImg("images:IMG.warehouse")} />
         <div className="absolute inset-0 bg-ink/50" />
-        <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col items-center justify-center px-5 text-center pc:px-8">
+        <div className="relative z-10 mx-auto flex h-full max-w-[1150px] flex-col items-center justify-center px-5 text-center pc:px-8">
           <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:company.mv", "英語見出し（補助）")}>{txt("sectionEn:company.mv", "COMPANY")}</p>
           <h1 className="mt-3 text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed("company:hero.title", "会社情報")}>{txt("company:hero.title", "会社情報")}</h1>
         </div>
@@ -156,7 +156,7 @@ export function Company() {
 
       {/* 企業理念 */}
       <Section heat={HEAT.philosophy} contained={false}>
-        <div className="mx-auto max-w-[1400px] px-5 pc:px-8">
+        <div className="mx-auto max-w-[1150px] px-5 pc:px-8">
           <SectionTitle en="PHILOSOPHY" jp="企業理念" align="center" path="sectionEn:company.philosophy" />
           <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed("sections:philosophy.body")}>
             {PHILOSOPHY.body}
