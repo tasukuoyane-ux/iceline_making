@@ -1011,6 +1011,10 @@ function JobsSection() {
     setSearchParams(next);
   };
   const openJob = jobs.find((j) => j.id === openId) ?? null;
+  // 部門ピルの幅を一覧内で最長の部門名に揃え、職種名の文頭が全行で同じX位置に並ぶようにする（2026-09 改修）。
+  // 部門名は CMS の自由入力（全角想定）なので、文字数×1em＋左右パディング分を最小幅にする
+  const deptChars = Math.max(4, ...jobs.map((j) => (j.dept || "").length));
+  const deptMinWidth = `calc(${deptChars}em + 1.5rem)`;
 
   return (
     <Sec id="jobs" className="scroll-mt-20">
@@ -1034,7 +1038,10 @@ function JobsSection() {
               >
                 {/* ピルの色は職種の分類（CMS「採用」タブの「分類」）で決まる：
                     食品事業部=赤／アイス事業部=青／総務部=グレー／未分類=黒（2026-09 改修） */}
-                <span className="rounded-full px-3 py-1 text-white" style={{ background: jobGroupColor(j.group), fontSize: 12, fontWeight: 700 }}>
+                <span
+                  className="shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-center text-white"
+                  style={{ background: jobGroupColor(j.group), fontSize: 12, fontWeight: 700, minWidth: deptMinWidth }}
+                >
                   {j.dept}
                 </span>
                 <span style={{ fontSize: "clamp(16px, 2vw, 19px)", fontWeight: 800, color: PAL.ink }}>{j.title}</span>
