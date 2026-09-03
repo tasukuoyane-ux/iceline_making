@@ -70,16 +70,28 @@ export interface CommitFile {
   encoding: "utf-8" | "base64";
 }
 
+/** リポジトリからファイルを削除する指定（/admin のメディア削除で使用） */
+export interface DeleteFile {
+  path: string;
+  delete: true;
+}
+
 /**
  * 複数ファイルを1コミットでブランチ先端に積む（= push。Vercel の自動デプロイがトリガーされる）。
  * 同じパスが既にあれば上書きになる。ref 更新の競合（422/409）は最大4回まで再試行。
+ * `{ path, delete: true }` を渡すとそのファイルを削除する。
  */
-export async function commitFiles(files: CommitFile[], message: string): Promise<{ sha: string }> {
+export async function commitFiles(files: (CommitFile | DeleteFile)[], message: string): Promise<{ sha: string }> {
   const { token, owner, repo, branch } = ghConfig();
 
   // 1. 各ファイルの blob を作成（blob は親コミットに依存しないので再試行時も使い回せる）
-  const tree: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
+  //    削除は tree エントリの sha を null にする（Git Data API の仕様）
+  const tree: { path: string; mode: "100644"; type: "blob"; sha: string | null }[] = [];
   for (const f of files) {
+    if ("delete" in f) {
+      tree.push({ path: f.path, mode: "100644", type: "blob", sha: null });
+      continue;
+    }
     const blob = await gh(`/repos/${owner}/${repo}/git/blobs`, token, {
       method: "POST",
       body: JSON.stringify({ content: f.content, encoding: f.encoding }),
@@ -121,4 +133,24 @@ export async function commitFiles(files: CommitFile[], message: string): Promise
     }
   }
   throw lastErr instanceof Error ? lastErr : new Error("GitHub へのコミットに失敗しました（競合の再試行上限）");
+}
+
+/**
+ * リポジトリ上のファイル（本番ブランチ先端）を取得する。無ければ null。
+ * /admin でアップロードしたメディアが、まだデプロイに含まれていない間の配信に使う
+ * （src/storage/postsStorage.ts 参照）。Contents API の raw 取得は 100MB まで対応。
+ */
+export async function fetchRepoFile(path: string): Promise<Buffer | null> {
+  const { token, owner, repo, branch } = ghConfig();
+  const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+  const res = await fetch(`${GH}/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github.raw+json",
+      "User-Agent": "iceline-console",
+    },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new GhError(res.status, `GitHub API エラー (${res.status}): ${await res.text()}`);
+  return Buffer.from(await res.arrayBuffer());
 }

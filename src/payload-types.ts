@@ -207,7 +207,7 @@ export interface News {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * 記事の本文中で使う画像と、採用記事のアイキャッチ動画（mp4 等）。
+ * 記事の本文中で使う画像と、採用記事のアイキャッチ動画（mp4 等）。1ファイル 4MB まで。4MB を超える動画はエンジニアに依頼して public/videos/ に配置し、「アイキャッチ動画URL」欄に /videos/ファイル名.mp4 を入力してください。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".

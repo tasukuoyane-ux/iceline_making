@@ -2,8 +2,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { en } from '@payloadcms/translations/languages/en'
 import { ja } from '@payloadcms/translations/languages/ja'
 import { buildConfig } from 'payload'
@@ -13,26 +13,10 @@ import { Interviews } from './collections/Interviews'
 import { Media } from './collections/Media'
 import { News } from './collections/News'
 import { Users } from './collections/Users'
+import { postsStorageAdapter } from './storage/postsStorage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-/**
- * Blob の read-write トークンを名前を問わず探す。
- * Vercel はストア名によって `<ストア名>_READ_WRITE_TOKEN` で注入することがある。
- */
-function findBlobToken(): string | undefined {
-  const direct = process.env.BLOB_READ_WRITE_TOKEN
-  if (direct?.startsWith('vercel_blob_rw_')) return direct
-  for (const [key, value] of Object.entries(process.env)) {
-    if (/READ_WRITE_TOKEN$/.test(key) && value?.startsWith('vercel_blob_rw_')) {
-      return value
-    }
-  }
-  return undefined
-}
-
-const blobToken = findBlobToken()
 
 // 本番（Vercel）で DB（Neon）が接続済みなのに PAYLOAD_SECRET が無い場合は起動を止める。
 // プレースホルダーのまま稼働すると推測可能な鍵でセッション署名・暗号化が行われてしまうため。
@@ -43,6 +27,11 @@ if (process.env.VERCEL && process.env.POSTGRES_URL && !process.env.PAYLOAD_SECRE
     'PAYLOAD_SECRET が未設定です。Vercel の Environment Variables に設定してください（openssl rand -hex 32 等で生成）。',
   )
 }
+
+// メディア（/admin の記事添付）の 1 ファイルあたりの上限。
+// Vercel の関数はリクエスト本文が約 4.5MB までなので、それより少し小さくしておく
+// （超えると Vercel 側で 413 になり、管理画面には分かりにくいエラーしか出ない）。
+const MEDIA_MAX_BYTES = 4 * 1024 * 1024
 
 export default buildConfig({
   // 本番では必ず PAYLOAD_SECRET を設定すること（.env.example 参照）。
@@ -76,13 +65,21 @@ export default buildConfig({
     meta: { titleSuffix: ' - アイスライン 管理' },
   },
 
+  upload: {
+    limits: { fileSize: MEDIA_MAX_BYTES },
+    abortOnLimit: true,
+    responseOnLimit: 'ファイルは 1 つ 4MB までです。画像は縮小してからアップロードしてください。',
+  },
+
   plugins: [
-    vercelBlobStorage({
-      enabled: Boolean(blobToken),
-      collections: { media: true },
-      token: blobToken,
-      // Vercel の関数はボディ約4.5MBまでなので、ブラウザから Blob へ直接置く。
-      clientUploads: true,
+    // メディアの実体は Vercel Blob ではなく、リポジトリの public/posts/ に GitHub 経由で
+    // コミットして /posts/<ファイル名> で配信する（2026-09 改修。src/storage/postsStorage.ts）。
+    // disablePayloadAccessControl: Media は誰でも閲覧可（access.read = true）なので、
+    // Payload の /api/media/file/… を経由せず静的 URL を直接返す。
+    cloudStoragePlugin({
+      collections: {
+        media: { adapter: postsStorageAdapter, disablePayloadAccessControl: true },
+      },
     }),
   ],
 
