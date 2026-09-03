@@ -139,7 +139,20 @@ export function EdImg({ path, label, className, alt = "" }: { path: string; labe
 }
 
 /** セクション見出し（英字ピル ＋ 日本語見出し） */
-export function Head({ base, en, jp, center }: { base: string; en: string; jp: string; center?: boolean }) {
+export function Head({
+  base,
+  en,
+  jp,
+  center,
+  color = PAL.ink,
+}: {
+  base: string;
+  en: string;
+  jp: string;
+  center?: boolean;
+  /** H2 の文字色（採用ページは背景動画の上に載るため #fff を渡す。2026-09 改修） */
+  color?: string;
+}) {
   return (
     <div className={center ? "text-center" : ""}>
       <Ed
@@ -156,7 +169,7 @@ export function Head({ base, en, jp, center }: { base: string; en: string; jp: s
         def={jp}
         label="見出し"
         className="mt-4 block"
-        style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}
+        style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color, lineHeight: 1.3 }}
       />
     </div>
   );
@@ -171,7 +184,18 @@ export function Sec({ children, className = "", id }: { children: React.ReactNod
   );
 }
 
-export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: string; extra?: React.ReactNode; bare?: boolean } = {}) {
+export function Hero({
+  bandColor = "#1ec8dd",
+  extra,
+  bare,
+  align = "center",
+}: {
+  bandColor?: string;
+  extra?: React.ReactNode;
+  bare?: boolean;
+  /** MV内テキストの揃え。left ならコンテンツ幅（max 1200px）の左端に揃える（採用ページ・2026-09 改修） */
+  align?: "left" | "center";
+} = {}) {
   // ICELINEの形に切り抜かれた帯（色はページごとに指定可能）
   const iceKnock = makeIceKnock(bandColor);
   // 背後のスライド画像（差し替え可・4枚）。複数枚が継ぎ足されながら流れ、ICELINEの穴から覗く。
@@ -235,12 +259,17 @@ export function Hero({ bandColor = "#1ec8dd", extra, bare }: { bandColor?: strin
           r2-mv-copy は採用3のイントロ演出（テキストのブラーイン）が参照する。
           bare（採用3・背景動画の上）では文字色 #fff・透明度95%・薄い黒影で読みやすくする。
           リッチ本文（RichBody）なので [[red:文字]] [[特大:文字]] 等の行内トークンが使える */}
-      <div className="r2-mv-copy relative z-10 px-6 text-center">
+      <div
+        className={
+          "r2-mv-copy relative z-10 px-6 " +
+          (align === "left" ? "mx-auto w-full max-w-[1200px] text-left pc:px-12" : "text-center")
+        }
+      >
         <RichBody
           path="recruit2:mv.title"
           text={txt("recruit2:mv.title", RECRUIT_MV.main)}
           label="キャッチコピー"
-          className="mx-auto max-w-[20em]"
+          className={align === "left" ? "max-w-[20em]" : "mx-auto max-w-[20em]"}
           style={{
             color: bare ? "#fff" : "#0b2530",
             opacity: bare ? 0.95 : undefined,

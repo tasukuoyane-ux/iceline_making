@@ -290,7 +290,7 @@ function About3() {
     <Sec>
       <div className="mx-auto max-w-3xl text-center">
         <h2
-          style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, lineHeight: 1.4, color: PAL.ink }}
+          style={{ fontSize: "clamp(22px, 3vw, 30px)", fontWeight: 900, lineHeight: 1.4, color: "#fff" }}
           {...ed("recruit3:about.title", "見出し（H2）")}
         >
           {txt("recruit3:about.title", "アイスラインとは？")}
@@ -347,7 +347,7 @@ function Culture() {
   );
   return (
     <Sec>
-      <Head base="recruit3:culture" en="CULTURE" jp="アイスラインのカルチャー" />
+      <Head base="recruit3:culture" en="CULTURE" jp="アイスラインのカルチャー" color="#fff" />
       <ol
         className="mt-12 divide-y divide-black/10 overflow-hidden rounded-[0.75rem] bg-white/85 shadow-[0_16px_36px_rgba(15,42,51,0.10)] backdrop-blur"
         {...rep.attrs}
@@ -393,7 +393,7 @@ function Work3() {
         {/* 文言（H2＋強調p＋通常p） */}
         <div>
           <h2
-            style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: PAL.ink, lineHeight: 1.3 }}
+            style={{ fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 900, color: "#fff", lineHeight: 1.3 }}
             {...ed("recruit3:work.title", "アイスラインの仕事 見出し（H2）")}
           >
             {txt("recruit3:work.title", "アイスラインの仕事")}
@@ -546,7 +546,7 @@ function People3D() {
 
       {/* セクション見出し＋リード（カルーセルの下に表示。2026-09 改修） */}
       <div className="mt-10">
-        <Head base="recruit3:people" en="PEOPLE" jp="人を知る" center />
+        <Head base="recruit3:people" en="PEOPLE" jp="人を知る" center color="#fff" />
         <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
           <Ed as="span" path="recruit3:people.lead" def="働く社員のインタビューを、カードをめくるように読めます。" label="人を知る リード" />
         </p>
@@ -1014,7 +1014,7 @@ function JobsSection() {
 
   return (
     <Sec id="jobs" className="scroll-mt-20">
-      <Head base="recruit3:jobs" en="RECRUIT" jp="募集職種一覧" center />
+      <Head base="recruit3:jobs" en="RECRUIT" jp="募集職種一覧" center color="#fff" />
       <p className="mt-4 text-center" style={{ fontSize: 14, color: PAL.ink }}>
         <Ed as="span" path="recruit3:jobs.lead" def="職種名を選ぶと、業務内容・PRポイント・諸条件・選考の流れなどの詳細をご覧いただけます。" label="募集職種 リード" />
       </p>
@@ -1056,6 +1056,7 @@ function JobsSection() {
 
 // メインビジュアルのキャッチコピー下に表示する追記。未入力の間は公開ページでは非表示。
 // 背景動画の上に載るため、文字色 #fff・透明度95%・薄い黒影で読みやすくする（2026-08 改修）
+// MV内の文字はキャッチコピーとともに左揃え（2026-09 改修）
 function HeroExtra() {
   const sub = txt("recruit3:mv.subcopy", "");
   const h3 = txt("recruit3:mv.h3", "");
@@ -1065,7 +1066,7 @@ function HeroExtra() {
   const ink = "#fff";
   // リッチ本文（RichBody）なので [[red:文字]] [[特大:文字]] 等の行内トークンが使える
   return (
-    <div className="mx-auto mt-5 max-w-[34em]" style={{ opacity: 0.95 }}>
+    <div className="mt-5 max-w-[34em] text-left" style={{ opacity: 0.95 }}>
       {(sub !== "" || EDIT_MODE) && (
         <RichBody
           path="recruit3:mv.subcopy"
@@ -1112,7 +1113,7 @@ function Stats3() {
   const rep = repeatSel("recruit3:stats.count", 3, MAX_STATS, "数字タイルの数");
   return (
     <Sec>
-      <Head base="recruit3:stats.head" en="COMPANY DECK" jp="数字で見るアイスライン" />
+      <Head base="recruit3:stats.head" en="COMPANY DECK" jp="数字で見るアイスライン" color="#fff" />
       <div className="mt-10 space-y-6" {...rep.attrs}>
         {Array.from({ length: MAX_STATS }, (_, i) => {
           const base = `recruit3:stats.${i}`;
@@ -1249,7 +1250,7 @@ function Deck3() {
   if (slides.length === 0 && !EDIT_MODE) return null;
   return (
     <Sec>
-      <Head base="recruit3:deck.head" en="COMPANY DECK" jp="カンパニーデック" center />
+      <Head base="recruit3:deck.head" en="COMPANY DECK" jp="カンパニーデック" center color="#fff" />
       {/* 見出し下の一文（「人を知る」のリードと同様。未入力の間は公開ページでは非表示。2026-09 改修） */}
       {(lead !== "" || EDIT_MODE) && (
         <p
@@ -1351,7 +1352,7 @@ function Videos3() {
   useBodyLock(playing !== null);
   return (
     <Sec>
-      <Head base="recruit3:videos.head" en="MOVIE" jp="動画" center />
+      <Head base="recruit3:videos.head" en="MOVIE" jp="動画" center color="#fff" />
       <div className="mx-auto mt-10 grid w-full max-w-[900px] grid-cols-2 gap-4 pc:gap-5">
         {VIDEOS.map((v) => (
           <button
@@ -1442,6 +1443,35 @@ const MV_TYPE_OPTS = [
   { value: "video", label: "動画1本" },
   { value: "slideshow", label: "画像スライドショー" },
 ];
+// キャッチコピーの袋文字（縁）の色。コンソールのプルダウンで切替（2026-09 改修）。
+// 見た目の縁は 2px（-webkit-text-stroke は文字の輪郭を中心に描かれるため 4px を指定し、
+// paint-order で塗りを縁の上に重ねて、文字の外側に 2px だけ縁が出るようにする）。
+const MV_STROKE_OPTS = [
+  { value: "none", label: "縁なし" },
+  { value: "ink", label: "紺（既定）" },
+  { value: "black", label: "黒" },
+  { value: "white", label: "白" },
+  { value: "red", label: "赤" },
+  { value: "teal", label: "ティール" },
+  { value: "blue", label: "水色" },
+];
+const MV_STROKE_COLORS: Record<string, string> = {
+  ink: PAL.ink,
+  black: "#000",
+  white: "#fff",
+  red: PAL.red,
+  teal: PAL.teal,
+  blue: PAL.blue,
+};
+const MV_STROKE_CSS = Object.entries(MV_STROKE_COLORS)
+  .map(
+    ([k, c]) =>
+      `[data-mv-stroke][data-edit-selected="${k}"] .r2-mv-copy [data-edit="recruit2:mv.title"],` +
+      `[data-mv-stroke]:not([data-edit-selected])[data-edit-value="${k}"] .r2-mv-copy [data-edit="recruit2:mv.title"]{` +
+      `-webkit-text-stroke:4px ${c};paint-order:stroke fill;text-shadow:none!important}`
+  )
+  .join("\n");
+
 const MV_TYPE_CSS = ["hero", "image", "video", "slideshow"]
   .map(
     (t) =>
@@ -1586,6 +1616,8 @@ export function Recruit3() {
   // MV以下のコンテンツ領域（背景動画のスクロール進行の基準）
   const areaRef = useRef<HTMLDivElement>(null);
   const mvType = txt("recruit3:mv.type", "hero");
+  // キャッチコピーの縁の色（袋文字）。既定は紺
+  const strokeColor = txt("recruit3:mv.strokeColor", "ink");
 
   // イントロ演出（背景動画1）：ヒーローMVのときだけ有効。
   // 編集モードではスクロールロックが編集の妨げになるため無効化し、
@@ -1610,6 +1642,7 @@ export function Recruit3() {
       {(!HAS_BG || bgFailed) && <PageBg />}
 
       <style>{MV_TYPE_CSS}</style>
+      <style>{MV_STROKE_CSS}</style>
       <style>{INTRO_CSS}</style>
 
       {/* メインビジュアル以下：スクロール追随の背景動画（fixed）＋新構成のコンテンツ。
@@ -1631,8 +1664,13 @@ export function Recruit3() {
           {/* 1. メインビジュアル（種類はコンソールのプルダウンで切替） */}
           <div data-mv-root="1" {...edSel("recruit3:mv.type", "メインビジュアルの種類", MV_TYPE_OPTS, mvType)}>
             {(EDIT_MODE || mvType === "hero") && (
-              <div data-mv-variant="hero">
-                <Hero bare extra={<HeroExtra />} />
+              <div
+                data-mv-variant="hero"
+                data-mv-stroke="1"
+                {...edSel("recruit3:mv.strokeColor", "キャッチコピーの縁の色", MV_STROKE_OPTS, strokeColor)}
+              >
+                {/* MV内の文字は左揃え・キャッチコピーは 2px の袋文字（2026-09 改修） */}
+                <Hero bare align="left" extra={<HeroExtra />} />
               </div>
             )}
             {(EDIT_MODE || mvType === "image") && (

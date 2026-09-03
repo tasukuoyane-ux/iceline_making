@@ -236,9 +236,10 @@ export function Top() {
               {news.slice(0, 4).map((n) => (
                 <li key={n.id}>
                   <Link to={`/news/${n.id}`} className="flex flex-col gap-1 py-4 transition-colors hover:text-brand tab:flex-row tab:items-center tab:gap-6">
-                    <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`news:${n.id}:date`)}>{n.date}</span>
-                    <span className="inline-flex w-fit bg-secondary px-3 py-0.5 text-muted-foreground" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{n.category}</span>
-                    <span className="flex items-center gap-2" style={{ fontSize: 15 }}>
+                    {/* 日付・カテゴリは固定幅（横並び時）にして、記事名の文頭位置を全行で揃える（2026-09 改修） */}
+                    <span className="shrink-0 text-muted-foreground tab:w-[6.5em]" style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }} {...ed(`news:${n.id}:date`)}>{n.date}</span>
+                    <span className="inline-flex w-fit shrink-0 justify-center bg-secondary px-3 py-0.5 text-muted-foreground tab:w-[6.5em]" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{n.category}</span>
+                    <span className="flex min-w-0 flex-1 items-center gap-2" style={{ fontSize: 15 }}>
                       <span {...ed(`news:${n.id}:title`)}>{n.title}</span>
                       {hasVideo(n.blocks) && <InlineMovieTag />}
                     </span>
@@ -290,7 +291,8 @@ export function Top() {
       </Section>
 
       {/* 事業内容（白カードに文章と画像を横並び。カードごとに左右が交互に入れ替わる。
-          左右はコンソールの「左右入れ替え」、幅は「画像の幅」スライダーでも調整できる。2026-09 改修） */}
+          左右はコンソールの「左右入れ替え」、幅は「画像の幅」スライダーでも調整できる。2026-09 改修。
+          カードのシャドウは無し（枠線のみ）） */}
       <Section heat={HEAT.topGenre}>
         <SectionTitle en="OUR SERVICES" jp="事業内容" path="sectionEn:top.services" />
         <div className="mt-10 flex flex-col gap-6">
@@ -299,7 +301,7 @@ export function Top() {
             const title = txt(`${base}.title`, s.title);
             const rtl = i % 2 === 1;
             return (
-              <div key={s.to} className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm pc:p-10">
+              <div key={s.to} className="rounded-2xl border border-black/10 bg-white p-6 pc:p-10">
                 <div
                   className={`grid items-center gap-6 pc:gap-12 pc:[grid-template-columns:var(--ratio)] ${rtl ? "pc:[direction:rtl]" : ""}`}
                   style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 42, false) }}
