@@ -4,8 +4,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Content, getValueByPath, setValueByPath } from "./content";
 import { Select, TextArea, TextInput, VideoPathHint } from "./ui";
 import { ImageField } from "./ImageField";
+import { VideoUploadButton } from "./VideoUploadButton";
 
-// 動画ファイルのアップロードボタンは 2026-09 改修で廃止（動画は public/videos/ に配置）。
+// 動画ファイルのアップロードボタンは VideoUploadButton.tsx（2026-09-03 復活・Vercel Blob へ直接アップロード）。
 
 // アニメーションの選択肢（値は "種類|開始オフセットpx|移動量px" で overrides の anim:<パス> に保存）
 const ANIM_OPTS: { value: string; label: string }[] = [
@@ -382,8 +383,13 @@ export function PageFields({
         ) : (
           <TextInput value={val(f)} onChange={(e) => onChange(setValueByPath(draft, f.path, e.target.value))} />
         )}
-        {/* 動画URLフィールド：配置先の案内 */}
-        {f.kind === "text" && f.video && <VideoPathHint />}
+        {/* 動画URLフィールド：ファイルの直接アップロード＋案内 */}
+        {f.kind === "text" && f.video && (
+          <div className="mt-1.5 space-y-1">
+            <VideoUploadButton onUploaded={(url) => onChange(setValueByPath(draft, f.path, url))} />
+            <VideoPathHint />
+          </div>
+        )}
       </div>
     );
   }

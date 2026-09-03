@@ -31,11 +31,12 @@
               → /api/publish が src/content/*.json を GitHub へコミット
               → Vercel が自動で再ビルド & 本番反映
         画像アップロードは /api/upload 経由で public/uploads/ に GitHub コミット
+        動画アップロードはブラウザから Vercel Blob へ直接（/api/upload-video がトークン発行）
 
 /admin（Payload CMS。アカウントは /console とは別に DB 管理）
   └─ お知らせ記事（日付・カテゴリ・タイトル・本文ブロック）→ Neon (Postgres) に保存
         → 公開サイトは /api/news（＋HTML埋め込み）経由で表示。公開すると即時反映
-        記事の画像・動画（メディア）は public/posts/ に GitHub コミット → /posts/… で配信
+        記事の画像・動画（メディア）はブラウザから Vercel Blob へ直接アップロード
 
 /console/check（/console と同じアカウント）
   ├─ 自動検査: /api/check が環境変数・HTTP出力・DB・GitHubトークンを検査
@@ -48,12 +49,15 @@
   一緒に公開される。動画（採用ページ背景動画・MV動画・動画一覧の mp4 等）は容量が大きいため
   コンソールからはアップロードできず、エンジニアが `public/videos/` に置いて（1本 50MB 以下推奨、
   100MB 超は GitHub が拒否）URL 欄に `/videos/ファイル名.mp4` を入力する。
-- **/admin の記事添付（メディア）も GitHub 経由（2026-09 改修）**: /admin でアップロードした画像・動画は
-  `public/posts/` にコミットされ、`/posts/<ファイル名>` で配信される（`src/storage/postsStorage.ts`）。
-  このコミットはデプロイを伴い（数分）、デプロイ完了までは `/posts/[name]` ルートが GitHub から
-  取得して配信するので、アップロード直後から記事に表示される。1ファイル 4MB まで（Vercel の関数の
-  本文上限）。4MB を超える動画は `public/videos/` に手動配置し、「アイキャッチ動画URL」欄に入力する。
-  Vercel Blob は使わなくなった（Blob 上の旧ファイルの取り込みは `pnpm migrate:blob`、Blob ブロック解除後に実行）。
+- **動画アップロードの復活（2026-09-03、Vercel Pro 化に伴う）**: /console の各動画URL欄に
+  「動画ファイルをアップロード」ボタンがあり、ファイルはブラウザから **Vercel Blob** へ直接送られる
+  （`/api/upload-video` はトークン発行のみ。関数の本文上限に縛られず、512MB まで）。URL は即時有効で
+  デプロイ不要。`public/videos/` のパスや YouTube・Vimeo の共有URLも従来どおり使える。
+- **/admin の記事添付（メディア）**: 本番では Vercel Blob（ブラウザから直接アップロード。動画も可）。
+  Blob トークンが無い環境では `public/posts/` への保存にフォールバックする
+  （`src/storage/postsStorage.ts`。Vercel 上なら GitHub コミット、ローカルなら直接書き込み。
+  その場合は 1ファイル 4MB まで）。
+  Blob 上の旧ファイルを public/uploads/ に取り込みたいときは `pnpm migrate:blob`。
 - ページの文言・画像の実データは `src/content/*.json`
   （`videos.json` / `interviews.json` / `images.json` / `sections.json` / `overrides.json` /
   `profileSlides.json` / `contact.json`）。
@@ -93,10 +97,12 @@ node scripts/hash-password.mjs <社員ID> <表示名> <パスワード>
 本番リポジトリの **Contents 書き込み権限** を持つトークンを発行します
 （Fine-grained personal access token 推奨：対象リポジトリの Contents = Read and write）。
 
-### 4. 画像・メディアの置き場
+### 4. Vercel Blob ストアを作成（動画・/admin の記事添付用）
 
-追加の設定は不要です。/console の画像は `public/uploads/`、/admin の記事添付は `public/posts/` に、
-上記 3 の GitHub トークンでコミットされます（Vercel Blob は 2026-09 に廃止）。
+Vercel ダッシュボード → Storage → Blob で **public** ストアを作成し、プロジェクトにリンクします。
+`BLOB_READ_WRITE_TOKEN` は自動で注入されます（Pro プラン。Hobby では利用上限を超えるとストアが
+ブロックされ、Blob 上の画像・動画がすべて表示されなくなるので注意）。
+/console の画像は Blob ではなく `public/uploads/` に上記 3 の GitHub トークンでコミットされます。
 
 ### 5. Neon (Postgres) を接続（/admin 用）
 
@@ -116,6 +122,7 @@ Vercel ダッシュボード → Storage → Neon を Connect します。
 | `GITHUB_OWNER` | リポジトリのオーナー（例: `tasukuoyane-ux`） |
 | `GITHUB_REPO` | リポジトリ名 |
 | `GITHUB_BRANCH` | 本番ブランチ（既定 `main`） |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob（Blobストア作成で自動付与。動画・/admin の記事添付） |
 | `POSTGRES_URL` ほか | Neon（Connect で自動付与） |
 | `PAYLOAD_SECRET` | Payload のセッション署名・暗号化キー |
 | `RESEND_API_KEY` / `CONTACT_FROM` / `CONTACT_RECIPIENT` | お問い合わせフォームのメール送信 |
@@ -200,8 +207,10 @@ pnpm migrate:news   # 冪等（何度実行しても安全。slug=旧IDで上書
 
 - **ログインできない（/console）**: `JWT_SECRET` と `CONSOLE_USERS` が登録されているか確認。
 - **「更新」で失敗する**: `GITHUB_TOKEN` の権限（Contents=write）と `GITHUB_OWNER/REPO/BRANCH` を確認。
-- **画像アップロードに失敗（/console・/admin とも）**: GitHub へのコミットで保存するため、
-  `GITHUB_TOKEN` の権限と `GITHUB_OWNER/REPO/BRANCH` を確認。/admin は 1ファイル 4MB まで。
+- **画像アップロードに失敗（/console）**: GitHub へのコミットで保存するため、
+  `GITHUB_TOKEN` の権限と `GITHUB_OWNER/REPO/BRANCH` を確認。1枚 4MB まで。
+- **動画アップロード（/console）や /admin の記事添付に失敗**: Blob ストアがリンクされ
+  `BLOB_READ_WRITE_TOKEN` があるか確認（/console/check の「Vercel Blob 接続」）。
 - **反映されない**: GitHub にコミットは入っているか（Vercel のデプロイログを確認）。
 - **/admin が開けない・エラーになる**: `POSTGRES_URL`（Neon Connect）と `PAYLOAD_SECRET` を確認。
   マイグレーション未適用の場合はデプロイログの `payload migrate` を確認。

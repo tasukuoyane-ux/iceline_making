@@ -135,6 +135,43 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
   return data;
 }
 
+/**
+ * 動画をアップロードして公開URL（Vercel Blob）を返す（2026-09-03 復活・Pro 化に伴う）。
+ * ファイル本体はブラウザから Blob へ直接送るため、関数の本文上限（約4.5MB）に縛られず
+ * 大きな動画もアップロードできる。認証は clientPayload に載せたログイントークンで行う
+ * （/api/upload-video）。URL は即時有効（デプロイ不要）。
+ */
+export async function uploadVideo(file: File, onProgress?: (percent: number) => void): Promise<{ url: string }> {
+  const token = getToken();
+  // 失効トークンで送ると @vercel/blob 側の汎用エラーになり原因が分からなくなるため、手前で弾く
+  if (isTokenExpired(token)) throw new Error(EXPIRED_MSG);
+  if (!file.type.startsWith("video/")) {
+    throw new Error("アップロードできるのは動画ファイル（mp4 / webm / mov 等）のみです。画像は「画像をアップロード」から。");
+  }
+  const { upload } = await import("@vercel/blob/client");
+  const clean = (file.name || "video").replace(/[^a-zA-Z0-9._-]/g, "_");
+  try {
+    const blob = await upload(`videos/${clean}`, file, {
+      access: "public",
+      handleUploadUrl: "/api/upload-video",
+      contentType: file.type || undefined,
+      clientPayload: token, // サーバの onBeforeGenerateToken で検証
+      multipart: file.size > 20 * 1024 * 1024, // 大きいファイルは分割アップロード
+      onUploadProgress: onProgress ? ({ percentage }) => onProgress(Math.round(percentage)) : undefined,
+    });
+    return { url: blob.url };
+  } catch (err: any) {
+    // @vercel/blob/client は /api/upload-video が返したエラー本文を捨て、
+    // "Failed to retrieve the client token" という汎用文言だけを投げる。
+    // 実際の原因はほぼ認証切れなので、利用者に伝わる文言へ置き換える。
+    const msg = String(err?.message || "");
+    if (/client token/i.test(msg)) {
+      throw new Error(`${EXPIRED_MSG}（アップロードの認証を取得できませんでした）`);
+    }
+    throw err;
+  }
+}
+
 /** 変更ファイル群をコミットして本番デプロイをトリガーする */
 export async function publish(
   files: Record<string, unknown>,

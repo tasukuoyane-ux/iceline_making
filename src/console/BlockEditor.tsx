@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Block } from "./content";
 import { Field, TextInput, TextArea, Button, Select, VideoPathHint } from "./ui";
 import { ImageField } from "./ImageField";
+import { VideoUploadButton } from "./VideoUploadButton";
 import recruitJson from "../content/recruit.json";
 
 const TYPE_LABEL: Record<Block["type"], string> = {
@@ -21,7 +22,7 @@ const JOB_OPTIONS: { value: string; label: string }[] = ((recruitJson as any).jo
   (j: { id: string; title: string; dept: string }) => ({ value: j.id, label: `${j.title}（${j.dept}）` })
 );
 
-// 動画ファイルのアップロードボタンは 2026-09 改修で廃止（動画は public/videos/ に配置）。
+// 動画ファイルのアップロードボタンは VideoUploadButton.tsx（2026-09-03 復活・Vercel Blob へ直接アップロード）。
 
 // 段落エディタ：選択範囲を **太字** / ==マーカー== で囲む。
 function ParagraphEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -117,9 +118,10 @@ export function BlockEditor({ value, onChange }: { value: Block[]; onChange: (v:
               </div>
             ) : b.type === "video" ? (
               <div className="space-y-2">
-                <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または /videos/ファイル名.mp4（public/videos/ に配置した動画）。">
+                <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。">
                   <TextInput value={b.src} onChange={(e) => update(i, { src: e.target.value })} placeholder="https://… または /videos/xxx.mp4" />
                 </Field>
+                <VideoUploadButton onUploaded={(url) => update(i, { src: url })} />
                 <VideoPathHint />
                 <Field label="キャプション（任意）">
                   <TextInput value={b.caption ?? ""} onChange={(e) => update(i, { caption: e.target.value })} />

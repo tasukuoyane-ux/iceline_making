@@ -5,9 +5,10 @@
 import { VideoItem, InterviewItem } from "./content";
 import { Field, TextInput, Button, Card, Collapsible, VideoPathHint } from "./ui";
 import { ImageField } from "./ImageField";
+import { VideoUploadButton } from "./VideoUploadButton";
 import { BlockEditor } from "./BlockEditor";
 
-// 動画ファイルのアップロードボタンは 2026-09 改修で廃止（動画は public/videos/ に配置）。
+// 動画ファイルのアップロードボタンは VideoUploadButton.tsx（2026-09-03 復活・Vercel Blob へ直接アップロード）。
 // 案内文は ui.tsx の VideoPathHint。
 
 export function genId(prefix: string): string {
@@ -38,7 +39,7 @@ export function SectionVideoPanel({
       <Card title={title}>
         <Field
           label="動画URL"
-          hint="YouTube・Vimeo の共有URL、または /videos/ファイル名.mp4（public/videos/ に配置した動画）。空欄ならセクション自体を非表示。"
+          hint="YouTube・Vimeo の共有URL、または mp4・webm 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄ならセクション自体を非表示。"
         >
           <div className="space-y-2">
             <TextInput
@@ -46,6 +47,7 @@ export function SectionVideoPanel({
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://… または /videos/xxx.mp4"
             />
+            <VideoUploadButton onUploaded={setUrl} />
             <VideoPathHint />
           </div>
         </Field>
@@ -135,7 +137,7 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
         >
           <Field
             label="動画URL"
-            hint="public/videos/ に配置した mp4・webm のパス（例: /videos/recruit-bg-1.mp4）。YouTube・Vimeo の共有URLはスクロール追随できないため使用できません。"
+            hint="mp4・webm 等の直リンク（下のボタンでアップロード、または public/videos/ のパス）。YouTube・Vimeo の共有URLはスクロール追随できないため使用できません。"
           >
             <div className="space-y-2">
               <TextInput
@@ -143,6 +145,7 @@ export function Recruit3BgPanel({ value, onChange }: { value: any; onChange: (v:
                 onChange={(e) => setVideo(i, e.target.value)}
                 placeholder="/videos/xxx.mp4"
               />
+              <VideoUploadButton onUploaded={(u) => setVideo(i, u)} />
               <VideoPathHint />
             </div>
           </Field>
@@ -179,9 +182,10 @@ export function VideosPanel({ value, onChange }: { value: VideoItem[]; onChange:
               <TextInput value={v.title} onChange={(e) => update(i, { title: e.target.value })} />
             </Field>
             <div className="mt-3">
-              <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または /videos/ファイル名.mp4（public/videos/ に配置した動画）。空欄なら「準備中」表示。">
+              <Field label="動画URL" hint="YouTube・Vimeo の共有URL、または mp4・webm 等の直リンク。下のボタンから動画ファイルを直接アップロードもできます。空欄なら「準備中」表示。">
                 <div className="space-y-2">
                   <TextInput value={v.videoUrl} onChange={(e) => update(i, { videoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=... または /videos/xxx.mp4" />
+                  <VideoUploadButton onUploaded={(url) => update(i, { videoUrl: url })} />
                   <VideoPathHint />
                 </div>
               </Field>
