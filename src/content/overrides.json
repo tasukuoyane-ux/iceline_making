@@ -113,7 +113,7 @@
   "recruit3:header.logo": "/uploads/logo_wwhite.png",
   "hide:recruit3:culture.2.title": "",
   "hide:recruit3:culture.2.body": "",
-  "site:protect.enabled": "1",
+  "site:protect.enabled": "",
   "site:protect.hash": "46637337ac3a5aca2304ca005b831f428eec1a17efd4d909e9ce860e5d8f1417",
   "recruit3:people.lead": "",
   "color:recruit3:deck.head.jp": "#000000",
@@ -129,7 +129,7 @@
   "recruit3:deck.7.image": "/uploads/8-vEOYSWrUJyrP8yTvp1nKKKrXfhu6VZ.webp",
   "recruit3:deck.8.image": "/uploads/9-UmQT83nGzQGXxPmpnp4GjiOPxytmLg.webp",
   "recruit3:mv.visible": "show",
-  "recruit3:movie.url": "https://www.youtube.com/watch?v=DlHIfaI29HU",
+  "recruit3:movie.url": "https://tlnao3m7wsd1mzf2.public.blob.vercel-storage.com/videos/ICELINE_Recrit_6_60fps-mHRtvajKBgdNeJ2H9S0D4DUMiE1lRi.mp4",
   "hidesec:recruit2:mv.slide.0": "",
   "division:food.sec.supply.0.title": "調達から配送までの一貫体制",
   "division:food.sec.supply.0.body": "お客様のニーズに応じた商品を国内外から調達し、岡山市北区青江の物流センターで保管し、岡山県全域のお客様へ届けています。前日注文・翌日配送を基本とし、受発注から配送までを一貫した体制で運用しています。お客様のニーズに合わせた食材の加工にも対応しています。",
@@ -436,5 +436,6 @@
   "ar:division:ice.process.step.2.image": "16:9",
   "ar:division:ice.process.step.3.image": "16:9",
   "ar:division:ice.process.step.4.image": "16:9",
-  "ar:division:ice.process.step.5.image": "16:9"
+  "ar:division:ice.process.step.5.image": "16:9",
+  "service:warehouse.overview": "40年以上にわたり、冷凍冷蔵倉庫業を営んできました。\n岡山市北区青江の物流センターを拠点に、食品製造会社・水産卸・菓子メーカーなど、業種を問わず幅広いお客様の冷凍品の保管を受け入れています。\nアイスラインが長年培ってきた低温管理の技術と設備を活かし、大切な商品を適切な環境でお預かりしています。"
 }
