@@ -442,5 +442,9 @@
   "recruit3:deck.lead": "アイスラインについて、さらに詳しい情報を掲載しています。",
   "op:division:food.sec.topshare.0.image": "40",
   "op:division:food.sec.supply.0.image": "",
-  "op:division:food.sec.quality.1.image": "65"
+  "op:division:food.sec.quality.1.image": "65",
+  "division:food.faq.0.a": "まずはお問い合わせフォームまたはお電話にてご連絡ください。086-232-3197（代）",
+  "division:ice.contact.body": "氷・雪氷・氷カフェ・フラペリッチ・炭酸氷の\nお問い合わせはこちらまでご連絡ください。\nアイス事業部\t086-944-8585（代）",
+  "service:warehouse.faq.4.a": "まずはこちらまでお問い合わせください。\n\n物流センター（青江）086-224-3533（代）\n物流センター（西大寺）086-944-8833（代）",
+  "service:dryice.faq.4.a": "要確認"
 }
