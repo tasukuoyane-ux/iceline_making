@@ -429,7 +429,7 @@
   "ar:recruit3:about.image": "",
   "service:dryice.sec.1.pic.1.caption": "窓口での直接購入",
   "service:dryice.sec.1.pic.0.caption": "カット加工対応",
-  "flip:top:strengthV2.ratio": "",
+  "flip:top:strengthV2.ratio": "1",
   "recruit2:mv.title": "すなおな心で、一歩ずつ。\n必要なのは、笑顔とまっすぐさ。",
   "ar:division:ice.process.step.0.image": "16:9",
   "ar:division:ice.process.step.1.image": "16:9",
