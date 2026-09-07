@@ -259,7 +259,7 @@
   "division:ice.sec.0.0.ratio": "35",
   "division:ice.sec.0.1.ratio": "35",
   "division:food.sec.supply.0.ratio": "40",
-  "division:food.sec.topshare.0.ratio": "30",
+  "division:food.sec.topshare.0.ratio": "58",
   "division:food.sec.features.0.ratio": "40",
   "division:food.sec.features.1.ratio": "40",
   "division:food.sec.features.2.ratio": "40",
@@ -268,7 +268,7 @@
   "division:food.sec.logistics.2.ratio": "40",
   "division:food.sec.logistics.3.ratio": "40",
   "division:food.sec.quality.0.ratio": "40",
-  "division:food.sec.quality.1.ratio": "40",
+  "division:food.sec.quality.1.ratio": "45",
   "service:warehouse.sec.0.0.ratio": "45",
   "service:warehouse.sec.0.1.ratio": "45",
   "service:dryice.sec.about.0.ratio": "40",
@@ -348,8 +348,8 @@
   "ice:lineupNav.1.image": "/uploads/210310_tabete_kyohou-PJDrhaj324gJDL3t0IUfRnmlUXqAGy.webp",
   "ice:lineupNav.0.image": "/uploads/________-g2Gm1IhAsRhR7mXmdgbHTjx5MGtdvx.webp",
   "ice:lineupNav.2.image": "/uploads/_____________-JoZUsKhYBx8CitFgJbcwV2no9VyL7v.webp",
-  "division:food.sec.topshare.0.image": "/uploads/1788764548465.png?v=c07f3fc",
-  "ar:division:food.sec.topshare.0.image": "1:1",
+  "division:food.sec.topshare.0.image": "/uploads/okayama_only_darker.png?v=0ec6afe",
+  "ar:division:food.sec.topshare.0.image": "16:9",
   "division:food.sec.features.0.image": "/uploads/Gemini_Generated_Image_z0qd3oz0qd3oz0qd-8DNxFkpvYscVZaqWsSHsQDf5o9SVZf.webp",
   "ar:division:food.sec.features.0.image": "16:9",
   "division:food.sec.features.1.image": "/uploads/Gemini_Generated_Image_79l6vu79l6vu79l6-UoKNNmo0bws7NAeQqcwrXKpIuMCzw2.webp",
@@ -440,6 +440,7 @@
   "service:warehouse.overview": "40年以上にわたり、冷凍冷蔵倉庫業を営んできました。\n岡山市北区青江の物流センターを拠点に、食品製造会社・水産卸・菓子メーカーなど、業種を問わず幅広いお客様の冷凍品の保管を受け入れています。\nアイスラインが長年培ってきた低温管理の技術と設備を活かし、大切な商品を適切な環境でお預かりしています。",
   "recruit3:deck.0.image": "/uploads/01_%E8%A1%A8%E7%B4%99.jpg?v=d44d19a",
   "recruit3:deck.lead": "アイスラインについて、さらに詳しい情報を掲載しています。",
-  "op:division:food.sec.topshare.0.image": "60",
-  "op:division:food.sec.supply.0.image": ""
+  "op:division:food.sec.topshare.0.image": "40",
+  "op:division:food.sec.supply.0.image": "",
+  "op:division:food.sec.quality.1.image": "65"
 }
