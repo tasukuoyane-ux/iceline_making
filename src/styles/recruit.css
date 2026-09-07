@@ -1250,6 +1250,11 @@
    以下は Next/React 化にあたっての追加分（デザイン支給 CSS には無い）
    ============================================================ */
 .rc { position: relative; min-height: 100vh; overflow-x: clip; }
+/* サイト共通の見出し書体指定（theme.css の h1-h4 → var(--font-display)）を打ち消す。
+   採用ページ内では --font-display が Yusei Magic（手書き）になるため、そのままだと
+   見出しが手書き書体＋グレインでガビガビに見える。見出しは丸ゴ（Zen Maru Gothic）に固定し、
+   Yusei Magic はデザインどおりクラス指定の箇所（数字・カルチャー見出し等）だけで使う */
+.rc h1, .rc h2, .rc h3, .rc h4 { font-family: var(--font-body); }
 /* 背景キャンバス（トップは id=story-canvas、オーバーレイは class のみ） */
 .rc .story-canvas { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
 .rc--overlay .story-canvas, .rc--overlay .bg-depth { position: fixed; }

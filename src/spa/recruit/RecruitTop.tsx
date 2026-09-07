@@ -87,7 +87,6 @@ function Hero() {
 
 /* ═══════════════ ② アイスラインとは？ ═══════════════ */
 function About() {
-  const image = img("recruit3:about.image", "");
   return (
     <section className="section" id="business">
       <div className="container">
@@ -100,14 +99,8 @@ function About() {
           label="本文"
           className="text-block text-block--center reveal"
         />
-        {/* 図版：コンソールで画像を設定するとその画像、未設定なら氷・食・物流のベン図 */}
-        {image !== "" || EDIT_MODE ? (
-          <div className="venn reveal">
-            <ImageWithFallback src={image || PH} alt={txt("recruit3:about.title", "アイスラインとは？")} className="about-img" {...edImg("recruit3:about.image", "アイスラインとは？ 図版（透過PNG推奨）")} />
-          </div>
-        ) : (
-          <Venn />
-        )}
+        {/* 図版：氷・食・物流のベン図（デザイン支給のインラインSVG。CMSの画像設定は使わない。2026-09 改修） */}
+        <Venn />
       </div>
     </section>
   );
@@ -115,6 +108,8 @@ function About() {
 
 /* ═══════════════ ③ 数字で見るアイスライン ═══════════════ */
 const MAX_STATS = 12;
+/** デザイン支給のイラストアイコンがある枚数（1〜5枚目） */
+const STAT_DEFAULTS_ICONS = 5;
 const STAT_DEFAULTS = [
   { circle: "創業 [[特大,red:121]] 年", h3: "明治38年、天然氷の販売から", p: "明治38年（1905年）、天然氷の販売から始まりました。氷を扱う技術を軸に、食品卸や物流へと事業を広げながら、120年以上にわたって岡山の食を支えています。" },
   { circle: "[[特大,red:40]] 期連続黒字", h3: "自己資本比率は52.8%", p: "外部環境が揺れるなかでも、40期連続で黒字が続いています。" },
@@ -133,11 +128,13 @@ function Stats() {
           {Array.from({ length: MAX_STATS }, (_, i) => {
             const base = `recruit3:stats.${i}`;
             const d = STAT_DEFAULTS[i] ?? { circle: "（数字）", h3: "（見出し）", p: "（本文）" };
-            const icon = img(`${base}.image`, "");
+            // アイコン：先頭5枚はデザイン支給のイラスト（創業・黒字・売上・昇給・定着）を常に使う。
+            // 6枚目以降はコンソールで画像を設定すればそれを、無ければイラストを順繰りに表示（2026-09 改修）
+            const icon = i >= STAT_DEFAULTS_ICONS ? img(`${base}.image`, "") : "";
             return (
               <div key={i} className="stat reveal">
                 <div className="stat__icon">
-                  {icon !== "" || EDIT_MODE ? (
+                  {i >= STAT_DEFAULTS_ICONS && (icon !== "" || EDIT_MODE) ? (
                     <ImageWithFallback src={icon || PH} alt="" {...edImg(`${base}.image`, `数字タイル${i + 1} アイコン画像`)} />
                   ) : (
                     <StatIcon index={i} />
