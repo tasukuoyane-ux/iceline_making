@@ -19,9 +19,10 @@ const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.C
 const News = lazy(() => import("./pages/News").then((m) => ({ default: m.News })));
 const NewsDetail = lazy(() => import("./pages/NewsDetail").then((m) => ({ default: m.NewsDetail })));
 const Videos = lazy(() => import("./pages/Videos").then((m) => ({ default: m.Videos })));
-// 採用ページ：旧「採用3」を /recruit に昇格（2026-08 改修。旧 /recruit・/recruit2 は削除）
-const Recruit3 = lazy(() => import("./pages/Recruit3").then((m) => ({ default: m.Recruit3 })));
-const Interview = lazy(() => import("./pages/Interview").then((m) => ({ default: m.Interview })));
+// 採用ページ：2026-09 改修でデザイン支給（青キャンバス＋線画アニメーション）の新構成に全面入れ替え。
+// 採用トップ・職種詳細オーバーレイ・インタビュー記事は src/spa/recruit/ 配下（独自ヘッダー・フッター付き）
+const RecruitTop = lazy(() => import("./recruit/RecruitTop").then((m) => ({ default: m.RecruitTop })));
+const InterviewPage = lazy(() => import("./recruit/InterviewPage").then((m) => ({ default: m.InterviewPage })));
 const RecipeDetail = lazy(() => import("./pages/RecipeDetail").then((m) => ({ default: m.RecipeDetail })));
 const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
 const ConsoleApp = lazy(() => import("../console/ConsoleApp").then((m) => ({ default: m.ConsoleApp })));
@@ -89,13 +90,17 @@ function ScrollToTop() {
   return null;
 }
 
-// 公開サイト本体（ヘッダー・フッター付き）
+// 公開サイト本体（ヘッダー・フッター付き）。
+// 採用系ページ（/recruit 配下）はデザイン専用のヘッダー・フッター・追従ボタンを自前で持つため、
+// サイト共通のヘッダー・フッター・「動画で知る」ボタンは出さない（2026-09 改修）
 function Site() {
+  const { pathname } = useLocation();
+  const isRecruit = pathname.startsWith("/recruit");
   return (
     <div className="flex min-h-screen flex-col">
       <SiteBg />
       <AnimateBoot />
-      <Header />
+      {!isRecruit && <Header />}
       <main className="flex-1">
         <Suspense fallback={null}>
           <Routes>
@@ -113,18 +118,18 @@ function Site() {
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />
             <Route path="/videos" element={<Videos />} />
-            <Route path="/recruit" element={<Recruit3 />} />
+            <Route path="/recruit" element={<RecruitTop />} />
             {/* 旧URL（/recruit2・/recruit3）は /recruit へリダイレクト（クエリ・ハッシュ維持） */}
             <Route path="/recruit2" element={<RecruitRedirect />} />
             <Route path="/recruit3" element={<RecruitRedirect />} />
-            <Route path="/recruit/interview/:id" element={<Interview />} />
+            <Route path="/recruit/interview/:id" element={<InterviewPage />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<Top />} />
           </Routes>
         </Suspense>
       </main>
-      <Footer />
-      <VideoCta />
+      {!isRecruit && <Footer />}
+      {!isRecruit && <VideoCta />}
       <CookieConsent />
     </div>
   );

@@ -12,7 +12,7 @@ import { Button, Collapsible } from "./ui";
 import { ImageField } from "./ImageField";
 import { PageFields, PageField } from "./PageFields";
 import { RecruitPanel } from "./RecruitPanel";
-import { VideosPanel, ContactSettingsPanel, Recruit3BgPanel } from "./panels";
+import { VideosPanel, ContactSettingsPanel } from "./panels";
 
 const DRAFT_KEY = "iceline-console-draft";
 const VIEWPORT_KEY = "iceline-console-viewport";
@@ -461,13 +461,9 @@ function PageManagers({
       node: <VideosPanel value={draft.videos} onChange={(v) => setSlice("videos", v)} />,
     });
   }
-  // 採用ページ（/recruit＝旧採用3）：背景動画の管理。
-  // 採用記事（社員インタビュー）は Payload（/admin の「採用記事」）で管理する
+  // 採用ページ（/recruit）：背景はデザイン支給の線画アニメーション（2026-09 改修）になり、
+  // 旧「採用 背景動画」パネルは廃止。採用記事（社員インタビュー）は Payload（/admin）で管理する
   if (route === "/recruit") {
-    items.push({
-      title: "採用 背景動画",
-      node: <Recruit3BgPanel value={draft.sections} onChange={(v) => setSlice("sections", v)} />,
-    });
     items.push({
       title: "採用記事（社員インタビュー）",
       node: (
