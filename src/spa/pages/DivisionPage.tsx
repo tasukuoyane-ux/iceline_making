@@ -10,7 +10,7 @@ import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs, ratioPct, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
 const MV: Record<Division, { img: string; en: string; title: string; lead: string }> = {
@@ -103,7 +103,7 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       en: "SUPPLY CHAIN",
       jp: "サプライチェーン",
       pathKey: "supply",
-      items: [{ title: "（見出し）", pending: true, image: true, overlapImage: true }],
+      items: [{ title: "（見出し）", pending: true, image: true }],
     },
     {
       en: "FEATURES",
@@ -697,10 +697,10 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
     );
   }
 
-  // 画像の一部が文章の下に回り込むレイアウト（岡山県内トップシェア・サプライチェーン・
-  // 幅広い調達網。2026-09 改修）。PC では画像を右側の列（幅＝「画像の幅」設定・既定 45%）に置き、
-  // 文章ブロックを同じ行でグリッドの全幅に張って重ねる。文章の最大幅は「文章側の列＋横幅の 12%」
-  // （--img-pct から算出）なので、画像の幅をどう変えても 12% ぶんが常に文章の下へ回り込む。文章が前面（z-10）で、
+  // 画像の一部が文章の下に回り込むレイアウト（岡山県内トップシェア・幅広い調達網。2026-09 改修）。
+  // PC では画像を右側の列（幅＝「画像の幅」設定・既定 45%）に置き、文章ブロックを同じ行で
+  // グリッドの全幅に張って重ねる。文章の最大幅は 65% 固定で、「画像の幅」を変えても文章側は
+  // 変わらず画像だけが拡大・縮小する（重なり量は画像の幅に応じて変わる）。文章が前面（z-10）で、
   // 画像には枠・角丸・座布団を付けず、透過PNGがそのまま文章の下へ入る。
   // 画像列は「左右入れ替え」で左にも置ける（その場合は文章が右寄せになる）。
   // 縦横比（既定＝画像そのままの比率）は切り抜かずに収める（object-contain）。
@@ -714,10 +714,10 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
         className="grid items-center gap-8 pc:gap-0 pc:[grid-template-columns:var(--ratio)]"
-        style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 45, false), ["--img-pct" as any]: `${ratioPct(`${base}.ratio`, 45)}%` }}
+        style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 45, false) }}
         {...ratioAttrs(`${base}.ratio`, 45, false)}
       >
-        <div className="relative z-10 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[calc(112%-var(--img-pct))]">
+        <div className="relative z-10 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[65%]">
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {txt(`${base}.title`, it.title)}
