@@ -1276,7 +1276,8 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: url(#rough-text) drop-shadow(0 3px 0 rgba(27, 63, 115, 0.28));
+  /* 手書きグレイン（url(#rough-text)）は GPU 描画時に縁がガタつくため h2 では使わない（2026-09）。ベタ影のみ残す */
+  filter: drop-shadow(0 3px 0 rgba(27, 63, 115, 0.28));
 }
 .rc .on-land .section__title__in {
   background: none;
