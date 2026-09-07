@@ -1255,6 +1255,49 @@
    見出しが手書き書体＋グレインでガビガビに見える。見出しは丸ゴ（Zen Maru Gothic）に固定し、
    Yusei Magic はデザインどおりクラス指定の箇所（数字・カルチャー見出し等）だけで使う */
 .rc h1, .rc h2, .rc h3, .rc h4 { font-family: var(--font-body); }
+/* 出現後は will-change を外す。付けたままだと、縮小状態（scale 0.82）で描画したビットマップが
+   拡大表示のまま再描画されず、グレイン付きの見出しがガタガタに見える（Chrome の合成レイヤーの挙動） */
+.rc .reveal.is-in { will-change: auto; }
+/* セクション見出しのグレイン（SVGフィルター）と出現アニメーション（scale/opacity）を別要素に分ける。
+   同じ要素に両方を載せると、GPU 合成時に縮小状態で描画したビットマップへフィルターがかかったまま
+   拡大表示され、縁がガタガタに見えることがあるため。h2 はアニメーションと配置だけを担い、
+   内側の .section__title__in が文字のグラデーション・グレイン・ベタ影を担う */
+.rc .section__title,
+.rc .section__title.reveal.is-in {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+}
+.rc .section__title__in {
+  display: inline-block;
+  background: linear-gradient(180deg, #FFFFFF 30%, var(--frost) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: url(#rough-text) drop-shadow(0 3px 0 rgba(27, 63, 115, 0.28));
+}
+.rc .on-land .section__title__in {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--ink);
+}
+.rc .section__title.is-over-art .section__title__in {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: #FFFFFF;
+}
+.rc .entry-form .section__title__in {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: var(--signal-red);
+  color: var(--signal-red);
+}
 /* 背景キャンバス（トップは id=story-canvas、オーバーレイは class のみ） */
 .rc .story-canvas { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
 .rc--overlay .story-canvas, .rc--overlay .bg-depth { position: fixed; }

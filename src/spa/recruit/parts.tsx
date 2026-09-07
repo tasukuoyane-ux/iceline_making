@@ -113,18 +113,26 @@ export function OutlineText({ text, accentLast = false, block = false }: { text:
   );
 }
 
-/** 見出しの一部に手書き風の波線マーカーを引く。mark が text に含まれるときだけ */
+/** セクション見出しの中身。mark の部分に手書き風の波線マーカーを引く（mark が text に含まれるときだけ）。
+ * 文字のグラデーション・グレイン・ベタ影は内側の .section__title__in が担う
+ * （出現アニメーションを担う h2 と分けて、GPU 合成時の縁のガタつきを防ぐ。2026-09 改修） */
 export function Marked({ text, mark }: { text: string; mark?: string }) {
-  if (!mark) return <span className="marker">{text}</span>;
-  const i = text.indexOf(mark);
-  if (i < 0) return <>{text}</>;
-  return (
-    <>
-      {text.slice(0, i)}
-      <span className="marker">{mark}</span>
-      {text.slice(i + mark.length)}
-    </>
-  );
+  let inner: ReactNode;
+  if (!mark) inner = <span className="marker">{text}</span>;
+  else {
+    const i = text.indexOf(mark);
+    inner =
+      i < 0 ? (
+        text
+      ) : (
+        <>
+          {text.slice(0, i)}
+          <span className="marker">{mark}</span>
+          {text.slice(i + mark.length)}
+        </>
+      );
+  }
+  return <span className="section__title__in">{inner}</span>;
 }
 
 /** 人物の線画（写真が未設定のときのプレースホルダー）。variant で髪型を変える */
