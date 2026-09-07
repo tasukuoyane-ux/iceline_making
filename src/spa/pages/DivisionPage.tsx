@@ -10,7 +10,7 @@ import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, ratioPct, EDIT_MODE } from "../lib/editable";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
 const MV: Record<Division, { img: string; en: string; title: string; lead: string }> = {
@@ -49,6 +49,10 @@ interface DetailItem {
   masonryImages?: boolean;
   /** true なら白カードの中に画像と文章を横並びで表示（製造体制・こだわり） */
   card?: boolean;
+  /** true なら画像の一部が文章の下に回り込むレイアウト（透過PNG向け・枠や座布団なし）。
+   * 画像の幅（サイズ）・左右はコンソールの「画像の幅」「左右入れ替え」、縦横比・透明度は
+   * 画像欄の「縦横比」「透明度」で調整できる（2026-09 改修） */
+  overlapImage?: boolean;
   /** 既存アップロード画像を引き継ぐ場合の明示キー */
   imgKey?: string;
 }
@@ -93,13 +97,13 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       en: "TOP SHARE",
       jp: "岡山県内トップシェア",
       pathKey: "topshare",
-      items: [{ pending: true, image: true }],
+      items: [{ pending: true, image: true, overlapImage: true }],
     },
     {
       en: "SUPPLY CHAIN",
       jp: "サプライチェーン",
       pathKey: "supply",
-      items: [{ title: "（見出し）", pending: true, image: true }],
+      items: [{ title: "（見出し）", pending: true, image: true, overlapImage: true }],
     },
     {
       en: "FEATURES",
@@ -130,9 +134,10 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       jp: "品質保証への取り組み",
       pathKey: "quality",
       // 3項目目はコンソールの「消す」指定により削除（2026-08 改修）
+      // 2項目目（幅広い調達網）は画像が文章の下に回り込むレイアウト（2026-09 改修）
       items: [
         { title: "（見出し）", pending: true, image: true },
-        { title: "（見出し）", pending: true, image: true },
+        { title: "（見出し）", pending: true, image: true, overlapImage: true },
       ],
     },
   ],
@@ -686,6 +691,46 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
             alt={it.title || secJp}
             className="aspect-[4/3] w-full rounded-xl object-cover [direction:ltr]"
             {...edImg(`${base}.image`, `${it.title || secJp} 画像`)}
+          />
+        </div>
+      </motion.div>
+    );
+  }
+
+  // 画像の一部が文章の下に回り込むレイアウト（岡山県内トップシェア・サプライチェーン・
+  // 幅広い調達網。2026-09 改修）。PC では画像を右側の列（幅＝「画像の幅」設定・既定 45%）に置き、
+  // 文章ブロックを同じ行でグリッドの全幅に張って重ねる。文章の最大幅は「文章側の列＋横幅の 12%」
+  // （--img-pct から算出）なので、画像の幅をどう変えても 12% ぶんが常に文章の下へ回り込む。文章が前面（z-10）で、
+  // 画像には枠・角丸・座布団を付けず、透過PNGがそのまま文章の下へ入る。
+  // 画像列は「左右入れ替え」で左にも置ける（その場合は文章が右寄せになる）。
+  // 縦横比（既定＝画像そのままの比率）は切り抜かずに収める（object-contain）。
+  // SP では文章 → 画像の縦積み（画像は横幅 70% で中央）。
+  if (it.overlapImage) {
+    const imgPath = it.imgKey ?? `${base}.image`;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="grid items-center gap-8 pc:gap-0 pc:[grid-template-columns:var(--ratio)]"
+        style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 45, false), ["--img-pct" as any]: `${ratioPct(`${base}.ratio`, 45)}%` }}
+        {...ratioAttrs(`${base}.ratio`, 45, false)}
+      >
+        <div className="relative z-10 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[calc(112%-var(--img-pct))]">
+          {it.title && (
+            <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
+              {txt(`${base}.title`, it.title)}
+            </h3>
+          )}
+          <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
+        </div>
+        <div className="[direction:ltr] pc:col-start-2 pc:row-start-1">
+          <ImageWithFallback
+            src={img(imgPath, IMG_PLACEHOLDER)}
+            alt={it.title || secJp}
+            className="mx-auto h-auto w-[70%] object-contain pc:w-full"
+            {...edImg(imgPath, `${it.title || secJp} 画像（文章の下に回り込む）`, { opacity: true })}
           />
         </div>
       </motion.div>

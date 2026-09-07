@@ -46,12 +46,22 @@ export function buildHideCss(overrides: Record<string, string>): string {
       const inner = `[data-edit="${path}"],[data-edit-img="${path}"],[data-edit-select="${path}"]`
       colors.push(`section:has(${inner}),main header:has(${inner}){display:none !important}`)
     }
-    // 画像の縦横比（コンソールの「縦横比」プルダウン。`ar:<画像パス>` → "1:1"|"4:3"|"3:2"|"16:9"）。
+    // 画像の縦横比（コンソールの「縦横比」プルダウン。`ar:<画像パス>` → "1:1"|"4:3"|"3:2"|"16:9"|"3:4"|"2:3"|"9:16"）。
     // 各デザインの既定比率（Tailwindの aspect クラス）に勝てるよう !important を付ける。
-    if (key.startsWith('ar:') && /^(1:1|4:3|3:2|16:9)$/.test(value)) {
+    if (key.startsWith('ar:') && /^(1:1|4:3|3:2|16:9|3:4|2:3|9:16)$/.test(value)) {
       const path = esc(key.slice('ar:'.length))
       const [w, h] = value.split(':')
       colors.push(`[data-edit-img="${path}"]{aspect-ratio:${w}/${h} !important}`)
+    }
+    // 画像の透明度（コンソールの「透明度」スライダー。`op:<画像パス>` → "0"〜"100"）。
+    // !important は付けない：スクロール連動アニメーション（animate.ts）がフェード中に
+    // インラインで opacity:0 を当て、終了時に外すため、CSS側の値がそのまま到達点になる。
+    if (key.startsWith('op:') && /^\d{1,3}$/.test(value)) {
+      const n = Math.min(100, Math.max(0, parseInt(value, 10)))
+      if (n < 100) {
+        const path = esc(key.slice('op:'.length))
+        colors.push(`[data-edit-img="${path}"]{opacity:${n / 100}}`)
+      }
     }
     // 画像＋文章の横並びグリッドの「左右入れ替え」（`flip:<比率パス>` = "1"）。
     // PC幅でグリッドの direction を既定と反対向きにして列順を反転する。

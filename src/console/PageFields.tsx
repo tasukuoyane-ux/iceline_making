@@ -94,6 +94,8 @@ export interface PageField {
   section?: string;
   /** true なら動画URLフィールド（動画ファイルのアップロードボタンを表示） */
   video?: boolean;
+  /** true なら画像の「透明度」スライダーを表示（overrides の `op:<画像パス>` = 0〜100） */
+  opacity?: boolean;
   /** 繰り返しセクションの「項目数」フィールドのメタ情報（追加・削除ボタン用） */
   repeat?: { prefix: string; max: number };
 }
@@ -311,7 +313,35 @@ export function PageFields({
                     <option value="4:3">4:3</option>
                     <option value="3:2">3:2</option>
                     <option value="16:9">16:9</option>
+                    <option value="3:4">3:4（縦長）</option>
+                    <option value="2:3">2:3（縦長）</option>
+                    <option value="9:16">9:16（縦長）</option>
                   </select>
+                </div>
+              );
+            })()}
+            {/* 画像の透明度（overrides の `op:<パス>` = 0〜100。100＝不透明＝未設定と同じ）。
+                文字の下に回り込む透過PNGのレイアウトで使う。ドラッグ中の値は左のプレビューへ即時反映される */}
+            {f.opacity && (() => {
+              const opKey = `op:${f.path}`;
+              const raw = parseInt(getValueByPath(draft, opKey) ?? "", 10);
+              const cur = Math.min(100, Math.max(0, Number.isNaN(raw) ? 100 : raw));
+              return (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="shrink-0 text-[11px] font-medium text-slate-500">透明度</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={cur}
+                    onChange={(e) => onChange(setValueByPath(draft, opKey, e.target.value === "100" ? "" : e.target.value))}
+                    aria-label="画像の透明度"
+                    className="min-w-0 flex-1 accent-emerald-600"
+                  />
+                  <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-slate-600">
+                    {cur === 100 ? "不透明" : `${cur}%`}
+                  </span>
                 </div>
               );
             })()}
@@ -418,7 +448,7 @@ export function PageFields({
     }
 
     // 値と付随設定（非表示・アニメ・色・縦横比・比率）をまとめて書き換えるヘルパー
-    const auxPrefixes = ["hide:", "anim:", "color:", "ar:"] as const;
+    const auxPrefixes = ["hide:", "anim:", "color:", "ar:", "op:"] as const;
     const clearItem = (next: Content, fs: PageField[]): Content => {
       for (const f of fs) {
         next = setValueByPath(next, f.path, "");

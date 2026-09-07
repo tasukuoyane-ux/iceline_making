@@ -73,11 +73,14 @@ export function edRich(path: string, label?: string, opts?: { list?: boolean }):
   return a;
 }
 
-/** 画像編集対象の属性を付与（ImageWithFallback / img に展開される） */
-export function edImg(path: string, label?: string): Record<string, string> {
+/** 画像編集対象の属性を付与（ImageWithFallback / img に展開される）。
+ * opts.opacity=true にすると、コンソールの画像欄に「透明度」スライダーが出る
+ * （値は overrides の `op:<画像パス>` = 0〜100。HideOverridesStyle が CSS の opacity に反映）。 */
+export function edImg(path: string, label?: string, opts?: { opacity?: boolean }): Record<string, string> {
   if (isCommon(path)) return {};
   const a: Record<string, string> = { "data-edit-img": path };
   if (label) a["data-edit-label"] = label;
+  if (opts?.opacity) a["data-edit-opacity"] = "1";
   return a;
 }
 

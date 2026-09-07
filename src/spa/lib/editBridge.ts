@@ -73,6 +73,8 @@ function applyRatioVars(overrides: Record<string, string>) {
     const p = Math.min(70, Math.max(30, Number.isNaN(raw) ? def : raw));
     const cols = first ? `${p}fr ${100 - p}fr` : `${100 - p}fr ${p}fr`;
     if (el.style.getPropertyValue("--ratio") !== cols) el.style.setProperty("--ratio", cols);
+    // 画像が文章の下に回り込むレイアウト（DivisionPage の overlapImage）は文章幅の算出に画像幅％も使う
+    if (el.style.getPropertyValue("--img-pct") !== "" && el.style.getPropertyValue("--img-pct") !== `${p}%`) el.style.setProperty("--img-pct", `${p}%`);
   });
 }
 
@@ -125,7 +127,7 @@ function applyOverrides(overrides: Record<string, string>) {
   // アニメーション設定は animate モジュールが要素へ反映する（DOMパッチ対象外）
   import("./animate").then((m) => m.setAnimOverrides(overrides));
   for (const [path, value] of Object.entries(overrides)) {
-    if (path.startsWith("hide:") || path.startsWith("hidesec:") || path.startsWith("anim:") || path.startsWith("color:") || path.startsWith("flip:") || path.startsWith("ar:")) continue; // 専用処理（style/animate）で反映済み
+    if (path.startsWith("hide:") || path.startsWith("hidesec:") || path.startsWith("anim:") || path.startsWith("color:") || path.startsWith("flip:") || path.startsWith("ar:") || path.startsWith("op:")) continue; // 専用処理（style/animate）で反映済み
     document.querySelectorAll<HTMLElement>(`[data-edit="${cssEscape(path)}"]`).forEach((el) => {
       if (el.hasAttribute("data-edit-rich")) {
         // リッチ本文：textContent の書き換えでは p/li 構造が壊れるため再構築する
@@ -252,6 +254,7 @@ function scanFields(): PageField[] {
       ...(isSel ? { options: parseOptions(el.getAttribute("data-edit-options")) } : {}),
       ...(ratio ? { ratio } : {}),
       ...(el.hasAttribute("data-edit-video") ? { video: true } : {}),
+      ...(isImg && el.hasAttribute("data-edit-opacity") ? { opacity: true } : {}),
       ...(isSel && el.hasAttribute("data-repeat")
         ? {
             repeat: {
