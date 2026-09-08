@@ -57,7 +57,7 @@ export function Header() {
   const logoSrc = img("header:logo", logo);
 
   // 「採用情報」CTAクリック時の円形トランジション：
-  // ボタン中心から #9cdff1 の真円がイーズインしながら1.2秒でビューポート全体を
+  // ボタン中心から採用ページの背景色（#009BFD）の真円がイーズインしながら1.2秒でビューポート全体を
   // 埋め尽くす。アニメーションは遷移前のページの上（ナビゲーションの下）で行われ、
   // 塗りつぶし完了後に /recruit3 へ遷移する（→ 採用3の背景動画1はその後に再生開始）。
   const navigate = useNavigate();
@@ -251,7 +251,7 @@ export function Header() {
         </nav>
       )}
 
-      {/* 円形トランジション：CTAボタン中心から #9cdff1 の真円がビューポート全体へ広がる。
+      {/* 円形トランジション：CTAボタン中心から採用ページの背景色（#009BFD）の真円がビューポート全体へ広がる。
           Z軸はナビゲーション（ヘッダー z-50）の下・他のコンテンツの上（z-40）。
           ページ側のスタッキングコンテキストに閉じ込められないよう body 直下へポータル描画 */}
       {circle &&
@@ -264,7 +264,7 @@ export function Header() {
                 height: 10px;
                 margin: -5px 0 0 -5px;
                 border-radius: 9999px;
-                background: #9cdff1;
+                background: #009BFD; /* 採用ページの背景色（Ice Blue）に合わせる。2026-09 改修 */
                 animation:
                   hdr-cta-expand 1.2s ease-in forwards,
                   hdr-cta-fade 0.4s ease-out 1.2s forwards;
