@@ -68,8 +68,13 @@ function RecruitHeader({ scrolled, hidden }: { scrolled: boolean; hidden: boolea
 function RecruitFooter() {
   const { goJobs } = useRecruitFrame();
   return (
-    // フッターのロゴとタグラインは 2026-09 改修（デザイン支給の更新）でトルツメ。ボタンとコピーライトのみ
+    // フッターのロゴ（青の座布団）とタグラインは、デザイン支給の更新では削除されていたが
+    // 「記事ページ下部を 9/7 のデプロイ（f99170a）の仕様に戻す」指示により復帰（2026-09-08）
     <footer className="footer on-land">
+      <div className="footer__logo">
+        <img className="footer__logoimg" src={img("recruit3:footer.logo", img("recruit3:header.logo", RECRUIT_LOGO))} alt="ICELINE" {...edImg("recruit3:footer.logo", "採用フッター ロゴ（白）")} />
+      </div>
+      <p className="footer__tag" {...ed("recruit3:footer.tag", "フッター タグライン")}>{txt("recruit3:footer.tag", "すなおな心で、一歩ずつ。")}</p>
       <div className="footer__actions">
         <Link to="/" className="btn btn--corp">
           <span {...ed("recruit3:footer.corp.label", "採用フッター コーポレートサイトリンク")}>{txt("recruit3:footer.corp.label", "コーポレートサイトはこちら")}</span>
