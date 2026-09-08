@@ -64,27 +64,8 @@
 .rc .page { position: relative; z-index: 1; }
 .rc img { max-width: 100%; }
 .rc a { color: var(--snow); text-decoration: none; }
-.rc .art-aware {
-  border-radius: 18px 12px 20px 14px / 14px 20px 12px 18px;
-  outline: 2px solid transparent;
-  outline-offset: 3px;
-  transition:
-    background-color 0.35s var(--ease),
-    outline-color 0.35s var(--ease),
-    opacity var(--dur-reveal) var(--ease),
-    transform var(--dur-reveal) var(--ease),
-    filter var(--dur-reveal) var(--ease);
-}
-.rc .is-over-art {
-  background-color: rgba(0, 155, 253, 0.55);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  outline-color: rgba(255, 255, 255, 0.7);
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  padding: 0.2em 0.5em;
-  margin: -0.2em -0.5em;
-}
+/* 退避窓（.art-aware / .is-over-art：背景線画と重なった文字に半透明の座布団と枠を出す仕組み）は
+   2026-09-09 のユーザー指示で廃止（canvas.ts でも対象要素を集めない） */
 .rc .on-land { color: var(--ink); }
 .rc .on-land .section__title {
   background: none;

@@ -876,20 +876,10 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
           (el) => !el.querySelector(".outline-text"),
         );
     iceEls.forEach((el) => el.classList.add("ice-aware"));
-    artEls = Array.from(
-      root.querySelectorAll<HTMLElement>("h1, h2, h3, h4, p, figcaption, .stat__number, .chip, .flow__step, .acc__head, .field__label"),
-    ).filter(
-      (el) =>
-        !el.querySelector(".outline-text") &&
-        !el.closest(".btn") &&
-        !el.closest(".p-card__photo") &&
-        !el.closest(".hero") &&
-        !el.closest("#business") &&
-        !el.closest(".on-land") &&
-        // ボタン行（記事末尾の CTA・求人エントリーリンク）は退避窓（座布団と枠）を出さない
-        !el.closest(".culture__item, .p-card, .acc, .job-row, .benefit, .entry-form, .entry-done, .media-frame, .iv-block, .iv-meta, .ov-bar, .ov-hero, .iv-link, .iv-actions"),
-    );
-    artEls.forEach((el) => el.classList.add("art-aware"));
+    // 退避窓（背景線画と重なった文字に半透明の座布団と枠を出す .is-over-art）は、スクロール中に
+    // 一時的に不自然な枠が入るとの指摘で採用ページ全体で廃止した（2026-09-09 ユーザー指示）。
+    // 対象要素を集めないことで applyOverlaps は何もしない
+    artEls = [];
   }
   rescan();
 
