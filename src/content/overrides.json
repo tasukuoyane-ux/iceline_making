@@ -429,7 +429,7 @@
   "ar:recruit3:about.image": "",
   "service:dryice.sec.1.pic.1.caption": "窓口での直接購入",
   "service:dryice.sec.1.pic.0.caption": "カット加工対応",
-  "flip:top:strengthV2.ratio": "1",
+  "flip:top:strengthV2.ratio": "",
   "recruit2:mv.title": "すなおな心で、一歩ずつ。\n必要なのは、笑顔とまっすぐさ。",
   "ar:division:ice.process.step.0.image": "16:9",
   "ar:division:ice.process.step.1.image": "16:9",
@@ -469,5 +469,18 @@
   "contact:tel.3.title": "低温物流センターのお問い合わせは",
   "contact:tel.3.body": "物流センター（青江） 086-224-3533 （代）\n物流センター（西大寺） 086-944-8833 （代）",
   "contact:tel.4.title": "その他のお問い合わせは",
-  "contact:tel.4.body": "総務部 086-224-5235 （代）"
+  "contact:tel.4.body": "総務部 086-224-5235 （代）",
+  "company:history.7.year": "2023",
+  "hide:company:history.7.year": "",
+  "anim:company:history.7.year": "",
+  "color:company:history.7.year": "",
+  "ar:company:history.7.year": "",
+  "op:company:history.7.year": "",
+  "company:history.7.text": "株式会社アイスマウンテン設立",
+  "hide:company:history.7.text": "",
+  "anim:company:history.7.text": "",
+  "color:company:history.7.text": "",
+  "ar:company:history.7.text": "",
+  "op:company:history.7.text": "",
+  "company:history.count": "8"
 }
