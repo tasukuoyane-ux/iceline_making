@@ -156,16 +156,14 @@ export function PersonArt({ variant = 0, size = 150 }: { variant?: number; size?
 
 /** 氷・食・物流のベン図（「アイスラインとは？」の画像が未設定のときの既定図版） */
 export function Venn() {
-  const font = "'Zen Maru Gothic', sans-serif";
+  const font = "'Zen Kaku Gothic New', sans-serif";
   return (
     <div className="venn reveal" role="img" aria-label="氷・食・物流の3つの要素が重なり合うベン図">
       <svg viewBox="0 0 360 344" width="500" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="132" cy="122" r="92" stroke="#FFFFFF" strokeWidth="2.5" fill="rgba(255,255,255,0.10)" />
         <circle cx="228" cy="122" r="92" stroke="#FFFFFF" strokeWidth="2.5" fill="rgba(255,255,255,0.10)" />
         <circle cx="180" cy="205" r="92" stroke="#FFFFFF" strokeWidth="2.5" fill="rgba(255,255,255,0.10)" />
-        <g stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M180 138v28M166 145l14 7 14-7M166 173l14-7 14 7" opacity="0.9" />
-        </g>
+        {/* 中央の雪結晶アイコンは 2026-09 改修（デザイン支給の更新）で削除。3円とラベル・各円のイラストのみ */}
         <g stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" transform="translate(76,60)">
           <path d="M4 12l12-8 14 4 2 14-10 10-14-4z" />
           <path d="M16 4l2 12-14-4M18 16l12-8M18 16l0 16" />
@@ -191,7 +189,7 @@ export function Venn() {
 
 /** 「数字で見る」の既定イラストアイコン（CMSで画像を設定するまでの表示） */
 export function StatIcon({ index }: { index: number }) {
-  const font = "'Zen Maru Gothic', sans-serif";
+  const font = "'Zen Kaku Gothic New', sans-serif";
   const common = { width: 64, height: 64, viewBox: "0 0 64 64", fill: "none", stroke: "#1F2430", strokeWidth: 2.5, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (index % 5) {
     case 0:

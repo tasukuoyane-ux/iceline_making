@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ExternalLink, MapPin } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
+import { ParticleHero } from "../components/common/ParticleHero";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { CEO_MESSAGE, COMPANY_PROFILE, HISTORY, PHILOSOPHY, CSR } from "../data/company";
@@ -129,14 +130,11 @@ export function Company() {
   const historyRep = repeatSel("company:history.count", HISTORY.length, MAX_HISTORY, "沿革の行数");
   return (
     <>
-      <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
-        <ImageWithFallback src={IMG.warehouse} alt="会社情報" className="absolute inset-0 h-full w-full object-cover opacity-70" {...edImg("images:IMG.warehouse")} />
-        <div className="absolute inset-0 bg-ink/50" />
-        <div className="relative z-10 mx-auto flex h-full max-w-[1150px] flex-col items-center justify-center px-5 text-center pc:px-8">
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:company.mv", "英語見出し（補助）")}>{txt("sectionEn:company.mv", "COMPANY")}</p>
-          <h1 className="mt-3 text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed("company:hero.title", "会社情報")}>{txt("company:hero.title", "会社情報")}</h1>
-        </div>
-      </section>
+      {/* ヒーロー（2026-09 改修）：デザイン支給の下層ヒーロー。微粒子が本社ビル・結晶のシルエットを形作る */}
+      <ParticleHero shapes={["building", "crystal"]} compact>
+        <div className="en-label" {...ed("sectionEn:company.mv", "英語見出し（補助）")}>{txt("sectionEn:company.mv", "COMPANY")}</div>
+        <h1 className="hero-title" {...ed("company:hero.title", "会社情報")}>{txt("company:hero.title", "会社情報")}</h1>
+      </ParticleHero>
 
       {/* 代表メッセージ（会社情報の熱量ピーク） */}
       <Section heat={HEAT.ceoMessage}>
@@ -175,8 +173,9 @@ export function Company() {
           <tbody>
             {COMPANY_PROFILE.map((r, i) => (
               <tr key={r.label} className="border-b border-border align-top">
-                <th className="w-40 bg-secondary px-5 py-4 text-left text-muted-foreground" style={{ fontSize: 14, fontWeight: 500 }}>{r.label}</th>
-                <td className="px-5 py-4" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`company:profile.${i}.value`, r.label, { multiline: true })}>{txt(`company:profile.${i}.value`, r.value)}</td>
+                {/* 罫線テーブル（デザイン支給：見出し列は座布団なし・太字） */}
+                <th className="w-[9em] whitespace-nowrap py-[18px] pl-1 pr-4 text-left" style={{ fontSize: 15, fontWeight: 700 }}>{r.label}</th>
+                <td className="px-1 py-[18px] text-foreground/80" style={{ fontSize: 15, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`company:profile.${i}.value`, r.label, { multiline: true })}>{txt(`company:profile.${i}.value`, r.value)}</td>
               </tr>
             ))}
           </tbody>

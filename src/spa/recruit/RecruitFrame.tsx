@@ -15,9 +15,10 @@ import { RoughFilterDefs } from "./parts";
 /** 既定の白ロゴ（デザイン支給 logo_white.png） */
 export const RECRUIT_LOGO = "/images/recruit/logo_white.png";
 
-const FONT_CSS = "https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@500;700;900&display=swap";
+// 本文書体は 2026-09 改修で丸ゴ（Zen Maru Gothic）→角ゴ（Zen Kaku Gothic New）に変更（デザイン支給準拠）
+const FONT_CSS = "https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap";
 
-/** 採用ページ用のWebフォント（Yusei Magic / Zen Maru Gothic）を一度だけ読み込む */
+/** 採用ページ用のWebフォント（Yusei Magic / Zen Kaku Gothic New）を一度だけ読み込む */
 function ensureFonts() {
   if (typeof document === "undefined" || document.getElementById("rc-fonts")) return;
   const l = document.createElement("link");
@@ -67,11 +68,8 @@ function RecruitHeader({ scrolled }: { scrolled: boolean }) {
 function RecruitFooter() {
   const { goJobs } = useRecruitFrame();
   return (
+    // フッターのロゴとタグラインは 2026-09 改修（デザイン支給の更新）でトルツメ。ボタンとコピーライトのみ
     <footer className="footer on-land">
-      <div className="footer__logo">
-        <img className="footer__logoimg" src={img("recruit3:footer.logo", img("recruit3:header.logo", RECRUIT_LOGO))} alt="ICELINE" {...edImg("recruit3:footer.logo", "採用フッター ロゴ（白）")} />
-      </div>
-      <p className="footer__tag" {...ed("recruit3:footer.tag", "フッター タグライン")}>{txt("recruit3:footer.tag", "すなおな心で、一歩ずつ。")}</p>
       <div className="footer__actions">
         <Link to="/" className="btn btn--corp">
           <span {...ed("recruit3:footer.corp.label", "採用フッター コーポレートサイトリンク")}>{txt("recruit3:footer.corp.label", "コーポレートサイトはこちら")}</span>
@@ -164,6 +162,7 @@ export function RecruitFrame({
   children,
   overlay = false,
   ambient = false,
+  land = false,
   intro = false,
   landAnchorId,
   className = "",
@@ -171,8 +170,11 @@ export function RecruitFrame({
   children: ReactNode;
   /** 職種詳細オーバーレイ用（固定・自前スクロール・ヘッダー/フッターなし・静かな背景） */
   overlay?: boolean;
-  /** 背景を下層用の静かな情景（積雪＋轍＋陸地）にする（記事ページ。overlay は常に ambient） */
+  /** 背景を下層用の静かな情景（積雪＋轍＋陸地）にする（overlay は land 指定が無ければ ambient） */
   ambient?: boolean;
+  /** 背景を「全面が緑の陸地・雪なし（トラックと人だけが動く）」にし、文字を黒基調にする
+   * （職種詳細・インタビュー記事。2026-09 改修・デザイン支給の data-canvas="land"） */
+  land?: boolean;
   /** true ならオープニング（氷の組み上がり）から始める（採用トップのみ） */
   intro?: boolean;
   /** 陸地の地平線の基準要素 id（採用トップ＝数字で見るセクション） */
@@ -226,7 +228,7 @@ export function RecruitFrame({
     const handle = mountRecruitCanvas({
       canvas,
       root,
-      mode: isAmbient ? "ambient" : "story",
+      mode: land ? "land" : isAmbient ? "ambient" : "story",
       landAnchorId,
       intro: introDecided.current === true,
       onIntroDone: () => setPhase("ready"),
@@ -240,7 +242,7 @@ export function RecruitFrame({
       handleRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAmbient, landAnchorId]);
+  }, [isAmbient, land, landAnchorId]);
 
   // ヘッダーの帯（スクロール後）
   useEffect(() => {
@@ -257,13 +259,14 @@ export function RecruitFrame({
 
   return (
     <FrameCtx.Provider value={{ goJobs }}>
-      <div ref={rootRef} className={"rc" + (overlay ? " rc--overlay" : "") + (introActive ? " is-intro" : "") + (className ? " " + className : "")}>
+      <div ref={rootRef} className={"rc" + (overlay ? " rc--overlay" : "") + (land ? " rc--land" : "") + (introActive ? " is-intro" : "") + (className ? " " + className : "")}>
         <RoughFilterDefs />
         <div className="bg-depth" />
         <canvas ref={canvasRef} id={overlay ? undefined : "story-canvas"} className="story-canvas" />
         {!overlay && <RecruitHeader scrolled={scrolled} />}
         {!overlay && <FloatVideo />}
-        <main className="page">{children}</main>
+        {/* land モードでは本文全体を陸地用（黒文字）にする */}
+        <main className={"page" + (land ? " on-land" : "")}>{children}</main>
         {!overlay && <RecruitFooter />}
       </div>
     </FrameCtx.Provider>

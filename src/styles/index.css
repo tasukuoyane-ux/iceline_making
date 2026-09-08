@@ -1,3 +1,4 @@
 /* フォント（Google Fonts）は src/app/(frontend)/layout.tsx の <link> で読み込む */
 @import './tailwind.css';
 @import './theme.css';
+@import './corp.css';

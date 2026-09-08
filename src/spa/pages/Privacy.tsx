@@ -62,16 +62,12 @@ const SECTIONS: { title: string; body: string[] }[] = [
 export function Privacy() {
   return (
     <>
-      <section className="relative h-[32vh] min-h-[240px] w-full overflow-hidden bg-ink">
-        <div className="relative mx-auto flex h-full max-w-[1150px] flex-col items-center justify-center px-5 text-center pc:px-8">
-          <p className="text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:privacy.mv", "英語見出し（補助）")}>{txt("sectionEn:privacy.mv", "PRIVACY POLICY")}</p>
-          <h1 className="mt-3 text-white" style={{ fontSize: "clamp(28px, 5vw, 46px)", fontWeight: 900, lineHeight: 1.2 }}>プライバシーポリシー</h1>
-        </div>
-      </section>
-
+      {/* 2026-09 改修：黒帯のヒーローを廃止し、デザイン支給どおり本文の先頭に英字ラベル＋見出しを置く */}
       <Section heat={HEAT.companyProfile}>
         <div className="mx-auto max-w-3xl">
-          <p className="text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
+          <div className="en-label" {...ed("sectionEn:privacy.mv", "英語見出し（補助）")}>{txt("sectionEn:privacy.mv", "PRIVACY POLICY")}</div>
+          <h1 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }}>プライバシーポリシー</h1>
+          <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
             {SITE.name}（以下「当社」といいます。）は、お客様の個人情報の保護を重要な責務と認識し、以下の方針に基づき個人情報を適切に取り扱います。
           </p>
           <div className="mt-12 space-y-10">

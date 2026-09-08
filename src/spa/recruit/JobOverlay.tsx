@@ -281,7 +281,8 @@ export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: Recr
 
   return createPortal(
     <div role="dialog" aria-modal="true" className="contents" onScrollCapture={(e) => setShowCta((e.target as HTMLElement).scrollTop > 240)}>
-      <RecruitFrame overlay>
+      {/* 背景は land モード（全面が緑の陸地・雪なし・文字は黒基調。2026-09 改修・デザイン支給 job/*.html 準拠） */}
+      <RecruitFrame overlay land>
         {/* 上部バー（sticky）：部門タグ＋職種名＋閉じる＋エントリー */}
         <div className="ov-bar">
           <div className="ov-bar__inner">

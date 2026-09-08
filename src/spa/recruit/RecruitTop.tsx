@@ -54,10 +54,7 @@ function Hero() {
   return (
     <section className="hero" id="top">
       <div className="container hero__inner">
-        <Doodle kind="gem" style={{ bottom: "0%", left: "46%" }} />
-        <Doodle kind="shaved" style={{ top: "30%", right: "2%" }} />
-        <Doodle kind="sparkle" style={{ top: "6%", left: "0%" }} />
-        <Doodle kind="wave" style={{ top: "38%", right: "16%" }} />
+        {/* あしらいは「つらら列」以外すべて削除（2026-09 改修・デザイン支給の更新） */}
         <Doodle kind="drips" style={{ bottom: "22%", right: "4%" }} />
         <h1 className="hero__copy reveal" {...ed("recruit2:mv.title", "キャッチコピー", { multiline: true })}>
           <OutlineText text={title} accentLast />
@@ -91,7 +88,6 @@ function About() {
     <section className="section" id="business">
       <div className="container">
         <Doodle kind="drips" style={{ top: -18, left: "14%" }} />
-        <Doodle kind="wave-sm" style={{ top: 36, right: "14%" }} />
         <Title path="recruit3:about.title" def="アイスラインとは？" mark="アイスライン" />
         <RichBody
           path="recruit3:about.body"
@@ -115,14 +111,14 @@ const STAT_DEFAULTS = [
   { circle: "[[特大,red:40]] 期連続黒字", h3: "自己資本比率は52.8%", p: "外部環境が揺れるなかでも、40期連続で黒字が続いています。" },
   { circle: "売上 [[特大,red:86]] 億円", h3: "4つの事業で着実に成長", p: "氷・氷菓の製造販売と業務用食材の卸という二本柱に、冷凍冷蔵倉庫とドライアイスを加えた4事業で、着実に成長してきました。" },
 ];
+/** 数字への注釈の既定値（4枚目＝昇給3年連続の「※一部職種例外あり」。デザイン支給準拠・コンソールで編集可） */
+const STAT_NOTE_DEFAULTS: Record<number, string> = { 3: "※一部職種例外あり" };
 
 function Stats() {
   const rep = repeatSel("recruit3:stats.count", 3, MAX_STATS, "数字タイルの数");
   return (
     <section className="section on-land" id="data">
       <div className="container">
-        <Doodle kind="dots" style={{ top: -10, right: "20%" }} />
-        <Doodle kind="circle" style={{ top: 48, left: "12%" }} />
         <Title path="recruit3:stats.head.jp" def="数字で見るアイスライン" mark="数字" />
         <div className="stats" data-reveal-group {...rep.attrs}>
           {Array.from({ length: MAX_STATS }, (_, i) => {
@@ -131,6 +127,7 @@ function Stats() {
             // アイコン：先頭5枚はデザイン支給のイラスト（創業・黒字・売上・昇給・定着）を常に使う。
             // 6枚目以降はコンソールで画像を設定すればそれを、無ければイラストを順繰りに表示（2026-09 改修）
             const icon = i >= STAT_DEFAULTS_ICONS ? img(`${base}.image`, "") : "";
+            const note = txt(`${base}.note`, STAT_NOTE_DEFAULTS[i] ?? "");
             return (
               <div key={i} className="stat reveal">
                 <div className="stat__icon">
@@ -144,6 +141,12 @@ function Stats() {
                 <div className="stat__label" {...ed(`${base}.h3`, `数字タイル${i + 1} 見出し`)}>
                   {txt(`${base}.h3`, d.h3)}
                 </div>
+                {/* 数字への注釈（任意。例：昇給の「※一部職種例外あり」） */}
+                {(note !== "" || EDIT_MODE) && (
+                  <div className="stat__note" {...ed(`${base}.note`, `数字タイル${i + 1} 注釈（任意）`)}>
+                    {note || "（注釈・任意）"}
+                  </div>
+                )}
                 <p className="stat__desc" style={{ whiteSpace: "pre-line" }} {...ed(`${base}.p`, `数字タイル${i + 1} 本文`, { multiline: true })}>
                   {txt(`${base}.p`, d.p)}
                 </p>
@@ -174,7 +177,6 @@ function Work() {
   return (
     <section className="section on-land" id="work">
       <div className="container">
-        <Doodle kind="wave" style={{ top: -16, left: "22%" }} />
         <Title path="recruit3:work.title" def="アイスラインの仕事" mark="仕事" />
         <p className="section__lead reveal" style={{ textAlign: "center", whiteSpace: "pre-line" }} {...ed("recruit3:work.strong", "アイスラインの仕事 リード", { multiline: true })}>
           {txt("recruit3:work.strong", "氷と食のフィールドで、暮らしの当たり前を支える。")}
@@ -201,7 +203,6 @@ function Culture() {
   return (
     <section className="section on-land" id="culture">
       <div className="container">
-        <Doodle kind="gem" style={{ top: -8, right: "16%" }} />
         <Kicker path="recruit3:culture.en" def="CULTURE" />
         <Title path="recruit3:culture.jp" def="アイスラインのカルチャー" mark="カルチャー" />
         <div className="culture" data-reveal-group {...rep.attrs}>
@@ -235,8 +236,6 @@ function People() {
   return (
     <section className="section on-land" id="people">
       <div className="container">
-        <Doodle kind="shaved" style={{ top: 20, left: "12%" }} />
-        <Doodle kind="sparkle-sm" style={{ top: -12, right: "16%" }} />
         <Kicker path="recruit3:people.en" def="PEOPLE" />
         <Title path="recruit3:people.jp" def="人を知る" mark="人" />
         <p className="section__lead reveal" style={{ textAlign: "center" }} {...ed("recruit3:people.lead", "人を知る リード")}>
@@ -450,8 +449,6 @@ function Jobs() {
   return (
     <section className="section on-land" id="jobs">
       <div className="container">
-        <Doodle kind="sparkle" style={{ top: -10, left: "18%" }} />
-        <Doodle kind="wave-sm" style={{ top: 52, right: "12%" }} />
         <Kicker path="recruit3:jobs.en" def="RECRUIT" />
         <Title path="recruit3:jobs.jp" def="募集職種一覧" mark="募集職種" />
         <p className="section__lead reveal" style={{ textAlign: "center" }} {...ed("recruit3:jobs.lead", "募集職種 リード")}>
@@ -500,7 +497,6 @@ function Videos() {
   return (
     <section className="section on-land" id="movie">
       <div className="container">
-        <Doodle kind="sparkle" style={{ top: -6, right: "22%" }} />
         <Kicker path="recruit3:videos.head.en" def="MOVIE" />
         <Title path="recruit3:videos.head.jp" def="はたらく現場の動画" mark="動画" />
         <div className="media-grid" data-reveal-group>

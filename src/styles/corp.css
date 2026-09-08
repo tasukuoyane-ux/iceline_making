@@ -1,0 +1,189 @@
+/* ============================================================
+   コーポレートサイト共通の追加スタイル（2026-09 改修）
+   デザイン支給 C:/Users/haya2/Downloads/ホームページメイカー (2)/…/result/Iceline_Hojin/site/assets/css/style.css
+   のうち、既存の Tailwind／theme.css では表せない部分（背景の微粒子・スクロール出現・
+   トップFVのパーティクル・下層ヒーロー・商品タイル）を移植したもの。
+   採用ページ（.rc 配下）は独自スタイル（recruit.css）なので、ここでは触らない。
+   ============================================================ */
+:root {
+  --site-bg: #F6F8F9;
+  /* 背景あしらい：FVより少し大きめの微粒子（薄グレー＋淡紅アクセント）。デザイン支給の --dust そのまま */
+  --dust: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cg fill-opacity='.5'%3E%3Crect x='22' y='34' width='6' height='6' fill='%23C7CFD4' transform='rotate(12 25 37)'/%3E%3Crect x='90' y='12' width='5' height='5' fill='%23D6DCE0' transform='rotate(-8 92 14)'/%3E%3Crect x='160' y='52' width='7' height='7' fill='%23C3D6E0' transform='rotate(20 163 55)'/%3E%3Crect x='240' y='26' width='5' height='5' fill='%23C7CFD4'/%3E%3Crect x='318' y='64' width='6' height='6' fill='%23D6DCE0' transform='rotate(-14 321 67)'/%3E%3Crect x='388' y='18' width='5' height='5' fill='%23C3D6E0' transform='rotate(8 390 20)'/%3E%3Crect x='56' y='120' width='5' height='5' fill='%23D6DCE0' transform='rotate(-6 58 122)'/%3E%3Crect x='140' y='150' width='6' height='6' fill='%23C7CFD4' transform='rotate(14 143 153)'/%3E%3Crect x='222' y='120' width='8' height='8' fill='%23EFB9BC' transform='rotate(-10 226 124)'/%3E%3Crect x='300' y='160' width='5' height='5' fill='%23C7CFD4' transform='rotate(6 302 162)'/%3E%3Crect x='382' y='140' width='6' height='6' fill='%23C3D6E0' transform='rotate(-16 385 143)'/%3E%3Crect x='30' y='230' width='7' height='7' fill='%23C3D6E0' transform='rotate(10 33 233)'/%3E%3Crect x='110' y='262' width='5' height='5' fill='%23C7CFD4' transform='rotate(-12 112 264)'/%3E%3Crect x='196' y='238' width='6' height='6' fill='%23D6DCE0' transform='rotate(4 199 241)'/%3E%3Crect x='280' y='270' width='5' height='5' fill='%23C7CFD4' transform='rotate(18 282 272)'/%3E%3Crect x='356' y='236' width='7' height='7' fill='%23D6DCE0' transform='rotate(-8 359 239)'/%3E%3Crect x='70' y='330' width='6' height='6' fill='%23C7CFD4' transform='rotate(8 73 333)'/%3E%3Crect x='150' y='368' width='5' height='5' fill='%23C3D6E0' transform='rotate(-18 152 370)'/%3E%3Crect x='238' y='344' width='6' height='6' fill='%23D6DCE0' transform='rotate(12 241 347)'/%3E%3Crect x='320' y='382' width='5' height='5' fill='%23C7CFD4' transform='rotate(-6 322 384)'/%3E%3Crect x='396' y='330' width='6' height='6' fill='%23C3D6E0' transform='rotate(16 399 333)'/%3E%3Crect x='18' y='392' width='5' height='5' fill='%23D6DCE0' transform='rotate(4 20 394)'/%3E%3Crect x='348' y='40' width='7' height='7' fill='%23EFB9BC' transform='rotate(22 351 43)'/%3E%3C/g%3E%3C/svg%3E");
+  --corp-ease: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ---------- ページ背景（旧 BG_Prism.jpg の代わり。淡いグレー地＋微粒子） ---------- */
+.site-bg {
+  background-color: var(--site-bg);
+  background-image: var(--dust);
+}
+
+/* ---------- スクロール出現（rule.md No.67：600ms ease-out・1回のみ） ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s ease-out, transform .6s ease-out;
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+.reveal-d1 { transition-delay: .08s; }
+.reveal-d2 { transition-delay: .16s; }
+.reveal-d3 { transition-delay: .24s; }
+
+/* ---------- 英字ラベル・見出し（デザイン支給の .en-label / .hero-title） ---------- */
+.en-label {
+  font-family: var(--font-accent);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: .18em;
+  color: var(--brand);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+/* ---------- トップFV（sticky＋微粒子キャンバス。本文は .fv-follow のカーテンとして上に被さる） ---------- */
+.fv {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--site-bg);
+  height: min(94vh, 860px);
+  min-height: 540px;
+}
+.fv-follow {
+  position: relative;
+  z-index: 2;
+  background-color: var(--site-bg);
+  background-image: var(--dust);
+}
+.fv-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fv-copy2 {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+/* 編集モードで文言をクリック選択できるように */
+.fv-copy2 [data-edit] { pointer-events: auto; }
+.fv-copy2-inner {
+  max-width: 1400px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  text-shadow: 0 0 12px rgba(246, 248, 249, .95), 0 0 4px rgba(246, 248, 249, .95);
+}
+@media (min-width: 1025px) { .fv-copy2-inner { padding-inline: 48px; } }
+/* MVテキスト（RichBody：行ごとの p）。1段落目＝メインコピー（[[特大:…]]＝3em → 30〜56px）、
+   2段落目以降＝リード（13〜14px・行間2.05）。デザイン支給の .fv-copy2 .t / .lead に相当 */
+.fv-copy2-rich p {
+  margin: 0;
+  white-space: pre-line;
+  font-size: 13px;
+  line-height: 2.05;
+  font-weight: 500;
+  color: rgba(10, 10, 10, .8);
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fvIn .9s var(--corp-ease) forwards;
+  animation-delay: .7s;
+}
+.fv-copy2-rich p:first-child {
+  font-family: var(--font-display);
+  font-size: clamp(10px, 1.333vw, 18.67px);
+  line-height: 1.4;
+  letter-spacing: .04em;
+  color: var(--ink);
+  animation-delay: .1s;
+}
+.fv-copy2-rich p:nth-child(2) { animation-delay: .25s; }
+.fv-copy2-rich p:nth-child(3) { animation-delay: .4s; }
+.fv-copy2-rich p:nth-child(4) { animation-delay: .55s; }
+@media (min-width: 1025px) {
+  .fv-copy2-rich p { font-size: 14px; }
+  .fv-copy2-rich p:first-child { font-size: clamp(10px, 1.333vw, 18.67px); }
+}
+@keyframes fvIn { to { opacity: 1; transform: none; } }
+@media (max-width: 767px) { .fv { height: min(86vh, 700px); } }
+
+/* ---------- 下層ヒーロー（微粒子キャンバス版。会社情報など） ---------- */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+}
+.page-hero--compact { min-height: 280px; }
+.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 粒状テクスチャ */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .055;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1150px;
+  margin-inline: auto;
+  padding: 56px 20px 72px;
+  text-align: center;
+}
+@media (min-width: 1025px) { .hero-inner { padding-inline: 32px; } }
+.hero-inner .en-label { margin-bottom: 12px; }
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1.4;
+  letter-spacing: .02em;
+}
+
+/* ---------- 商品タイル（トップ PRODUCTS：ホバーで説明を表示） ---------- */
+.prod-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 32px;
+}
+@media (min-width: 768px) { .prod-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+.prod-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .1);
+}
+.prod-tile__img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+.prod-tile__btn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.prod-info {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, .92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s var(--corp-ease);
+}
+@media (hover: hover) { .prod-tile:hover .prod-info { opacity: 1; } }
+.prod-info h3 { font-size: 16px; font-weight: 700; line-height: 1.5; }
+.prod-info p { margin-top: 8px; font-size: 12px; line-height: 1.7; color: rgba(10, 10, 10, .8); white-space: pre-line; }
+.prod-name-sp { padding: 10px 12px; font-size: 13px; border-top: 1px solid rgba(0, 0, 0, .1); text-align: left; }
+@media (min-width: 768px) { .prod-name-sp { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .fv-copy2-rich p { animation: none; opacity: 1; transform: none; }
+}

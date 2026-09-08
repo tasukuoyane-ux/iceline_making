@@ -25,8 +25,9 @@ export function News() {
             key={c}
             onClick={() => setCat(c)}
             className={cn(
-              "border px-4 py-2 transition-colors",
-              cat === c ? "border-brand bg-brand text-brand-foreground" : "border-border bg-white hover:border-brand"
+              // カテゴリフィルタ（デザイン支給の .f-pill：丸ピル）
+              "rounded-full border px-4 py-1.5 transition-colors",
+              cat === c ? "border-brand bg-brand text-brand-foreground" : "border-border bg-white text-foreground hover:border-brand hover:text-brand"
             )}
             style={{ fontSize: 13 }}
           >

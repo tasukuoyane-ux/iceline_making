@@ -5,15 +5,19 @@
 //   第2幕 衝撃波＋3D破片の爆散
 //   第3幕 風に流される降雪と積雪
 //   第4幕 薄緑の陸地（数字セクション以降）をトラックが周回し轍を残す
-// mode="ambient"（記事・職種詳細）では、積雪後の静かな情景を時間駆動で描く。
+// mode="ambient" では、積雪後の静かな情景を時間駆動で描く。
+// mode="land"（記事・職種詳細。2026-09 改修）では、画面上端1割の空を除き全面が緑の陸地で、
+// 雪（降雪・積雪・停車トラック）は無く、蛇行トラック3台と歩く人・耕す人だけが動く。
 //
 // 2026-09 改修（移植時）:
 //  - 衝突時の白いストロボ点滅は「チカチカする」ため廃止した（元 main.js の strobe ブロック）
 //  - 背景線画と重なるテキストの退避窓（.is-over-art）は、重なり判定が数フレーム連続で
 //    変わったときだけ切り替える（ヒステリシス）ようにし、境界付近での明滅を防ぐ
 //  - React のアンマウントで確実に止められるよう、rAF・イベントを stop() で解除する
+//  - 氷（多面体）が重なった箇所だけ文字色を Ink に切り替える（.ice-aware / .is-over-ice。
+//    ヒーロー・②は退避窓を出さない代わりにこの色替えで可読性を守る。デザイン支給の更新分）
 
-export type CanvasMode = "story" | "ambient";
+export type CanvasMode = "story" | "ambient" | "land";
 
 export interface MountOptions {
   canvas: HTMLCanvasElement;
@@ -46,12 +50,15 @@ interface Region {
   h: number;
 }
 
-const INTRO_STEP = 100; // 1面あたりのms（ぱきっ間隔）
-const INTRO_PRE = 400; // 水色だけを見せる導入のms
+// オープニングは約1.2秒（導入150ms／1面45ms×20／余韻300ms）— すぐ凍ってすぐコピー表示（2026-09 改修）
+const INTRO_STEP = 45; // 1面あたりのms（ぱきっ間隔）
+const INTRO_PRE = 150; // 水色だけを見せる導入のms
+const INTRO_TAIL = 300; // 完成後の余韻ms
 
 export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
   const { canvas, mode, root } = opts;
   const ambient = mode === "ambient";
+  const landMode = mode === "land";
   const reduceMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ctx = canvas.getContext("2d");
   let stopped = false;
@@ -190,7 +197,7 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
   let introBuild: { start: number } | null = null;
 
   function progress() {
-    if (ambient) return 1;
+    if (ambient || landMode) return 1;
     const { y, max } = opts.getScroll();
     return max > 0 ? clamp01(y / max) : 0;
   }
@@ -231,6 +238,8 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
   }
 
   let artRegions: Region[] = [];
+  /* 氷（多面体）そのものの領域（ヒーロー・②の文字色替え用） */
+  let gemRegion: Region | null = null;
 
   /* ---------- 薄緑の陸地 ---------- */
   const landEl = opts.landAnchorId ? (root.querySelector<HTMLElement>("#" + opts.landAnchorId) ?? null) : null;
@@ -420,6 +429,7 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
     const cp = renderGem(cx, cy, an.x, oy + bob, z, rx, ry, rz, 1);
     const rad = Math.min(W, H) * 0.15 * 1.7 * cp.s;
     artRegions.push({ x: cp.x - rad, y: cp.y - rad, w: rad * 2, h: rad * 2 });
+    gemRegion = { x: cp.x - rad, y: cp.y - rad, w: rad * 2, h: rad * 2 };
   }
 
   /* ---------- 第1幕: ダイブ落下 ---------- */
@@ -473,6 +483,7 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
     }
     const rad = Math.min(W, H) * 0.15 * 1.7 * cp0.s;
     artRegions.push({ x: cp0.x - rad, y: cp0.y - rad, w: rad * 2, h: rad * 2 });
+    gemRegion = { x: cp0.x - rad, y: cp0.y - rad, w: rad * 2, h: rad * 2 };
   }
 
   /* ---------- 衝撃波 ---------- */
@@ -853,8 +864,18 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
   // 要素ごとの「重なり判定が連続した回数」。閾値を超えたときだけ状態を切り替える（明滅防止）
   const overCount = new WeakMap<HTMLElement, number>();
   const HYST = 4;
+  /* 氷（多面体）が重なった箇所だけ文字色を Ink に切り替える対象
+     （ヒーロー・②は退避窓を出さない代わりに、この色替えで可読性を守る） */
+  let iceEls: HTMLElement[] = [];
   function rescan() {
     artEls.forEach((el) => el.classList.remove("art-aware", "is-over-art"));
+    iceEls.forEach((el) => el.classList.remove("ice-aware", "is-over-ice"));
+    iceEls = landMode
+      ? []
+      : Array.from(root.querySelectorAll<HTMLElement>(".hero__sub, .hero__body, #business p, #business .section__title")).filter(
+          (el) => !el.querySelector(".outline-text"),
+        );
+    iceEls.forEach((el) => el.classList.add("ice-aware"));
     artEls = Array.from(
       root.querySelectorAll<HTMLElement>("h1, h2, h3, h4, p, figcaption, .stat__number, .chip, .flow__step, .acc__head, .field__label"),
     ).filter(
@@ -879,6 +900,20 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
     if (x2 <= x || y2 <= y) return 0;
     const area = (r.right - r.left) * (r.bottom - r.top);
     return area > 0 ? ((x2 - x) * (y2 - y)) / area : 0;
+  }
+  function applyIceSwap(region: Region | null, viewH: number) {
+    for (const el of iceEls) {
+      if (!region) {
+        el.classList.remove("is-over-ice");
+        continue;
+      }
+      const r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > viewH || r.width === 0) {
+        el.classList.remove("is-over-ice");
+        continue;
+      }
+      el.classList.toggle("is-over-ice", rectsOverlapRatio(r, region) > 0.08);
+    }
   }
   function applyOverlaps(regions: Region[], viewH: number) {
     for (const el of artEls) {
@@ -917,12 +952,13 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
     handoffAt = performance.now() - 2000;
     opts.onIntroDone?.();
   }
-  if (opts.intro && !ambient) {
+  if (opts.intro && !ambient && !landMode) {
     introBuild = { start: performance.now() + INTRO_PRE };
   } else {
     handoffAt = performance.now();
   }
-  const introGuard = window.setTimeout(finishIntroBuild, INTRO_PRE + 20 * INTRO_STEP + 1400);
+  /* 保険（描画が止まっていても本編へ進める） */
+  const introGuard = window.setTimeout(finishIntroBuild, INTRO_PRE + 20 * INTRO_STEP + INTRO_TAIL + 500);
 
   /* ---------- メインループ ---------- */
   function draw() {
@@ -935,11 +971,23 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
     const p = ambient ? 1 : smooth;
     c.clearRect(0, 0, W, H);
     artRegions = [];
+    gemRegion = null;
+
+    /* 職種詳細・記事（land）: 全面陸地（空は上端1割のみ）・雪なし。トラックと人だけが動く */
+    if (landMode) {
+      landHorizon = H * 0.1;
+      paintLandAt(landHorizon);
+      drawLandTrucks();
+      drawPeople(landHorizon);
+      raf = requestAnimationFrame(draw);
+      return;
+    }
+
     const cx = W / 2, cy = H * 0.46;
 
     if (introBuild) {
       const bt = time - introBuild.start;
-      if (bt >= 20 * INTRO_STEP + 900) {
+      if (bt >= 20 * INTRO_STEP + INTRO_TAIL) {
         finishIntroBuild();
       } else {
         if (bt > 0) {
@@ -947,7 +995,7 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
           const bFlash = Math.max(0, 1 - (bt - (bCount - 1) * INTRO_STEP) / 240);
           const bRot = time * 0.00045;
           const bAn = gemAnchor(cx, cy);
-          const settle = clamp01((bt - 20 * INTRO_STEP) / 600);
+          const settle = clamp01((bt - 20 * INTRO_STEP) / 300);
           renderGem(cx, cy, bAn.x, bAn.y + Math.sin(time * 0.0016) * 9 * settle, 220, bRot, bRot * 1.4, Math.sin(time * 0.0003) * 0.25, 1, { count: bCount, flash: bFlash });
         }
         drawFlakes(0.3);
@@ -984,7 +1032,10 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
 
     // ※ 元デザインの「衝突時の白ストロボ点滅」はここにあったが、チカチカするため廃止（2026-09）
 
-    if (frame % 3 === 0) applyOverlaps(artRegions, H);
+    if (frame % 3 === 0) {
+      applyOverlaps(artRegions, H);
+      applyIceSwap(gemRegion, H);
+    }
     raf = requestAnimationFrame(draw);
   }
   raf = requestAnimationFrame(draw);
@@ -996,6 +1047,7 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
       window.clearTimeout(introGuard);
       window.removeEventListener("resize", resize);
       artEls.forEach((el) => el.classList.remove("art-aware", "is-over-art"));
+      iceEls.forEach((el) => el.classList.remove("ice-aware", "is-over-ice"));
     },
     skipIntro() {
       finishIntroBuild();

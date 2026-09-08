@@ -17,11 +17,13 @@ interface SectionProps {
 // 熱量プロファイルから余白・背景を派生させるセクションラッパ。
 // メインカラムの最大幅は 1150px（2026-09 改修：従来の 1400px から約 70/85 に縮小。
 // ヘッダー・フッターは従来幅のまま。MV 等で直接 max-w を書いているページも同じ値に揃えること）
+// 内側のコンテナには `.reveal`（スクロール出現：src/spa/lib/reveal.ts）を付け、
+// セクションが見えたときに下からふわっと現れる（2026-09 改修・デザイン支給準拠）。
 export function Section({ heat, children, className, contained = true, compact, id }: SectionProps) {
   const s = heatStyles(heat);
   return (
     <section id={id} className={cn(compact ? s.sectionPaddingCompact : s.sectionPadding, s.surface, className)}>
-      <div className={cn(contained && "mx-auto max-w-[1150px] px-5 pc:px-8")}>{children}</div>
+      <div className={cn("reveal", contained && "mx-auto max-w-[1150px] px-5 pc:px-8")}>{children}</div>
     </section>
   );
 }

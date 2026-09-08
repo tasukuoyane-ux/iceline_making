@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlayCircle, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
@@ -36,8 +36,11 @@ export function Videos() {
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 {...edImg(`videos:${v.id}:thumb`)}
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-ink/30 transition-colors group-hover:bg-ink/45">
-                <PlayCircle size={56} className="text-white" />
+              {/* 再生ボタン（デザイン支給の .video-card .play：赤い円） */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand/90 transition-transform group-hover:scale-110">
+                  <svg viewBox="0 0 16 16" className="ml-0.5 h-5 w-5 fill-white" aria-hidden><path d="M4 2l10 6-10 6z" /></svg>
+                </span>
               </div>
               <span className="absolute bottom-3 right-3 rounded bg-ink/80 px-2 py-0.5 text-white" style={{ fontSize: 12 }} {...ed(`videos:${v.id}:duration`)}>{v.duration}</span>
             </div>
