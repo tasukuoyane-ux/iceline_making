@@ -122,7 +122,11 @@ function Locations() {
   );
 }
 
+// 沿革の最大行数（コンソールの「追加」で増やせる上限）
+const MAX_HISTORY = 30;
+
 export function Company() {
+  const historyRep = repeatSel("company:history.count", HISTORY.length, MAX_HISTORY, "沿革の行数");
   return (
     <>
       <section className="relative h-[40vh] min-h-[300px] w-full overflow-hidden bg-ink">
@@ -188,9 +192,10 @@ export function Company() {
           style={{ ["--ratio" as any]: ratioCols("company:history.ratio", 50, false) }}
           {...ratioAttrs("company:history.ratio", 50, false)}
         >
-          <ol className="border-l-2 border-border pl-6">
-            {HISTORY.map((h, i) => (
-              <li key={h.year} className="relative mb-8 last:mb-0">
+          {/* 沿革の行はコンソールの「追加」「削除」で 1〜MAX_HISTORY 行に変更できる（既定は同梱データの行数。2026-09 改修） */}
+          <ol className="border-l-2 border-border pl-6" {...historyRep.attrs}>
+            {Array.from({ length: MAX_HISTORY }, (_, i) => HISTORY[i] ?? { year: "（年）", text: "（内容）" }).map((h, i) => (
+              <li key={i} className="relative mb-8 last:mb-0">
                 <span className="absolute -left-[31px] top-1 h-3 w-3 rounded-full bg-brand" />
                 <div className="flex flex-col gap-1 tab:flex-row tab:gap-6">
                   <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 20, fontWeight: 700 }} {...ed(`company:history.${i}.year`, "年")}>{txt(`company:history.${i}.year`, h.year)}</span>

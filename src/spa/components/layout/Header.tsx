@@ -172,7 +172,7 @@ export function Header() {
             <Link
               to="/recruit"
               onClick={startCtaTransition}
-              className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-[#9CDFF1] hover:text-[#16232b]"
+              className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-[#009BFD] hover:text-white"
               style={{ fontSize: 14 }}
             >
               <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
@@ -241,7 +241,7 @@ export function Header() {
                 <Link
                   to="/recruit"
                   onClick={startCtaTransition}
-                  className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground transition-colors hover:bg-[#9CDFF1] hover:text-[#16232b]"
+                  className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground transition-colors hover:bg-[#009BFD] hover:text-white"
                 >
                   <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
                 </Link>
