@@ -45,10 +45,10 @@ export function useGoJobs() {
   };
 }
 
-function RecruitHeader({ scrolled }: { scrolled: boolean }) {
+function RecruitHeader({ scrolled, hidden }: { scrolled: boolean; hidden: boolean }) {
   const { goJobs } = useRecruitFrame();
   return (
-    <header className={"header" + (scrolled ? " is-scrolled" : "")}>
+    <header className={"header" + (scrolled ? " is-scrolled" : "") + (hidden ? " is-hidden" : "")}>
       <Link to="/" className="header__logo" aria-label="株式会社アイスライン">
         <img className="header__logoimg" src={img("recruit3:header.logo", RECRUIT_LOGO)} alt="ICELINE" {...edImg("recruit3:header.logo", "採用ページ ロゴ（白）")} />
         <small {...ed("recruit3:header.sub", "ロゴ横の小文字")}>{txt("recruit3:header.sub", "採用サイト")}</small>
@@ -191,6 +191,8 @@ export function RecruitFrame({
   const [phase, setPhase] = useState<"pending" | "intro" | "ready">(intro && !overlay ? "pending" : "ready");
   const introDecided = useRef<boolean | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  // スクロールダウンで上へ消え、スクロールアップで戻る（サイト共通ヘッダーと同じ挙動。2026-09 改修で復帰）
+  const [hidden, setHidden] = useState(false);
   const goJobs = useGoJobs();
 
   useLayoutEffect(() => {
@@ -244,11 +246,27 @@ export function RecruitFrame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAmbient, land, landAnchorId]);
 
-  // ヘッダーの帯（スクロール後）
+  // ヘッダーの帯（スクロール後）と、スクロール方向による表示／非表示。
+  // ページ上部（80px 以内）では常に表示。小さな揺れで震えないよう 6px 以上の移動で方向を判定する
   useEffect(() => {
     if (overlay) return;
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const d = y - lastY;
+        setScrolled(y > 40);
+        if (y < 80) setHidden(false);
+        else if (d > 6) setHidden(true);
+        else if (d < -6) setHidden(false);
+        lastY = y;
+        ticking = false;
+      });
+    };
+    setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [overlay]);
@@ -263,7 +281,7 @@ export function RecruitFrame({
         <RoughFilterDefs />
         <div className="bg-depth" />
         <canvas ref={canvasRef} id={overlay ? undefined : "story-canvas"} className="story-canvas" />
-        {!overlay && <RecruitHeader scrolled={scrolled} />}
+        {!overlay && <RecruitHeader scrolled={scrolled} hidden={hidden} />}
         {!overlay && <FloatVideo />}
         {/* land モードでは本文全体を陸地用（黒文字）にする */}
         <main className={"page" + (land ? " on-land" : "")}>{children}</main>

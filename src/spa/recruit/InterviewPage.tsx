@@ -3,7 +3,9 @@
 // 合わせて描画する。本文ブロックは
 //   H2 → セクション見出し（波線マーカー）／ H3 → 紙窓の見出し／ 段落 → 紙窓の本文
 //   画像・動画 → 氷フレームの写真枠／ 求人エントリーリンク → 赤ボタン
-// に対応させる。背景は職種詳細と同じ land モード（全面が緑の陸地・雪なし・文字は黒基調。2026-09 改修）。
+// に対応させる。背景は下層共通のアンビエント（青空＋降雪、下半分に陸地）。
+// ※ 2026-09-08 に一度 land モード（全面緑）へ変えたが、下部CTAが青空に透けて置かれる元の見え方へ
+//    戻す指示（ユーザー指定）により ambient に復帰した。land は職種詳細オーバーレイのみ。
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -127,7 +129,7 @@ export function InterviewPage() {
   const idx = Math.max(0, items.findIndex((x) => x.id === id));
 
   return (
-    <RecruitFrame land>
+    <RecruitFrame ambient>
       {!iv ? (
         ready ? (
           <div className="iv-notfound">

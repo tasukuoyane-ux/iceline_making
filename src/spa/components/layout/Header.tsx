@@ -56,6 +56,7 @@ export function Header() {
   // このヘッダーは描画されない（App.tsx で切り替え。2026-09 改修）
   const logoSrc = img("header:logo", logo);
 
+  // 「採用情報」ボタンのホバー色はグレー（#666666。2026-09 改修：採用ページの青から変更）
   // 「採用情報」CTAクリック時の円形トランジション：
   // ボタン中心から採用ページの背景色（#009BFD）の真円がイーズインしながら1.2秒でビューポート全体を
   // 埋め尽くす。アニメーションは遷移前のページの上（ナビゲーションの下）で行われ、
@@ -172,7 +173,7 @@ export function Header() {
             <Link
               to="/recruit"
               onClick={startCtaTransition}
-              className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-[#009BFD] hover:text-white"
+              className="ml-3 inline-flex items-center bg-brand px-5 py-2.5 text-brand-foreground transition-colors hover:bg-[#666666] hover:text-white"
               style={{ fontSize: 14 }}
             >
               <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
@@ -241,7 +242,7 @@ export function Header() {
                 <Link
                   to="/recruit"
                   onClick={startCtaTransition}
-                  className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground transition-colors hover:bg-[#009BFD] hover:text-white"
+                  className="mt-4 inline-flex items-center justify-center bg-brand py-3.5 text-brand-foreground transition-colors hover:bg-[#666666] hover:text-white"
                 >
                   <span {...ed("header:cta.label", "採用CTA")}>{txt("header:cta.label", "採用情報")}</span>
                 </Link>

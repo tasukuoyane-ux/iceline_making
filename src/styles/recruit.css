@@ -123,8 +123,10 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px 24px;
-  transition: background var(--dur-hover) var(--ease), backdrop-filter var(--dur-hover) var(--ease);
+  transition: background var(--dur-hover) var(--ease), backdrop-filter var(--dur-hover) var(--ease), transform 0.3s var(--ease);
 }
+/* スクロールダウンで上へスライドアウト（RecruitFrame の hidden 状態） */
+.rc .header.is-hidden { transform: translateY(-100%); }
 .rc .header.is-scrolled {
   background: rgba(0, 155, 253, 0.82);
   backdrop-filter: blur(8px);
