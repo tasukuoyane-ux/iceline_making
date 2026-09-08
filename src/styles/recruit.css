@@ -1360,6 +1360,25 @@
 .rc .deck-dots button { width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0; cursor: pointer; background: rgba(31, 36, 48, 0.25); transition: background var(--dur-hover) var(--ease), width var(--dur-hover) var(--ease); }
 .rc .deck-dots button.is-on { background: var(--ice-blue); width: 22px; border-radius: 999px; }
 .rc .media-frame--movie { max-width: 800px; margin: 64px auto 0; width: 100%; }
+/* カンパニーデック：画像外の全画面ボタン */
+.rc .deck-actions { display: flex; justify-content: center; margin-top: 20px; }
+.rc .deck-full-btn { background: var(--ice-blue); color: var(--snow); }
+.rc .deck-full-btn:hover { background: var(--deep-current); }
+/* カンパニーデックの全画面ビューア（body 直下へポータル描画） */
+.rc-deck-full { position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 40, 80, 0.94); padding: 56px 16px 40px; }
+.rc-deck-full__stage { position: relative; width: 100%; max-width: 1600px; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.rc-deck-full__img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 12px; }
+.rc-deck-full__close { position: absolute; top: 16px; right: 16px; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255, 255, 255, 0.15); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.rc-deck-full__close:hover { background: rgba(255, 255, 255, 0.3); }
+.rc-deck-full__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border-radius: 50%; border: none; background: rgba(255, 255, 255, 0.9); color: #009BFD; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.rc-deck-full__nav:hover { background: #fff; }
+.rc-deck-full__nav--prev { left: 8px; }
+.rc-deck-full__nav--next { right: 8px; }
+.rc-deck-full__count { margin-top: 14px; color: #fff; font-family: "Zen Maru Gothic", sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.08em; }
+@media (max-width: 768px) {
+  .rc-deck-full { padding: 64px 8px 32px; }
+  .rc-deck-full__nav { width: 40px; height: 40px; }
+}
 .rc .media-frame--deck { max-width: 720px; margin: 0 auto; width: 100%; }
 
 /* 編集モード専用の補助枠（デッキ・MV等のサムネイル列） */

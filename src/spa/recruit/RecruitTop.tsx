@@ -317,13 +317,26 @@ const MAX_DECK = 20;
 function Deck() {
   const all = Array.from({ length: MAX_DECK }, (_, i) => ({ i, src: img(`recruit3:deck.${i}.image`, "") }));
   const slides = all.filter((s) => s.src !== "");
+  // 既定は1枚目。自動送りはしない（前後ボタン・ドット・全画面表示で操作。2026-09 改修）
   const [idx, setIdx] = useState(0);
   const cur = slides.length > 0 ? ((idx % slides.length) + slides.length) % slides.length : 0;
+  // 全画面表示（画面いっぱいのビューア。Esc／背景クリックで閉じる、←→で送る）
+  const [full, setFull] = useState(false);
   useEffect(() => {
-    if (slides.length < 2) return;
-    const t = setInterval(() => setIdx((v) => v + 1), 5000);
-    return () => clearInterval(t);
-  }, [slides.length]);
+    if (!full) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFull(false);
+      else if (e.key === "ArrowRight") setIdx((v) => v + 1);
+      else if (e.key === "ArrowLeft") setIdx((v) => v - 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [full]);
   const lead = txt("recruit3:deck.lead", "");
   if (slides.length === 0 && !EDIT_MODE) return null;
   return (
@@ -366,6 +379,41 @@ function Deck() {
             ))}
           </div>
         )}
+        {/* 画像の外に置く全画面ボタン（2026-09 改修） */}
+        {slides.length > 0 && (
+          <div className="deck-actions">
+            <button type="button" className="btn btn--corp btn--sm deck-full-btn" onClick={() => setFull(true)}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" /></svg>
+              <span {...ed("recruit3:deck.fullLabel", "デッキ 全画面ボタン文言")}>{txt("recruit3:deck.fullLabel", "全画面で見る")}</span>
+            </button>
+          </div>
+        )}
+        {full &&
+          slides.length > 0 &&
+          createPortal(
+            <div className="rc-deck-full" role="dialog" aria-modal="true" aria-label="カンパニーデック（全画面）" onClick={() => setFull(false)}>
+              <button type="button" className="rc-deck-full__close" aria-label="閉じる" onClick={() => setFull(false)}>
+                <X size={28} />
+              </button>
+              <div className="rc-deck-full__stage" onClick={(e) => e.stopPropagation()}>
+                <ImageWithFallback src={slides[cur].src} alt={`カンパニーデック ${cur + 1}枚目`} sizes="100vw" className="rc-deck-full__img" />
+                {slides.length > 1 && (
+                  <>
+                    <button type="button" className="rc-deck-full__nav rc-deck-full__nav--prev" aria-label="前のスライド" onClick={() => setIdx((v) => v - 1)}>
+                      <svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 3L5 9l6 6" /></svg>
+                    </button>
+                    <button type="button" className="rc-deck-full__nav rc-deck-full__nav--next" aria-label="次のスライド" onClick={() => setIdx((v) => v + 1)}>
+                      <svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3l6 6-6 6" /></svg>
+                    </button>
+                  </>
+                )}
+              </div>
+              <p className="rc-deck-full__count" onClick={(e) => e.stopPropagation()}>
+                {cur + 1} / {slides.length}
+              </p>
+            </div>,
+            document.body,
+          )}
         {EDIT_MODE && (
           <div className="edit-strip">
             {all.map((s) => (
