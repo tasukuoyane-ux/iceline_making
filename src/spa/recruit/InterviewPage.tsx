@@ -36,8 +36,20 @@ function renderInline(text: string): ReactNode[] {
 }
 
 /** ブロック列を「セクション（H2）→ 紙窓（H3＋段落）／写真枠／リンク」に組み直して描画 */
-function Article({ blocks }: { blocks: Block[] }) {
+/** 記事内の「求人エントリーリンク」ブロックをボタンにする（記事末尾の CTA 行で使う） */
+function RecruitLinkButton({ b }: { b: Extract<Block, { type: "recruitLink" }> }) {
   const { jobs } = useRecruitData();
+  const job = jobs.find((j) => j.id === b.job);
+  return (
+    <Link to={`/recruit?job=${encodeURIComponent(b.job)}&entry=1`} className="btn btn--entry">
+      {b.label || (job ? `${job.title}にエントリーする` : "この職種にエントリーする")}
+    </Link>
+  );
+}
+
+// 「求人エントリーリンク」ブロックは本文の流れの中には出さず、記事末尾の CTA 行に
+// 「採用情報へ戻る」と横並びで置く（2026-09-09 ユーザー指示。汎用の「エントリー」ボタンは廃止）
+function Article({ blocks }: { blocks: Block[] }) {
   type Sec = { title?: string; items: ReactNode[] };
   const secs: Sec[] = [];
   let cur: Sec = { items: [] };
@@ -92,15 +104,8 @@ function Article({ blocks }: { blocks: Block[] }) {
         </figure>,
       );
     } else if (b.type === "recruitLink") {
+      // 紙窓を区切るだけ。ボタン自体は記事末尾の CTA 行（InterviewPage）で描画する
       flushWin();
-      const job = jobs.find((j) => j.id === b.job);
-      cur.items.push(
-        <p key={key++} className="iv-link reveal">
-          <Link to={`/recruit?job=${encodeURIComponent(b.job)}&entry=1`} className="btn btn--entry">
-            {b.label || (job ? `${job.title}にエントリーする` : "この職種にエントリーする")}
-          </Link>
-        </p>,
-      );
     }
   }
   flushWin();
@@ -189,9 +194,14 @@ export function InterviewPage() {
 
           <div className="container iv-body">
             <Article blocks={iv.blocks} />
+            {/* 記事末尾の CTA 行：「この職種にエントリーする」（記事の求人エントリーリンク）＋「採用情報へ戻る」 */}
             <div className="iv-actions reveal">
+              {iv.blocks
+                .filter((b): b is Extract<Block, { type: "recruitLink" }> => b.type === "recruitLink")
+                .map((b, i) => (
+                  <RecruitLinkButton key={i} b={b} />
+                ))}
               <Link to="/recruit#people" className="btn btn--corp">採用情報へ戻る</Link>
-              <Link to="/recruit#jobs" className="btn btn--entry">エントリー</Link>
             </div>
           </div>
         </>

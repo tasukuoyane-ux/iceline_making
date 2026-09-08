@@ -886,7 +886,8 @@ export function mountRecruitCanvas(opts: MountOptions): CanvasHandle {
         !el.closest(".hero") &&
         !el.closest("#business") &&
         !el.closest(".on-land") &&
-        !el.closest(".culture__item, .p-card, .acc, .job-row, .benefit, .entry-form, .entry-done, .media-frame, .iv-block, .iv-meta, .ov-bar, .ov-hero"),
+        // ボタン行（記事末尾の CTA・求人エントリーリンク）は退避窓（座布団と枠）を出さない
+        !el.closest(".culture__item, .p-card, .acc, .job-row, .benefit, .entry-form, .entry-done, .media-frame, .iv-block, .iv-meta, .ov-bar, .ov-hero, .iv-link, .iv-actions"),
     );
     artEls.forEach((el) => el.classList.add("art-aware"));
   }
