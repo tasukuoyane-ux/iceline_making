@@ -2,7 +2,6 @@ import { motion } from "motion/react";
 import { ExternalLink, MapPin } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
-import { ParticleHero } from "../components/common/ParticleHero";
 import { HEAT } from "../data/heatMap";
 import { IMG } from "../data/images";
 import { CEO_MESSAGE, COMPANY_PROFILE, HISTORY, PHILOSOPHY, CSR } from "../data/company";
@@ -130,11 +129,28 @@ export function Company() {
   const historyRep = repeatSel("company:history.count", HISTORY.length, MAX_HISTORY, "沿革の行数");
   return (
     <>
-      {/* ヒーロー（2026-09 改修）：デザイン支給の下層ヒーロー。微粒子が本社ビル・結晶のシルエットを形作る */}
-      <ParticleHero shapes={["building", "crystal"]} compact>
-        <div className="en-label" {...ed("sectionEn:company.mv", "英語見出し（補助）")}>{txt("sectionEn:company.mv", "COMPANY")}</div>
-        <h1 className="hero-title" {...ed("company:hero.title", "会社情報")}>{txt("company:hero.title", "会社情報")}</h1>
-      </ParticleHero>
+      {/* メインビジュアル（2026-09-09 改修）：各事業ページと同じ画像背景＋中央タイトル。
+          画像はコンソールの「メインビジュアル画像」で差し替えられる（既定は倉庫の写真） */}
+      <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
+        <ImageWithFallback
+          src={img("company:hero.image", IMG.warehouse)}
+          alt={txt("company:hero.title", "会社情報")}
+          loading="eager"
+          fetchPriority="high"
+          className="absolute inset-0 h-full w-full object-cover"
+          {...edImg("company:hero.image", "メインビジュアル画像")}
+        />
+        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
+          <div style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
+            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:company.mv", "英語見出し（補助）")}>
+              {txt("sectionEn:company.mv", "COMPANY")}
+            </p>
+            <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed("company:hero.title", "ページタイトル")}>
+              {txt("company:hero.title", "会社情報")}
+            </h1>
+          </div>
+        </div>
+      </section>
 
       {/* 代表メッセージ（会社情報の熱量ピーク） */}
       <Section heat={HEAT.ceoMessage}>
