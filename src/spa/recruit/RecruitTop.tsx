@@ -254,8 +254,10 @@ function People() {
             const r = splitRole(iv.role);
             return (
               <article key={iv.id} className="p-card reveal">
-                <div className="p-card__photo">
+                {/* 写真は上揃え（object-position: top）。2枚目のアイキャッチがある記事はホバーでフェード切替（2026-09 改修） */}
+                <div className={"p-card__photo" + (iv.image2 ? " has-alt" : "")}>
                   {iv.image ? <ImageWithFallback src={iv.image} alt={iv.name} /> : <PersonArt variant={i} />}
+                  {iv.image2 && <ImageWithFallback src={iv.image2} alt="" className="p-card__photo-alt" />}
                   {(r.job || iv.category) && <span className="p-card__job">{r.job || iv.category}</span>}
                 </div>
                 <div className="p-card__body">

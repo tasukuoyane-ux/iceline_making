@@ -47,6 +47,9 @@ const APPLIED_PROBES = {
   // 採用記事の自己紹介・趣味・アイキャッチ動画: interviews.video_src 列があれば適用済み
   '20260901_040403_interview_eyecatch_video':
     "select exists(select 1 from information_schema.columns where table_schema='public' and table_name='interviews' and column_name='video_src') as ok",
+  // 採用記事の2枚目アイキャッチ: interviews.image2_src 列があれば適用済み
+  '20260909_033309_interview_image2':
+    "select exists(select 1 from information_schema.columns where table_schema='public' and table_name='interviews' and column_name='image2_src') as ok",
 }
 
 /** DB を確認・修復し、migrate の実行が必要かを返す。 */

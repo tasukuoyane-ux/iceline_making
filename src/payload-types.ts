@@ -278,6 +278,14 @@ export interface Interview {
    */
   imageSrc?: string | null;
   /**
+   * 採用ページ「人を知る」のカードにマウスを載せたとき、メイン画像からこの画像へフェードで切り替わります。未設定なら切り替わりません。
+   */
+  image2?: (number | null) | Media;
+  /**
+   * 通常は上の「アイキャッチ画像（2枚目）」を使用。両方ある場合はアップロード画像が優先されます。
+   */
+  image2Src?: string | null;
+  /**
    * mp4 等の動画ファイル。設定すると記事のアイキャッチに再生ボタンが表示され、クリックで画面中央に大きく再生されます。「人を知る」カードには動画の1フレーム目（メイン画像がある場合はその画像）が表示されます。
    */
   video?: (number | null) | Media;
@@ -543,6 +551,8 @@ export interface InterviewsSelect<T extends boolean = true> {
   hobby?: T;
   image?: T;
   imageSrc?: T;
+  image2?: T;
+  image2Src?: T;
   video?: T;
   videoSrc?: T;
   blocks?:

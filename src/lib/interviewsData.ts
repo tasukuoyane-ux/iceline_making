@@ -21,6 +21,8 @@ export interface InterviewItemData {
   /** 趣味（アイキャッチ内に表示・任意） */
   hobby: string
   image: string
+  /** 2枚目のアイキャッチ（「人を知る」カードのホバー時に表示。空なら切り替えなし） */
+  image2: string
   /** アイキャッチ動画のURL（アップロードファイル or 外部URL。空なら動画なし） */
   video: string
   category: string
@@ -29,6 +31,7 @@ export interface InterviewItemData {
 
 export function toInterviewItem(doc: any): InterviewItemData {
   const media = typeof doc.image === 'object' && doc.image ? doc.image : null
+  const media2 = typeof doc.image2 === 'object' && doc.image2 ? doc.image2 : null
   const vmedia = typeof doc.video === 'object' && doc.video ? doc.video : null
   return {
     id: String(doc.slug ?? doc.id),
@@ -40,6 +43,7 @@ export function toInterviewItem(doc: any): InterviewItemData {
     intro: String(doc.intro ?? ''),
     hobby: String(doc.hobby ?? ''),
     image: String(media?.url || doc.imageSrc || ''),
+    image2: String(media2?.url || doc.image2Src || ''),
     video: String(vmedia?.url || doc.videoSrc || ''),
     category: String(doc.category ?? '社員インタビュー'),
     blocks: (Array.isArray(doc.blocks) ? doc.blocks : [])
@@ -60,6 +64,7 @@ export function fallbackInterviews(): InterviewItemData[] {
     intro: String(iv.intro ?? ''),
     hobby: String(iv.hobby ?? ''),
     image: String(iv.image ?? ''),
+    image2: String(iv.image2 ?? ''),
     video: String(iv.video ?? ''),
     category: '社員インタビュー',
     blocks: toBlocks(iv.blocks ?? iv.paragraphs),

@@ -17,6 +17,8 @@ export interface InterviewItem {
   /** 趣味（記事ページのアイキャッチ内に表示・任意） */
   hobby: string;
   image: string;
+  /** 2枚目のアイキャッチ（採用ページ「人を知る」カードのホバー時にフェードで表示。空なら切り替えなし） */
+  image2: string;
   /** アイキャッチ動画のURL（空なら動画なし）。設定時はアイキャッチに再生ボタンが出て
    * クリックで画面中央に大きく再生される。カードには画像（無ければ1フレーム目）を表示 */
   video: string;
@@ -36,6 +38,7 @@ const FALLBACK: InterviewItem[] = (interviewsData as any[]).map((iv) => ({
   intro: String(iv.intro ?? ""),
   hobby: String(iv.hobby ?? ""),
   image: String(iv.image ?? ""),
+  image2: String(iv.image2 ?? ""),
   video: String(iv.video ?? ""),
   category: "社員インタビュー",
   blocks: toBlocks(iv.blocks ?? iv.paragraphs),
@@ -58,7 +61,7 @@ function preloadInterviews(): Promise<InterviewItem[]> {
         // 古いキャッシュ（自己紹介・動画フィールド追加前）でも undefined にならないよう補完
         cache =
           Array.isArray(data) && data.length > 0
-            ? data.map((iv) => ({ ...iv, intro: iv.intro ?? "", hobby: iv.hobby ?? "", video: iv.video ?? "" }))
+            ? data.map((iv) => ({ ...iv, intro: iv.intro ?? "", hobby: iv.hobby ?? "", image2: iv.image2 ?? "", video: iv.video ?? "" }))
             : FALLBACK;
         ready = true;
         listeners.forEach((l) => l());
