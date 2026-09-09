@@ -230,6 +230,9 @@ export interface FvTiming {
   /** false を返している間はシルエット（赤いオブジェクト）を作らず、散らばったまま漂い続ける
    * （トップ：メインビジュアルが画面内にあるときだけ形作る。2026-09 改修） */
   canGather?: () => boolean;
+  /** シルエットをページに固定するためのオフセット（px）。固定キャンバス上でも、返した分だけ
+   * オブジェクトを上へずらして描く（トップ：window.scrollY を返すとMVと一緒にスクロールして消える） */
+  scrollOffset?: () => number;
 }
 
 /**
@@ -309,22 +312,26 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
     last = now;
     tS += dt;
     const time = now / 1000;
-    if (state === "drift" && tS >= DUR.drift) {
-      if (timing.canGather && !timing.canGather()) tS = DUR.drift; // 形作れない位置なら漂い続ける（次フレームで再判定）
-      else { state = "gather"; tS = 0; assign(); }
-    }
-    else if (state === "gather" && tS >= DUR.gather + 0.3) { state = "hold"; tS = 0; }
-    else if (state === "hold" && tS >= DUR.hold) {
+    const off = timing.scrollOffset ? timing.scrollOffset() : 0;
+    const startBurst = () => {
       state = "burst"; tS = 0;
       const sc = center();
       for (const p of P) {
         if (!p.has) continue;
-        const dx = p.x - sc.cx, dy = p.y - sc.cy, L = Math.sqrt(dx * dx + dy * dy) || 1;
+        const dx = p.x - sc.cx, dy = p.y - (sc.cy - off), L = Math.sqrt(dx * dx + dy * dy) || 1;
         const v = 90 + Math.random() * 180;
         p.vx = (dx / L) * v / 60 + (Math.random() - 0.5) * 2;
         p.vy = (dy / L) * v / 60 + (Math.random() - 0.5) * 2;
       }
-    } else if (state === "burst" && tS >= DUR.burst) { state = "drift"; tS = 0; shapeIdx = (shapeIdx + 1) % shapes.length; }
+    };
+    if (state === "drift" && tS >= DUR.drift) {
+      if (timing.canGather && !timing.canGather()) tS = DUR.drift; // 形作れない位置なら漂い続ける（次フレームで再判定）
+      else { state = "gather"; tS = 0; assign(); }
+    }
+    else if ((state === "gather" || state === "hold") && timing.canGather && !timing.canGather()) startBurst(); // MVの外へ出たら即解体
+    else if (state === "gather" && tS >= DUR.gather + 0.3) { state = "hold"; tS = 0; }
+    else if (state === "hold" && tS >= DUR.hold) startBurst();
+    else if (state === "burst" && tS >= DUR.burst) { state = "drift"; tS = 0; shapeIdx = (shapeIdx + 1) % shapes.length; }
 
     ctx!.clearRect(0, 0, W, H);
     for (const p2 of P) {
@@ -333,11 +340,11 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
         const t = Math.max(0, Math.min(1, (tS - p2.d) / DUR.gather));
         const e = ease(t);
         p2.x = p2.sx + (p2.tx - p2.sx) * e + Math.sin(time * 2 + p2.ph) * (1 - e) * 4;
-        p2.y = p2.sy + (p2.ty - p2.sy) * e + Math.cos(time * 1.7 + p2.ph) * (1 - e) * 4;
+        p2.y = p2.sy + (p2.ty - off - p2.sy) * e + Math.cos(time * 1.7 + p2.ph) * (1 - e) * 4;
         if (t > 0.55) lerpCol(p2.col, redAt(p2.gt), dt * 5);
       } else if (active && state === "hold") {
         p2.x = p2.tx + Math.sin(time * 2.2 + p2.ph) * 1.4;
-        p2.y = p2.ty + Math.cos(time * 1.9 + p2.ph) * 1.4;
+        p2.y = p2.ty - off + Math.cos(time * 1.9 + p2.ph) * 1.4;
         lerpCol(p2.col, redAt(p2.gt), dt * 5);
       } else {
         p2.x += p2.vx + Math.sin(time * 0.7 + p2.ph) * 0.18;

@@ -186,12 +186,18 @@ function Hero() {
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv) return;
-    // メインビジュアルの下端が画面上部より下にある（＝MVが見えている）間だけシルエットを作る
+    // シルエット（赤いオブジェクト）はメインビジュアルの中だけ：MVがほぼ画面内にある間だけ形作り、
+    // 形作ったオブジェクトはページに固定（scrollOffset）してMVと一緒に上へ流れ、MVを離れたら即解体する
     const canGather = () => {
       const h = fvRef.current?.offsetHeight || 1;
-      return window.scrollY < h * 0.6;
+      return window.scrollY < h * 0.35;
     };
-    const stop = mountFvParticles(cv, FV_TOP_SHAPES, false, { driftMul: 1 / 3, gatherMul: 1 / 3, canGather });
+    const stop = mountFvParticles(cv, FV_TOP_SHAPES, false, {
+      driftMul: 1 / 3,
+      gatherMul: 1 / 3,
+      canGather,
+      scrollOffset: () => window.scrollY,
+    });
     // スクロールでコピーがフェードアウト
     const onScroll = () => {
       const h = fvRef.current?.offsetHeight || 1;
