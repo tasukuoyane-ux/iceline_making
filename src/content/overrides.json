@@ -511,5 +511,6 @@
   "anim:recruit3:stats.1.h3": "fade-t|0|40",
   "anim:recruit3:stats.1.p": "fade-t|0|40",
   "company:hero.image": "/uploads/Kaisha_Gaiyo_(1).jpg?v=4dbd815",
-  "ar:company:historyImage": "16:9"
+  "ar:company:historyImage": "16:9",
+  "ypos:company:hero.image": "100"
 }
