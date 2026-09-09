@@ -259,7 +259,6 @@ function EntryForm({ job, sectionRef }: { job: RecruitJob; sectionRef: React.Ref
 export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: RecruitView; onClose: () => void }) {
   useBodyLock();
   const entryRef = useRef<HTMLElement | null>(null);
-  const [showCta, setShowCta] = useState(false);
   const tag = deptTag(job);
 
   // Escape で閉じる
@@ -277,27 +276,15 @@ export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: Recr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const scrollToEntry = () => entryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-
   return createPortal(
-    <div role="dialog" aria-modal="true" className="contents" onScrollCapture={(e) => setShowCta((e.target as HTMLElement).scrollTop > 240)}>
+    <div role="dialog" aria-modal="true" className="contents">
       {/* 背景は land モード（全面が緑の陸地・雪なし・文字は黒基調。2026-09 改修・デザイン支給 job/*.html 準拠） */}
       <RecruitFrame overlay land>
-        {/* 上部バー（sticky）：部門タグ＋職種名＋閉じる＋エントリー */}
-        <div className="ov-bar">
-          <div className="ov-bar__inner">
-            <span className={"acc__tag " + tag.cls} style={tag.style}>{job.dept}</span>
-            <span className="ov-bar__title">{job.title}</span>
-            {showCta && (
-              <button type="button" className="btn btn--entry" onClick={scrollToEntry}>
-                エントリー
-              </button>
-            )}
-            <button type="button" className="ov-bar__close" aria-label="閉じる" onClick={onClose}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" strokeWidth="2.2" strokeLinecap="round"><path d="M4 4l12 12M16 4L4 16" /></svg>
-            </button>
-          </div>
-        </div>
+        {/* 上部の白い帯（部門タグ・職種名・エントリー）は 2026-09-09 のユーザー指示で廃止。
+            右上に固定の「閉じる」ボタンだけを残す */}
+        <button type="button" className="ov-close" aria-label="閉じる" onClick={onClose}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" strokeWidth="2.2" strokeLinecap="round"><path d="M4 4l12 12M16 4L4 16" /></svg>
+        </button>
 
         <section className="iv-hero ov-hero">
           <span className="kicker reveal" {...ed("recruit3:ov.kicker", "職種詳細 英字ラベル")}>{txt("recruit3:ov.kicker", "RECRUIT")}</span>

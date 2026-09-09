@@ -1453,21 +1453,17 @@
    ------------------------------------------------------------ */
 .rc--overlay { position: fixed; inset: 0; z-index: 80; overflow-y: auto; overflow-x: hidden; min-height: 0; background: var(--ice-blue); }
 .rc--overlay .page { padding-bottom: 120px; }
-.rc .ov-bar {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  color: var(--ink);
-  border-bottom: 2px solid rgba(0, 155, 253, 0.25);
+/* 閉じるボタンだけを右上に固定（上部の白い帯は 2026-09-09 に廃止） */
+.rc .ov-close {
+  position: fixed; top: 16px; right: 16px; z-index: 20;
+  width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.92);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 60, 120, 0.18);
+  transition: background var(--dur-hover) var(--ease), transform var(--dur-hover) var(--ease);
 }
-.rc .ov-bar__inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; width: 100%; max-width: var(--max-w); margin: 0 auto; }
-.rc .ov-bar__title { flex: 1; min-width: 0; font-weight: 900; font-size: 16px; letter-spacing: 0.03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rc .ov-bar__close { flex: none; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0, 155, 253, 0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background var(--dur-hover) var(--ease); }
-.rc .ov-bar__close:hover { background: rgba(0, 155, 253, 0.2); }
-.rc .ov-bar__close svg { stroke: var(--ink); }
-.rc .ov-bar .btn--entry { font-size: 13px; padding: 10px 22px; }
+.rc .ov-close:hover { background: #fff; transform: scale(1.06); }
+.rc .ov-close svg { stroke: var(--ink); }
 .rc .ov-hero { padding: 72px 24px 0; text-align: center; }
 .rc .ov-hero .iv-hero__catch .outline-text { white-space: normal; }
 .rc .ov-sec { margin-top: 96px; }
