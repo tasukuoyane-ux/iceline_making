@@ -56,22 +56,26 @@ const SERVICES: { to: string; title: string; body: string; imgKey?: string; imgD
 ];
 
 // ─────────────────────────────────────────────────────────
-// 自社開発商品（旧「商品コラージュ」）。2026-09 改修でデザイン支給の PRODUCTS セクション
-// （英字ラベル＋H2＋リード → 正方形タイル4列のグリッド・PC はホバーで白地に説明表示）に変更。
-// 編集パス（top:collage.*）は旧コラージュから引き継ぐ。
+// 商品コラージュ（自社開発商品）。7枚の写真を不揃いなタイルで敷き詰め、
+// 見出し（H2＋p）をタイルの一角に置く。SP・PC を問わず同じ配置を保つため、
+// グリッドは 4列×10行の比率指定（gridArea は "行開始 / 列開始 / 行終了 / 列終了"）。
+// PC は写真にホバーで薄くなり黒文字の説明が出る。SP はタップでオーバーレイ表示。
+// （2026-09-08 に正方形タイル4列へ変えたが、翌日「edae2cd の仕様に戻す」指示でこの構成へ復帰）
 // ─────────────────────────────────────────────────────────
-const PRODUCT_TILES: { title: string; body: string; imgKey?: string; imgDefault?: string }[] = [
-  { title: "無色透明かち割り氷", body: "硬く透明で溶けにくい業務用の氷。飲み物の味を損なわず、最後まで冷たさを保ちます。", imgDefault: IMG.iceClose },
-  { title: "氷カフェ", body: "コーヒーや果汁を凍らせた氷菓。牛乳を注ぐだけで、溶けるほどに味が深まる一杯に。", imgDefault: IMG.icedCoffee },
-  { title: "氷・氷菓", body: "自社工場で製造する氷から味付き氷・氷菓まで。冷たいものなら、アイスライン。", imgDefault: IMG.iceMv },
-  { title: "かき氷用 雪氷", body: "ふわふわに削れる、かき氷専用の氷。季節メニューの主役に。", imgDefault: IMG.iceBlue },
-  { title: "業務用食材", body: "5,000品目を超える業務用食材を、ホテル・飲食店・食品メーカーへお届けします。", imgDefault: IMG.foodMv },
-  { title: "冷凍冷蔵倉庫", body: "食品をお預かりし、入出庫・在庫管理まで低温物流の基盤を支えます。", imgDefault: IMG.warehouse },
-  { title: "ドライアイス", body: "食品の鮮度保持や低温輸送に欠かせない冷熱を、必要なときに必要な量だけ。", imgKey: "service:dryice.mv.image" },
+// 見出しは左右の写真の上辺（2行目）に上端を揃える
+const COLLAGE_HEAD_AREA = "2 / 2 / 4 / 4";
+const COLLAGE_TILES: { area: string; title: string; body: string; imgKey?: string; imgDefault?: string }[] = [
+  { area: "2 / 1 / 6 / 2", title: "無色透明かち割り氷", body: "硬く透明で溶けにくい業務用の氷。飲み物の味を損なわず、最後まで冷たさを保ちます。", imgDefault: IMG.iceClose },
+  { area: "6 / 1 / 11 / 2", title: "氷カフェ", body: "コーヒーや果汁を凍らせた氷菓。牛乳を注ぐだけで、溶けるほどに味が深まる一杯に。", imgDefault: IMG.icedCoffee },
+  { area: "4 / 2 / 11 / 3", title: "氷・氷菓", body: "自社工場で製造する氷から味付き氷・氷菓まで。冷たいものなら、アイスライン。", imgDefault: IMG.iceMv },
+  { area: "4 / 3 / 7 / 4", title: "かき氷用 雪氷", body: "ふわふわに削れる、かき氷専用の氷。季節メニューの主役に。", imgDefault: IMG.iceBlue },
+  { area: "7 / 3 / 11 / 4", title: "業務用食材", body: "5,000品目を超える業務用食材を、ホテル・飲食店・食品メーカーへお届けします。", imgDefault: IMG.foodMv },
+  { area: "2 / 4 / 6 / 5", title: "冷凍冷蔵倉庫", body: "食品をお預かりし、入出庫・在庫管理まで低温物流の基盤を支えます。", imgDefault: IMG.warehouse },
+  { area: "6 / 4 / 11 / 5", title: "ドライアイス", body: "食品の鮮度保持や低温輸送に欠かせない冷熱を、必要なときに必要な量だけ。", imgKey: "service:dryice.mv.image" },
 ];
-const PRODUCTS_LEAD_DEFAULT = "現場の声から生まれた、アイスラインのオリジナル商品とサービスをご紹介します。";
+const COLLAGE_LEAD_DEFAULT = "氷・氷菓から業務用食材、倉庫、ドライアイスまで。\n現場の声から生まれた商品とサービスをご紹介します。";
 
-// 見出しのないバナー導線（商品タイルの下）。画像・文言・リンク先はコンソールから編集できる。
+// 見出しのないバナー導線（コラージュの下）。画像・文言・リンク先はコンソールから編集できる。
 // リンク先は「#〜」でページ内アンカー、「/〜」でサイト内ページ、「https://〜」で外部サイト（別タブ）。
 const BANNERS: { title: string; sub: string; href: string; imgDefault: string }[] = [
   { title: "採用情報", sub: "私たちと一緒に働きませんか", href: "/recruit", imgDefault: IMG.warehouse },
@@ -112,35 +116,37 @@ function EditableLinkHint({ path, label, href }: { path: string; label: string; 
   );
 }
 
-/** 商品タイル。PC はホバーで写真の上に白地の説明、タッチ端末はタップでオーバーレイ */
-function ProductTile({ i, def }: { i: number; def: (typeof PRODUCT_TILES)[number] }) {
+/** コラージュの写真タイル。PC はホバーで写真が薄くなり黒文字の説明、SP はタップでオーバーレイ */
+function CollageTile({ i, def }: { i: number; def: (typeof COLLAGE_TILES)[number] }) {
   const base = `top:collage.${i}`;
   const [open, setOpen] = useState(false);
   const title = txt(`${base}.title`, def.title);
   const body = txt(`${base}.body`, def.body);
   const src = img(`${base}.image`, def.imgKey ? img(def.imgKey, STRENGTH_PLACEHOLDER) : def.imgDefault!);
   return (
-    <div className="prod-tile">
-      <button type="button" className="prod-tile__btn" onClick={() => setOpen(true)} aria-label={`${title} の説明を表示`}>
+    <div className="group relative min-h-0 min-w-0 overflow-hidden rounded-lg bg-white" style={{ gridArea: def.area }}>
+      <button type="button" onClick={() => setOpen(true)} className="block h-full w-full" aria-label={`${title} の説明を表示`}>
         <ImageWithFallback
           src={src}
           alt={title}
-          sizes="(min-width: 768px) 25vw, 50vw"
-          className="prod-tile__img"
-          {...edImg(`${base}.image`, `商品タイル${i + 1} 画像`)}
+          sizes="(min-width: 1025px) 30vw, 40vw"
+          className="h-full w-full object-cover transition-opacity duration-300 pc:group-hover:opacity-20"
+          {...edImg(`${base}.image`, `コラージュ写真${i + 1}`)}
         />
       </button>
-      {/* PC：ホバーで説明（デザイン支給の .prod-info） */}
-      <div className="prod-info" aria-hidden>
-        <h3 {...ed(`${base}.title`, `商品タイル${i + 1} 見出し`)}>{title}</h3>
-        <p {...ed(`${base}.body`, `商品タイル${i + 1} 説明`, { multiline: true })}>{body}</p>
+      {/* PC：ホバーで写真の上に黒文字の説明を表示 */}
+      <div className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center p-4 text-center text-ink opacity-0 transition-opacity duration-300 pc:flex pc:group-hover:opacity-100">
+        <h3 style={{ fontSize: "clamp(13px, 1.2vw, 18px)", fontWeight: 700, lineHeight: 1.5 }} {...ed(`${base}.title`, `コラージュ写真${i + 1} 見出し`)}>
+          {title}
+        </h3>
+        <p className="mt-2" style={{ fontSize: "clamp(10px, 0.85vw, 13px)", lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${base}.body`, `コラージュ写真${i + 1} 説明`, { multiline: true })}>
+          {body}
+        </p>
       </div>
-      {/* SP：タイル下に商品名 */}
-      <p className="prod-name-sp">{title}</p>
-      {/* タッチ端末：タップでオーバーレイ表示 */}
+      {/* SP：タップでオーバーレイ表示（PC幅では出さない） */}
       {open && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-ink/70 p-6"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-ink/70 p-6 pc:hidden"
           role="dialog"
           aria-modal="true"
           onClick={() => setOpen(false)}
@@ -168,24 +174,28 @@ function ProductTile({ i, def }: { i: number; def: (typeof PRODUCT_TILES)[number
 
 /**
  * メインビジュアル（2026-09 改修）。デザイン支給の FV：氷の微粒子が食材のシルエットを形作っては爆散する
- * パーティクル（fvParticles.ts）を sticky のキャンバスに描き、本文（.fv-follow）がその上に被さって
- * スクロールする。コピーは従来どおり1つのテキストボックス（[[特大,red:氷]] 等の行内トークン対応）。
+ * パーティクル（fvParticles.ts）。コピーは従来どおり1つのテキストボックス（[[特大,red:氷]] 等の行内トークン対応）。
  * 「形作るまでの時間」と「解体後にオブジェクトが無い時間」はデザイン支給の 1/3（ユーザー指定）。
+ * 2026-09-09 改修：キャンバスは画面に固定（背景画像の上・本文の下）にし、メインビジュアルより下へ
+ * スクロールしても微粒子が連続して漂う。赤いオブジェクトを形作るのはメインビジュアルが画面内にあるときだけ。
  */
 function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fvRef = useRef<HTMLElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv) return;
-    const stop = mountFvParticles(cv, FV_TOP_SHAPES, false, { driftMul: 1 / 3, gatherMul: 1 / 3 });
-    // パララックス：スクロールで粒子が沈み、コピーがフェードアウト
-    const fv = cv.parentElement;
-    const motionOK = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // メインビジュアルの下端が画面上部より下にある（＝MVが見えている）間だけシルエットを作る
+    const canGather = () => {
+      const h = fvRef.current?.offsetHeight || 1;
+      return window.scrollY < h * 0.6;
+    };
+    const stop = mountFvParticles(cv, FV_TOP_SHAPES, false, { driftMul: 1 / 3, gatherMul: 1 / 3, canGather });
+    // スクロールでコピーがフェードアウト
     const onScroll = () => {
-      const h = fv?.offsetHeight || 1;
+      const h = fvRef.current?.offsetHeight || 1;
       const y = Math.min(window.scrollY, h);
-      if (motionOK) cv.style.transform = `translateY(${y * 0.16}px)`;
       if (copyRef.current) copyRef.current.style.opacity = String(Math.max(0, 1 - y / (h * 0.75)));
     };
     onScroll();
@@ -196,14 +206,17 @@ function Hero() {
     };
   }, []);
   return (
-    <section className="fv" aria-label="メインビジュアル">
-      <canvas ref={canvasRef} className="fv-canvas" aria-hidden />
-      <div ref={copyRef} className="fv-copy2">
-        <div className="fv-copy2-inner">
-          <RichBody path="top:mv.title" text={txt("top:mv.title", TOP_MV_TEXT_DEFAULT)} label="MVテキスト" className="fv-copy2-rich" />
+    <>
+      {/* 微粒子キャンバス（画面固定・背景画像の上・本文の下） */}
+      <canvas ref={canvasRef} className="fv-canvas-fixed" aria-hidden />
+      <section ref={fvRef} className="fv" aria-label="メインビジュアル">
+        <div ref={copyRef} className="fv-copy2">
+          <div className="fv-copy2-inner">
+            <RichBody path="top:mv.title" text={txt("top:mv.title", TOP_MV_TEXT_DEFAULT)} label="MVテキスト" className="fv-copy2-rich" />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
 
@@ -213,8 +226,6 @@ export function Top() {
     <>
       <Hero />
 
-      {/* FV の上に被さる本文（背景の微粒子がFVから連続してシームレスに接続） */}
-      <div className="fv-follow">
       {/* 新着情報 */}
       <Section heat={HEAT.topNews}>
         <div className="grid gap-8 pc:grid-cols-[280px_1fr]">
@@ -330,27 +341,40 @@ export function Top() {
         </div>
       </Section>
 
-      {/* 自社開発商品（旧「商品コラージュ」。英字ラベル＋H2＋リード → 正方形タイルのグリッド。2026-09 改修） */}
+      {/* 商品コラージュ（自社開発商品。見出しH2＋pをタイルの一角に置く。SP・PC同一配置。edae2cd の仕様） */}
       <Section heat={HEAT.topGenre}>
         <div
-          className="en-label"
-          {...ed("sectionEn:top.products.en", "英語見出し（補助）")}
+          className="grid"
+          style={{
+            gridTemplateColumns: "13fr 20fr 10fr 13fr",
+            gridTemplateRows: "repeat(10, minmax(0, 1fr))",
+            aspectRatio: "1265 / 650",
+            gap: "clamp(6px, 1.2vw, 16px)",
+          }}
         >
-          {txt("sectionEn:top.products.en", "PRODUCTS")}
-        </div>
-        <h2 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} {...ed("sectionEn:top.products.jp", "大見出し（H2）")}>
-          {txt("sectionEn:top.products.jp", "自社開発商品")}
-        </h2>
-        <p
-          className="mt-4 max-w-[48em] text-foreground/80"
-          style={{ fontSize: 16, lineHeight: 1.9, whiteSpace: "pre-line" }}
-          {...ed("top:collage.lead", "見出し直下の文章", { multiline: true })}
-        >
-          {txt("top:collage.lead", PRODUCTS_LEAD_DEFAULT)}
-        </p>
-        <div className="prod-grid">
-          {PRODUCT_TILES.map((t, i) => (
-            <ProductTile key={i} i={i} def={t} />
+          {/* 見出し（英語補助・H2・直下のp＝2行）。上端を左右の写真の上辺に揃え、幅に比例して縮む。
+              余白は文字サイズ比（em）にして SP でも枠に収まるようにする */}
+          <div className="min-w-0 self-start" style={{ gridArea: COLLAGE_HEAD_AREA, lineHeight: 1 }}>
+            <div
+              className="text-brand"
+              style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(6px, 0.95vw, 13px)", lineHeight: 1.2, letterSpacing: "0.18em" }}
+              {...ed("sectionEn:top.products.en", "英語見出し（補助）")}
+            >
+              {txt("sectionEn:top.products.en", "PRODUCTS")}
+            </div>
+            <h2 style={{ marginTop: "0.25em", fontSize: "clamp(11px, 2.2vw, 30px)", fontWeight: 700, lineHeight: 1.3 }} {...ed("sectionEn:top.products.jp", "大見出し（H2）")}>
+              {txt("sectionEn:top.products.jp", "自社開発商品")}
+            </h2>
+            <p
+              className="text-foreground/80"
+              style={{ marginTop: "0.6em", fontSize: "clamp(6px, 1vw, 14px)", lineHeight: 1.7, whiteSpace: "pre-line" }}
+              {...ed("top:collage.lead", "見出し直下の文章（2行）", { multiline: true })}
+            >
+              {txt("top:collage.lead", COLLAGE_LEAD_DEFAULT)}
+            </p>
+          </div>
+          {COLLAGE_TILES.map((t, i) => (
+            <CollageTile key={i} i={i} def={t} />
           ))}
         </div>
       </Section>
@@ -378,10 +402,10 @@ export function Top() {
                     />
                     <div className="absolute inset-0 bg-ink/55 transition-colors group-hover:bg-ink/45" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center text-white">
-                      <span style={{ fontSize: "clamp(13px, 1.6vw, 18px)", fontWeight: 700, lineHeight: 1.4 }} {...ed(`${base}.title`, `バナー${i + 1} 見出し`)}>
+                      <span style={{ fontSize: "clamp(11px, 1.5vw, 22px)", fontWeight: 700, lineHeight: 1.4 }} {...ed(`${base}.title`, `バナー${i + 1} 見出し`)}>
                         {title}
                       </span>
-                      <span className="mt-1 text-white/90" style={{ fontSize: "clamp(10px, 1.1vw, 13px)", lineHeight: 1.6 }} {...ed(`${base}.sub`, `バナー${i + 1} 文言`)}>
+                      <span className="mt-1 text-white/90" style={{ fontSize: "clamp(8px, 0.9vw, 13px)", lineHeight: 1.6 }} {...ed(`${base}.sub`, `バナー${i + 1} 文言`)}>
                         {txt(`${base}.sub`, b.sub)}
                       </span>
                     </div>
@@ -393,7 +417,6 @@ export function Top() {
           })}
         </div>
       </Section>
-      </div>
     </>
   );
 }

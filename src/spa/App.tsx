@@ -3,8 +3,8 @@ import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "./components/ui/sonner";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
-import { VideoCta } from "./components/layout/VideoCta";
 import { CookieConsent } from "./components/layout/CookieConsent";
+import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Top } from "./pages/Top";
 import { bootReveal } from "./lib/reveal";
 
@@ -27,13 +27,24 @@ const RecipeDetail = lazy(() => import("./pages/RecipeDetail").then((m) => ({ de
 const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
 const ConsoleApp = lazy(() => import("../console/ConsoleApp").then((m) => ({ default: m.ConsoleApp })));
 
-// 基本背景（採用ページ以外）：淡いグレー地（#F6F8F9）に微粒子を散らした背景（デザイン支給準拠。
-// 2026-09 改修。旧プリズム画像 BG_Prism.jpg は使わない）。
+// 基本背景（採用ページ以外）：プリズム調の背景画像を全面に敷く（2026-09-09 にユーザー指示で復帰。
+// トップの微粒子パーティクルはこの画像の上・本文の下で漂う）。
 // 採用系ページは各ページ独自の背景（青キャンバス＋線画）を持つため白のまま。
 function SiteBg() {
   const { pathname } = useLocation();
   const isRecruit = pathname.startsWith("/recruit");
-  return <div className={"pointer-events-none fixed inset-0 -z-10 " + (isRecruit ? "bg-background" : "site-bg")} aria-hidden />;
+  return (
+    <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden>
+      {!isRecruit && (
+        <ImageWithFallback
+          src="/images/background/BG_Prism.jpg"
+          alt=""
+          loading="eager"
+          className="h-full w-full object-cover"
+        />
+      )}
+    </div>
+  );
 }
 
 // スクロール出現（.reveal → .is-visible）の起動。採用ページ以外で有効
@@ -131,7 +142,7 @@ function Site() {
         </Suspense>
       </main>
       {!isRecruit && <Footer />}
-      {!isRecruit && <VideoCta />}
+      {/* 追従「動画で知るアイスライン」ボタン（VideoCta）は 2026-09-09 のユーザー指示で全ページから削除 */}
       <CookieConsent />
     </div>
   );

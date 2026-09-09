@@ -12,7 +12,9 @@
   --corp-ease: cubic-bezier(.4, 0, .2, 1);
 }
 
-/* ---------- ページ背景（旧 BG_Prism.jpg の代わり。淡いグレー地＋微粒子） ---------- */
+/* ---------- ページ背景 ----------
+   2026-09-09 改修：背景は従来のプリズム画像（BG_Prism.jpg。App.tsx の SiteBg）に戻した。
+   .site-bg（淡いグレー地＋微粒子）は未使用 */
 .site-bg {
   background-color: var(--site-bg);
   background-image: var(--dust);
@@ -40,23 +42,25 @@
   margin-bottom: 8px;
 }
 
-/* ---------- トップFV（sticky＋微粒子キャンバス。本文は .fv-follow のカーテンとして上に被さる） ---------- */
+/* ---------- トップFV（微粒子キャンバス） ----------
+   2026-09-09 改修：キャンバスは画面に固定（背景画像の上・本文の下）で、メインビジュアルより下へ
+   スクロールしても微粒子が連続して漂い続ける。赤いオブジェクト（食材のシルエット）を形作るのは
+   メインビジュアルが画面内にあるときだけ（fvParticles の canGather） */
 .fv {
-  position: sticky;
-  top: 0;
-  z-index: 0;
+  position: relative;
   overflow: hidden;
-  background: var(--site-bg);
+  background: transparent;
   height: min(94vh, 860px);
   min-height: 540px;
 }
-.fv-follow {
-  position: relative;
-  z-index: 2;
-  background-color: var(--site-bg);
-  background-image: var(--dust);
+.fv-canvas-fixed {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -5;
+  pointer-events: none;
 }
-.fv-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fv-copy2 {
   position: absolute;
   left: 0; right: 0; top: 50%;

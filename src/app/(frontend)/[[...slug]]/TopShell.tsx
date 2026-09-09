@@ -17,7 +17,7 @@ const OVERRIDES = overridesData as Record<string, string>
 const SHELL_CSS = `
 #top-shell{pointer-events:none}
 #top-shell .ts-hd{height:64px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)}
-#top-shell .ts-fv{position:relative;overflow:hidden;background:#F6F8F9;height:min(94vh,860px);min-height:540px}
+#top-shell .ts-fv{position:relative;overflow:hidden;background:transparent;height:min(94vh,860px);min-height:540px}
 #top-shell .ts-copy{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%)}
 #top-shell .ts-inner{max-width:1400px;margin-inline:auto;padding-inline:20px;text-shadow:0 0 12px rgba(246,248,249,.95),0 0 4px rgba(246,248,249,.95)}
 #top-shell .ts-text p{margin:0;white-space:pre-line;font-size:13px;line-height:2.05;font-weight:500;color:rgba(10,10,10,.8)}

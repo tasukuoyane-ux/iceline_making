@@ -227,6 +227,9 @@ export interface FvTiming {
   driftMul?: number;
   /** 集まってオブジェクトを形作るまでの時間の倍率 */
   gatherMul?: number;
+  /** false を返している間はシルエット（赤いオブジェクト）を作らず、散らばったまま漂い続ける
+   * （トップ：メインビジュアルが画面内にあるときだけ形作る。2026-09 改修） */
+  canGather?: () => boolean;
 }
 
 /**
@@ -306,7 +309,10 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
     last = now;
     tS += dt;
     const time = now / 1000;
-    if (state === "drift" && tS >= DUR.drift) { state = "gather"; tS = 0; assign(); }
+    if (state === "drift" && tS >= DUR.drift) {
+      if (timing.canGather && !timing.canGather()) tS = DUR.drift; // 形作れない位置なら漂い続ける（次フレームで再判定）
+      else { state = "gather"; tS = 0; assign(); }
+    }
     else if (state === "gather" && tS >= DUR.gather + 0.3) { state = "hold"; tS = 0; }
     else if (state === "hold" && tS >= DUR.hold) {
       state = "burst"; tS = 0;

@@ -80,19 +80,6 @@ function RecruitFooter() {
   );
 }
 
-/** 追従「動画で知るアイスライン」ボタン（リンク先は従来どおり /videos） */
-function FloatVideo() {
-  return (
-    <Link to="/videos" className="float-video btn btn--corp">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#009BFD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="9" cy="9" r="7" />
-        <path d="M7.5 6.5l4 2.5-4 2.5z" />
-      </svg>
-      <span {...ed("recruit3:float.label", "追従ボタン 文言")}>{txt("recruit3:float.label", "動画で知るアイスライン")}</span>
-    </Link>
-  );
-}
-
 /**
  * スクロール出現（奥→手前）。root 内の .reveal を IntersectionObserver で監視し、
  * 見えたら .is-in を付ける。後から増えた要素（記事の取得完了など）も MutationObserver で拾う。
@@ -279,7 +266,7 @@ export function RecruitFrame({
         <div className="bg-depth" />
         <canvas ref={canvasRef} id={overlay ? undefined : "story-canvas"} className="story-canvas" />
         {!overlay && <RecruitHeader scrolled={scrolled} hidden={hidden} />}
-        {!overlay && <FloatVideo />}
+        {/* 追従「動画で知るアイスライン」ボタン（FloatVideo）は 2026-09-09 のユーザー指示で削除 */}
         {/* land モードでは本文全体を陸地用（黒文字）にする */}
         <main className={"page" + (land ? " on-land" : "")}>{children}</main>
         {!overlay && <RecruitFooter />}

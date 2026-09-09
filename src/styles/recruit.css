@@ -1387,7 +1387,7 @@
 
 /* 人を知る：CMS の写真 */
 /* 写真は上揃え（人物の頭が見切れないように。2026-09 改修） */
-.rc .p-card__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.rc .p-card__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; } /* 上揃えから 1/5 だけ下へ（2026-09-09） */
 /* 2枚目のアイキャッチ：通常は透明、カードにホバーするとフェードで表示（2026-09 改修） */
 .rc .p-card__photo .p-card__photo-alt { opacity: 0; transition: opacity 0.5s var(--ease); }
 .rc .p-card:hover .p-card__photo.has-alt .p-card__photo-alt { opacity: 1; }
