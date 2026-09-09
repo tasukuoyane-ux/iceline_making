@@ -500,5 +500,14 @@
   "service:dryice.sec.purchase.step.2.image": "/uploads/ICELINE_0909_29.jpg?v=64c1ff4",
   "service:dryice.sec.purchase.step.0.image": "/uploads/ICELINE_0909_24.jpg?v=75b641d",
   "recruit3:movie.caption": "アイスラインの仕事についての動画です。",
-  "company:hero.image": "/uploads/Kaisha_Gaiyo.jpg?v=6557bff"
+  "anim:recruit2:mv.title": "fade-t|0|40",
+  "anim:recruit3:mv.subcopy": "fade-t|0|40",
+  "anim:recruit3:mv.p": "fade-t|0|40",
+  "anim:recruit3:stats.head.jp": "fade-t|0|40",
+  "anim:recruit3:stats.0.circle": "fade-t|0|40",
+  "anim:recruit3:stats.0.h3": "fade-t|0|40",
+  "anim:recruit3:stats.0.p": "fade-t|0|40",
+  "anim:recruit3:stats.1.circle": "fade-t|0|40",
+  "anim:recruit3:stats.1.h3": "fade-t|0|40",
+  "anim:recruit3:stats.1.p": "fade-t|0|40"
 }
