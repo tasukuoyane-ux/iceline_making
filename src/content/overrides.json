@@ -287,7 +287,7 @@
   "service:dryice.cta.copy": "ドライアイスの購入、引き取りのご相談はお気軽にお問い合わせください。",
   "division:ice.sec.reasons.1.body": "氷カフェ・フラペリッチなど、一般的な業務用氷にとどまらない商品開発を行っています。市場のニーズを捉えながら、新しい氷のかたちを生み出しています。営業が現場で得た声を開発側にフィードバックすることで、季節や用途に応じたニーズを商品開発に反映しています。",
   "division:ice.overview": "アイスラインは、1905年の創業以来、氷の製造・販売を中核事業として展開してきました。西大寺物流センター（営業部・製造部）を拠点に、業務用かち割り氷から独自開発の味付き氷・氷菓まで、幅広いラインナップを全国の飲食店・量販店・テーマパークなどに供給しています。",
-  "company:historyImage": "/uploads/__________2026-08-26_8.30.53-PZu8y3J0gUtGHyJnWiJIqgx6ygN10G.webp",
+  "company:historyImage": "/uploads/ICELINE_0909_45.jpg?v=f4def1b",
   "division:ice.sec.kodawari.0.body": "氷カフェ・フラペリッチなど、一般的な業務用氷にとどまらない商品開発を行っています。市場のニーズを捉えながら、新しい氷のかたちを生み出しています。営業が現場で得た声を開発側に即時フィードバックすることで、季節や用途に応じたニーズを商品開発に反映しています。\t\t\t",
   "division:ice.sec.kodawari.0.title": "Only1を生み出す開発力",
   "division:ice.sec.kodawari.1.title": "取引先ごとに合わせた商品づくり",
@@ -509,5 +509,13 @@
   "anim:recruit3:stats.0.p": "fade-t|0|40",
   "anim:recruit3:stats.1.circle": "fade-t|0|40",
   "anim:recruit3:stats.1.h3": "fade-t|0|40",
-  "anim:recruit3:stats.1.p": "fade-t|0|40"
+  "anim:recruit3:stats.1.p": "fade-t|0|40",
+  "anim:recruit3:stats.2.circle": "fade-t|0|40",
+  "anim:recruit3:stats.2.h3": "fade-t|0|40",
+  "anim:recruit3:stats.2.note": "fade-t|0|40",
+  "hide:recruit3:stats.2.p": "",
+  "anim:recruit3:stats.2.p": "fade-t|0|40",
+  "anim:recruit3:culture.en": "",
+  "anim:recruit3:culture.jp": "fade-t|0|40",
+  "company:hero.image": "/uploads/Kaisha_Gaiyo_(1).jpg?v=830d524"
 }
