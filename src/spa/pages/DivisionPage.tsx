@@ -904,8 +904,9 @@ export function DivisionPage({ division }: { division: Division }) {
       {/* メインビジュアル（画像はオーバーレイなしでそのまま見せる・タイトル中央・
           タイトル直下に旧「事業概要」の本文を置く。文章量に応じて高さが伸びる。2026-09 改修） */}
       <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
-        {/* 業務用食材のMV画像は上揃え（画像の上側を切らずに見せる。黒帯は出さない。2026-09-09 ユーザー指定） */}
-        <ImageWithFallback src={MV[division].img} alt={divTitle} loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" style={division === "food" ? { objectPosition: "center top" } : undefined} {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像")} />
+        {/* 業務用食材のMV画像は既定で上揃え（画像の上側を切らずに見せる。2026-09-09 ユーザー指定）。
+            縦位置はコンソールの「縦位置」スライダー（ypos:）で上書きできる */}
+        <ImageWithFallback src={MV[division].img} alt={divTitle} loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" style={division === "food" ? { objectPosition: "center top" } : undefined} {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像", { ypos: true })} />
         <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`division:${division}.mv.en`, "英語見出し（補助）")}>

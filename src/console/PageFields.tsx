@@ -96,6 +96,8 @@ export interface PageField {
   video?: boolean;
   /** true なら画像の「透明度」スライダーを表示（overrides の `op:<画像パス>` = 0〜100） */
   opacity?: boolean;
+  /** true なら画像の「縦位置」スライダーを表示（overrides の `ypos:<画像パス>` = 0〜100＝上〜下。メインビジュアル用） */
+  ypos?: boolean;
   /** 繰り返しセクションの「項目数」フィールドのメタ情報（追加・削除ボタン用） */
   repeat?: { prefix: string; max: number };
 }
@@ -345,6 +347,32 @@ export function PageFields({
                 </div>
               );
             })()}
+            {/* 画像の縦位置（overrides の `ypos:<パス>` = 0〜100。0＝上端を見せる／50＝中央／100＝下端）。
+                メインビジュアルなど枠に合わせて切り抜かれる画像で、見せる位置を上下に動かす。
+                ドラッグ中の値は左のプレビューへ即時反映される（2026-09 改修） */}
+            {f.ypos && (() => {
+              const yKey = `ypos:${f.path}`;
+              const raw = parseInt(getValueByPath(draft, yKey) ?? "", 10);
+              const cur = Math.min(100, Math.max(0, Number.isNaN(raw) ? 50 : raw));
+              return (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="shrink-0 text-[11px] font-medium text-slate-500">縦位置</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={cur}
+                    onChange={(e) => onChange(setValueByPath(draft, yKey, e.target.value))}
+                    aria-label="画像の縦位置（上〜下）"
+                    className="min-w-0 flex-1 accent-emerald-600"
+                  />
+                  <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-slate-600">
+                    {Number.isNaN(raw) ? "既定" : cur === 0 ? "上端" : cur === 100 ? "下端" : cur === 50 ? "中央" : `${cur}%`}
+                  </span>
+                </div>
+              );
+            })()}
             {/* 画像と文章の横並びグリッド内の画像には、幅の比率スライダーを統合表示。
                 ドラッグ中の値は左のプレビューへ即時反映される（editBridge が --ratio を更新） */}
             {f.ratio && (() => {
@@ -448,7 +476,7 @@ export function PageFields({
     }
 
     // 値と付随設定（非表示・アニメ・色・縦横比・比率）をまとめて書き換えるヘルパー
-    const auxPrefixes = ["hide:", "anim:", "color:", "ar:", "op:"] as const;
+    const auxPrefixes = ["hide:", "anim:", "color:", "ar:", "op:", "ypos:"] as const;
     const clearItem = (next: Content, fs: PageField[]): Content => {
       for (const f of fs) {
         next = setValueByPath(next, f.path, "");

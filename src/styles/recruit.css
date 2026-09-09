@@ -1499,7 +1499,7 @@
 .rc .acc__head .acc__icon svg { display: block; }
 /* エントリーフォーム（オーバーレイ内） */
 .rc .entry-form { margin-top: 96px; }
-.rc .entry-form .section__title { margin-bottom: 8px; }
+.rc .entry-form .section__title { margin-bottom: 32px; } /* 波線マーカーが直下の注記に被らない余白（2026-09-09） */
 .rc .entry-form__note { text-align: center; margin-bottom: 40px; }
 .rc .entry-form input[type="text"], .rc .entry-form input[type="tel"], .rc .entry-form input[type="email"], .rc .entry-form textarea { display: block; }
 .rc .entry-form button.btn { font-family: var(--font-body); }

@@ -76,11 +76,15 @@ export function edRich(path: string, label?: string, opts?: { list?: boolean }):
 /** 画像編集対象の属性を付与（ImageWithFallback / img に展開される）。
  * opts.opacity=true にすると、コンソールの画像欄に「透明度」スライダーが出る
  * （値は overrides の `op:<画像パス>` = 0〜100。HideOverridesStyle が CSS の opacity に反映）。 */
-export function edImg(path: string, label?: string, opts?: { opacity?: boolean }): Record<string, string> {
+export function edImg(path: string, label?: string, opts?: { opacity?: boolean; ypos?: boolean }): Record<string, string> {
   if (isCommon(path)) return {};
   const a: Record<string, string> = { "data-edit-img": path };
   if (label) a["data-edit-label"] = label;
   if (opts?.opacity) a["data-edit-opacity"] = "1";
+  // opts.ypos=true にすると、コンソールの画像欄に「縦位置」スライダーが出る
+  // （値は overrides の `ypos:<画像パス>` = 0〜100（上〜下）。HideOverridesStyle が object-position に反映。
+  //  メインビジュアルなど object-fit: cover で切り抜かれる画像の見せる位置の調整用。2026-09 改修）
+  if (opts?.ypos) a["data-edit-ypos"] = "1";
   return a;
 }
 

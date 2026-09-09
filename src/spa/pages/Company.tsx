@@ -138,7 +138,7 @@ export function Company() {
           loading="eager"
           fetchPriority="high"
           className="absolute inset-0 h-full w-full object-cover"
-          {...edImg("company:hero.image", "メインビジュアル画像")}
+          {...edImg("company:hero.image", "メインビジュアル画像", { ypos: true })}
         />
         <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
           <div style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>

@@ -63,6 +63,14 @@ export function buildHideCss(overrides: Record<string, string>): string {
         colors.push(`[data-edit-img="${path}"]{opacity:${n / 100}}`)
       }
     }
+    // 画像の縦位置（コンソールの「縦位置」スライダー。`ypos:<画像パス>` → "0"〜"100"＝上〜下）。
+    // object-fit: cover で切り抜かれる画像（メインビジュアル）の見せる位置。
+    // ページ側のインライン既定（例: 業務用食材MVの object-position: top）にも勝てるよう !important を付ける。
+    if (key.startsWith('ypos:') && /^\d{1,3}$/.test(value)) {
+      const n = Math.min(100, Math.max(0, parseInt(value, 10)))
+      const path = esc(key.slice('ypos:'.length))
+      colors.push(`[data-edit-img="${path}"]{object-position:50% ${n}% !important}`)
+    }
     // 画像＋文章の横並びグリッドの「左右入れ替え」（`flip:<比率パス>` = "1"）。
     // PC幅でグリッドの direction を既定と反対向きにして列順を反転する。
     // 既定で direction:rtl のグリッドは data-ratio-rtl="1" が付いており ltr へ反転。
