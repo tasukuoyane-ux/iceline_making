@@ -382,7 +382,7 @@
   "division:ice.process.step.4.image": "/uploads/ICELINE_0908_41.jpg?v=ef09993",
   "division:ice.process.step.5.image": "/uploads/ICELINE_0908_21.jpg?v=a3eb670",
   "division:food.mv.en": "FOOD DIVISION　食品事業部",
-  "service:warehouse.mv.en": "FOOD DIVISION　食品事業部",
+  "service:warehouse.mv.en": "STORAGE 物流センター",
   "service:dryice.mv.en": "FOOD DIVISION　食品事業部",
   "division:food.sec.quality.1.image": "/uploads/1788865099874.png?v=71893e2",
   "recruit3:bizlink.philosophy.title": "",
@@ -512,8 +512,8 @@
   "ar:company:historyImage": "16:9",
   "ypos:company:hero.image": "75",
   "company:ceo.body": "1905年、北海道の天然氷を岡山で売り始めたところから、アイスラインは始まりました。\n120年という時間は、長いようで、振り返ると一つひとつの積み重ねです。挨拶をきちんとする。お客様の立場で考える。当然のことを、当然のようにやり続ける。そのことを、これからも大切にしていきたいと思っています。\n変化に対して臆病にならず、それでも軸はぶらさない。お客様の現場に合わせて得意なことで応えていく。それがこの会社の姿勢だと考えています。\nお客様の喜びや笑顔に触れるとき、社員一人ひとりが何かを感じ取っています。それが仕事をする意味になり、次への原動力になる。「お客様に愛され信頼される良い会社、社員が胸を張れる良い会社を皆でつくる」——この理念を胸に、日々の仕事に向き合っています。\n創業120年を超えましたが、私たちの挑戦はまだ始まったばかりです。これからも氷と食を通じて、より多くの人の日常に届けていく。その思いを持ち続けながら、歩んでまいります。",
-  "ar:company:ceo.image2": "2:3",
-  "ar:images:IMG.waterDew": "2:3",
+  "ar:company:ceo.image2": "",
+  "ar:images:IMG.waterDew": "",
   "sectionEn:company.message.jp": "代表メッセージ",
   "company:profile.1.label": "資本金",
   "hide:company:profile.1.label": "",
@@ -763,5 +763,6 @@
   "ar:company:awards.8.body": "",
   "op:company:awards.8.body": "",
   "ypos:company:awards.8.body": "",
-  "company:ceo.image2": "/uploads/5.jpg?v=220339b"
+  "company:ceo.image2": "/uploads/5.jpg?v=220339b",
+  "service:warehouse.mv.title": "冷凍・冷蔵倉庫"
 }
