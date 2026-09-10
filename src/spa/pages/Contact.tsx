@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { ed, txt, EDIT_MODE } from "../lib/editable";
+import { rt } from "../lib/richInline";
 import { RichBody } from "../components/common/RichBody";
 
 const TOPICS = [
@@ -69,7 +70,7 @@ export function Contact() {
       <div className="mx-auto max-w-2xl">
         <SectionTitle en="CONTACT" jp="お問い合わせ" align="center" path="sectionEn:contact.main" />
         <p className="mx-auto mt-6 max-w-xl text-center text-muted-foreground" style={{ fontSize: 15, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed("contact:intro", "導入文", { multiline: true })}>
-          {txt("contact:intro", "商品についてのご相談、お取引に関するご質問など、お気軽にお問い合わせください。")}
+          {rt("contact:intro", "商品についてのご相談、お取引に関するご質問など、お気軽にお問い合わせください。")}
         </p>
 
         <form onSubmit={onSubmit} className="mt-12 space-y-6">
@@ -108,7 +109,7 @@ export function Contact() {
             {submitting ? "送信中…" : txt("contact:submit", "この内容で送信する")}
           </Button>
           <p className="text-center text-muted-foreground" style={{ fontSize: 12 }} {...ed("contact:note", "注意書き")}>
-            {txt("contact:note", "※ ご記入いただいた内容は、お問い合わせ対応の目的にのみ利用します。詳しくはプライバシーポリシーをご覧ください。")}
+            {rt("contact:note", "※ ご記入いただいた内容は、お問い合わせ対応の目的にのみ利用します。詳しくはプライバシーポリシーをご覧ください。")}
           </p>
         </form>
       </div>
@@ -127,7 +128,7 @@ export function Contact() {
               return (
                 <div key={i} className="rounded-2xl border border-border bg-card p-7">
                   <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`contact:tel.${i}.title`, `電話問い合わせ${i + 1} 見出し`)}>
-                    {txt(`contact:tel.${i}.title`, "（見出し）")}
+                    {rt(`contact:tel.${i}.title`, "（見出し）")}
                   </h3>
                   <RichBody
                     path={`contact:tel.${i}.body`}

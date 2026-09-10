@@ -53,6 +53,7 @@ const PAGES: { label: string; path: string }[] = [
   { label: "動画で知る", path: "/videos" },
   { label: "採用情報", path: "/recruit" },
   { label: "会社情報", path: "/company" },
+  { label: "株式会社アイスマウンテン", path: "/ice-mountain" },
   { label: "お問い合わせ", path: "/contact" },
 ];
 

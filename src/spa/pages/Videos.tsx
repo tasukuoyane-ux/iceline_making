@@ -5,6 +5,7 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { VIDEOS, VideoItem } from "../data/news";
 import { ed, edImg, EDIT_MODE } from "../lib/editable";
+import { rich } from "../lib/richInline";
 import { toEmbed } from "../lib/video";
 import sections from "../../content/sections.json";
 
@@ -16,7 +17,7 @@ export function Videos() {
     <Section heat={HEAT.videoList}>
       <SectionTitle en="MOVIE" jp="動画で知るアイスライン" path="sectionEn:videos.movie" />
       <p className="mt-4 text-muted-foreground" style={{ fontSize: 15, lineHeight: 1.9 }} {...ed("sections:videosIntro")}>
-        {sections.videosIntro}
+        {rich(sections.videosIntro)}
       </p>
       <div className="mt-10 grid gap-6 tab:grid-cols-2">
         {VIDEOS.map((v) => (
@@ -42,9 +43,9 @@ export function Videos() {
                   <svg viewBox="0 0 16 16" className="ml-0.5 h-5 w-5 fill-white" aria-hidden><path d="M4 2l10 6-10 6z" /></svg>
                 </span>
               </div>
-              <span className="absolute bottom-3 right-3 rounded bg-ink/80 px-2 py-0.5 text-white" style={{ fontSize: 12 }} {...ed(`videos:${v.id}:duration`)}>{v.duration}</span>
+              <span className="absolute bottom-3 right-3 rounded bg-ink/80 px-2 py-0.5 text-white" style={{ fontSize: 12 }} {...ed(`videos:${v.id}:duration`)}>{rich(v.duration)}</span>
             </div>
-            <h3 className="mt-3" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`videos:${v.id}:title`)}>{v.title}</h3>
+            <h3 className="mt-3" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`videos:${v.id}:title`)}>{rich(v.title)}</h3>
           </button>
         ))}
       </div>

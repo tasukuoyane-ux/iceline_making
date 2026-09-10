@@ -5,7 +5,7 @@
 // を行う。通常閲覧時は完全に無効（副作用なし）。
 
 import { EDIT_MODE } from "./editable";
-import { parseRich, sizeStyle, splitColorTokens } from "./richText";
+import { appendInline, parseRich, serializeInline } from "./richText";
 import { buildHideCss, HIDE_STYLE_ID } from "../../components/HideOverridesStyle";
 
 const OUTLINE_STYLE_ID = "iceline-edit-style";
@@ -76,24 +76,9 @@ function applyRatioVars(overrides: Record<string, string>) {
   });
 }
 
-/** 行内の装飾トークン（[[red:文字]] / [[特大:文字]] / [[特大,red:文字]] 等）を span へ展開して流し込む */
+/** 行内の装飾トークン（[[red:文字]] / **太字** / [文字](URL) 等）を span/strong/a へ展開して流し込む */
 function fillLine(node: HTMLElement, line: string) {
-  for (const seg of splitColorTokens(line)) {
-    if (seg.color || seg.size) {
-      const sp = document.createElement("span");
-      if (seg.color) sp.style.color = seg.color;
-      const sz = sizeStyle(seg.size);
-      if (sz) {
-        sp.style.fontSize = sz.fontSize;
-        if (sz.fontWeight) sp.style.fontWeight = String(sz.fontWeight);
-        if (sz.lineHeight) sp.style.lineHeight = String(sz.lineHeight);
-      }
-      sp.textContent = seg.text;
-      node.appendChild(sp);
-    } else {
-      node.appendChild(document.createTextNode(seg.text));
-    }
-  }
+  appendInline(node, line);
 }
 
 /** リッチ本文（data-edit-rich）の中身を値から再構築する。
@@ -133,8 +118,10 @@ function applyOverrides(overrides: Record<string, string>) {
           renderRichInto(el, value);
           el.setAttribute("data-edit-default", value);
         }
-      } else if (el.textContent !== value) {
-        el.textContent = value;
+      } else if (serializeInline(el) !== value) {
+        // 太字・リンク等の行内トークンを展開して流し込む（トークンが無ければ文字だけ）
+        el.textContent = "";
+        fillLine(el, value);
       }
     });
     document.querySelectorAll<HTMLElement>(`[data-edit-img="${cssEscape(path)}"]`).forEach((el) => {
@@ -223,7 +210,8 @@ function scanFields(): PageField[] {
       // リッチ本文は textContent だと改行が失われるため、元の値を属性から拾う
       value = el.getAttribute("data-edit-default") || "";
     } else {
-      value = el.textContent || "";
+      // 太字・リンク等の記法を保ったまま現在値を拾う（textContent だと記法が失われる）
+      value = serializeInline(el) || "";
     }
     const label = el.getAttribute("data-edit-label") || autoLabel(path);
     const multiline = !isSel && (el.hasAttribute("data-edit-multi") || (!isImg && value.length > 40));

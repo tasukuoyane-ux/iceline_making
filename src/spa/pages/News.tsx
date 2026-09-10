@@ -6,6 +6,7 @@ import { useNews } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { cn } from "../components/ui/utils";
 import { ed } from "../lib/editable";
+import { rich } from "../lib/richInline";
 import { InlineMovieTag } from "../components/common/MovieBadge";
 
 const CATS = ["すべて", "お知らせ", "製品", "採用", "メディア"] as const;
@@ -41,10 +42,10 @@ export function News() {
         {items.map((n) => (
           <li key={n.id}>
             <Link to={`/news/${n.id}`} className="flex flex-col gap-2 py-5 transition-colors hover:text-brand tab:flex-row tab:items-center tab:gap-6">
-              <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`news:${n.id}:date`)}>{n.date}</span>
-              <span className="inline-flex w-fit bg-secondary px-3 py-0.5 text-muted-foreground" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{n.category}</span>
+              <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`news:${n.id}:date`)}>{rich(n.date)}</span>
+              <span className="inline-flex w-fit bg-secondary px-3 py-0.5 text-muted-foreground" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{rich(n.category)}</span>
               <span className="flex items-center gap-2" style={{ fontSize: 15 }}>
-                <span {...ed(`news:${n.id}:title`)}>{n.title}</span>
+                <span {...ed(`news:${n.id}:title`)}>{rich(n.title)}</span>
                 {hasVideo(n.blocks) && <InlineMovieTag />}
               </span>
             </Link>

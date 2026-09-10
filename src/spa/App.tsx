@@ -15,6 +15,7 @@ const ServicePage = lazy(() => import("./pages/ServicePage").then((m) => ({ defa
 const PackagePage = lazy(() => import("./pages/PackagePage").then((m) => ({ default: m.PackagePage })));
 const ProductDetail = lazy(() => import("./pages/ProductDetail").then((m) => ({ default: m.ProductDetail })));
 const Company = lazy(() => import("./pages/Company").then((m) => ({ default: m.Company })));
+const IceMountain = lazy(() => import("./pages/IceMountain").then((m) => ({ default: m.IceMountain })));
 const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.Contact })));
 const News = lazy(() => import("./pages/News").then((m) => ({ default: m.News })));
 const NewsDetail = lazy(() => import("./pages/NewsDetail").then((m) => ({ default: m.NewsDetail })));
@@ -127,6 +128,7 @@ function Site() {
             <Route path="/warehouse" element={<ServicePage service="warehouse" />} />
             <Route path="/dryice" element={<ServicePage service="dryice" />} />
             <Route path="/company" element={<Company />} />
+            <Route path="/ice-mountain" element={<IceMountain />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />

@@ -9,6 +9,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState
 import { Link, useLocation, useNavigate } from "react-router";
 import "../../styles/recruit.css";
 import { EDIT_MODE, ed, edImg, img, txt } from "../lib/editable";
+import { rt } from "../lib/richInline";
 import { mountRecruitCanvas, type CanvasHandle } from "./canvas";
 import { RoughFilterDefs } from "./parts";
 
@@ -51,14 +52,14 @@ function RecruitHeader({ scrolled, hidden }: { scrolled: boolean; hidden: boolea
     <header className={"header" + (scrolled ? " is-scrolled" : "") + (hidden ? " is-hidden" : "")}>
       <Link to="/" className="header__logo" aria-label="株式会社アイスライン">
         <img className="header__logoimg" src={img("recruit3:header.logo", RECRUIT_LOGO)} alt="ICELINE" {...edImg("recruit3:header.logo", "採用ページ ロゴ（白）")} />
-        <small {...ed("recruit3:header.sub", "ロゴ横の小文字")}>{txt("recruit3:header.sub", "採用サイト")}</small>
+        <small {...ed("recruit3:header.sub", "ロゴ横の小文字")}>{rt("recruit3:header.sub", "採用サイト")}</small>
       </Link>
       <nav className="header__nav">
         <Link to="/" className="btn btn--corp">
-          <span {...ed("recruit3:header.corp.label", "採用ヘッダー コーポレートサイトリンク")}>{txt("recruit3:header.corp.label", "コーポレートサイトはこちら")}</span>
+          <span {...ed("recruit3:header.corp.label", "採用ヘッダー コーポレートサイトリンク")}>{rt("recruit3:header.corp.label", "コーポレートサイトはこちら")}</span>
         </Link>
         <a href="/recruit#jobs" className="btn btn--entry" onClick={goJobs}>
-          <span {...ed("recruit3:header.cta.label", "採用CTA（エントリー）")}>{txt("recruit3:header.cta.label", "エントリー")}</span>
+          <span {...ed("recruit3:header.cta.label", "採用CTA（エントリー）")}>{rt("recruit3:header.cta.label", "エントリー")}</span>
         </a>
       </nav>
     </header>
@@ -73,9 +74,9 @@ function RecruitFooter() {
       <div className="footer__logo">
         <img className="footer__logoimg" src={img("recruit3:footer.logo", img("recruit3:header.logo", RECRUIT_LOGO))} alt="ICELINE" {...edImg("recruit3:footer.logo", "採用フッター ロゴ（白）")} />
       </div>
-      <p className="footer__tag" {...ed("recruit3:footer.tag", "フッター タグライン")}>{txt("recruit3:footer.tag", "すなおな心で、一歩ずつ。")}</p>
+      <p className="footer__tag" {...ed("recruit3:footer.tag", "フッター タグライン")}>{rt("recruit3:footer.tag", "すなおな心で、一歩ずつ。")}</p>
       {/* フッターのボタン列（コーポレートサイトはこちら／エントリー）は 2026-09-08 のユーザー指示で削除 */}
-      <p className="footer__copy" {...ed("recruit3:footer.copy", "コピーライト")}>{txt("recruit3:footer.copy", "© ICELINE Co., Ltd.")}</p>
+      <p className="footer__copy" {...ed("recruit3:footer.copy", "コピーライト")}>{rt("recruit3:footer.copy", "© ICELINE Co., Ltd.")}</p>
     </footer>
   );
 }

@@ -15,6 +15,7 @@ import { useRecruitData } from "../lib/recruitStore";
 import type { Block } from "../data/blocks";
 import { toEmbed } from "../lib/video";
 import { ed, txt } from "../lib/editable";
+import { rt } from "../lib/richInline";
 import { RecruitFrame } from "./RecruitFrame";
 import { Marked, OutlineText, PersonArt, PlayIcon } from "./parts";
 
@@ -147,7 +148,7 @@ export function InterviewPage() {
       ) : (
         <>
           <section className="iv-hero">
-            <span className="kicker reveal" {...ed("sectionEn:interview.mv", "英字ラベル")}>{txt("sectionEn:interview.mv", "INTERVIEW")}</span>
+            <span className="kicker reveal" {...ed("sectionEn:interview.mv", "英字ラベル")}>{rt("sectionEn:interview.mv", "INTERVIEW")}</span>
             <h1 className="iv-hero__catch reveal">
               <OutlineText text={iv.lead} />
             </h1>

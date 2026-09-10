@@ -11,6 +11,7 @@ import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
 import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { rt, rich } from "../lib/richInline";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
 const MV: Record<Division, { img: string; en: string; title: string; lead: string }> = {
@@ -484,7 +485,7 @@ function EditableLinkHint({ path, label, href }: { path: string; label: string; 
   if (!EDIT_MODE) return null;
   return (
     <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(path, label)}>
-      {href}
+      {rich(href)}
     </p>
   );
 }
@@ -522,7 +523,7 @@ function LineupNavTile({ i, def }: { i: number; def: { name: string; href: strin
         style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-line" }}
         {...ed(`${base}.name`, `ラインナップ導線${i + 1} 名称`)}
       >
-        {name}
+        {rich(name)}
       </h3>
       {/* 画像 */}
       <div className="mt-5">{wrap(image)}</div>
@@ -532,7 +533,7 @@ function LineupNavTile({ i, def }: { i: number; def: { name: string; href: strin
         style={{ fontSize: 14, lineHeight: 2.0, whiteSpace: "pre-line" }}
         {...ed(`${base}.body`, `ラインナップ導線${i + 1} 文言`, { multiline: true })}
       >
-        {txt(`${base}.body`, def.body)}
+        {rt(`${base}.body`, def.body)}
       </p>
       {wrap(
         <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13, fontWeight: 600 }}>
@@ -589,11 +590,11 @@ function IceProcessFlow() {
             </span>
           </div>
           <p className="mt-3" style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${s.base}.title`, `工程${s.i + 1} 工程名`)}>
-            {s.title || (EDIT_MODE || s.i === 0 ? "（工程名）" : "")}
+            {rich(s.title || (EDIT_MODE || s.i === 0 ? "（工程名）" : ""))}
           </p>
           {(s.body || EDIT_MODE) && (
             <p className="mt-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${s.base}.body`, `工程${s.i + 1} 説明`, { multiline: true })}>
-              {s.body || "（説明・任意）"}
+              {rich(s.body || "（説明・任意）")}
             </p>
           )}
           {/* 次の工程への矢印（PCの行末＝折り返し位置では表示しない） */}
@@ -632,7 +633,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         <div className="pc:px-12">
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-              {txt(`${base}.title`, it.title)}
+              {rt(`${base}.title`, it.title)}
             </h3>
           )}
           <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
@@ -681,7 +682,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
           <div className="[direction:ltr]">
             {it.title && (
               <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-                {txt(`${base}.title`, it.title)}
+                {rt(`${base}.title`, it.title)}
               </h3>
             )}
             <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
@@ -720,7 +721,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         <div className="relative z-10 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[65%]">
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-              {txt(`${base}.title`, it.title)}
+              {rt(`${base}.title`, it.title)}
             </h3>
           )}
           <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
@@ -751,7 +752,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         <div className="[direction:ltr] pc:px-12">
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-              {txt(`${base}.title`, it.title)}
+              {rt(`${base}.title`, it.title)}
             </h3>
           )}
           <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
@@ -800,7 +801,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         <div>
           {it.title && (
             <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-              {txt(`${base}.title`, it.title)}
+              {rt(`${base}.title`, it.title)}
             </h3>
           )}
           <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
@@ -818,7 +819,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
     <div className={it.title ? "rounded-2xl border border-border bg-card p-8" : "max-w-3xl"}>
       {it.title && (
         <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
-          {txt(`${base}.title`, it.title)}
+          {rt(`${base}.title`, it.title)}
         </h3>
       )}
       <RichBody
@@ -876,8 +877,8 @@ function ProductCard({ division, id }: { division: Division; id: string }) {
         <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h4 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{txt(`product:${p.id}:name`, p.name)}</h4>
-        <p className="mt-1 flex-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{txt(`product:${p.id}:catch`, p.catch)}</p>
+        <h4 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{rt(`product:${p.id}:name`, p.name)}</h4>
+        <p className="mt-1 flex-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{rt(`product:${p.id}:catch`, p.catch)}</p>
         <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
           詳細を見る <ArrowRight size={14} />
         </span>
@@ -910,10 +911,10 @@ export function DivisionPage({ division }: { division: Division }) {
         <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`division:${division}.mv.en`, "英語見出し（補助）")}>
-              {txt(`division:${division}.mv.en`, mv.en)}
+              {rt(`division:${division}.mv.en`, mv.en)}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`division:${division}.mv.title`, "ページタイトル")}>
-              {divTitle}
+              {rich(divTitle)}
             </h1>
             {/* 旧「事業概要」セクションの本文（編集パスは従来のまま） */}
             <RichBody
@@ -955,17 +956,17 @@ export function DivisionPage({ division }: { division: Division }) {
             {ICE_CATEGORIES.map((cat, ci) => (
               <div key={ci}>
                 <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`ice:lineup.${ci}.name`, "カテゴリ名")}>
-                  {txt(`ice:lineup.${ci}.name`, cat.name)}
+                  {rt(`ice:lineup.${ci}.name`, cat.name)}
                 </h3>
                 <p className="mt-5 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.desc`, "カテゴリ説明", { multiline: true })}>
-                  {txt(`ice:lineup.${ci}.desc`, cat.desc)}
+                  {rt(`ice:lineup.${ci}.desc`, cat.desc)}
                 </p>
                 <div className="mt-8 grid gap-8 pc:grid-cols-[1fr_2fr]">
                   {/* 規格一覧 */}
                   <div className="rounded-2xl border border-border bg-secondary/40 p-6">
                     <p className="text-muted-foreground" style={{ fontSize: 12, letterSpacing: "0.08em" }}>規格一覧</p>
                     <p className="mt-3" style={{ fontSize: 14, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.skus`, "規格一覧", { multiline: true })}>
-                      {txt(`ice:lineup.${ci}.skus`, cat.skus)}
+                      {rt(`ice:lineup.${ci}.skus`, cat.skus)}
                     </p>
                   </div>
                   {/* 対応する商品詳細ページ */}
@@ -987,12 +988,12 @@ export function DivisionPage({ division }: { division: Division }) {
         <Section heat={listHeat}>
           <SectionTitle en="PRODUCTS" jp="取り扱い商品カテゴリ" path="division:food.products" />
           <p className="mt-6 max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.products.intro", "取り扱い商品カテゴリ 説明", { multiline: true })}>
-            {txt("division:food.products.intro", "取扱商品の主要カテゴリは食用油・輸入鶏肉をはじめとする業務用食材です。")}
+            {rt("division:food.products.intro", "取扱商品の主要カテゴリは食用油・輸入鶏肉をはじめとする業務用食材です。")}
           </p>
           {/* 要確認：カテゴリ一覧と代表商品名 */}
           {(txt("division:food.products.categories", "") || EDIT_MODE) && (
             <p className="mt-4 max-w-3xl text-muted-foreground" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("division:food.products.categories", "カテゴリ一覧と代表商品名（要確認・未確定）", { multiline: true })}>
-              {txt("division:food.products.categories", PENDING_HINT)}
+              {rt("division:food.products.categories", PENDING_HINT)}
             </p>
           )}
           <FoodSearchMock />
@@ -1015,10 +1016,10 @@ export function DivisionPage({ division }: { division: Division }) {
               >
                 <span className="text-brand" style={{ fontFamily: "var(--font-accent)", fontSize: 32, fontWeight: 700, lineHeight: 1 }}>{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-4" style={{ fontSize: 19, fontWeight: 700, lineHeight: 1.5 }} {...ed(`package:${pkg.id}.title`, "パッケージ名")}>
-                  {txt(`package:${pkg.id}.title`, pkg.title)}
+                  {rt(`package:${pkg.id}.title`, pkg.title)}
                 </h3>
                 <p className="mt-3 flex-1 text-muted-foreground" style={{ fontSize: 13, lineHeight: 1.9 }} {...ed(`package:${pkg.id}.lead`, "リード")}>
-                  {txt(`package:${pkg.id}.lead`, pkg.lead)}
+                  {rt(`package:${pkg.id}.lead`, pkg.lead)}
                 </p>
                 <span className="mt-5 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
                   セット内容を見る <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
@@ -1036,10 +1037,10 @@ export function DivisionPage({ division }: { division: Division }) {
           {/* 氷カフェが生まれた理由 */}
           <div className="mt-10 rounded-2xl border border-border bg-card p-8">
             <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed("division:ice.recipeIdeas.storyTitle", "見出し")}>
-              {txt("division:ice.recipeIdeas.storyTitle", "氷カフェが生まれた理由")}
+              {rt("division:ice.recipeIdeas.storyTitle", "氷カフェが生まれた理由")}
             </h3>
             <p className="mt-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed("division:ice.recipeIdeas.story", "本文", { multiline: true })}>
-              {txt("division:ice.recipeIdeas.story", ICE_RECIPE_STORY)}
+              {rt("division:ice.recipeIdeas.story", ICE_RECIPE_STORY)}
             </p>
           </div>
 
@@ -1051,7 +1052,7 @@ export function DivisionPage({ division }: { division: Division }) {
           {/* 要確認：QRコード案内のレシピ内容・動画コンテンツ */}
           {(recipePendingVal || EDIT_MODE) && (
             <p className="mt-3 max-w-3xl text-muted-foreground" style={{ fontSize: 14, lineHeight: 2, whiteSpace: "pre-line" }} {...ed("division:ice.recipeIdeas.pending", "メニューレシピ補足（要確認・未確定）", { multiline: true })}>
-              {recipePendingVal || PENDING_HINT}
+              {rich(recipePendingVal || PENDING_HINT)}
             </p>
           )}
           <div className="mt-8 space-y-4">
@@ -1127,12 +1128,12 @@ export function DivisionPage({ division }: { division: Division }) {
                 <div key={i} className="rounded-xl border border-border bg-card p-6">
                   <p className="flex gap-3" style={{ fontSize: 16, fontWeight: 700 }}>
                     <span className="text-brand" style={{ fontFamily: "var(--font-accent)" }}>Q.</span>
-                    <span {...ed(`division:${division}.faq.${i}.q`, "質問")}>{txt(`division:${division}.faq.${i}.q`, f.q)}</span>
+                    <span {...ed(`division:${division}.faq.${i}.q`, "質問")}>{rt(`division:${division}.faq.${i}.q`, f.q)}</span>
                   </p>
                   <p className="mt-3 flex gap-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
                     <span className="text-muted-foreground" style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}>A.</span>
                     <span style={{ whiteSpace: "pre-line" }} className={f.pending && !a ? "text-muted-foreground" : ""} {...ed(`division:${division}.faq.${i}.a`, f.pending ? "回答（要確認・未確定）" : "回答", { multiline: true })}>
-                      {a || (f.pending ? PENDING_HINT : "")}
+                      {rich(a || (f.pending ? PENDING_HINT : ""))}
                     </span>
                   </p>
                 </div>

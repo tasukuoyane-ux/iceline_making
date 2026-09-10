@@ -210,6 +210,24 @@ html.cookie-open .video-cta {
   }
 }
 
+/* 行内装飾（コンソールのテキスト欄の **太字** / [文字](URL)。richInline.tsx / richText.ts が展開） */
+.rt-b {
+  font-weight: 700;
+}
+.rt-link {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  transition: opacity 0.2s;
+}
+.rt-link:hover {
+  opacity: 0.7;
+}
+/* 採用サイト（.rc）は独自配色のため、リンク色は周囲の文字色を引き継ぐ */
+.rc .rt-link {
+  color: inherit;
+}
+
 /* 編集可能な本文（RichBody）：行頭「・」「- 」の行はリスト、それ以外は段落。
    値はプレーンテキストのまま保存され、表示時に p / ul>li へ展開される */
 [data-edit-rich] p {
@@ -223,6 +241,10 @@ html.cookie-open .video-cta {
 }
 [data-edit-rich] li {
   white-space: pre-line;
+}
+/* 1行＝1段落の本文（代表メッセージなど）。段落間に余白を取る */
+.rich-paras p + p {
+  margin-top: 1.25em;
 }
 
 /* 繰り返しセクションの「項目数」設定（コンソールのプルダウン）。
@@ -274,5 +296,78 @@ html.cookie-open .video-cta {
 }
 [data-repeat][data-edit-selected="12"] > :nth-child(n+13),
 [data-repeat]:not([data-edit-selected])[data-edit-value="12"] > :nth-child(n+13) {
+  display: none !important;
+}
+/* 13〜30 項目（沿革 30 行・会社概要など上限の大きい繰り返しセクション用。2026-09-10 追加） */
+[data-repeat][data-edit-selected="13"] > :nth-child(n+14),
+[data-repeat]:not([data-edit-selected])[data-edit-value="13"] > :nth-child(n+14) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="14"] > :nth-child(n+15),
+[data-repeat]:not([data-edit-selected])[data-edit-value="14"] > :nth-child(n+15) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="15"] > :nth-child(n+16),
+[data-repeat]:not([data-edit-selected])[data-edit-value="15"] > :nth-child(n+16) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="16"] > :nth-child(n+17),
+[data-repeat]:not([data-edit-selected])[data-edit-value="16"] > :nth-child(n+17) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="17"] > :nth-child(n+18),
+[data-repeat]:not([data-edit-selected])[data-edit-value="17"] > :nth-child(n+18) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="18"] > :nth-child(n+19),
+[data-repeat]:not([data-edit-selected])[data-edit-value="18"] > :nth-child(n+19) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="19"] > :nth-child(n+20),
+[data-repeat]:not([data-edit-selected])[data-edit-value="19"] > :nth-child(n+20) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="20"] > :nth-child(n+21),
+[data-repeat]:not([data-edit-selected])[data-edit-value="20"] > :nth-child(n+21) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="21"] > :nth-child(n+22),
+[data-repeat]:not([data-edit-selected])[data-edit-value="21"] > :nth-child(n+22) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="22"] > :nth-child(n+23),
+[data-repeat]:not([data-edit-selected])[data-edit-value="22"] > :nth-child(n+23) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="23"] > :nth-child(n+24),
+[data-repeat]:not([data-edit-selected])[data-edit-value="23"] > :nth-child(n+24) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="24"] > :nth-child(n+25),
+[data-repeat]:not([data-edit-selected])[data-edit-value="24"] > :nth-child(n+25) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="25"] > :nth-child(n+26),
+[data-repeat]:not([data-edit-selected])[data-edit-value="25"] > :nth-child(n+26) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="26"] > :nth-child(n+27),
+[data-repeat]:not([data-edit-selected])[data-edit-value="26"] > :nth-child(n+27) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="27"] > :nth-child(n+28),
+[data-repeat]:not([data-edit-selected])[data-edit-value="27"] > :nth-child(n+28) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="28"] > :nth-child(n+29),
+[data-repeat]:not([data-edit-selected])[data-edit-value="28"] > :nth-child(n+29) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="29"] > :nth-child(n+30),
+[data-repeat]:not([data-edit-selected])[data-edit-value="29"] > :nth-child(n+30) {
+  display: none !important;
+}
+[data-repeat][data-edit-selected="30"] > :nth-child(n+31),
+[data-repeat]:not([data-edit-selected])[data-edit-value="30"] > :nth-child(n+31) {
   display: none !important;
 }

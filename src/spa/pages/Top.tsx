@@ -8,6 +8,7 @@ import { IMG } from "../data/images";
 import { useNews } from "../data/news";
 import { hasVideo } from "../data/blocks";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { rt, rich } from "../lib/richInline";
 import { RichBody } from "../components/common/RichBody";
 import { InlineMovieTag } from "../components/common/MovieBadge";
 import { FV_TOP_SHAPES, mountFvParticles } from "../lib/fvParticles";
@@ -111,7 +112,7 @@ function EditableLinkHint({ path, label, href }: { path: string; label: string; 
   if (!EDIT_MODE) return null;
   return (
     <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(path, label)}>
-      {href}
+      {rich(href)}
     </p>
   );
 }
@@ -137,10 +138,10 @@ function CollageTile({ i, def }: { i: number; def: (typeof COLLAGE_TILES)[number
       {/* PC：ホバーで写真の上に黒文字の説明を表示 */}
       <div className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center p-4 text-center text-ink opacity-0 transition-opacity duration-300 pc:flex pc:group-hover:opacity-100">
         <h3 style={{ fontSize: "clamp(13px, 1.2vw, 18px)", fontWeight: 700, lineHeight: 1.5 }} {...ed(`${base}.title`, `コラージュ写真${i + 1} 見出し`)}>
-          {title}
+          {rich(title)}
         </h3>
         <p className="mt-2" style={{ fontSize: "clamp(10px, 0.85vw, 13px)", lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${base}.body`, `コラージュ写真${i + 1} 説明`, { multiline: true })}>
-          {body}
+          {rich(body)}
         </p>
       </div>
       {/* SP：タップでオーバーレイ表示（PC幅では出さない） */}
@@ -243,10 +244,10 @@ export function Top() {
                 <li key={n.id}>
                   <Link to={`/news/${n.id}`} className="flex flex-col gap-1 py-4 transition-colors hover:text-brand tab:flex-row tab:items-center tab:gap-6">
                     {/* 日付・カテゴリは固定幅（横並び時）にして、記事名の文頭位置を全行で揃える（2026-09 改修） */}
-                    <span className="shrink-0 text-muted-foreground tab:w-[6.5em]" style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }} {...ed(`news:${n.id}:date`)}>{n.date}</span>
-                    <span className="inline-flex w-fit shrink-0 justify-center bg-secondary px-3 py-0.5 text-muted-foreground tab:w-[6.5em]" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{n.category}</span>
+                    <span className="shrink-0 text-muted-foreground tab:w-[6.5em]" style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }} {...ed(`news:${n.id}:date`)}>{rich(n.date)}</span>
+                    <span className="inline-flex w-fit shrink-0 justify-center bg-secondary px-3 py-0.5 text-muted-foreground tab:w-[6.5em]" style={{ fontSize: 12 }} {...ed(`news:${n.id}:category`)}>{rich(n.category)}</span>
                     <span className="flex min-w-0 flex-1 items-center gap-2" style={{ fontSize: 15 }}>
-                      <span {...ed(`news:${n.id}:title`)}>{n.title}</span>
+                      <span {...ed(`news:${n.id}:title`)}>{rich(n.title)}</span>
                       {hasVideo(n.blocks) && <InlineMovieTag />}
                     </span>
                   </Link>
@@ -266,10 +267,10 @@ export function Top() {
           className="en-label"
           {...ed("sectionEn:top.strength", "英語見出し（補助）")}
         >
-          {txt("sectionEn:top.strength", "OUR BUSINESS")}
+          {rt("sectionEn:top.strength", "OUR BUSINESS")}
         </div>
         <h2 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} {...ed("top:strengthV2.title", "強み 見出し（H2）")}>
-          {txt("top:strengthV2.title", "アイスラインの特徴")}
+          {rt("top:strengthV2.title", "アイスラインの特徴")}
         </h2>
         <div
           className="mt-7 grid items-center gap-8 pc:gap-12 pc:[grid-template-columns:var(--ratio)]"
@@ -286,10 +287,10 @@ export function Top() {
           {/* 右：テキスト（H3 ＋ 本文） */}
           <div className="pc:px-4">
             <h3 className="text-brand" style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.5 }} {...ed("top:strengthV2.subhead", "強み 小見出し（H3）")}>
-              {txt("top:strengthV2.subhead", "氷を祖業に、低温のプロフェッショナルとして広がった事業")}
+              {rt("top:strengthV2.subhead", "氷を祖業に、低温のプロフェッショナルとして広がった事業")}
             </h3>
             <p className="mt-4 text-foreground/80" style={{ fontSize: 16, lineHeight: 2, whiteSpace: "pre-line" }} {...ed("top:strengthV2.body", "強み 本文", { multiline: true })}>
-              {txt("top:strengthV2.body", STRENGTH_BODY_DEFAULT)}
+              {rt("top:strengthV2.body", STRENGTH_BODY_DEFAULT)}
             </p>
           </div>
         </div>
@@ -315,14 +316,14 @@ export function Top() {
                   {/* 文章（小見出し・本文・リンク） */}
                   <div className="[direction:ltr] pc:px-2">
                     <h3 className="text-brand" style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.5 }} {...ed(`${base}.title`, "事業名")}>
-                      {title}
+                      {rich(title)}
                     </h3>
                     <p
                       className="mt-4 text-foreground/85"
                       style={{ fontSize: 16, lineHeight: 1.9, whiteSpace: "pre-line" }}
                       {...ed(`${base}.body`, "事業内容 本文", { multiline: true })}
                     >
-                      {txt(`${base}.body`, s.body)}
+                      {rt(`${base}.body`, s.body)}
                     </p>
                     <Link to={s.to} className="group mt-4 inline-flex w-fit items-center gap-1.5 text-brand transition-opacity hover:opacity-75" style={{ fontSize: 14 }}>
                       <span>{title}</span>
@@ -366,17 +367,17 @@ export function Top() {
               style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(6px, 0.95vw, 13px)", lineHeight: 1.2, letterSpacing: "0.18em" }}
               {...ed("sectionEn:top.products.en", "英語見出し（補助）")}
             >
-              {txt("sectionEn:top.products.en", "PRODUCTS")}
+              {rt("sectionEn:top.products.en", "PRODUCTS")}
             </div>
             <h2 style={{ marginTop: "0.25em", fontSize: "clamp(11px, 2.2vw, 30px)", fontWeight: 700, lineHeight: 1.3 }} {...ed("sectionEn:top.products.jp", "大見出し（H2）")}>
-              {txt("sectionEn:top.products.jp", "自社開発商品")}
+              {rt("sectionEn:top.products.jp", "自社開発商品")}
             </h2>
             <p
               className="text-foreground/80"
               style={{ marginTop: "0.6em", fontSize: "clamp(6px, 1vw, 14px)", lineHeight: 1.7, whiteSpace: "pre-line" }}
               {...ed("top:collage.lead", "見出し直下の文章（2行）", { multiline: true })}
             >
-              {txt("top:collage.lead", COLLAGE_LEAD_DEFAULT)}
+              {rt("top:collage.lead", COLLAGE_LEAD_DEFAULT)}
             </p>
           </div>
           {COLLAGE_TILES.map((t, i) => (
@@ -409,10 +410,10 @@ export function Top() {
                     <div className="absolute inset-0 bg-ink/55 transition-colors group-hover:bg-ink/45" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center text-white">
                       <span style={{ fontSize: "clamp(11px, 1.5vw, 22px)", fontWeight: 700, lineHeight: 1.4 }} {...ed(`${base}.title`, `バナー${i + 1} 見出し`)}>
-                        {title}
+                        {rich(title)}
                       </span>
                       <span className="mt-1 text-white/90" style={{ fontSize: "clamp(8px, 0.9vw, 13px)", lineHeight: 1.6 }} {...ed(`${base}.sub`, `バナー${i + 1} 文言`)}>
-                        {txt(`${base}.sub`, b.sub)}
+                        {rt(`${base}.sub`, b.sub)}
                       </span>
                     </div>
                   </div>

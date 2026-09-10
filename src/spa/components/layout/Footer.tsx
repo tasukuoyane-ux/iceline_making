@@ -7,7 +7,8 @@ import { ed, txt, img } from "../../lib/editable";
 // 2026-09 改修：文字の「ICELINE」・会社名・タグラインをロゴ画像（デザイン支給 logo-white.png）に置き換えた。
 const LOGO_WHITE = "/images/logo-white.png";
 
-const COLS = [
+// sub: true の項目は一回り小さい文字で表示（会社情報の下の「株式会社アイスマウンテン」。2026-09-10 追加。ナビには出さない）
+const COLS: { title: string; links: { to: string; label: string; sub?: boolean }[] }[] = [
   {
     title: "事業",
     links: [
@@ -21,6 +22,7 @@ const COLS = [
     title: "会社",
     links: [
       { to: "/company", label: "会社情報" },
+      { to: "/ice-mountain", label: "株式会社アイスマウンテン", sub: true },
       { to: "/news", label: "お知らせ" },
       { to: "/videos", label: "動画で知るアイスライン" },
     ],
@@ -51,8 +53,8 @@ export function Footer() {
               <p {...ed(`footer:cols.${ci}.title`, "見出し")} className="mb-4 text-white/50" style={{ fontSize: 13 }}>{txt(`footer:cols.${ci}.title`, c.title)}</p>
               <ul className="space-y-3">
                 {c.links.map((l, li) => (
-                  <li key={l.to}>
-                    <Link to={l.to} className="text-white/85 transition-colors hover:text-brand" style={{ fontSize: 14 }}>
+                  <li key={l.to} className={l.sub ? "-mt-1.5 pl-3" : undefined}>
+                    <Link to={l.to} className="text-white/85 transition-colors hover:text-brand" style={{ fontSize: l.sub ? 12 : 14 }}>
                       <span {...ed(`footer:cols.${ci}.nav.${li}.label`, "ナビ項目")}>{txt(`footer:cols.${ci}.nav.${li}.label`, l.label)}</span>
                     </Link>
                   </li>

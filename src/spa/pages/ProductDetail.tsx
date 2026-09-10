@@ -4,6 +4,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { PRODUCTS } from "../data/products";
 import { PRODUCT_IMG } from "../data/images";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs } from "../lib/editable";
+import { rt } from "../lib/richInline";
 
 export function ProductDetail() {
   const { id } = useParams();
@@ -49,16 +50,16 @@ export function ProductDetail() {
           {...edImg(`${pre}:image`, "商品画像")}
         />
         <div>
-          <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`${pre}:genre`, "ジャンル")}>{txt(`${pre}:genre`, p.genre)}</span>
-          <h1 className="mt-1" style={{ fontSize: 32, fontWeight: 900 }} {...ed(`${pre}:name`, "商品名")}>{txt(`${pre}:name`, p.name)}</h1>
-          <p className="mt-3 text-brand" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`${pre}:catch`, "キャッチコピー")}>{txt(`${pre}:catch`, p.catch)}</p>
+          <span className="text-muted-foreground" style={{ fontSize: 13 }} {...ed(`${pre}:genre`, "ジャンル")}>{rt(`${pre}:genre`, p.genre)}</span>
+          <h1 className="mt-1" style={{ fontSize: 32, fontWeight: 900 }} {...ed(`${pre}:name`, "商品名")}>{rt(`${pre}:name`, p.name)}</h1>
+          <p className="mt-3 text-brand" style={{ fontSize: 16, fontWeight: 700 }} {...ed(`${pre}:catch`, "キャッチコピー")}>{rt(`${pre}:catch`, p.catch)}</p>
 
           <table className="mt-8 w-full border-t border-border">
             <tbody>
               {rows.map((r) => (
                 <tr key={r.key} className="border-b border-border align-top">
                   <th className="w-32 bg-secondary px-4 py-3 text-left text-muted-foreground" style={{ fontSize: 13, fontWeight: 500 }}>{r.label}</th>
-                  <td className="px-4 py-3" style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${pre}:${r.key}`, r.label)}>{txt(`${pre}:${r.key}`, r.value)}</td>
+                  <td className="px-4 py-3" style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${pre}:${r.key}`, r.label)}>{rt(`${pre}:${r.key}`, r.value)}</td>
                 </tr>
               ))}
             </tbody>
@@ -67,7 +68,7 @@ export function ProductDetail() {
           {p.recipe && (
             <div className="mt-6 rounded-lg bg-secondary p-5">
               <p className="text-brand" style={{ fontSize: 13, fontWeight: 700 }}>活用レシピ（動画連携予定）</p>
-              <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${pre}:recipe`, "活用レシピ")}>{txt(`${pre}:recipe`, p.recipe)}</p>
+              <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.9, whiteSpace: "pre-line" }} {...ed(`${pre}:recipe`, "活用レシピ")}>{rt(`${pre}:recipe`, p.recipe)}</p>
             </div>
           )}
 

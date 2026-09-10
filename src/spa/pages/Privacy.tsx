@@ -2,6 +2,7 @@ import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { SITE } from "../data/company";
 import { ed, txt } from "../lib/editable";
+import { rt } from "../lib/richInline";
 
 const SECTIONS: { title: string; body: string[] }[] = [
   {
@@ -65,7 +66,7 @@ export function Privacy() {
       {/* 2026-09 改修：黒帯のヒーローを廃止し、デザイン支給どおり本文の先頭に英字ラベル＋見出しを置く */}
       <Section heat={HEAT.companyProfile}>
         <div className="mx-auto max-w-3xl">
-          <div className="en-label" {...ed("sectionEn:privacy.mv", "英語見出し（補助）")}>{txt("sectionEn:privacy.mv", "PRIVACY POLICY")}</div>
+          <div className="en-label" {...ed("sectionEn:privacy.mv", "英語見出し（補助）")}>{rt("sectionEn:privacy.mv", "PRIVACY POLICY")}</div>
           <h1 style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }}>プライバシーポリシー</h1>
           <p className="mt-6 text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
             {SITE.name}（以下「当社」といいます。）は、お客様の個人情報の保護を重要な責務と認識し、以下の方針に基づき個人情報を適切に取り扱います。

@@ -13,6 +13,7 @@ import { ContactSection } from "../components/common/ContactSection";
 import { RichBody } from "../components/common/RichBody";
 import { HEAT } from "../data/heatMap";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { rt, rich } from "../lib/richInline";
 
 // 要確認スロットの案内文（未入力の間、公開ページでは項目ごと非表示になる）
 const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
@@ -313,11 +314,11 @@ function ServiceSteps({ base, count, defaults }: { base: string; count: number; 
             </span>
           </div>
           <p className="mt-3" style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${s.sb}.title`, `手順${s.i + 1} 工程名`)}>
-            {s.title || (EDIT_MODE ? "（工程名）" : "")}
+            {rich(s.title || (EDIT_MODE ? "（工程名）" : ""))}
           </p>
           {(s.body || EDIT_MODE) && (
             <p className="mt-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed(`${s.sb}.body`, `手順${s.i + 1} 説明`, { multiline: true })}>
-              {s.body || "（説明・任意）"}
+              {rich(s.body || "（説明・任意）")}
             </p>
           )}
           {/* 次の手順への矢印（PC のみ・行末では表示しない） */}
@@ -350,10 +351,10 @@ export function ServicePage({ service }: { service: ServiceId }) {
         <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`${base}.mv.en`, "英語見出し（補助）")}>
-              {txt(`${base}.mv.en`, s.en)}
+              {rt(`${base}.mv.en`, s.en)}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`${base}.mv.title`, "ページタイトル")}>
-              {txt(`${base}.mv.title`, s.title)}
+              {rt(`${base}.mv.title`, s.title)}
             </h1>
             {/* 旧「事業概要」セクションの本文（編集パスは従来のまま） */}
             <RichBody
@@ -374,7 +375,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   style={{ fontSize: 15, fontWeight: 700 }}
                 >
                   <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
-                    {txt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
+                    {rt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
                   </span>
                   <ArrowRight size={16} />
                 </a>
@@ -414,7 +415,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                       style={{ fontSize: 13, lineHeight: 1.7 }}
                       {...ed(`${base}.sec.${sk}.photo.${p.i}.caption`, `写真${p.i + 1} キャプション`)}
                     >
-                      {txt(`${base}.sec.${sk}.photo.${p.i}.caption`, "") || (EDIT_MODE ? "（キャプション）" : "")}
+                      {rt(`${base}.sec.${sk}.photo.${p.i}.caption`, "") || (EDIT_MODE ? "（キャプション）" : "")}
                     </figcaption>
                   </figure>
                 ))}
@@ -452,7 +453,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                       style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.6 }}
                       {...ed(`${base}.sec.${sk}.pic.${p.i}.caption`, `特徴${p.i + 1} キャプション`)}
                     >
-                      {p.caption || (EDIT_MODE ? "（キャプション）" : "")}
+                      {rich(p.caption || (EDIT_MODE ? "（キャプション）" : ""))}
                     </p>
                   </div>
                 ))}
@@ -490,13 +491,13 @@ export function ServicePage({ service }: { service: ServiceId }) {
                     style={{ fontSize: 15 }}
                   >
                     <span {...ed(`${ib}.cta.label`, "CTAボタン文言")}>
-                      {txt(`${ib}.cta.label`, "オンラインショップで購入する")}
+                      {rt(`${ib}.cta.label`, "オンラインショップで購入する")}
                     </span>
                     <ArrowRight size={16} />
                   </a>
                   {EDIT_MODE && (
                     <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(`${ib}.cta.url`, "CTAリンク先URL")}>
-                      {txt(`${ib}.cta.url`, s.shopUrl || "/contact")}
+                      {rt(`${ib}.cta.url`, s.shopUrl || "/contact")}
                     </p>
                   )}
                 </div>
@@ -522,7 +523,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                       <div className="[direction:ltr]">
                         {it.title && (
                           <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${ib}.title`, "見出し")}>
-                            {txt(`${ib}.title`, it.title)}
+                            {rt(`${ib}.title`, it.title)}
                           </h3>
                         )}
                         <RichBody
@@ -558,7 +559,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                   <div className="[direction:ltr] pc:px-12">
                     {it.title && (
                       <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${ib}.title`, "見出し")}>
-                        {txt(`${ib}.title`, it.title)}
+                        {rt(`${ib}.title`, it.title)}
                       </h3>
                     )}
                     <RichBody
@@ -581,7 +582,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                 <div key={ii} className={it.title ? "rounded-2xl border border-border bg-card p-8" : "max-w-3xl"}>
                   {it.title && (
                     <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${ib}.title`, "見出し")}>
-                      {txt(`${ib}.title`, it.title)}
+                      {rt(`${ib}.title`, it.title)}
                     </h3>
                   )}
                   <RichBody
@@ -614,12 +615,12 @@ export function ServicePage({ service }: { service: ServiceId }) {
             <div key={i} className="rounded-xl border border-border bg-card p-6">
               <p className="flex gap-3" style={{ fontSize: 16, fontWeight: 700 }}>
                 <span className="text-brand" style={{ fontFamily: "var(--font-accent)" }}>Q.</span>
-                <span {...ed(`${base}.faq.${i}.q`, "質問")}>{txt(`${base}.faq.${i}.q`, f.q)}</span>
+                <span {...ed(`${base}.faq.${i}.q`, "質問")}>{rt(`${base}.faq.${i}.q`, f.q)}</span>
               </p>
               <p className="mt-3 flex gap-3 text-foreground/80" style={{ fontSize: 15, lineHeight: 2 }}>
                 <span className="text-muted-foreground" style={{ fontFamily: "var(--font-accent)", fontWeight: 700 }}>A.</span>
                 <span style={{ whiteSpace: "pre-line" }} className={f.pending && !a ? "text-muted-foreground" : ""} {...ed(`${base}.faq.${i}.a`, f.pending ? "回答（要確認・未確定）" : "回答", { multiline: true })}>
-                  {a || (f.pending ? PENDING_HINT : "")}
+                  {rich(a || (f.pending ? PENDING_HINT : ""))}
                 </span>
               </p>
             </div>
@@ -657,7 +658,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
                       style={{ fontSize: 13, lineHeight: 1.7 }}
                       {...ed(`${base}.photo.${p.i}.caption`, `施設写真${p.i + 1} キャプション`)}
                     >
-                      {txt(`${base}.photo.${p.i}.caption`, p.capDef) || (EDIT_MODE ? "（キャプション・任意）" : "")}
+                      {rt(`${base}.photo.${p.i}.caption`, p.capDef) || (EDIT_MODE ? "（キャプション・任意）" : "")}
                     </figcaption>
                   </figure>
                 ))}
@@ -670,7 +671,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
       <Section heat={HEAT.foodList}>
         <div className="rounded-2xl border border-border bg-card px-6 py-12 text-center pc:py-16">
           <p style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${base}.cta.copy`, "CTAコピー")}>
-            {txt(`${base}.cta.copy`, "ご相談・お見積りはお気軽にどうぞ。")}
+            {rt(`${base}.cta.copy`, "ご相談・お見積りはお気軽にどうぞ。")}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link

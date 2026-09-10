@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { findRecipe } from "../data/products";
 import { ed, edImg, txt, img } from "../lib/editable";
+import { rt } from "../lib/richInline";
 
 export function RecipeDetail() {
   const { id } = useParams();
@@ -31,7 +32,7 @@ export function RecipeDetail() {
         <span className="inline-flex bg-secondary px-3 py-1 text-muted-foreground" style={{ fontSize: 12 }}>
           {recipe.category}
         </span>
-        <h1 className="mt-3" style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} {...ed(`recipe:${recipe.id}:name`, "レシピ名")}>{txt(`recipe:${recipe.id}:name`, recipe.name)}</h1>
+        <h1 className="mt-3" style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.35 }} {...ed(`recipe:${recipe.id}:name`, "レシピ名")}>{rt(`recipe:${recipe.id}:name`, recipe.name)}</h1>
       </div>
 
       <ImageWithFallback
@@ -48,7 +49,7 @@ export function RecipeDetail() {
           <ul className="mt-4 space-y-2">
             {recipe.materials.map((m, i) => (
               <li key={i} className="flex justify-between gap-3 border-b border-border/60 pb-2 text-foreground/80" style={{ fontSize: 14 }} {...ed(`recipe:${recipe.id}:materials.${i}`, `材料${i + 1}`)}>
-                {txt(`recipe:${recipe.id}:materials.${i}`, m)}
+                {rt(`recipe:${recipe.id}:materials.${i}`, m)}
               </li>
             ))}
           </ul>
@@ -63,7 +64,7 @@ export function RecipeDetail() {
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground" style={{ fontSize: 13, fontWeight: 700 }}>
                   {i + 1}
                 </span>
-                <span className="pt-0.5" style={{ whiteSpace: "pre-line" }} {...ed(`recipe:${recipe.id}:steps.${i}`, `作り方${i + 1}`, { multiline: true })}>{txt(`recipe:${recipe.id}:steps.${i}`, s)}</span>
+                <span className="pt-0.5" style={{ whiteSpace: "pre-line" }} {...ed(`recipe:${recipe.id}:steps.${i}`, `作り方${i + 1}`, { multiline: true })}>{rt(`recipe:${recipe.id}:steps.${i}`, s)}</span>
               </li>
             ))}
           </ol>

@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, txt } from "../lib/editable";
+import { rt } from "../lib/richInline";
 import type { RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
 import { RecruitFrame } from "./RecruitFrame";
 import { FlowArrow, Marked, OutlineText } from "./parts";
@@ -211,7 +212,7 @@ function EntryForm({ job, sectionRef }: { job: RecruitJob; sectionRef: React.Ref
           <Marked text={txt("recruit2:entry.jp", "エントリー")} />
         </h2>
         <p className="note entry-form__note" {...ed("recruit3:entry.note", "エントリー 注記")}>
-          {txt("recruit3:entry.note", "下記フォームからご応募ください。担当者よりご連絡いたします。")}
+          {rt("recruit3:entry.note", "下記フォームからご応募ください。担当者よりご連絡いたします。")}
         </p>
         <div className="field">
           <label className="field__label" htmlFor="rc-job">希望職種</label>
@@ -287,7 +288,7 @@ export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: Recr
         </button>
 
         <section className="iv-hero ov-hero">
-          <span className="kicker reveal" {...ed("recruit3:ov.kicker", "職種詳細 英字ラベル")}>{txt("recruit3:ov.kicker", "RECRUIT")}</span>
+          <span className="kicker reveal" {...ed("recruit3:ov.kicker", "職種詳細 英字ラベル")}>{rt("recruit3:ov.kicker", "RECRUIT")}</span>
           <h1 className="iv-hero__catch reveal">
             <OutlineText text={job.title.replace(/（[^）]*）\s*$/, "")} />
           </h1>

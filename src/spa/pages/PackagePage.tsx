@@ -8,6 +8,7 @@ import { ArrowRight, ArrowLeft, Package } from "lucide-react";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
 import { ed, txt } from "../lib/editable";
+import { rt } from "../lib/richInline";
 
 interface PackageItem {
   name: string;
@@ -102,13 +103,13 @@ export function PackagePage() {
         <div className="mx-auto flex min-h-[240px] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed("sectionEn:package.mv", "英語見出し（補助）")}>
-              {txt("sectionEn:package.mv", "RECOMMENDED PACKAGE")}
+              {rt("sectionEn:package.mv", "RECOMMENDED PACKAGE")}
             </p>
             <h1 className="text-white" style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 900, lineHeight: 1.4 }} {...ed(`${base}.title`, "パッケージ名")}>
-              {txt(`${base}.title`, pkg.title)}
+              {rt(`${base}.title`, pkg.title)}
             </h1>
             <p className="mt-4 text-white/85" style={{ fontSize: 15 }} {...ed(`${base}.lead`, "リード")}>
-              {txt(`${base}.lead`, pkg.lead)}
+              {rt(`${base}.lead`, pkg.lead)}
             </p>
           </motion.div>
         </div>
@@ -118,7 +119,7 @@ export function PackagePage() {
       <Section heat={HEAT.foodBiz}>
         <div className="mx-auto max-w-3xl">
           <p className="text-foreground/80" style={{ fontSize: 15, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`${base}.body`, "説明文", { multiline: true })}>
-            {txt(`${base}.body`, pkg.body)}
+            {rt(`${base}.body`, pkg.body)}
           </p>
         </div>
       </Section>
@@ -140,14 +141,14 @@ export function PackagePage() {
               <div>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`${base}.item.${i}.name`, "商品名")}>
-                    {txt(`${base}.item.${i}.name`, it.name)}
+                    {rt(`${base}.item.${i}.name`, it.name)}
                   </h3>
                   <span className="text-muted-foreground" style={{ fontSize: 12 }} {...ed(`${base}.item.${i}.spec`, "規格")}>
-                    {txt(`${base}.item.${i}.spec`, it.spec)}
+                    {rt(`${base}.item.${i}.spec`, it.spec)}
                   </span>
                 </div>
                 <p className="mt-2 text-foreground/70" style={{ fontSize: 13, lineHeight: 1.9 }} {...ed(`${base}.item.${i}.note`, "説明")}>
-                  {txt(`${base}.item.${i}.note`, it.note)}
+                  {rt(`${base}.item.${i}.note`, it.note)}
                 </p>
               </div>
             </motion.div>
@@ -162,7 +163,7 @@ export function PackagePage() {
       <Section heat={HEAT.foodList}>
         <div className="rounded-2xl border border-border bg-card px-6 py-12 text-center pc:py-16">
           <p style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${base}.cta`, "CTAコピー")}>
-            {txt(`${base}.cta`, "このパッケージについて相談する")}
+            {rt(`${base}.cta`, "このパッケージについて相談する")}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link

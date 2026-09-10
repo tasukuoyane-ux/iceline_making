@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { RichBody } from "../components/common/RichBody";
 import { EDIT_MODE, ed, edImg, img, repeatSel, txt } from "../lib/editable";
+import { rt, rich } from "../lib/richInline";
 import { useRecruitData } from "../lib/recruitStore";
 import { useInterviews } from "../data/interviews";
 import { VIDEOS, type VideoItem } from "../data/news";
@@ -42,7 +43,7 @@ function Title({ path, def, mark, label = "見出し" }: { path: string; def: st
 function Kicker({ path, def }: { path: string; def: string }) {
   return (
     <span className="kicker reveal" {...ed(path, "英字ラベル")}>
-      {txt(path, def)}
+      {rt(path, def)}
     </span>
   );
 }
@@ -139,16 +140,16 @@ function Stats() {
                 </div>
                 <RichBody path={`${base}.circle`} text={txt(`${base}.circle`, d.circle)} label={`数字タイル${i + 1} 数字テキスト`} className="stat__number" />
                 <div className="stat__label" {...ed(`${base}.h3`, `数字タイル${i + 1} 見出し`)}>
-                  {txt(`${base}.h3`, d.h3)}
+                  {rt(`${base}.h3`, d.h3)}
                 </div>
                 {/* 数字への注釈（任意。例：昇給の「※一部職種例外あり」） */}
                 {(note !== "" || EDIT_MODE) && (
                   <div className="stat__note" {...ed(`${base}.note`, `数字タイル${i + 1} 注釈（任意）`)}>
-                    {note || "（注釈・任意）"}
+                    {rich(note || "（注釈・任意）")}
                   </div>
                 )}
                 <p className="stat__desc" style={{ whiteSpace: "pre-line" }} {...ed(`${base}.p`, `数字タイル${i + 1} 本文`, { multiline: true })}>
-                  {txt(`${base}.p`, d.p)}
+                  {rt(`${base}.p`, d.p)}
                 </p>
               </div>
             );
@@ -179,7 +180,7 @@ function Work() {
       <div className="container">
         <Title path="recruit3:work.title" def="アイスラインの仕事" mark="仕事" />
         <p className="section__lead reveal" style={{ textAlign: "center", whiteSpace: "pre-line" }} {...ed("recruit3:work.strong", "アイスラインの仕事 リード", { multiline: true })}>
-          {txt("recruit3:work.strong", "氷と食のフィールドで、暮らしの当たり前を支える。")}
+          {rt("recruit3:work.strong", "氷と食のフィールドで、暮らしの当たり前を支える。")}
         </p>
         <p className="poem-title reveal" style={{ textAlign: "center", marginTop: 64, fontSize: "clamp(22px, 3vw, 32px)", fontWeight: 900 }} {...ed("recruit3:work.poemTitle", "アイスラインの仕事 大コピー")}>
           <OutlineText text={poemTitle} accentLast />
@@ -210,9 +211,9 @@ function Culture() {
             const d = CULTURE_DEFAULTS[i] ?? { title: "（見出し）", body: "（本文）" };
             return (
               <div key={i} className="culture__item reveal">
-                <h3 {...ed(`recruit3:culture.${i}.title`, `カルチャー${i + 1} 見出し`)}>{txt(`recruit3:culture.${i}.title`, d.title)}</h3>
+                <h3 {...ed(`recruit3:culture.${i}.title`, `カルチャー${i + 1} 見出し`)}>{rt(`recruit3:culture.${i}.title`, d.title)}</h3>
                 <p style={{ whiteSpace: "pre-line" }} {...ed(`recruit3:culture.${i}.body`, `カルチャー${i + 1} 本文`, { multiline: true })}>
-                  {txt(`recruit3:culture.${i}.body`, d.body)}
+                  {rt(`recruit3:culture.${i}.body`, d.body)}
                 </p>
               </div>
             );
@@ -239,10 +240,10 @@ function People() {
         <Kicker path="recruit3:people.en" def="PEOPLE" />
         <Title path="recruit3:people.jp" def="人を知る" mark="人" />
         <p className="section__lead reveal" style={{ textAlign: "center" }} {...ed("recruit3:people.lead", "人を知る リード")}>
-          {txt("recruit3:people.lead", "働く社員のインタビューを、カードをめくるように読めます。")}
+          {rt("recruit3:people.lead", "働く社員のインタビューを、カードをめくるように読めます。")}
         </p>
         <div className="people-hint reveal">
-          <span className="note" {...ed("recruit3:people.hint", "横スクロールの案内")}>{txt("recruit3:people.hint", "横にスクロールできます")}</span>
+          <span className="note" {...ed("recruit3:people.hint", "横スクロールの案内")}>{rt("recruit3:people.hint", "横にスクロールできます")}</span>
           <svg width="20" height="14" viewBox="0 0 20 14" fill="none" stroke="#E2E2E2" strokeWidth="2" strokeLinecap="round">
             <path d="M2 7h15M13 2l5 5-5 5" />
           </svg>
@@ -268,7 +269,7 @@ function People() {
                     {iv.years ? `　${iv.years}` : ""}
                   </div>
                   <Link to={`/recruit/interview/${iv.id}`} className="btn btn--corp btn--sm">
-                    <span {...ed("recruit3:people.more", "記事リンク文言")}>{txt("recruit3:people.more", "記事を読む")}</span>
+                    <span {...ed("recruit3:people.more", "記事リンク文言")}>{rt("recruit3:people.more", "記事を読む")}</span>
                   </Link>
                 </div>
               </article>
@@ -300,12 +301,12 @@ function Movie() {
         </div>
         {(caption !== "" || EDIT_MODE) && (
           <p className="media-frame__caption reveal" style={{ whiteSpace: "pre-line" }} {...ed("recruit3:movie.caption", "動画キャプション", { multiline: true })}>
-            {caption || "（動画のキャプションを入力）"}
+            {rich(caption || "（動画のキャプションを入力）")}
           </p>
         )}
         {EDIT_MODE && (
           <p className="edit-url" {...ed("recruit3:movie.url", "埋め込み動画URL")} data-edit-video="1">
-            {url || "（動画URLを入力：YouTube/Vimeoの共有URL、または動画ファイルをアップロード）"}
+            {rich(url || "（動画URLを入力：YouTube/Vimeoの共有URL、または動画ファイルをアップロード）")}
           </p>
         )}
       </div>
@@ -347,7 +348,7 @@ function Deck() {
         <Title path="recruit3:deck.head.jp" def="カンパニーデック" />
         {(lead !== "" || EDIT_MODE) && (
           <p className="section__lead reveal" style={{ textAlign: "center", whiteSpace: "pre-line" }} {...ed("recruit3:deck.lead", "カンパニーデック リード", { multiline: true })}>
-            {lead || "（見出し下の一文を入力）"}
+            {rich(lead || "（見出し下の一文を入力）")}
           </p>
         )}
         <div className="media-grid">
@@ -385,7 +386,7 @@ function Deck() {
           <div className="deck-actions">
             <button type="button" className="btn btn--corp btn--sm deck-full-btn" onClick={() => setFull(true)}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" /></svg>
-              <span {...ed("recruit3:deck.fullLabel", "デッキ 全画面ボタン文言")}>{txt("recruit3:deck.fullLabel", "全画面で見る")}</span>
+              <span {...ed("recruit3:deck.fullLabel", "デッキ 全画面ボタン文言")}>{rt("recruit3:deck.fullLabel", "全画面で見る")}</span>
             </button>
           </div>
         )}
@@ -454,7 +455,7 @@ function Jobs() {
         <Kicker path="recruit3:jobs.en" def="RECRUIT" />
         <Title path="recruit3:jobs.jp" def="募集職種一覧" mark="募集職種" />
         <p className="section__lead reveal" style={{ textAlign: "center" }} {...ed("recruit3:jobs.lead", "募集職種 リード")}>
-          {txt("recruit3:jobs.lead", "職種名を選ぶと、業務内容・PRポイント・諸条件・選考の流れなどの詳細をご覧いただけます。")}
+          {rt("recruit3:jobs.lead", "職種名を選ぶと、業務内容・PRポイント・諸条件・選考の流れなどの詳細をご覧いただけます。")}
         </p>
         {jobs.length === 0 ? (
           <div className="job-row job-list--empty reveal" style={{ marginTop: 64 }}>
@@ -469,7 +470,7 @@ function Jobs() {
                 </span>
                 <span className="job-row__name">{j.title}</span>
                 <button type="button" className="btn btn--corp btn--sm job-row__btn" onClick={() => setOpenId(j.id)}>
-                  <span {...ed("recruit3:jobs.more", "職種リンク文言")}>{txt("recruit3:jobs.more", "詳細・エントリー")}</span>
+                  <span {...ed("recruit3:jobs.more", "職種リンク文言")}>{rt("recruit3:jobs.more", "詳細・エントリー")}</span>
                 </button>
               </li>
             ))}
@@ -517,7 +518,7 @@ function Videos() {
                 <PlayIcon size={40} />
               </span>
               <span className="media-frame__label" {...ed(`recruit3:videos.${v.id}.title`, "動画キャプション")}>
-                {txt(`recruit3:videos.${v.id}.title`, v.title)}
+                {rt(`recruit3:videos.${v.id}.title`, v.title)}
               </span>
             </button>
           ))}
