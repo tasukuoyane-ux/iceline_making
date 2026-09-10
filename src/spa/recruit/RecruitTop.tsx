@@ -6,7 +6,7 @@
 //   → ⑤ カルチャー → ⑥ 人を知る → 埋め込み動画（CMSで設定時） → ⑦ カンパニーデック
 //   → ⑧ 募集職種一覧 → ⑨ 動画
 // 文章・画像はすべてコンソール（ページ編集）で差し替えられる（編集パスは旧ページから引き継ぎ）。
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
@@ -234,6 +234,36 @@ function splitRole(role: string): { meta: string; job: string } {
 
 function People() {
   const { items } = useInterviews();
+  // 記事データの到着でカード列が再描画されると、Chrome の scroll-snap が「直前に snap していたカード」を
+  // 追従して 1 枚ぶん横スクロールし、1枚目が画面外に隠れることがある（先頭に記事が増えた場合など）。
+  // ユーザーがまだ横スクロールしていなければ、データ更新のたびに先頭へ戻す（2026-09-10 修正）。
+  const trackRef = useRef<HTMLDivElement>(null);
+  const touched = useRef(false);
+  useEffect(() => {
+    const t = trackRef.current;
+    if (!t) return;
+    const mark = () => {
+      touched.current = true;
+    };
+    t.addEventListener("wheel", mark, { passive: true });
+    t.addEventListener("touchstart", mark, { passive: true });
+    t.addEventListener("pointerdown", mark, { passive: true });
+    return () => {
+      t.removeEventListener("wheel", mark);
+      t.removeEventListener("touchstart", mark);
+      t.removeEventListener("pointerdown", mark);
+    };
+  }, []);
+  useEffect(() => {
+    const t = trackRef.current;
+    if (!t || touched.current) return;
+    t.scrollLeft = 0;
+    // snap の再計算が描画後に走ることがあるので、少し遅れてもう一度戻す
+    const id = window.setTimeout(() => {
+      if (!touched.current && t.scrollLeft !== 0) t.scrollLeft = 0;
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [items]);
   return (
     <section className="section on-land" id="people">
       <div className="container">
@@ -250,7 +280,7 @@ function People() {
         </div>
       </div>
       <div className="people">
-        <div className="people-track" data-reveal-group>
+        <div className="people-track" data-reveal-group ref={trackRef}>
           {items.map((iv, i) => {
             const r = splitRole(iv.role);
             return (

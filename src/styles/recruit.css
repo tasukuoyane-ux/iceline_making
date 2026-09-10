@@ -524,10 +524,18 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding: 8px max(24px, calc((100vw - var(--max-w)) / 2 + 48px)) 24px;
+  /* snap 位置に左右の余白を含める。これが無いと mandatory snap が読み込み直後に
+     1枚目を画面左端へ吸い付け、余白ぶん左へずれて見切れる（2026-09-10 修正）。
+     1枚目はコンテンツ幅の左端に揃い、そこから右へ並ぶ */
+  scroll-padding-inline: max(24px, calc((100vw - var(--max-w)) / 2 + 48px));
   -webkit-overflow-scrolling: touch;
   scrollbar-color: var(--veil-24) transparent;
   scrollbar-width: thin;
 }
+/* 出現前のカード（.reveal の scale(0.82) 状態）から snap 位置が計算されて左へズレるのを防ぐ：
+   カードは縦移動＋フェードだけで出現させる（横幅・横位置を変えない） */
+.rc .p-card.reveal { transform: translateY(48px); }
+.rc .p-card.reveal.is-in { transform: none; }
 .rc .people-track::-webkit-scrollbar { height: 6px; }
 .rc .people-track::-webkit-scrollbar-track { background: transparent; }
 .rc .people-track::-webkit-scrollbar-thumb { background: var(--veil-24); border-radius: 999px; }
