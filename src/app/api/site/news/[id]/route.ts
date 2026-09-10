@@ -1,7 +1,7 @@
-// GET /api/news/:id — お知らせ1件（slug = 旧CMSのID）。
+// GET /api/site/news/:id — お知らせ1件（slug = 旧CMSのID）。
 // 現状の SPA は一覧APIだけで詳細も描画できるため、このルートは
 // 記事数の増加や深いリンクの最適化に備えた将来用。
-import { fetchNewsById } from '../../../../lib/newsData'
+import { fetchNewsById } from '../../../../../lib/newsData'
 
 export async function GET(
   _req: Request,

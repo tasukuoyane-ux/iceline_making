@@ -7,7 +7,7 @@ async function revalidateInterviews(): Promise<void> {
   try {
     const { revalidatePath } = await import('next/cache')
     revalidatePath('/', 'layout')
-    revalidatePath('/api/interviews')
+    revalidatePath('/api/site/interviews')
   } catch {
     /* no-op（migrate スクリプトなど Next コンテキスト外） */
   }

@@ -1,62 +1,6 @@
 // 診断用: 依存の読み込みと環境変数の有無をハンドラ内で検査して返す。
 // import時クラッシュを避けるため、すべてハンドラ内の動的読み込みで行う。
-export async function GET(req: Request): Promise<Response> {
-  // 一時診断（2026-09-10）: 本番で「採用記事の新規作成」が不明なエラーになる原因を取る。
-  // /api/diag?probe=interview-create&key=<閲覧パスワードのハッシュ> で、下書きの採用記事を
-  // Local API で作成→即削除し、失敗時はエラー本文とスタックを返す。原因判明後に削除する。
-  const u = new URL(req.url);
-  if (u.searchParams.get("probe") === "interview-create") {
-    const overrides = (await import("../../../content/overrides.json")).default as Record<string, string>;
-    if (!u.searchParams.get("key") || u.searchParams.get("key") !== overrides["site:protect.hash"]) {
-      return Response.json({ error: "forbidden" }, { status: 403 });
-    }
-    const res: any = { steps: [] };
-    const t0 = Date.now();
-    try {
-      const { getPayload } = await import("payload");
-      const config = (await import("../../../payload.config")).default;
-      const payload = await getPayload({ config });
-      res.steps.push(`init ${Date.now() - t0}ms`);
-      const data: any = {
-        name: "＿診断テスト",
-        lead: "診断",
-        category: "社員インタビュー",
-        order: 0,
-        role: "",
-        years: "",
-        subtitle: "",
-        intro: "",
-        hobby: "",
-        image: null,
-        imageSrc: "",
-        image2: null,
-        image2Src: "",
-        video: null,
-        videoSrc: "",
-        blocks: [{ blockType: "paragraph", text: "診断" }],
-      };
-      let id: any = null;
-      try {
-        const doc = await payload.create({ collection: "interviews", data, draft: true });
-        id = doc.id;
-        res.steps.push(`create ok id=${doc.id} slug=${doc.slug} ${Date.now() - t0}ms`);
-      } catch (e: any) {
-        res.createError = { message: e?.message, name: e?.name, data: e?.data, cause: String(e?.cause?.message ?? e?.cause ?? ""), stack: String(e?.stack || "").split("\n").slice(0, 15) };
-      }
-      if (id != null) {
-        try {
-          await payload.delete({ collection: "interviews", id });
-          res.steps.push(`delete ok ${Date.now() - t0}ms`);
-        } catch (e: any) {
-          res.deleteError = { message: e?.message, stack: String(e?.stack || "").split("\n").slice(0, 10) };
-        }
-      }
-    } catch (e: any) {
-      res.fatal = { message: e?.message, stack: String(e?.stack || "").split("\n").slice(0, 15) };
-    }
-    return Response.json(res);
-  }
-
+export async function GET(): Promise<Response> {
   const out: any = {
     node: process.version,
     env: {

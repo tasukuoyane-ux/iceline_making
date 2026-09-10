@@ -19,7 +19,7 @@ async function revalidateNews(): Promise<void> {
   try {
     const { revalidatePath } = await import('next/cache')
     revalidatePath('/', 'layout') // 一覧・TOP・詳細（catch-all 配下すべて）
-    revalidatePath('/api/news')
+    revalidatePath('/api/site/news')
   } catch {
     /* no-op（migrate スクリプトなど Next コンテキスト外） */
   }

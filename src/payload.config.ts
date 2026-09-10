@@ -121,29 +121,6 @@ export default buildConfig({
 
   sharp,
 
-  // 一時診断（2026-09-10）: 本番で「採用記事の新規作成」が不明なエラーになる原因を取るため、
-  // REST/管理画面で起きた例外を DB の diag_errors テーブルへ記録する（原因判明後に削除する）。
-  hooks: {
-    afterError: [
-      async ({ error, req, collection }) => {
-        try {
-          const { sql } = await import('@payloadcms/db-vercel-postgres')
-          const db: any = req?.payload?.db
-          const path = String(req?.url ?? '')
-          const method = String(req?.method ?? '')
-          const message = String((error as any)?.message ?? error)
-          const stack = String((error as any)?.stack ?? '').slice(0, 4000)
-          const col = collection?.slug ?? ''
-          await db.drizzle.execute(
-            sql`insert into diag_errors (path, method, collection, message, stack) values (${path}, ${method}, ${col}, ${message}, ${stack})`,
-          )
-        } catch (e) {
-          console.error('[diag] afterError の記録に失敗', e)
-        }
-      },
-    ],
-  },
-
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

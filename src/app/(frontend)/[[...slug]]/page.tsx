@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   const { slug } = await params
   const isTop = !slug?.length
   // お知らせ一覧を HTML に埋め込み、SPA 初回描画時のちらつきを無くす
-  // （src/spa/data/news.ts が読み取る。失敗時は埋め込み無し＝SPA が /api/news へ）。
+  // （src/spa/data/news.ts が読み取る。失敗時は埋め込み無し＝SPA が /api/site/news へ）。
   let newsJson: string | null = null
   try {
     const news = await fetchPublishedNews()

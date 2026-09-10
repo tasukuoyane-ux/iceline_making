@@ -1,5 +1,5 @@
 // 採用記事（社員インタビュー等）。
-// 記事は Payload CMS（/admin の「採用記事」）へ移行済み。実行時に /api/interviews から
+// 記事は Payload CMS（/admin の「採用記事」）へ移行済み。実行時に /api/site/interviews から
 // 読み込み、取得完了までは移行元 interviews.json（ビルド同梱）で即時描画する。
 import { useEffect, useState } from "react";
 import interviewsData from "../../content/interviews.json";
@@ -52,7 +52,7 @@ const listeners = new Set<() => void>();
 function preloadInterviews(): Promise<InterviewItem[]> {
   if (cache) return Promise.resolve(cache);
   if (!inflight) {
-    inflight = fetch("/api/interviews")
+    inflight = fetch("/api/site/interviews")
       .then((r) => {
         if (!r.ok) throw new Error(`interviews api ${r.status}`);
         return r.json();

@@ -35,7 +35,7 @@
 
 /admin（Payload CMS。アカウントは /console とは別に DB 管理）
   └─ お知らせ記事（日付・カテゴリ・タイトル・本文ブロック）→ Neon (Postgres) に保存
-        → 公開サイトは /api/news（＋HTML埋め込み）経由で表示。公開すると即時反映
+        → 公開サイトは /api/site/news（＋HTML埋め込み）経由で表示。公開すると即時反映
         記事の画像・動画（メディア）はブラウザから Vercel Blob へ直接アップロード
 
 /console/check（/console と同じアカウント）

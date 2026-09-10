@@ -1,6 +1,6 @@
 // お知らせ記事・動画。
 // 記事は Payload CMS（/admin で編集）へ移行済み。サーバが HTML に埋め込む
-// __NEWS_DATA__（なければ /api/news への fetch）から実行時に読み込む。
+// __NEWS_DATA__（なければ /api/site/news への fetch）から実行時に読み込む。
 // 動画は従来どおり src/content/videos.json（/console から編集可能）。
 import { useEffect, useState } from "react";
 import videosData from "../../content/videos.json";
@@ -65,7 +65,7 @@ if (embedded) writeSnapshot(embedded);
 export function preloadNews(): Promise<NewsItem[]> {
   if (embedded) return Promise.resolve(embedded);
   if (!inflight) {
-    inflight = fetch("/api/news")
+    inflight = fetch("/api/site/news")
       .then((r) => {
         if (!r.ok) throw new Error(`news api ${r.status}`);
         return r.json();
