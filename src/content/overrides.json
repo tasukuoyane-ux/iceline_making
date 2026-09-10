@@ -775,5 +775,8 @@
   "icemountain:hero.image": "/uploads/ICELINE_HP_-_02.jpg?v=2049817",
   "icemountain:services.2.image": "/uploads/ICELINE_HP_-_01_(2).jpg?v=a309520",
   "icemountain:profile.4.value": "スムージーの製造",
-  "icemountain:services.lead": "野菜・果物と氷を組み合わせた商品のさらなる展開を目指してまいります。"
+  "icemountain:services.lead": "野菜・果物と氷を組み合わせた商品のさらなる展開を目指してまいります。",
+  "icemountain:services.0.body": "サービスの概要を入力。",
+  "icemountain:services.1.body": "サービスの概要を入力。",
+  "icemountain:services.2.body": "サービスの概要を入力。"
 }
