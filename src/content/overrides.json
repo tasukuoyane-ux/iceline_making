@@ -273,7 +273,7 @@
   "service:dryice.sec.about.0.ratio": "40",
   "service:dryice.sec.0.0.ratio": "40",
   "service:dryice.sec.uses.0.ratio": "40",
-  "company:ceo.ratio": "35",
+  "company:ceo.ratio": "30",
   "recruit3:work.ratio": "41",
   "hide:recruit3:work.image": "",
   "division:ice.sec.0.1.body": "製氷方法は、工場と製品によって異なります。\n二日市工場ではカングリット製法を採用しています。135kgの大きな氷の塊からカットして加工していく方法で、かち割り氷や小さな氷など多様なサイズに対応できることが特徴です。\n西大寺工場ではターボ製氷（氷柱方式）を採用しています。90〜120分という短いサイクルで製氷できるため、需要の変動に柔軟に対応できる生産体制を整えています。",
@@ -513,7 +513,7 @@
   "ypos:company:hero.image": "75",
   "company:ceo.body": "\n\n日頃よりアイスラインをご愛顧いただき、心より御礼申し上げます。\n創業から120年、氷を扱う会社として続けてまいりました。この間に時代も、人々の暮らしの形も大きく変わりました。それでも、挨拶を欠かさないこと、相手の立場で考えること。仕事の土台にあるものは、変わりません。\n私たちが手がける氷や食材は、どこかで誰かの食卓に並んでいます。目立たない部分ではありますが、確かにそこに関わっている。誰かの大切な時間に、静かに寄り添う仕事だと考えています。\n創業120年を超えてなお、挑戦は始まったばかりです。これからも氷と食を通じて、豊かな社会に貢献してまいります。\n今後とも変わらぬご支援を賜りますようお願い申し上げます。",
   "ar:company:ceo.image2": "3:4",
-  "ar:images:IMG.waterDew": "",
+  "ar:images:IMG.waterDew": "3:4",
   "sectionEn:company.message.jp": "代表メッセージ",
   "company:profile.1.label": "資本金",
   "hide:company:profile.1.label": "",
@@ -763,6 +763,7 @@
   "ar:company:awards.8.body": "",
   "op:company:awards.8.body": "",
   "ypos:company:awards.8.body": "",
-  "company:ceo.image2": "/uploads/01_web_800_1.jpg?v=1c2f41c",
-  "service:warehouse.mv.title": "冷凍・冷蔵倉庫"
+  "company:ceo.image2": "",
+  "service:warehouse.mv.title": "冷凍・冷蔵倉庫",
+  "flip:company:ceo.ratio": ""
 }
