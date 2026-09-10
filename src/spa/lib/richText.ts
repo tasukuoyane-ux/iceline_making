@@ -81,7 +81,9 @@ function parseInline(text: string, base: Base, depth: number, out: RichSegment[]
     } else if (m[3] !== undefined) {
       parseInline(m[3], { ...base, bold: true }, depth + 1, out);
     } else {
-      parseInline(m[4], { ...base, href: m[5] }, depth + 1, out);
+      // public/ 配下のファイルは「/uploads/…」で公開される。コンソールで「/public/uploads/…」と
+      // 書かれても切れないよう先頭の /public を落とす
+      parseInline(m[4], { ...base, href: m[5].replace(/^\/public\//, "/") }, depth + 1, out);
     }
     last = m.index + m[0].length;
   }

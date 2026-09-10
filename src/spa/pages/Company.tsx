@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { ExternalLink, MapPin } from "lucide-react";
+import { ChevronDown, ExternalLink, MapPin } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { HEAT } from "../data/heatMap";
@@ -142,40 +143,100 @@ const MAX_AWARDS = 12;
  * 件数はコンソールの「追加」「削除」で 1〜MAX_AWARDS。旧仕様（1行1件のリスト
  * company:awards.items）の入力があれば、その各行を既定のタイトルとして引き継ぐ。
  * 1件目のタイトルが未入力の間は公開ページでは非表示。 */
+// 受賞歴の折りたたみ：最初に見せる件数（4件目以降は白くフェードアウトし「すべて見る」で展開）
+const AWARDS_VISIBLE = 3;
+
 function Awards() {
   const legacy = txt("company:awards.items", "").split("\n").map((l) => l.trim()).filter(Boolean);
   const rep = repeatSel("company:awards.count", Math.max(1, legacy.length), MAX_AWARDS, "受賞歴の数");
+  // アコーディオン（2026-09-10 追加）：表示件数が AWARDS_VISIBLE を超えるときだけ折りたたむ。
+  // 折りたたみ時の高さは「先頭3件＋4件目の一部」を実測する（編集プレビューの件数変更にも追従）。
+  const listRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(EDIT_MODE);
+  const [collapsedH, setCollapsedH] = useState(0);
+  const [collapsible, setCollapsible] = useState(false);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const measure = () => {
+      const kids = (Array.from(el.children) as HTMLElement[]).filter((k) => getComputedStyle(k).display !== "none");
+      setCollapsible(kids.length > AWARDS_VISIBLE);
+      let h = 0;
+      for (let i = 0; i < AWARDS_VISIBLE && i < kids.length; i++) h += kids[i].offsetHeight;
+      const next = kids[AWARDS_VISIBLE];
+      if (next) h += Math.min(next.offsetHeight, 88);
+      setCollapsedH(h);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    const mo = new MutationObserver(measure);
+    mo.observe(el, { attributes: true, childList: true, subtree: true });
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, []);
+  const collapsed = collapsible && !open;
   if (txt("company:awards.0.title", legacy[0] ?? "") === "" && !EDIT_MODE) return null;
   return (
     <Section heat={HEAT.csr}>
       <SectionTitle en="AWARDS" jp="受賞歴" path="sectionEn:company.awards" />
-      <div className="mt-10 overflow-hidden rounded-2xl border border-border" {...rep.attrs}>
-        {Array.from({ length: MAX_AWARDS }, (_, i) => {
-          const base = `company:awards.${i}`;
-          const title = txt(`${base}.title`, legacy[i] ?? "");
-          const body = txt(`${base}.body`, "");
-          return (
-            <div key={i} className="border-t border-border first:border-t-0">
-              <div className="bg-white px-6 py-4 pc:px-8">
-                <h3 className={title ? "" : "text-muted-foreground"} style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${base}.title`, `受賞歴${i + 1} タイトル`)}>
-                  {rich(title || "（受賞名・年など）")}
-                </h3>
-              </div>
-              {(body !== "" || EDIT_MODE) && (
-                <div className="px-6 py-5 pc:px-8">
-                  <RichBody
-                    path={`${base}.body`}
-                    text={body || "（本文・任意。行頭に「・」で箇条書き）"}
-                    label={`受賞歴${i + 1} 本文`}
-                    className={body ? "text-foreground/80" : "text-muted-foreground"}
-                    style={{ fontSize: 15, lineHeight: 2.05 }}
-                  />
+      <div className="relative mt-10">
+        <div
+          ref={listRef}
+          className="overflow-hidden rounded-2xl border border-border transition-[max-height] duration-500 ease-out"
+          style={collapsed && collapsedH > 0 ? { maxHeight: collapsedH } : undefined}
+          {...rep.attrs}
+        >
+          {Array.from({ length: MAX_AWARDS }, (_, i) => {
+            const base = `company:awards.${i}`;
+            const title = txt(`${base}.title`, legacy[i] ?? "");
+            const body = txt(`${base}.body`, "");
+            return (
+              <div key={i} className="border-t border-border first:border-t-0">
+                <div className="bg-white px-6 py-4 pc:px-8">
+                  <h3 className={title ? "" : "text-muted-foreground"} style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${base}.title`, `受賞歴${i + 1} タイトル`)}>
+                    {rich(title || "（受賞名・年など）")}
+                  </h3>
                 </div>
-              )}
-            </div>
-          );
-        })}
+                {(body !== "" || EDIT_MODE) && (
+                  <div className="px-6 py-5 pc:px-8">
+                    <RichBody
+                      path={`${base}.body`}
+                      text={body || "（本文・任意。行頭に「・」で箇条書き）"}
+                      label={`受賞歴${i + 1} 本文`}
+                      className={body ? "text-foreground/80" : "text-muted-foreground"}
+                      style={{ fontSize: 15, lineHeight: 2.05 }}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {/* 折りたたみ時：下端を白くフェードアウト */}
+        {collapsed && (
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-44 rounded-b-2xl"
+            style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 55%, #ffffff 100%)" }}
+          />
+        )}
       </div>
+      {collapsible && (
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-7 py-2.5 text-foreground transition-colors hover:bg-secondary"
+            style={{ fontSize: 14, fontWeight: 700 }}
+          >
+            {open ? "閉じる" : "すべて見る"}
+            <ChevronDown size={16} className={"transition-transform " + (open ? "rotate-180" : "")} />
+          </button>
+        </div>
+      )}
     </Section>
   );
 }
@@ -202,9 +263,11 @@ export function Company() {
                 2枚目が未設定なら公開ページでは1枚目だけを表示する */}
             {(() => {
               const img2 = img("company:ceo.image2", "");
+              // 1枚目は通常フローで縦横比（既定 4:3・コンソールの「縦横比」設定が優先）を守り、
+              // 上揃えで置く。高さは文章側に合わせて伸ばさない（2026-09-10 修正）。2枚目は同じ枠に重ねる
               return (
-                <div className="group relative mt-6 aspect-[4/3] w-full overflow-hidden rounded-2xl bg-secondary pc:aspect-auto pc:min-h-0 pc:flex-1">
-                  <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="absolute inset-0 h-full w-full object-cover" {...edImg("images:IMG.waterDew", "代表 写真1")} />
+                <div className="group relative mt-6 w-full self-start overflow-hidden rounded-2xl bg-secondary">
+                  <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="block aspect-[4/3] w-full object-cover" {...edImg("images:IMG.waterDew", "代表 写真1")} />
                   {(img2 !== "" || EDIT_MODE) && (
                     <ImageWithFallback
                       src={img2 || IMG_PLACEHOLDER}
