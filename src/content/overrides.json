@@ -766,5 +766,7 @@
   "company:ceo.image2": "",
   "service:warehouse.mv.title": "冷凍・冷蔵倉庫",
   "flip:company:ceo.ratio": "",
-  "ice:lineupNav.2.name": "コンビニスムージー"
+  "ice:lineupNav.2.name": "コンビニスムージー",
+  "division:ice.recipeIdeas.story": "",
+  "division:ice.recipeIdeas.storyTitle": ""
 }
