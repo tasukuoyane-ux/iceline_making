@@ -17,7 +17,7 @@ const SHOP_URL = "https://www.dry-ice.jp/";
 const SERVICE_NAV: { to: string; label: string }[] = [
   { to: "/ice", label: "氷・氷菓" },
   { to: "/food", label: "業務用食材" },
-  { to: "/warehouse", label: "倉庫事業" },
+  { to: "/warehouse", label: "冷凍・冷蔵倉庫" },
   { to: "/dryice", label: "ドライアイス" },
 ];
 const NAV: { to: string; label: string }[] = [
