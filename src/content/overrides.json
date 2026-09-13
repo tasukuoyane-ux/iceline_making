@@ -313,8 +313,8 @@
   "sectionEn:top.strength": "OUR BUSINESS",
   "top:services.2.image": "/uploads/_______-rvUoKLnpqPvC1tdydZHkYs7enZukgL.webp",
   "top:services.3.image": "/uploads/%E3%83%89%E3%83%A9%E3%82%A4%E3%82%A2%E3%82%A4%E3%82%B9%E3%82%B5%E3%83%A0%E3%83%8D.jpeg?v=f9b7210",
-  "service:warehouse.mv.image": "/uploads/Iceline_pic0909_2_36.jpg?v=cdb3e73",
-  "service:warehouse.sec.0.0.image": "/uploads/ICELINE_HP_-_03_(3).jpg?v=9fac900",
+  "service:warehouse.mv.image": "/uploads/phMain.jpg?v=9f04686",
+  "service:warehouse.sec.0.0.image": "/uploads/ph02.jpg?v=333b3b5",
   "service:warehouse.sec.0.1.image": "/uploads/Iceline_pic0909_2_36.jpg?v=cca1c6d",
   "service:warehouse.photo.0.image": "",
   "service:warehouse.photo.1.image": "",
@@ -821,5 +821,6 @@
   "service:dryice.sec.0.0.title": "500g~300kgまで、幅広く対応",
   "service:dryice.sec.uses.jp": "持ち時間の目安",
   "service:warehouse.gallery.jp": "",
-  "service:warehouse.gallery.en": ""
+  "service:warehouse.gallery.en": "",
+  "service:warehouse.sec.features.1.body": "専用のシステムで在庫を管理しています。入出庫のたびに記録と通知を行っています。月末には在庫表を発行し、お客様側の記録と照合。システムによる自動記録に加えて、人の目によるチェックも重ねることで、数量の誤差が生じないようにしています。"
 }
