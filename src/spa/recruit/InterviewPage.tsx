@@ -1,11 +1,8 @@
 // 社員インタビュー記事（/recruit/interview/:id）。
-// 記事の内容は Payload（/admin の「採用記事」）のまま、見た目をデザイン支給 interview/*.html に
-// 合わせて描画する。本文ブロックは
-//   H2 → セクション見出し（波線マーカー）／ H3 → 紙窓の見出し／ 段落 → 紙窓の本文
-//   画像・動画 → 氷フレームの写真枠／ 求人エントリーリンク → 赤ボタン
-// に対応させる。背景は下層共通のアンビエント（青空＋降雪、下半分に陸地）。
-// ※ 2026-09-08 に一度 land モード（全面緑）へ変えたが、下部CTAが青空に透けて置かれる元の見え方へ
-//    戻す指示（ユーザー指定）により ambient に復帰した。land は職種詳細オーバーレイのみ。
+// 記事の内容は Payload（/admin の「採用記事」）のまま、見た目をデザイン支給 iceline-saiyo の
+// 記事デザイン（people.html の .article）に合わせて描画する（2026-09-15 全面差し替え）。
+// 本文ブロックの対応：H2 → 次の H3 のセクションラベル（.article__section-label）／H3 → 見出し／
+// 段落 → p／画像・動画 → 図版／求人エントリーリンク → 記事末尾の赤ボタン（/recruit/entry?job=）。
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -14,10 +11,8 @@ import { useInterviews } from "../data/interviews";
 import { useRecruitData } from "../lib/recruitStore";
 import type { Block } from "../data/blocks";
 import { toEmbed } from "../lib/video";
-import { ed, txt } from "../lib/editable";
-import { rt } from "../lib/richInline";
-import { RecruitFrame } from "./RecruitFrame";
-import { Marked, OutlineText, PersonArt, PlayIcon } from "./parts";
+import { txt } from "../lib/editable";
+import { BtnLine, EntryBand, LowerKv } from "./RsParts";
 
 // 段落テキスト内の **太字** と ==マーカー== （記事エディタの装飾）を描画
 function renderInline(text: string): ReactNode[] {
@@ -36,94 +31,78 @@ function renderInline(text: string): ReactNode[] {
   return out;
 }
 
-/** ブロック列を「セクション（H2）→ 紙窓（H3＋段落）／写真枠／リンク」に組み直して描画 */
-/** 記事内の「求人エントリーリンク」ブロックをボタンにする（記事末尾の CTA 行で使う） */
-function RecruitLinkButton({ b }: { b: Extract<Block, { type: "recruitLink" }> }) {
-  const { jobs } = useRecruitData();
-  const job = jobs.find((j) => j.id === b.job);
-  return (
-    <Link to={`/recruit?job=${encodeURIComponent(b.job)}&entry=1`} className="btn btn--entry">
-      {b.label || (job ? `${job.title}にエントリーする` : "この職種にエントリーする")}
-    </Link>
-  );
-}
-
-// 「求人エントリーリンク」ブロックは本文の流れの中には出さず、記事末尾の CTA 行に
-// 「採用情報へ戻る」と横並びで置く（2026-09-09 ユーザー指示。汎用の「エントリー」ボタンは廃止）
-function Article({ blocks }: { blocks: Block[] }) {
-  type Sec = { title?: string; items: ReactNode[] };
-  const secs: Sec[] = [];
-  let cur: Sec = { items: [] };
-  let win: { title?: string; paras: string[] } | null = null;
+/** 本文ブロック → 記事デザイン。H2 はセクションラベルとして次の H3 に添える */
+function ArticleBody({ blocks }: { blocks: Block[] }) {
+  const out: ReactNode[] = [];
+  let label: string | null = null;
   let key = 0;
-  const flushWin = () => {
-    if (!win) return;
-    const w = win;
-    cur.items.push(
-      <div key={key++} className="iv-block reveal">
-        {w.title && <h3>{w.title}</h3>}
-        {w.paras.map((p, i) => (
-          <p key={i} style={{ whiteSpace: "pre-line" }}>{renderInline(p)}</p>
-        ))}
-      </div>,
+  const heading = (title?: string) => {
+    if (!label && !title) return;
+    out.push(
+      <h3 key={key++} className="js-reveal">
+        {label && <span className="article__section-label">{label}</span>}
+        {title}
+      </h3>,
     );
-    win = null;
+    label = null;
   };
   for (const b of blocks) {
     if (b.type === "h2") {
-      flushWin();
-      if (cur.title || cur.items.length) secs.push(cur);
-      cur = { title: b.text, items: [] };
+      if (label) heading();
+      label = b.text;
     } else if (b.type === "h3") {
-      flushWin();
-      win = { title: b.text, paras: [] };
+      heading(b.text);
     } else if (b.type === "paragraph") {
-      if (!win) win = { paras: [] };
-      win.paras.push(b.text);
+      if (label) heading();
+      out.push(
+        <p key={key++} className="js-reveal" style={{ whiteSpace: "pre-line" }}>
+          {renderInline(b.text)}
+        </p>,
+      );
     } else if (b.type === "image") {
-      flushWin();
+      if (label) heading();
       const im = <ImageWithFallback src={b.src} alt={b.alt || ""} />;
-      cur.items.push(
-        <figure key={key++} className="iv-photo reveal">
-          <div className="iv-photo__ph">{b.href ? <a href={b.href} target="_blank" rel="noopener noreferrer">{im}</a> : im}</div>
+      out.push(
+        <figure key={key++} className="article__fig js-reveal">
+          {b.href ? (
+            <a href={b.href} target="_blank" rel="noopener noreferrer">
+              {im}
+            </a>
+          ) : (
+            im
+          )}
           {b.alt && <figcaption>{b.alt}</figcaption>}
         </figure>,
       );
     } else if (b.type === "video") {
-      flushWin();
+      if (label) heading();
       const embed = toEmbed(b.src);
-      cur.items.push(
-        <figure key={key++} className="iv-photo reveal">
-          <div className="iv-photo__ph">
-            {embed?.type === "iframe" ? (
-              <iframe src={embed.src} title={b.caption || "動画"} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-            ) : embed ? (
-              <video src={embed.src} controls playsInline />
-            ) : null}
-          </div>
+      out.push(
+        <figure key={key++} className="article__fig js-reveal">
+          {embed?.type === "iframe" ? (
+            <iframe src={embed.src} title={b.caption || "動画"} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+          ) : embed ? (
+            <video src={embed.src} controls playsInline />
+          ) : null}
           {b.caption && <figcaption>{b.caption}</figcaption>}
         </figure>,
       );
-    } else if (b.type === "recruitLink") {
-      // 紙窓を区切るだけ。ボタン自体は記事末尾の CTA 行（InterviewPage）で描画する
-      flushWin();
     }
+    // recruitLink は記事末尾の CTA 行で描画する
   }
-  flushWin();
-  if (cur.title || cur.items.length) secs.push(cur);
+  if (label) heading();
+  return <div className="article__body">{out}</div>;
+}
+
+/** 記事内の「求人エントリーリンク」ブロック → エントリーページ（希望職種を選択済み）へ */
+function RecruitLinkButton({ b }: { b: Extract<Block, { type: "recruitLink" }> }) {
+  const { jobs } = useRecruitData();
+  const job = jobs.find((j) => j.id === b.job);
   return (
-    <>
-      {secs.map((s, i) => (
-        <section key={i} className="iv-section">
-          {s.title && (
-            <h2 className="section__title reveal">
-              <Marked text={s.title} />
-            </h2>
-          )}
-          {s.items}
-        </section>
-      ))}
-    </>
+    <Link to={`/recruit/entry?job=${encodeURIComponent(b.job)}`} className="btn-entry">
+      {b.label || (job ? `${job.title}にエントリーする` : "この職種にエントリーする")}
+      <span className="arrow">→</span>
+    </Link>
   );
 }
 
@@ -132,81 +111,76 @@ export function InterviewPage() {
   const { items, ready } = useInterviews();
   const iv = items.find((x) => x.id === id);
   const [playing, setPlaying] = useState(false);
-  const idx = Math.max(0, items.findIndex((x) => x.id === id));
 
   return (
-    <RecruitFrame ambient>
-      {!iv ? (
-        ready ? (
-          <div className="iv-notfound">
-            <p>記事が見つかりませんでした。</p>
-            <Link to="/recruit" className="btn btn--corp">採用情報へ戻る</Link>
-          </div>
-        ) : (
-          <div className="iv-notfound" />
-        )
-      ) : (
-        <>
-          <section className="iv-hero">
-            <span className="kicker reveal" {...ed("sectionEn:interview.mv", "英字ラベル")}>{rt("sectionEn:interview.mv", "INTERVIEW")}</span>
-            <h1 className="iv-hero__catch reveal">
-              <OutlineText text={iv.lead} />
-            </h1>
-            {iv.subtitle && <p className="iv-hero__sub reveal">{iv.subtitle}</p>}
-            <div className="iv-meta reveal">
-              <div className="iv-meta__photo">
-                {iv.image ? <ImageWithFallback src={iv.image} alt={iv.name} /> : <PersonArt variant={idx} size={96} />}
-              </div>
-              <div>
-                <div className="iv-meta__name">{iv.name}</div>
-                <p className="iv-meta__role">
-                  {iv.role}
-                  {iv.years && (
-                    <>
-                      <br />
-                      {iv.years}
-                    </>
-                  )}
-                </p>
-                {iv.intro !== "" && <p className="iv-meta__intro">{iv.intro}</p>}
-                {iv.hobby !== "" && (
-                  <p className="iv-meta__hobby">
-                    <strong>趣味</strong>
-                    {iv.hobby}
+    <>
+      <LowerKv en={txt("rs:interview.kv.en", "Interview")} jp={txt("rs:interview.kv.jp", "社員インタビュー")} base="rs:interview.kv" cloud={{ right: "5%", top: "15%", width: "min(24vw,300px)" }} />
+      <section className="island">
+        <div className="container">
+          {!iv ? (
+            <div className="js-reveal is-inview" style={{ textAlign: "center" }}>
+              {ready && (
+                <>
+                  <p className="lead-text">記事が見つかりませんでした。</p>
+                  <p style={{ marginTop: 28 }}>
+                    <BtnLine to="/recruit/people" def="インタビュー一覧へ" />
                   </p>
-                )}
-              </div>
+                </>
+              )}
             </div>
-            {/* アイキャッチ動画（設定時のみ。クリックで画面中央に大きく再生） */}
-            {iv.video !== "" && (
-              <div className="container" style={{ marginTop: 40 }}>
-                <figure className="iv-photo reveal">
-                  <div className="iv-photo__ph">
-                    <VideoPoster image={iv.image} video={iv.video} alt={iv.lead} />
-                    <button type="button" className="iv-photo__play" aria-label="アイキャッチ動画を再生" onClick={() => setPlaying(true)}>
-                      <PlayIcon size={72} />
-                    </button>
+          ) : (
+            <article className="article">
+              <header className="js-reveal">
+                <p className="article__kicker">{txt("rs:interview.kicker", "INTERVIEW")}</p>
+                <h2 className="article__title">{iv.lead}</h2>
+                {iv.subtitle && <p className="article__sub">{iv.subtitle}</p>}
+                <div className="article__meta">
+                  <p className="article__name">{iv.name}</p>
+                  {iv.role && <span className="job-row__place">{iv.role}</span>}
+                  {iv.years && <span className="note">{iv.years}</span>}
+                </div>
+                {(iv.intro !== "" || iv.hobby !== "") && (
+                  <div className="article__intro">
+                    {iv.intro !== "" && <p style={{ whiteSpace: "pre-line" }}>{iv.intro}</p>}
+                    {iv.hobby !== "" && (
+                      <p style={{ marginTop: 6 }}>
+                        <strong>趣味</strong>
+                        {iv.hobby}
+                      </p>
+                    )}
                   </div>
-                </figure>
+                )}
+                {(iv.image !== "" || iv.video !== "") && (
+                  <div className="article__visual">
+                    {iv.video !== "" ? (
+                      <>
+                        <VideoPoster image={iv.image} video={iv.video} alt={iv.lead} />
+                        <button type="button" className="article__play" aria-label="アイキャッチ動画を再生" onClick={() => setPlaying(true)} />
+                      </>
+                    ) : (
+                      <ImageWithFallback src={iv.image} alt={iv.name} />
+                    )}
+                  </div>
+                )}
+              </header>
+              <ArticleBody blocks={iv.blocks} />
+              <div className="article__actions js-reveal">
+                {iv.blocks
+                  .filter((b): b is Extract<Block, { type: "recruitLink" }> => b.type === "recruitLink")
+                  .map((b, i) => (
+                    <RecruitLinkButton key={i} b={b} />
+                  ))}
+                <BtnLine to="/recruit/jobs" path="rs:interview.jobsBtn" def="募集職種を見る" />
+                <BtnLine to="/recruit/people" path="rs:interview.backBtn" def="インタビュー一覧へ" />
               </div>
-            )}
-          </section>
-          {playing && iv.video !== "" && <VideoModal url={iv.video} title={iv.lead} onClose={() => setPlaying(false)} />}
+            </article>
+          )}
+        </div>
+      </section>
+      {playing && iv && iv.video !== "" && <VideoModal url={iv.video} title={iv.lead} onClose={() => setPlaying(false)} />}
 
-          <div className="container iv-body">
-            <Article blocks={iv.blocks} />
-            {/* 記事末尾の CTA 行：「この職種にエントリーする」（記事の求人エントリーリンク）＋「採用情報へ戻る」 */}
-            <div className="iv-actions reveal">
-              {iv.blocks
-                .filter((b): b is Extract<Block, { type: "recruitLink" }> => b.type === "recruitLink")
-                .map((b, i) => (
-                  <RecruitLinkButton key={i} b={b} />
-                ))}
-              <Link to="/recruit#people" className="btn btn--corp">採用情報へ戻る</Link>
-            </div>
-          </div>
-        </>
-      )}
-    </RecruitFrame>
+      <div className="sea-gap" />
+      <EntryBand />
+    </>
   );
 }

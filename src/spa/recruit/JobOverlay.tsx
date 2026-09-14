@@ -1,20 +1,14 @@
-// 職種詳細（/recruit?job=<職種ID> で開くオーバーレイ）。
-// デザイン支給 job/*.html の構成（仕事内容／PRポイント／人物像／諸条件／福利厚生／選考の流れ）を
-// 採用タブ（CMS）の職種データで描画し、旧オーバーレイにあった拠点マップ・FAQ・職種別メッセージ・
-// エントリーフォームも引き継ぐ。記事の「求人エントリーリンク」（&entry=1）で開いたときは
-// エントリーフォームまで自動スクロールする。
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { createPortal } from "react-dom";
-import { toast } from "sonner";
+// 職種詳細（/recruit/jobs?job=<職種ID> などで開くオーバーレイ）。
+// 採用タブ（CMS）の職種データ（仕事内容／1日の仕事内容／やりがい／PRポイント／人物像／諸条件／
+// 拠点マップ／福利厚生／選考の流れ／FAQ／メッセージ）を、デザイン支給 iceline-saiyo のカード調で描画する。
+// エントリーはエントリーページ（/recruit/entry?job=<ID>）へ（2026-09-15 全面差し替え）。
+import { useEffect } from "react";
+import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ed, txt } from "../lib/editable";
 import { rt } from "../lib/richInline";
-import type { RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitTimeline, RecruitView } from "../lib/recruitStore";
-import { RecruitFrame } from "./RecruitFrame";
-import { FlowArrow, Marked, OutlineText } from "./parts";
-import { deptTag } from "./jobTag";
+import type { RecruitBlock, RecruitJob, RecruitPrPoint, RecruitRow, RecruitView } from "../lib/recruitStore";
 
-/** モーダル表示中は背面のスクロールを止める */
 function useBodyLock() {
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -25,317 +19,203 @@ function useBodyLock() {
   }, []);
 }
 
-function SecTitle({ path, def, mark }: { path: string; def: string; mark?: string }) {
+function H2({ path, def }: { path?: string; def: string }) {
   return (
-    <h2 className="section__title reveal" {...ed(path, "見出し")}>
-      <Marked text={txt(path, def)} mark={mark} />
+    <h2 className="ov__h2" {...(path ? ed(path, "見出し") : {})}>
+      {path ? rt(path, def) : def}
     </h2>
   );
 }
 
-/** H2＋本文＋画像（任意）のブロック（1日の仕事内容／やりがい・特徴） */
-function BlockSec({ block, defTitle, base }: { block?: RecruitBlock; defTitle: string; base: string }) {
+function BlockSec({ block, defTitle }: { block?: RecruitBlock; defTitle: string }) {
   if (!block || (block.body.trim() === "" && block.image.trim() === "")) return null;
   const hasImage = block.image.trim() !== "";
   return (
-    <section className="ov-sec">
-      <h2 className="section__title reveal">
-        <Marked text={block.title || defTitle} />
-      </h2>
-      <div className={"iv-block iv-block--lead reveal" + (hasImage ? " has-image" : "")} data-ov={base}>
+    <div className="card ov__sec js-reveal">
+      <H2 def={block.title || defTitle} />
+      <div className={"ov__block" + (hasImage ? " has-image" : "")}>
         {block.body.trim() !== "" && <p style={{ whiteSpace: "pre-line" }}>{block.body}</p>}
-        {hasImage && <ImageWithFallback src={block.image} alt={block.title || defTitle} className="iv-block__img" />}
+        {hasImage && <ImageWithFallback src={block.image} alt={block.title || defTitle} className="ov__img" />}
       </div>
-    </section>
+    </div>
   );
 }
 
-/** H2＋任意個数の H4/本文/画像（PRポイント／求める人物像／こんな方であれば…） */
-function PointsSec({ pr, defTitle, mark }: { pr?: { title: string; points: RecruitPrPoint[] }; defTitle: string; mark?: string }) {
+function PointsSec({ pr, defTitle }: { pr?: { title: string; points: RecruitPrPoint[] }; defTitle: string }) {
   const points = (pr?.points ?? []).filter((p) => p.title.trim() !== "" || p.body.trim() !== "" || p.image.trim() !== "");
   if (points.length === 0) return null;
   return (
-    <section className="ov-sec">
-      <h2 className="section__title reveal">
-        <Marked text={pr?.title || defTitle} mark={mark} />
-      </h2>
-      <div className="iv-block reveal">
+    <div className="card ov__sec js-reveal">
+      <H2 def={pr?.title || defTitle} />
+      <div className="ov__points">
         {points.map((p, i) => {
           const hasImage = p.image.trim() !== "";
           return (
-            <div key={i} className={"ov-point" + (hasImage ? " ov-point--img" : "")}>
+            <div key={i} className={"ov__point" + (hasImage ? " has-image" : "")}>
               <div>
                 {p.title.trim() !== "" && <h4>{p.title}</h4>}
                 {p.body.trim() !== "" && <p style={{ whiteSpace: "pre-line" }}>{p.body}</p>}
               </div>
-              {hasImage && <ImageWithFallback src={p.image} alt={p.title} className="iv-block__img" />}
+              {hasImage && <ImageWithFallback src={p.image} alt={p.title} className="ov__img" />}
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }
 
-/** 諸条件・福利厚生の表 */
-function RowsSec({ rows, path, def, mark }: { rows: RecruitRow[]; path: string; def: string; mark?: string }) {
+function RowsSec({ rows, path, def }: { rows: RecruitRow[]; path: string; def: string }) {
   const list = rows.filter((r) => r.label.trim() !== "" || r.value.trim() !== "");
   if (list.length === 0) return null;
   return (
-    <section className="ov-sec">
-      <SecTitle path={path} def={def} mark={mark} />
-      <div className="iv-block reveal">
-        <dl className="cond-dl">
-          {list.map((r, i) => (
-            <div key={i} style={{ display: "contents" }}>
-              <dt>{r.label}</dt>
-              <dd>{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
+    <div className="card ov__sec js-reveal">
+      <H2 path={path} def={def} />
+      <dl className="ov__dl">
+        {list.map((r, i) => (
+          <div key={i} style={{ display: "contents" }}>
+            <dt>{r.label}</dt>
+            <dd>{r.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
-/** 拠点（Googleマップ） */
 function MapSec({ map }: { map?: { title: string; spots: string[] } }) {
   const spots = (map?.spots ?? []).map((s) => s.trim()).filter(Boolean);
   if (spots.length === 0) return null;
   return (
-    <section className="ov-sec">
-      <h2 className="section__title reveal">
-        <Marked text={map?.title || "拠点（Googleマップ）"} mark="拠点" />
-      </h2>
-      <div className={"iv-block reveal"}>
-        <div className={"ov-map" + (spots.length > 1 ? " ov-map--2" : "")}>
-          {spots.map((s, i) => {
-            const q = s.includes("〒") ? s.slice(s.indexOf("〒")) : s;
-            return (
-              <div key={i}>
-                <iframe src={`https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed&hl=ja`} title={s} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
-                <p>{s}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/** 選考の流れ（ピルの横並び） */
-function FlowSec({ job, data }: { job: RecruitJob; data: RecruitView }) {
-  const t: RecruitTimeline =
-    job.flow && job.flow.steps?.length
-      ? job.flow
-      : { note: "", image: "", steps: (data.flow ?? []).filter((s) => s.trim() !== "").map((s, i) => ({ time: `STEP${i + 1}`, task: s })) };
-  const steps = t.steps.filter((s) => s.task.trim() !== "");
-  if (steps.length === 0) return null;
-  return (
-    <section className="ov-sec">
-      <SecTitle path="recruit3:ov.flow.jp" def="選考の流れ" />
-      <div className="flow flow--center reveal">
-        {steps.map((s, i) => (
-          <span key={i} style={{ display: "contents" }}>
-            {i > 0 && <FlowArrow />}
-            <span className="flow__step">{s.task}</span>
-          </span>
-        ))}
-      </div>
-      {t.note && <p className="note flow__note reveal">{t.note}</p>}
-    </section>
-  );
-}
-
-/** よくある質問（カテゴリ＝アコーディオン。Q&A はカテゴリの中に一覧表示） */
-function FaqSec({ items }: { items: { q: string; a: string; cat?: string }[] }) {
-  const groups: { name: string; items: { q: string; a: string }[] }[] = [];
-  for (const f of items) {
-    if (f.q.trim() === "") continue;
-    const name = (f.cat || "").trim() || "その他";
-    const g = groups.find((x) => x.name === name);
-    if (g) g.items.push(f);
-    else groups.push({ name, items: [f] });
-  }
-  const single = groups.length === 1 && groups[0].name === "その他";
-  const [open, setOpen] = useState<string[]>(single ? ["その他"] : []);
-  if (groups.length === 0) return null;
-  const toggle = (name: string) => setOpen((a) => (a.includes(name) ? a.filter((x) => x !== name) : [...a, name]));
-  return (
-    <section className="ov-sec">
-      <SecTitle path="recruit3:ov.faq.jp" def="よくある質問" mark="質問" />
-      <div className="accordion reveal" style={{ marginTop: 0 }}>
-        {groups.map((g) => {
-          const isOpen = open.includes(g.name);
+    <div className="card ov__sec js-reveal">
+      <H2 def={map?.title || "拠点（Googleマップ）"} />
+      <div className={"ov__map" + (spots.length > 1 ? " -two" : "")}>
+        {spots.map((s, i) => {
+          const q = s.includes("〒") ? s.slice(s.indexOf("〒")) : s;
           return (
-            <div key={g.name} className={"acc" + (isOpen ? " is-open" : "")}>
-              <button type="button" className="acc__head" aria-expanded={isOpen} onClick={() => toggle(g.name)}>
-                <span className="acc__tag">FAQ</span>
-                <span>{g.name}</span>
-                <span className="acc__icon">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" strokeWidth="2" strokeLinecap="round"><path d="M10 3v14M3 10h14" /></svg>
-                </span>
-              </button>
-              <div className="acc__panel" style={{ maxHeight: isOpen ? "none" : 0 }}>
-                <div className="acc__body">
-                  {g.items.map((f, i) => (
-                    <div key={i} className="faq-item">
-                      <div className="faq-item__q">
-                        <span className="q">Q</span>
-                        <span>{f.q}</span>
-                      </div>
-                      {f.a.trim() !== "" && <p className="faq-item__a">{f.a}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div key={i}>
+              <iframe src={`https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed&hl=ja`} title={s} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+              <p>{s}</p>
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }
 
-/** エントリーフォーム（プロトタイプ：送信内容は保存されない） */
-function EntryForm({ job, sectionRef }: { job: RecruitJob; sectionRef: React.RefObject<HTMLElement | null> }) {
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    toast.success("エントリーを受け付けました。担当者よりご連絡いたします。");
-    (e.target as HTMLFormElement).reset();
-  };
+function FlowSec({ job, data }: { job: RecruitJob; data: RecruitView }) {
+  const steps =
+    job.flow && job.flow.steps?.length
+      ? job.flow.steps.map((s) => s.task).filter((s) => s.trim() !== "")
+      : (data.flow ?? []).filter((s) => s.trim() !== "");
+  if (steps.length === 0) return null;
   return (
-    <section ref={sectionRef as any} id="entry" className="section--tight">
-      <form className="entry-form reveal" onSubmit={onSubmit}>
-        <h2 className="section__title section__title--center" {...ed("recruit2:entry.jp", "エントリー 見出し")}>
-          <Marked text={txt("recruit2:entry.jp", "エントリー")} />
-        </h2>
-        <p className="note entry-form__note" {...ed("recruit3:entry.note", "エントリー 注記")}>
-          {rt("recruit3:entry.note", "下記フォームからご応募ください。担当者よりご連絡いたします。")}
-        </p>
-        <div className="field">
-          <label className="field__label" htmlFor="rc-job">希望職種</label>
-          <input type="text" id="rc-job" name="job" defaultValue={`${job.title}（${job.dept}）`} readOnly />
-        </div>
-        <div className="field-row">
-          <div className="field">
-            <label className="field__label" htmlFor="rc-name">氏名 <span className="req">必須</span></label>
-            <input type="text" id="rc-name" name="name" placeholder="例）山田 太郎" required />
+    <div className="ov__sec js-reveal">
+      <H2 path="rs:ov.flow" def="選考の流れ" />
+      <div className="flow-grid">
+        {steps.map((s, i) => (
+          <div key={i} className="card flow-step">
+            <p className="flow-step__title">{s}</p>
           </div>
-          <div className="field">
-            <label className="field__label" htmlFor="rc-kana">フリガナ</label>
-            <input type="text" id="rc-kana" name="kana" placeholder="例）ヤマダ タロウ" />
+        ))}
+      </div>
+      {job.flow?.note && <p className="note" style={{ marginTop: 12 }}>{job.flow.note}</p>}
+    </div>
+  );
+}
+
+function FaqSec({ items }: { items: { q: string; a: string; cat?: string }[] }) {
+  const list = items.filter((f) => f.q.trim() !== "");
+  if (list.length === 0) return null;
+  return (
+    <div className="card ov__sec js-reveal">
+      <H2 path="rs:ov.faq" def="よくある質問" />
+      <div className="ov__faq">
+        {list.map((f, i) => (
+          <div key={i}>
+            <p className="ov__faq-q">
+              <span className="q">Q.</span>
+              <span>{f.q}</span>
+            </p>
+            {f.a.trim() !== "" && <p className="ov__faq-a">{f.a}</p>}
           </div>
-        </div>
-        <div className="field-row">
-          <div className="field">
-            <label className="field__label" htmlFor="rc-tel">電話番号</label>
-            <input type="tel" id="rc-tel" name="tel" placeholder="例）086-000-0000" />
-          </div>
-          <div className="field">
-            <label className="field__label" htmlFor="rc-email">メールアドレス <span className="req">必須</span></label>
-            <input type="email" id="rc-email" name="email" placeholder="例）taro@example.com" required />
-          </div>
-        </div>
-        <div className="field">
-          <label className="field__label" htmlFor="rc-message">志望動機・自己PR・ご質問など（任意）</label>
-          <textarea id="rc-message" name="message" rows={5} placeholder="ご自由にお書きください" />
-        </div>
-        <div className="field">
-          <label className="check">
-            <input type="checkbox" required />
-            <span>個人情報の取り扱いに同意する <span className="req">必須</span></span>
-          </label>
-        </div>
-        <div className="entry-form__submit">
-          <button className="btn btn--entry" type="submit">この内容でエントリーする</button>
-        </div>
-        <p className="note" style={{ textAlign: "center", marginTop: 16 }}>※ これはプロトタイプです。送信内容は保存されません。</p>
-      </form>
-    </section>
+        ))}
+      </div>
+    </div>
   );
 }
 
 export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: RecruitView; onClose: () => void }) {
   useBodyLock();
-  const entryRef = useRef<HTMLElement | null>(null);
-  const tag = deptTag(job);
-
-  // Escape で閉じる
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+  const title = job.title.replace(/（[^）]*）\s*$/, "");
+  const type = /（([^）]*)）\s*$/.exec(job.title)?.[1] ?? "";
 
-  // 記事のエントリーリンク（&entry=1）から開かれたときはフォームまで自動スクロール
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("entry") !== "1") return;
-    const t = window.setTimeout(() => entryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 600);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  return (
+    <div className="ov" role="dialog" aria-modal="true" aria-label={job.title}>
+      <button type="button" className="ov__close" aria-label="閉じる" onClick={onClose}>
+        <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+          <path d="M4 4l12 12M16 4L4 16" />
+        </svg>
+      </button>
 
-  return createPortal(
-    <div role="dialog" aria-modal="true" className="contents">
-      {/* 背景は land モード（全面が緑の陸地・雪なし・文字は黒基調。2026-09 改修・デザイン支給 job/*.html 準拠） */}
-      <RecruitFrame overlay land>
-        {/* 上部の白い帯（部門タグ・職種名・エントリー）は 2026-09-09 のユーザー指示で廃止。
-            右上に固定の「閉じる」ボタンだけを残す */}
-        <button type="button" className="ov-close" aria-label="閉じる" onClick={onClose}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" strokeWidth="2.2" strokeLinecap="round"><path d="M4 4l12 12M16 4L4 16" /></svg>
-        </button>
-
-        <section className="iv-hero ov-hero">
-          <span className="kicker reveal" {...ed("recruit3:ov.kicker", "職種詳細 英字ラベル")}>{rt("recruit3:ov.kicker", "RECRUIT")}</span>
-          <h1 className="iv-hero__catch reveal">
-            <OutlineText text={job.title.replace(/（[^）]*）\s*$/, "")} />
+      <section className="lower-kv">
+        <div className="lower-kv__inner">
+          <h1 className="billboard -white js-reveal is-inview" style={{ transitionDelay: "0.15s" }}>
+            <span className="billboard__en" {...ed("rs:ov.kv.en", "職種詳細 英字")}>{rt("rs:ov.kv.en", "Recruit")}</span>
+            <span className="billboard__jp">{job.dept}</span>
           </h1>
-          <p className="iv-hero__sub reveal">
-            <span className={"acc__tag " + tag.cls} style={tag.style}>{job.dept}</span>
-            {/（[^）]*）\s*$/.test(job.title) ? `　${job.title.match(/（([^）]*)）\s*$/)![1]}` : ""}
+          <p className="js-reveal is-inview" style={{ marginTop: 26, fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 700, lineHeight: 1.4, fontFeatureSettings: "'palt' 1", transitionDelay: "0.3s" }}>
+            {title}
+            {type && <span style={{ marginLeft: 12, fontSize: 15, fontWeight: 500, opacity: 0.9 }}>{type}</span>}
           </p>
-        </section>
+          <p className="js-reveal is-inview" style={{ marginTop: 14, transitionDelay: "0.45s" }}>
+            <span className="job-row__badge" style={{ borderColor: "#FFFFFF", color: "#FFFFFF" }}>{txt("rs:jobs.badge", "募集中")}</span>
+          </p>
+        </div>
+      </section>
 
-        <div className="container iv-body">
-          {/* 仕事内容 */}
-          <section className="ov-sec" style={{ marginTop: 0 }}>
-            <SecTitle path="recruit3:ov.body.jp" def="仕事内容" />
-            <div className={"iv-block iv-block--lead reveal" + (job.image ? " has-image" : "")}>
+      <section className="island">
+        <div className="container">
+          <div className="card ov__sec js-reveal">
+            <H2 path="rs:ov.body" def="仕事内容" />
+            <div className={"ov__block" + (job.image ? " has-image" : "")}>
               <p style={{ whiteSpace: "pre-line" }}>{job.body}</p>
-              {job.image && <ImageWithFallback src={job.image} alt={job.title} className="iv-block__img" />}
+              {job.image && <ImageWithFallback src={job.image} alt={job.title} className="ov__img" />}
             </div>
-          </section>
-
-          <BlockSec block={job.daywork} defTitle="1日の仕事内容" base="daywork" />
-          <BlockSec block={job.appeal} defTitle="やりがい・特徴" base="appeal" />
-          <PointsSec pr={job.pr} defTitle="この仕事のPRポイント" mark="PRポイント" />
-          <PointsSec pr={job.persona} defTitle="求める人物像" mark="人物像" />
+          </div>
+          <BlockSec block={job.daywork} defTitle="1日の仕事内容" />
+          <BlockSec block={job.appeal} defTitle="やりがい・特徴" />
+          <PointsSec pr={job.pr} defTitle="この仕事のPRポイント" />
+          <PointsSec pr={job.persona} defTitle="求める人物像" />
           <PointsSec pr={job.invite} defTitle="こんな方であればぜひご応募ください" />
-          <RowsSec rows={job.conditions?.length ? job.conditions : data.conditions} path="recruit3:ov.conditions.jp" def="諸条件" />
+          <RowsSec rows={job.conditions?.length ? job.conditions : data.conditions} path="rs:ov.conditions" def="諸条件" />
           <MapSec map={job.map} />
-          <RowsSec rows={job.benefits?.length ? job.benefits : data.benefits} path="recruit3:ov.benefits.jp" def="福利厚生" />
+          <RowsSec rows={job.benefits?.length ? job.benefits : data.benefits} path="rs:ov.benefits" def="福利厚生" />
           <FlowSec job={job} data={data} />
           <FaqSec items={data.faq} />
-
-          {/* 職種別メッセージ（短文・大きな縁取り文字） */}
           {job.message.trim() !== "" && (
-            <p className="ov-message reveal">
-              <OutlineText text={job.message} />
-            </p>
+            <div className="ov__sec js-reveal">
+              <p className="ov__message" style={{ whiteSpace: "pre-line" }}>{job.message}</p>
+            </div>
           )}
-
-          <EntryForm job={job} sectionRef={entryRef} />
-
-          <div className="iv-actions reveal">
-            <button type="button" className="btn btn--corp" onClick={onClose}>
-              募集職種一覧へ戻る
+          <div className="ov__actions js-reveal">
+            <Link className="btn-entry" to={`/recruit/entry?job=${encodeURIComponent(job.id)}`}>
+              <span {...ed("rs:ov.entryBtn", "エントリーボタン文言")}>{rt("rs:ov.entryBtn", "この職種にエントリーする")}</span>
+              <span className="arrow">→</span>
+            </Link>
+            <button type="button" className="btn-line" onClick={onClose}>
+              <span {...ed("rs:ov.backBtn", "一覧へ戻るボタン文言")}>{rt("rs:ov.backBtn", "募集職種一覧へ戻る")}</span>
             </button>
           </div>
         </div>
-      </RecruitFrame>
-    </div>,
-    document.body,
+      </section>
+      <div className="sea-gap" />
+    </div>
   );
 }

@@ -26,7 +26,14 @@ const NewsDetail = lazy(() => import("./pages/NewsDetail").then((m) => ({ defaul
 const Videos = lazy(() => import("./pages/Videos").then((m) => ({ default: m.Videos })));
 // 採用ページ：2026-09 改修でデザイン支給（青キャンバス＋線画アニメーション）の新構成に全面入れ替え。
 // 採用トップ・職種詳細オーバーレイ・インタビュー記事は src/spa/recruit/ 配下（独自ヘッダー・フッター付き）
-const RecruitTop = lazy(() => import("./recruit/RecruitTop").then((m) => ({ default: m.RecruitTop })));
+// 採用サイト（2026-09-15 全面差し替え：デザイン支給 iceline-saiyo）。共通レイアウト＋各ページはネストルート
+const RecruitLayout = lazy(() => import("./recruit/RecruitLayout").then((m) => ({ default: m.RecruitLayout })));
+const RsIndex = lazy(() => import("./recruit/RsIndex").then((m) => ({ default: m.RsIndex })));
+const RsAbout = lazy(() => import("./recruit/RsAbout").then((m) => ({ default: m.RsAbout })));
+const RsWork = lazy(() => import("./recruit/RsWork").then((m) => ({ default: m.RsWork })));
+const RsPeople = lazy(() => import("./recruit/RsPeople").then((m) => ({ default: m.RsPeople })));
+const RsJobs = lazy(() => import("./recruit/RsJobs").then((m) => ({ default: m.RsJobs })));
+const RsEntry = lazy(() => import("./recruit/RsEntry").then((m) => ({ default: m.RsEntry })));
 const InterviewPage = lazy(() => import("./recruit/InterviewPage").then((m) => ({ default: m.InterviewPage })));
 const RecipeDetail = lazy(() => import("./pages/RecipeDetail").then((m) => ({ default: m.RecipeDetail })));
 const Privacy = lazy(() => import("./pages/Privacy").then((m) => ({ default: m.Privacy })));
@@ -143,11 +150,18 @@ function Site() {
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />
             <Route path="/videos" element={<Videos />} />
-            <Route path="/recruit" element={<RecruitTop />} />
+            <Route path="/recruit" element={<RecruitLayout />}>
+              <Route index element={<RsIndex />} />
+              <Route path="about" element={<RsAbout />} />
+              <Route path="work" element={<RsWork />} />
+              <Route path="people" element={<RsPeople />} />
+              <Route path="jobs" element={<RsJobs />} />
+              <Route path="entry" element={<RsEntry />} />
+              <Route path="interview/:id" element={<InterviewPage />} />
+            </Route>
             {/* 旧URL（/recruit2・/recruit3）は /recruit へリダイレクト（クエリ・ハッシュ維持） */}
             <Route path="/recruit2" element={<RecruitRedirect />} />
             <Route path="/recruit3" element={<RecruitRedirect />} />
-            <Route path="/recruit/interview/:id" element={<InterviewPage />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<Top />} />
           </Routes>
