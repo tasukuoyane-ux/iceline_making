@@ -68,6 +68,9 @@ interface DetailSection {
   items: DetailItem[];
   /** true なら項目の下に工程フロー（写真＋工程名、最大10ステップ）を表示 */
   flow?: boolean;
+  /** セクション末尾の大きな CTA ボタン（例: 氷・氷菓事業の特徴 → 製造方法ページ。2026-09-14 追加）。
+   * 文言はコンソールの「CTAボタン文言」で編集できる */
+  cta?: { label: string; to: string };
   /** 編集パス用のセクションキー。未指定なら表示順の添字を使う。
    * セクションの追加・削除で既存の編集パス（division:*.sec.<キー>.*）が
    * ずれないよう、並びを変えたセクションには明示的に付与すること。 */
@@ -162,6 +165,8 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
         { title: "（見出し）", pending: true, card: true },
         { title: "（見出し）", pending: true, card: true },
       ],
+      // セクション末尾：製造方法ページ（/ice/process）への大きな CTA（2026-09-14 追加）
+      cta: { label: "製造方法はこちら", to: "/ice/process" },
     },
     {
       en: "MANUFACTURING",
@@ -203,6 +208,11 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
     },
   ],
 };
+
+// 氷・氷菓ページから製造方法ページ（/ice/process。IceProcess.tsx）へ移したセクション（2026-09-14）。
+// 定義・編集パス（sec.0 / sec.2）はそのまま共用し、氷・氷菓ページ側では表示しない
+const ICE_PROCESS_KEYS = ["0", "2"];
+export const ICE_PROCESS_SECTIONS: DetailSection[] = DETAIL_PRE.ice.filter((sec) => ICE_PROCESS_KEYS.includes(sec.pathKey ?? ""));
 
 // 商品一覧より下のセクション（お客様の声・環境など）
 const DETAIL_POST: Record<Division, DetailSection[]> = {
@@ -887,7 +897,7 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
 }
 
 /** セクション（全項目が未入力の要確認スロットなら公開ページでは丸ごと非表示） */
-function DetailSectionBlock({
+export function DetailSectionBlock({
   division,
   si,
   sec,
@@ -913,6 +923,19 @@ function DetailSectionBlock({
         ))}
         {sec.flow && <IceProcessFlow />}
       </div>
+      {/* セクション末尾の大きな CTA ボタン（文言はコンソールで編集可） */}
+      {sec.cta && (
+        <div className="mt-12 text-center">
+          <Link
+            to={sec.cta.to}
+            className="inline-flex items-center justify-center gap-3 bg-brand px-12 py-5 text-brand-foreground transition-colors hover:bg-brand-dark"
+            style={{ fontSize: 18, fontWeight: 700, minWidth: 320 }}
+          >
+            <span {...ed(`division:${division}.sec.${sk}.cta.label`, "CTAボタン文言")}>{rt(`division:${division}.sec.${sk}.cta.label`, sec.cta.label)}</span>
+            <ArrowRight size={20} />
+          </Link>
+        </div>
+      )}
     </Section>
   );
 }
@@ -993,9 +1016,11 @@ export function DivisionPage({ division }: { division: Division }) {
       )}
 
       {/* 商品一覧より上のセクション（シート準拠） */}
-      {DETAIL_PRE[division].map((sec, si) => (
-        <DetailSectionBlock key={si} division={division} si={si} sec={sec} heat={si % 2 ? listHeat : reasonHeat} />
-      ))}
+      {DETAIL_PRE[division]
+        .filter((sec) => !(division === "ice" && ICE_PROCESS_KEYS.includes(sec.pathKey ?? "")))
+        .map((sec, si) => (
+          <DetailSectionBlock key={sec.pathKey ?? si} division={division} si={si} sec={sec} heat={si % 2 ? listHeat : reasonHeat} />
+        ))}
 
       {/* ── 氷・氷菓：製品ラインナップ（シートのカテゴリ分け通り） ── */}
       {division === "ice" && (

@@ -18,6 +18,7 @@ const PackagePage = lazy(() => import("./pages/PackagePage").then((m) => ({ defa
 const ProductDetail = lazy(() => import("./pages/ProductDetail").then((m) => ({ default: m.ProductDetail })));
 const Company = lazy(() => import("./pages/Company").then((m) => ({ default: m.Company })));
 const IceMountain = lazy(() => import("./pages/IceMountain").then((m) => ({ default: m.IceMountain })));
+const IceProcess = lazy(() => import("./pages/IceProcess").then((m) => ({ default: m.IceProcess })));
 const GlobalSettings = lazy(() => import("./pages/GlobalSettings").then((m) => ({ default: m.GlobalSettings })));
 const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.Contact })));
 const News = lazy(() => import("./pages/News").then((m) => ({ default: m.News })));
@@ -128,6 +129,7 @@ function Site() {
             <Route path="/food" element={<DivisionPage division="food" />} />
             <Route path="/ice" element={<DivisionPage division="ice" />} />
             <Route path="/ice/recipe/:id" element={<RecipeDetail />} />
+            <Route path="/ice/process" element={<IceProcess />} />
             <Route path="/food/products/:id" element={<ProductDetail />} />
             <Route path="/food/packages/:id" element={<PackagePage />} />
             <Route path="/ice/products/:id" element={<ProductDetail />} />

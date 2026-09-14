@@ -66,6 +66,36 @@ export function Contact() {
 
   return (
     <>
+    {/* お電話でのお問い合わせ（H3＋本文×5。本文が入力された項目だけ公開。2026-09-14: フォームより上に配置） */}
+    {(Array.from({ length: TEL_SLOTS }, (_, i) => txt(`contact:tel.${i}.body`, "")).some((v) => v !== "") ||
+      EDIT_MODE) && (
+      <Section heat={HEAT.contactForm}>
+        <div className="mx-auto max-w-4xl">
+          <SectionTitle en="TEL" jp="お電話でのお問い合わせ" align="center" path="sectionEn:contact.tel" />
+          <div className="mt-10 grid gap-5 tab:grid-cols-2">
+            {Array.from({ length: TEL_SLOTS }, (_, i) => {
+              const body = txt(`contact:tel.${i}.body`, "");
+              if (body === "" && !EDIT_MODE) return null;
+              return (
+                <div key={i} className="rounded-2xl border border-border bg-card p-7">
+                  <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`contact:tel.${i}.title`, `電話問い合わせ${i + 1} 見出し`)}>
+                    {rt(`contact:tel.${i}.title`, "（見出し）")}
+                  </h3>
+                  <RichBody
+                    path={`contact:tel.${i}.body`}
+                    text={body || "（未入力：電話番号・受付時間などを入力してください）"}
+                    label={`電話問い合わせ${i + 1} 内容`}
+                    className={`mt-3 ${body ? "text-foreground/80" : "text-muted-foreground"}`}
+                    style={{ fontSize: 15, lineHeight: 2 }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </Section>
+    )}
+
     <Section heat={HEAT.contactForm}>
       <div className="mx-auto max-w-2xl">
         <SectionTitle en="CONTACT" jp="お問い合わせ" align="center" path="sectionEn:contact.main" />
@@ -114,36 +144,6 @@ export function Contact() {
         </form>
       </div>
     </Section>
-
-    {/* お電話でのお問い合わせ（H3＋本文×5。本文が入力された項目だけ公開） */}
-    {(Array.from({ length: TEL_SLOTS }, (_, i) => txt(`contact:tel.${i}.body`, "")).some((v) => v !== "") ||
-      EDIT_MODE) && (
-      <Section heat={HEAT.contactForm}>
-        <div className="mx-auto max-w-4xl">
-          <SectionTitle en="TEL" jp="お電話でのお問い合わせ" align="center" path="sectionEn:contact.tel" />
-          <div className="mt-10 grid gap-5 tab:grid-cols-2">
-            {Array.from({ length: TEL_SLOTS }, (_, i) => {
-              const body = txt(`contact:tel.${i}.body`, "");
-              if (body === "" && !EDIT_MODE) return null;
-              return (
-                <div key={i} className="rounded-2xl border border-border bg-card p-7">
-                  <h3 className="text-brand" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`contact:tel.${i}.title`, `電話問い合わせ${i + 1} 見出し`)}>
-                    {rt(`contact:tel.${i}.title`, "（見出し）")}
-                  </h3>
-                  <RichBody
-                    path={`contact:tel.${i}.body`}
-                    text={body || "（未入力：電話番号・受付時間などを入力してください）"}
-                    label={`電話問い合わせ${i + 1} 内容`}
-                    className={`mt-3 ${body ? "text-foreground/80" : "text-muted-foreground"}`}
-                    style={{ fontSize: 15, lineHeight: 2 }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </Section>
-    )}
 
     {/* プライバシーポリシー（簡素な1段落。未入力の間は非表示） */}
     {(txt("contact:privacy.body", "") !== "" || EDIT_MODE) && (

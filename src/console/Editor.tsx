@@ -44,6 +44,7 @@ const PAGES: { label: string; path: string }[] = [
   { label: "全体設定", path: "/__global" },
   { label: "トップ", path: "/" },
   { label: "氷・氷菓の製造販売", path: "/ice" },
+  { label: "氷・氷菓: 製造方法", path: "/ice/process" },
   { label: "業務用食材の販売", path: "/food" },
   { label: "倉庫事業", path: "/warehouse" },
   { label: "ドライアイスの販売", path: "/dryice" },
