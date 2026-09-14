@@ -824,5 +824,8 @@
   "service:warehouse.gallery.en": "",
   "service:warehouse.sec.features.1.body": "専用のシステムで在庫を管理しています。入出庫のたびに記録と通知を行っています。月末には在庫表を発行し、お客様側の記録と照合。システムによる自動記録に加えて、人の目によるチェックも重ねることで、数量の誤差が生じないようにしています。",
   "color:contact:tel.0.title": "#000000",
-  "color:contact:tel.1.title": "#000000"
+  "color:contact:tel.1.title": "#000000",
+  "color:contact:tel.3.title": "#000000",
+  "color:contact:tel.2.title": "#000000",
+  "color:contact:tel.4.title": "#000000"
 }
