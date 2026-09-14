@@ -7,6 +7,8 @@ import { CookieConsent } from "./components/layout/CookieConsent";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import { Top } from "./pages/Top";
 import { bootReveal } from "./lib/reveal";
+import { img } from "./lib/editable";
+import { SITE_BG_DEFAULT } from "./lib/siteSettings";
 
 // パフォーマンス対応：トップ以外のページと管理コンソールは遅延読み込み
 // （ルート別チャンクに分割）し、初回に読むJS量を減らす。
@@ -16,6 +18,7 @@ const PackagePage = lazy(() => import("./pages/PackagePage").then((m) => ({ defa
 const ProductDetail = lazy(() => import("./pages/ProductDetail").then((m) => ({ default: m.ProductDetail })));
 const Company = lazy(() => import("./pages/Company").then((m) => ({ default: m.Company })));
 const IceMountain = lazy(() => import("./pages/IceMountain").then((m) => ({ default: m.IceMountain })));
+const GlobalSettings = lazy(() => import("./pages/GlobalSettings").then((m) => ({ default: m.GlobalSettings })));
 const Contact = lazy(() => import("./pages/Contact").then((m) => ({ default: m.Contact })));
 const News = lazy(() => import("./pages/News").then((m) => ({ default: m.News })));
 const NewsDetail = lazy(() => import("./pages/NewsDetail").then((m) => ({ default: m.NewsDetail })));
@@ -38,10 +41,13 @@ function SiteBg() {
     <div className="pointer-events-none fixed inset-0 -z-10 bg-background" aria-hidden>
       {!isRecruit && (
         <ImageWithFallback
-          src="/images/background/BG_Prism.jpg"
+          // 背景画像はコンソールの「全体設定」（/__global）で差し替えられる（site:bg.image。2026-09-14）。
+          // data-edit-mirror: 編集プレビュー中、editBridge が同じパスの下書き画像をここにも反映する
+          src={img("site:bg.image", SITE_BG_DEFAULT)}
           alt=""
           loading="eager"
           className="h-full w-full object-cover"
+          data-edit-mirror="site:bg.image"
         />
       )}
     </div>
@@ -129,6 +135,8 @@ function Site() {
             <Route path="/dryice" element={<ServicePage service="dryice" />} />
             <Route path="/company" element={<Company />} />
             <Route path="/ice-mountain" element={<IceMountain />} />
+            {/* 全体設定（コンソール専用。公開サイトではトップへ戻す） */}
+            <Route path="/__global" element={<GlobalSettings />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/news" element={<News />} />
             <Route path="/news/:id" element={<NewsDetail />} />

@@ -40,6 +40,8 @@ function loadViewport(): ViewportId {
 }
 
 const PAGES: { label: string; path: string }[] = [
+  // 全体設定（採用ページ以外の全ページに影響する項目。背景画像など。2026-09-14 追加）
+  { label: "全体設定", path: "/__global" },
   { label: "トップ", path: "/" },
   { label: "氷・氷菓の製造販売", path: "/ice" },
   { label: "業務用食材の販売", path: "/food" },

@@ -124,7 +124,8 @@ function applyOverrides(overrides: Record<string, string>) {
         fillLine(el, value);
       }
     });
-    document.querySelectorAll<HTMLElement>(`[data-edit-img="${cssEscape(path)}"]`).forEach((el) => {
+    document.querySelectorAll<HTMLElement>(`[data-edit-img="${cssEscape(path)}"],[data-edit-mirror="${cssEscape(path)}"]`).forEach((el) => {
+      // data-edit-mirror: 編集対象ではないが同じ値を映す要素（例: 全体設定の背景画像 → 実際の背景）
       const im = el.tagName === "IMG" ? (el as HTMLImageElement) : el.querySelector("img");
       if (im && im.getAttribute("src") !== value) im.setAttribute("src", value);
     });

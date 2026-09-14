@@ -54,6 +54,11 @@ interface DetailItem {
    * 画像の幅（サイズ）・左右はコンソールの「画像の幅」「左右入れ替え」、縦横比・透明度は
    * 画像欄の「縦横比」「透明度」で調整できる（2026-09 改修） */
   overlapImage?: boolean;
+  /** overlapImage 用：本文の上に大きく赤字で出す短いテキスト（例「No.1」）の既定値。
+   * コンソールの「強調テキスト」で編集。空にすると公開ページでは非表示（2026-09-14 追加） */
+  badge?: string;
+  /** true なら 画像 → 中央寄せの赤い見出し → 本文 の縦積みレイアウト（サプライチェーン。2026-09-14 追加） */
+  stackImage?: boolean;
   /** 既存アップロード画像を引き継ぐ場合の明示キー */
   imgKey?: string;
 }
@@ -98,13 +103,14 @@ const DETAIL_PRE: Record<Division, DetailSection[]> = {
       en: "TOP SHARE",
       jp: "岡山県内トップシェア",
       pathKey: "topshare",
-      items: [{ pending: true, image: true, overlapImage: true }],
+      items: [{ pending: true, image: true, overlapImage: true, badge: "No.1" }],
     },
     {
       en: "SUPPLY CHAIN",
       jp: "サプライチェーン",
       pathKey: "supply",
-      items: [{ title: "（見出し）", pending: true, image: true }],
+      // 2026-09-14: 画像（工程図）→ 中央寄せの赤い見出し → 本文 の縦積み
+      items: [{ title: "（見出し）", pending: true, image: true, stackImage: true }],
     },
     {
       en: "FEATURES",
@@ -719,6 +725,20 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         {...ratioAttrs(`${base}.ratio`, 45, false)}
       >
         <div className="relative z-10 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[65%]">
+          {/* 強調テキスト（例「No.1」）：大きく赤字。空なら公開ページでは出さない（2026-09-14 追加） */}
+          {(() => {
+            const badge = txt(`${base}.badge`, it.badge ?? "");
+            if (badge === "" && !EDIT_MODE) return null;
+            return (
+              <p
+                className={"mb-4 " + (badge ? "text-brand" : "text-muted-foreground")}
+                style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(48px, 6vw, 84px)", fontWeight: 900, lineHeight: 1, letterSpacing: "0.02em" }}
+                {...ed(`${base}.badge`, "強調テキスト（例: No.1）")}
+              >
+                {rich(badge || "（強調テキスト・任意）")}
+              </p>
+            );
+          })()}
           {it.title && (
             <h3 className="text-foreground" style={{ fontSize: 18, fontWeight: 700 }} {...ed(`${base}.title`, "見出し")}>
               {rt(`${base}.title`, it.title)}
@@ -733,7 +753,40 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
             className="mx-auto h-auto w-[70%] object-contain pc:w-full"
             {...edImg(imgPath, `${it.title || secJp} 画像（文章の下に回り込む）`, { opacity: true })}
           />
+          {/* 画像の下：右から左へ消えていく赤いライン（2026-09-14 追加。太さ 6px・幅は画像幅） */}
+          <div
+            aria-hidden
+            className="mx-auto mt-4 h-[6px] w-[70%] pc:w-full"
+            style={{ background: "linear-gradient(to left, #E60012 0%, rgba(230,0,18,0.85) 45%, rgba(230,0,18,0) 100%)" }}
+          />
         </div>
+      </motion.div>
+    );
+  }
+
+  // 画像（工程図など）を先頭に、赤い見出しを中央寄せ、本文を下に縦積み（サプライチェーン。2026-09-14 改修）
+  if (it.stackImage) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center"
+      >
+        <ImageWithFallback
+          src={img(it.imgKey ?? `${base}.image`, IMG_PLACEHOLDER)}
+          alt={it.title || secJp}
+          className="aspect-[16/9] w-full max-w-3xl rounded-2xl border border-border bg-card object-cover"
+          data-keep-size="1"
+          {...edImg(it.imgKey ?? `${base}.image`, `${it.title || secJp} 画像`)}
+        />
+        {it.title && (
+          <h3 className="mt-8 text-center text-brand" style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.6 }} {...ed(`${base}.title`, "見出し（赤・中央）")}>
+            {rt(`${base}.title`, it.title)}
+          </h3>
+        )}
+        <RichBody path={`${base}.body`} text={bodyText} label="本文" className="mt-4 w-full max-w-3xl text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05 }} />
       </motion.div>
     );
   }
