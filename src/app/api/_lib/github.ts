@@ -23,8 +23,19 @@ export function ghConfig() {
     token: env("GITHUB_TOKEN"),
     owner: env("GITHUB_OWNER"),
     repo: env("GITHUB_REPO"),
-    branch: process.env.GITHUB_BRANCH || "main",
+    branch: publishBranch(),
   };
+}
+
+/** コンソールの「公開」がコミットする先のブランチ。
+ *  Vercel のプレビュー（本番以外の）デプロイでは、そのデプロイ元ブランチ（VERCEL_GIT_COMMIT_REF）に
+ *  コミットする。これにより、作業用ブランチ（例: next）のプレビュー URL 上のコンソールで公開しても
+ *  main（本番）には影響せず、そのブランチだけが更新・再デプロイされる（2026-09-15）。
+ *  本番デプロイやローカルでは従来どおり GITHUB_BRANCH（未設定なら main）。 */
+export function publishBranch(): string {
+  const ref = process.env.VERCEL_GIT_COMMIT_REF;
+  if (process.env.VERCEL_ENV === "preview" && ref) return ref;
+  return process.env.GITHUB_BRANCH || "main";
 }
 
 export async function gh(path: string, token: string, init?: RequestInit) {
