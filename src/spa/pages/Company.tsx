@@ -266,8 +266,9 @@ export function Company() {
               // 1枚目は通常フローで縦横比（既定 4:3・コンソールの「縦横比」設定が優先）を守り、
               // 上揃えで置く。高さは文章側に合わせて伸ばさない（2026-09-10 修正）。2枚目は同じ枠に重ねる
               return (
-                <div className="group relative mt-6 w-full self-start overflow-hidden rounded-2xl bg-secondary">
-                  <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="block aspect-[4/3] w-full object-cover" {...edImg("images:IMG.waterDew", "代表 写真1")} />
+                <div className="group relative mx-auto mt-6 w-[90%] self-center overflow-hidden rounded-2xl bg-secondary">
+                  {/* 写真の 90% 縮小は枠側（w-[90%]）で行うため、theme.css の一括ルールから除外（data-keep-size） */}
+                  <ImageWithFallback src={IMG.waterDew} alt="代表メッセージ" className="block aspect-[4/3] w-full object-cover" data-keep-size="1" {...edImg("images:IMG.waterDew", "代表 写真1")} />
                   {(img2 !== "" || EDIT_MODE) && (
                     <ImageWithFallback
                       src={img2 || IMG_PLACEHOLDER}

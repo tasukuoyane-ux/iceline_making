@@ -371,3 +371,19 @@ html.cookie-open .video-cta {
 [data-repeat]:not([data-edit-selected])[data-edit-value="30"] > :nth-child(n+31) {
   display: none !important;
 }
+
+/* ページ端でのオーバースクロール（フッターより下へのバウンス）を禁止する（2026-09-14） */
+html,
+body {
+  overscroll-behavior: none;
+}
+
+/* コンテンツ系の写真を従来の 90% で表示する（2026-09-14）。
+   対象＝コーポレート各ページ本文中の写真（object-cover の img、または写真を含む aspect-* の枠）。
+   除外＝メインビジュアル等の absolute 配置、枠いっぱいに伸ばす h-full の写真、採用サイト（.rc）、
+   data-keep-size を付けた要素（親側で幅を調整しているもの） */
+main img[class~="object-cover"][class~="w-full"]:not([class~="absolute"]):not([class~="h-full"]):not([data-keep-size]):not(.rc *),
+main [class*="aspect-"]:not([class~="absolute"]):has(> img[class~="object-cover"], > :not([class*="aspect-"]) > img[class~="object-cover"]):not(.rc *) {
+  max-width: 90%;
+  margin-inline: auto;
+}

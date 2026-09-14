@@ -198,6 +198,11 @@ function Hero() {
       gatherMul: 1 / 3,
       canGather,
       scrollOffset: () => window.scrollY,
+      // 赤いオブジェクトの上下位置は MV テキスト（.fv-copy2）の中心に合わせる（ページ座標）
+      centerY: () => {
+        const r = copyRef.current?.getBoundingClientRect();
+        return r ? r.top + r.height / 2 + window.scrollY : window.innerHeight * 0.44;
+      },
     });
     // スクロールでコピーがフェードアウト
     const onScroll = () => {

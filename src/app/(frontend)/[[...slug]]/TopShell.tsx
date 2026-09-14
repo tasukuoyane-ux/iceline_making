@@ -17,13 +17,15 @@ const OVERRIDES = overridesData as Record<string, string>
 const SHELL_CSS = `
 #top-shell{pointer-events:none}
 #top-shell .ts-hd{height:64px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)}
-#top-shell .ts-fv{position:relative;overflow:hidden;background:transparent;height:min(94vh,860px);min-height:540px}
+#top-shell .ts-fv{position:relative;overflow:hidden;background:transparent;height:min(75.2vh,688px);min-height:432px}
 #top-shell .ts-copy{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%)}
 #top-shell .ts-inner{max-width:1400px;margin-inline:auto;padding-inline:20px;text-shadow:0 0 12px rgba(246,248,249,.95),0 0 4px rgba(246,248,249,.95)}
-#top-shell .ts-text p{margin:0;white-space:pre-line;font-size:13px;line-height:2.05;font-weight:500;color:rgba(10,10,10,.8)}
-#top-shell .ts-text p:first-child{font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;font-size:clamp(10px,1.333vw,18.67px);line-height:1.4;letter-spacing:.04em;color:#0a0a0a}
-@media (max-width:767px){#top-shell .ts-fv{height:min(86vh,700px)}}
-@media (min-width:1025px){#top-shell .ts-hd{height:80px}#top-shell .ts-inner{padding-inline:48px}#top-shell .ts-text p{font-size:14px}#top-shell .ts-text p:first-child{font-size:clamp(10px,1.333vw,18.67px)}}
+#top-shell .ts-text p{margin:0;white-space:pre-line;font-size:12px;line-height:1.525;font-weight:500;color:rgba(10,10,10,.8)}
+#top-shell .ts-text p:first-child{font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;font-size:calc(clamp(10px,1.333vw,18.67px) - 1px);line-height:1.2;letter-spacing:.04em;color:#0a0a0a}
+#top-shell .ts-text p:first-child [data-rt*="特大"],#top-shell .ts-text p:first-child [data-rt*="xl"]{font-size:calc(clamp(10px,1.333vw,18.67px) * 3) !important;line-height:1.3 !important}
+#top-shell .ts-text p:first-child [data-rt*="大"]:not([data-rt*="特大"]),#top-shell .ts-text p:first-child [data-rt*="lg"]{font-size:calc(clamp(10px,1.333vw,18.67px) * 2.1) !important;line-height:1.3 !important}
+@media (max-width:767px){#top-shell .ts-fv{height:min(68.8vh,560px)}}
+@media (min-width:1025px){#top-shell .ts-hd{height:80px}#top-shell .ts-inner{padding-inline:48px}#top-shell .ts-text p{font-size:13px}#top-shell .ts-text p:first-child{font-size:calc(clamp(10px,1.333vw,18.67px) - 1px)}}
 `
 
 /** 行内装飾トークン（色・サイズ）込みで1行を描画（RichBody の renderLine と同じ規則） */
@@ -31,7 +33,7 @@ function renderLine(line: string) {
   return splitColorTokens(line).map((s, i) => {
     const style = { ...(sizeStyle(s.size) ?? {}), ...(s.color ? { color: s.color } : {}) }
     return Object.keys(style).length > 0 ? (
-      <span key={i} style={style}>{s.text}</span>
+      <span key={i} style={style} data-rt={s.attr}>{s.text}</span>
     ) : (
       <Fragment key={i}>{s.text}</Fragment>
     )

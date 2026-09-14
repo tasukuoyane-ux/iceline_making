@@ -205,7 +205,8 @@ function sample(name: ShapeName): { x: number; y: number }[] {
   return pts;
 }
 
-const GRAYS = [[201, 208, 213], [214, 220, 224], [191, 200, 206], [197, 216, 226]];
+// 散らばっている粒子の色（2026-09-14: グレーから水色 #9cdff1 へ。明暗の近い4色で粒ごとに揺らす）
+const GRAYS = [[156, 223, 241], [172, 230, 245], [140, 214, 236], [162, 226, 243]];
 function redAt(t: number): number[] {
   const top = [249, 167, 155], mid = [232, 68, 60], bot = [179, 0, 14];
   const a = t < 0.5 ? top : mid, b = t < 0.5 ? mid : bot, u = (t < 0.5 ? t : t - 0.5) * 2;
@@ -233,6 +234,9 @@ export interface FvTiming {
   /** シルエットをページに固定するためのオフセット（px）。固定キャンバス上でも、返した分だけ
    * オブジェクトを上へずらして描く（トップ：window.scrollY を返すとMVと一緒にスクロールして消える） */
   scrollOffset?: () => number;
+  /** シルエット（赤いオブジェクト）の中心Y（px・ページ座標）。指定が無ければ画面高さ基準の既定位置
+   * （トップ：MVテキストの中心に合わせる。2026-09-14 改修） */
+  centerY?: () => number;
 }
 
 /**
@@ -263,7 +267,8 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
     const mob = W < 768;
     if (hero) return { cx: W * (mob ? 0.5 : 0.8), cy: H * 0.52, sc: Math.min(W, H) * 0.95 };
     // シルエットは従来比 1.25 倍（コピーへの重なり許容 ※デザイン指定）
-    return { cx: W * (mob ? 0.5 : 0.66), cy: H * (mob ? 0.36 : 0.44), sc: Math.min(W, H) * (mob ? 1 : 0.85) };
+    const cy = timing.centerY?.() ?? H * (mob ? 0.36 : 0.44);
+    return { cx: W * (mob ? 0.5 : 0.66), cy, sc: Math.min(W, H) * (mob ? 1 : 0.85) };
   }
   function resize() {
     W = cv.clientWidth;
