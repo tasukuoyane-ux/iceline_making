@@ -716,7 +716,9 @@
    追加分（SPA 移植に伴う差分）
    ========================================================= */
 /* ルート（旧 body 相当） */
-.rc { position: relative; min-height: 100vh; }
+.rc { position: relative; min-height: 100vh; isolation: isolate; }
+/* isolation: isolate … 負の z-index の固定背景（.bg-sky / .bg-sea / .bg-3d）が .rc 自身の背景の
+   裏に隠れないよう、.rc をスタッキングコンテキストにする（旧 body 相当の役割） */
 .rc.has-3d .bg-sea { display: none; }
 /* 3D の背景色グラデーションは固定要素で敷く（body 背景の代替） */
 .rc .bg-sky { position: fixed; inset: 0; z-index: -3; background: var(--sea); pointer-events: none; }
