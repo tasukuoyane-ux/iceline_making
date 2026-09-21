@@ -157,7 +157,7 @@ export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: Recr
   const type = /（([^）]*)）\s*$/.exec(job.title)?.[1] ?? "";
 
   return (
-    <div className="ov" role="dialog" aria-modal="true" aria-label={job.title}>
+    <div className={"ov" + (job.heroImage ? " has-hero" : "")} role="dialog" aria-modal="true" aria-label={job.title}>
       <button type="button" className="ov__close" aria-label="閉じる" onClick={onClose}>
         <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
           <path d="M4 4l12 12M16 4L4 16" />

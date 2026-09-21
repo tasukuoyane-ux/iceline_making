@@ -956,7 +956,9 @@
 .rc .people-scroller.is-nudge .people-card:nth-child(n+5) { animation-delay: 0.24s; }
 
 /* 職種詳細：見出し直下の画像（KV と最初のカードの間） */
-.rc .ov__hero { margin: -24px 0 8px; border-radius: var(--r-img); overflow: hidden; aspect-ratio: 16 / 7; background: none; }
+.rc .ov__hero { margin: 3rem 0; border-radius: var(--r-img); overflow: hidden; aspect-ratio: 16 / 7; background: none; }
+/* 画像があるときは KV 下の余白を無くし、画像の上下 3rem だけにする（2026-09-21 ユーザー指定） */
+.rc .ov.has-hero .lower-kv { padding-bottom: 0; }
 .rc .ov__hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* 見出しなどコンソールで編集できる要素のクリック領域 */
