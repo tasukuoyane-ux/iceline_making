@@ -248,7 +248,7 @@ export function Company() {
       {/* メインビジュアル（2026-09-09 改修）：各事業ページと同じ画像背景＋中央タイトル。
           画像はコンソールの「メインビジュアル画像」で差し替えられる（既定は倉庫の写真）。
           部品は CompanyParts.tsx（/ice-mountain と共用） */}
-      <CorpHero base="company:hero" enPath="sectionEn:company.mv" defEn="COMPANY" defTitle="会社情報" defImage={IMG.warehouse} />
+      <CorpHero base="company:hero" enPath="sectionEn:company.mv" defEn="COMPANY" defTitle="会社情報" defImage={IMG.warehouse} crumbs={[{ label: txt("company:hero.title", "会社情報") }]} />
 
       {/* 代表メッセージ（会社情報の熱量ピーク） */}
       <Section heat={HEAT.ceoMessage}>

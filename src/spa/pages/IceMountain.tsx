@@ -93,7 +93,7 @@ export function IceMountain() {
   return (
     <>
       {/* メインビジュアル（会社情報と同じ設計） */}
-      <CorpHero base="icemountain:hero" enPath="sectionEn:icemountain.mv" defEn="ICE MOUNTAIN" defTitle="株式会社アイスマウンテン" defImage={IMG.warehouse} />
+      <CorpHero base="icemountain:hero" enPath="sectionEn:icemountain.mv" defEn="ICE MOUNTAIN" defTitle="株式会社アイスマウンテン" defImage={IMG.warehouse} crumbs={[{ label: txt("company:hero.title", "会社情報"), to: "/company" }, { label: txt("icemountain:hero.title", "株式会社アイスマウンテン") }]} />
 
       {/* ABOUT US（会社情報の企業理念セクションと同デザイン） */}
       <Section heat={HEAT.philosophy} contained={false}>

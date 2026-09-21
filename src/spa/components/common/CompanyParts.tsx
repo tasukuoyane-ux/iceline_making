@@ -1,9 +1,10 @@
 // 会社情報ページと株式会社アイスマウンテンページ（/ice-mountain）で共有する部品（2026-09-10 追加）。
-//  - CorpHero      … 画像背景＋中央タイトルのメインビジュアル（画像はコンソールで差し替え・縦位置調整可）
+//  - CorpHero      … メインビジュアル（2026-09-21 から事業ページ共通の PageMv を使う。画像はコンソールで差し替え・縦位置調整可）
 //  - ProfileTable  … 罫線テーブルの会社概要（行はコンソールの「追加」「削除」で増減できる）
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { ed, edImg, img, repeatSel, txt } from "../../lib/editable";
 import { rt } from "../../lib/richInline";
+import { PageMv } from "./PageMv";
 
 export function CorpHero({
   base,
@@ -11,6 +12,7 @@ export function CorpHero({
   defEn,
   defTitle,
   defImage,
+  crumbs,
 }: {
   /** 編集パスの接頭辞（例 "company:hero" → <base>.image / <base>.title） */
   base: string;
@@ -19,29 +21,11 @@ export function CorpHero({
   defEn: string;
   defTitle: string;
   defImage: string;
+  /** パンくずリスト（例 [{ label: "会社情報" }]） */
+  crumbs?: { label: string; to?: string }[];
 }) {
-  return (
-    <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
-      <ImageWithFallback
-        src={img(`${base}.image`, defImage)}
-        alt={txt(`${base}.title`, defTitle)}
-        loading="eager"
-        fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover"
-        {...edImg(`${base}.image`, "メインビジュアル画像", { ypos: true })}
-      />
-      <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
-        <div style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
-          <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(enPath, "英語見出し（補助）")}>
-            {rt(enPath, defEn)}
-          </p>
-          <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`${base}.title`, "ページタイトル")}>
-            {rt(`${base}.title`, defTitle)}
-          </h1>
-        </div>
-      </div>
-    </section>
-  );
+  // 2026-09-21：事業ページと同じ共通部品 PageMv（白背景・30px マージン・ピル型の白座布団・パンくず）で描く
+  return <PageMv imgSrc={img(`${base}.image`, defImage)} imgPath={`${base}.image`} enPath={enPath} enDef={defEn} titlePath={`${base}.title`} titleDef={defTitle} crumbs={crumbs} />;
 }
 
 /** 会社概要の罫線テーブル。行数はコンソールの「追加」「削除」で 1〜max に変更できる

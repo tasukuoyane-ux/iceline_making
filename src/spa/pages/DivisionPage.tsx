@@ -1132,6 +1132,7 @@ export function DivisionPage({ division }: { division: Division }) {
         titleDef={mv.title}
         overviewPath={`division:${division}.overview`}
         overviewDef={OVERVIEW[division]}
+        crumbs={[{ label: txt("nav:services", "サービス") }, { label: divTitle }]}
       />
 
       {/* 氷・氷菓：商品ラインナップ導線（赤帯の外・画像＋グレーオーバーレイ＋白文字のボタン） */}

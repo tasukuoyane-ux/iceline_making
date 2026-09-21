@@ -369,6 +369,7 @@ export function ServicePage({ service }: { service: ServiceId }) {
         titleDef={s.title}
         overviewPath={`${base}.overview`}
         overviewDef={s.overview}
+        crumbs={[{ label: txt("nav:services", "サービス") }, { label: txt(`${base}.mv.title`, s.title) }]}
       >
         {/* ドライアイス：ECサイトへの導線ボタン（旧事業概要セクションから移設） */}
         {s.shopUrl && (
