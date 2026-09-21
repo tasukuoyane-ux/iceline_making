@@ -98,8 +98,8 @@ export function IceMountain() {
       {/* ABOUT US（会社情報の企業理念セクションと同デザイン） */}
       <Section heat={HEAT.philosophy} contained={false}>
         <div className="mx-auto max-w-[1150px] px-5 pc:px-8">
-          <SectionTitle en="ABOUT US" jp="アイスマウンテンについて" align="center" path="sectionEn:icemountain.about" />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-brand pc:max-w-full" style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.8, whiteSpace: "pre-line" }} {...ed("icemountain:about.body", "本文", { multiline: true })}>
+          {/* 2026-09-21：大見出し・英語見出しは置かず、本文のみ（通常ウェイト・左寄せ） */}
+          <p className="mx-auto max-w-3xl text-left pc:max-w-full" style={{ fontSize: 16, fontWeight: 400, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed("icemountain:about.body", "本文", { multiline: true })}>
             {rt("icemountain:about.body", ABOUT_DEFAULT)}
           </p>
         </div>

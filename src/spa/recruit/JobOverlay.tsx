@@ -180,6 +180,13 @@ export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: Recr
         </div>
       </section>
 
+      {/* 見出し直下の画像（採用タブ「見出し下の画像」。未設定なら無し） */}
+      {job.heroImage && (
+        <div className="container ov__hero js-reveal is-inview">
+          <ImageWithFallback src={job.heroImage} alt={job.title} />
+        </div>
+      )}
+
       <section className="island">
         <div className="container">
           <div className="card ov__sec js-reveal">

@@ -391,8 +391,8 @@ main [class*="aspect-"]:not([class~="absolute"]):has(> img[class~="object-cover"
 /* =========================================================
    角丸・枠線の共通仕様（2026-09-21）
    - 画像：やさしい角丸 16px（rounded-lg / xl / 2xl の混在を統一）
-   - ボタン・文字の座布団（ラベル・バッジ）：500px で完全なピル
-   - メインビジュアル（[data-mv]）：角を落とさない
+   - ボタン：500px で完全なピル／文字の座布団（ラベル・バッジ）：8px
+   - メインビジュアル（[data-mv]）：18px
    - 白い座布団（bg-card / bg-white / bg-background）のグレーの枠線は無し
    採用サイト（.rc）は対象外
    ========================================================= */
@@ -407,9 +407,12 @@ main .prod-tile {
   border-radius: var(--radius-img);
 }
 main [data-mv] {
-  border-radius: 0 !important;
+  border-radius: 18px !important;
 }
-main :is(a, button, span, div)[class~="inline-flex"]:is([class~="bg-brand"], [class~="bg-ink"], [class~="bg-secondary"], [class~="bg-white"], [class~="border-brand"], [class~="border-border"]):not(.rc *),
+main :is(span, div, p)[class~="inline-flex"][class~="bg-secondary"]:not(.rc *) {
+  border-radius: 8px;
+}
+main :is(a, button)[class~="inline-flex"]:is([class~="bg-brand"], [class~="bg-ink"], [class~="bg-white"], [class~="border-brand"], [class~="border-border"]):not(.rc *),
 main button[type="submit"]:not(.rc *),
 main [class~="rounded-md"][class~="bg-brand"]:not(.rc *) {
   border-radius: var(--radius-pill);

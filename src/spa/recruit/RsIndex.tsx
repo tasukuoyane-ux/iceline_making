@@ -108,12 +108,12 @@ function JobAccordion({ j }: { j: RecruitJob }) {
         )}
         <p>
           <strong>勤務地:</strong> {f.place}
-          {f.type !== "" && (
-            <>
-              ｜<strong>雇用形態:</strong> {f.type}
-            </>
-          )}
         </p>
+        {f.type !== "" && (
+          <p>
+            <strong>雇用形態:</strong> {f.type}
+          </p>
+        )}
         <p className="job-acc__actions">
           <Link className="btn-line" to={`/recruit?job=${encodeURIComponent(j.id)}`} data-no-transition>
             <span {...ed("rs:jobs.detailBtn", "職種詳細ボタン文言")}>{rt("rs:jobs.detailBtn", "詳細を見る")}</span>

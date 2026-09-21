@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ChevronRight, ChevronDown, Lightbulb, Minus, Plus, Search } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, ChevronDown, Minus, Plus, Search } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
@@ -323,35 +323,6 @@ const ICE_LINEUP_ITEMS: LineupItem[] = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────
-// 事業概要の下に置く商品ラインナップ導線タイル（氷・氷菓のみ）。
-// 画像・名称・リンク先はすべてコンソールから編集可能
-// （キー: ice:lineupNav.{i}.image / .name / .href）。
-// リンク先は「#〜」でページ内アンカー、「/〜」でサイト内ページ、
-// 「https://〜」で外部サイト（別タブ）として扱う。
-// ─────────────────────────────────────────────────────────
-const ICE_LINEUP_NAV: { name: string; href: string; img: string; body: string }[] = [
-  {
-    // タイトルに改行は入れない（幅いっぱいまでは自然に折り返す）
-    name: "無色透明かち割り氷",
-    href: "/ice/products/rocky-ice",
-    img: IMG.iceClose,
-    body: "純度の高い原料水を低温でじっくり凍らせた、硬く透明で溶けにくい業務用かち割り氷です。溶けても飲み物の味を損なわず、食品本来のおいしさを届けます。",
-  },
-  {
-    name: "味・色付き氷",
-    href: "/ice/products/ice-cafe",
-    img: IMG.icedCoffee,
-    body: "コーヒーや果汁を凍らせた氷カフェ・カクテル用アイスなど、溶けるほどに味が深まる氷菓シリーズ。特別な機械なしで新メニューを導入できます。",
-  },
-  {
-    name: "コンビニ向け",
-    href: "#ice-lineup",
-    img: IMG.iceBlue,
-    body: "コンビニエンスストア向けのカップ氷をはじめ、全国の店頭に並ぶ製品を安定した品質で製造・供給しています。",
-  },
-];
-
 // 活用提案・メニューレシピ（シート準拠の確定原稿）
 const ICE_RECIPE_STORY =
   "通常の氷をドリンクに入れると、溶けるにつれて飲み物の味が薄くなっていきます。これは飲食店にとって長年の課題でした。氷カフェはその発想を逆転させた商品です。氷そのものをコーヒーや果汁にすることで、溶けるほどに味が深まっていく。牛乳を注ぐだけでアイスカフェラテを作ることができ、特別な機械は不要です。アイスラインの氷菓は、透明・無味・無臭という「普通の氷」の常識にとどまらず、氷そのものを素材として捉え直した商品群です。";
@@ -533,61 +504,6 @@ function EditableLinkHint({ path, label, href }: { path: string; label: string; 
     <p className="mt-1.5 break-all text-muted-foreground" style={{ fontSize: 11 }} {...ed(path, label)}>
       {rich(href)}
     </p>
-  );
-}
-
-/** 商品ラインナップ導線タイル（見出し＋画像＋文言の縦組み。2026-08 改修）。
- * 見出しは下線付き、画像クリックと「詳細を見る」でリンク先へ。 */
-function LineupNavTile({ i, def }: { i: number; def: { name: string; href: string; img: string; body: string } }) {
-  const base = `ice:lineupNav.${i}`;
-  const name = txt(`${base}.name`, def.name);
-  const href = txt(`${base}.href`, def.href);
-  const linkCls = "group block";
-  const image = (
-    <div className="aspect-[16/9] w-full overflow-hidden rounded-xl border border-border bg-secondary">
-      <ImageWithFallback
-        src={img(`${base}.image`, def.img || IMG_PLACEHOLDER)}
-        alt={name}
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        {...edImg(`${base}.image`, `ラインナップ導線${i + 1} 画像`)}
-      />
-    </div>
-  );
-  const wrap = (children: React.ReactNode) =>
-    /^https?:/i.test(href) ? (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={linkCls}>{children}</a>
-    ) : href.startsWith("#") ? (
-      <a href={href} className={linkCls}>{children}</a>
-    ) : (
-      <Link to={href} className={linkCls}>{children}</Link>
-    );
-  return (
-    <div className="flex flex-col">
-      {/* タイトル（下線付き見出し） */}
-      <h3
-        className="border-b border-border pb-3"
-        style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-line" }}
-        {...ed(`${base}.name`, `ラインナップ導線${i + 1} 名称`)}
-      >
-        {rich(name)}
-      </h3>
-      {/* 画像 */}
-      <div className="mt-5">{wrap(image)}</div>
-      {/* 文言 */}
-      <p
-        className="mt-4 flex-1 text-foreground/80"
-        style={{ fontSize: 14, lineHeight: 2.0, whiteSpace: "pre-line" }}
-        {...ed(`${base}.body`, `ラインナップ導線${i + 1} 文言`, { multiline: true })}
-      >
-        {rt(`${base}.body`, def.body)}
-      </p>
-      {wrap(
-        <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13, fontWeight: 600 }}>
-          詳細を見る <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
-        </span>
-      )}
-      <EditableLinkHint path={`${base}.href`} label={`ラインナップ導線${i + 1} リンク先URL`} href={href} />
-    </div>
   );
 }
 
@@ -970,35 +886,95 @@ export function DetailSectionBlock({
   );
 }
 
-/** 製品ラインナップ：商品画像（リンク先があれば商品詳細ページへ。ホバーで拡大） */
+/** 製品ラインナップ：商品画像のスライドショー（2026-09-21 改修）。
+ * 画像は最大 MAX_SLIDES 枚（編集パス `${base}.image` `${base}.image2` … ）。2枚以上あるときだけ左右ボタンを表示し、
+ * 自動では進まない。1枚目をクリックするとリンク先（既存の商品詳細ページ。コンソールで変更可）へ。
+ * 編集モードでは全スロットを縦に並べて表示する（空のスロットはプレースホルダー）。 */
+const MAX_SLIDES = 5;
+function slidePath(base: string, n: number) {
+  return n === 0 ? `${base}.image` : `${base}.image${n + 1}`;
+}
 function LineupImage({ base, label, def, aspect }: { base: string; label: string; def: LineupItem; aspect: string }) {
   const href = txt(`${base}.href`, def.product ? `/ice/products/${def.product}` : "");
   const name = txt(`${base}.name`, def.name);
-  const image = (
-    <ImageWithFallback
-      src={img(`${base}.image`, PRODUCT_IMG[def.product] || IMG_PLACEHOLDER)}
-      alt={name}
-      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      {...edImg(`${base}.image`, `${label} 画像`)}
-    />
+  const [idx, setIdx] = useState(0);
+  const slides = Array.from({ length: MAX_SLIDES }, (_, n) => img(slidePath(base, n), n === 0 ? PRODUCT_IMG[def.product] || IMG_PLACEHOLDER : "")).filter((src) => src !== "");
+  const boxCls = `${aspect} w-full overflow-hidden rounded-xl bg-secondary`;
+
+  if (EDIT_MODE) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: MAX_SLIDES }, (_, n) => {
+          const path = slidePath(base, n);
+          const src = img(path, n === 0 ? PRODUCT_IMG[def.product] || IMG_PLACEHOLDER : "");
+          return (
+            <div key={n} className={boxCls + (src ? "" : " flex items-center justify-center text-muted-foreground")} style={src ? undefined : { fontSize: 12 }}>
+              {src ? (
+                <ImageWithFallback src={src} alt={name} className="h-full w-full object-cover" {...edImg(path, `${label} 画像${n + 1}${n === 0 ? "" : "（任意）"}`)} />
+              ) : (
+                <span {...edImg(path, `${label} 画像${n + 1}（任意）`)}>画像{n + 1}（任意・クリックして設定）</span>
+              )}
+            </div>
+          );
+        })}
+        <EditableLinkHint path={`${base}.href`} label={`${label} リンク先URL（空ならリンクなし）`} href={href || "（リンク先URL・任意）"} />
+      </div>
+    );
+  }
+
+  const cur = Math.min(idx, slides.length - 1);
+  const track = (
+    <div className="flex h-full w-full transition-transform duration-500 ease-out" style={{ transform: `translateX(-${cur * 100}%)` }}>
+      {slides.map((src, n) => (
+        <ImageWithFallback key={n} src={src} alt={n === 0 ? name : `${name} ${n + 1}`} className="h-full w-full shrink-0 object-cover" data-keep-size="1" />
+      ))}
+    </div>
   );
-  const cls = `group block ${aspect} w-full overflow-hidden rounded-xl bg-secondary`;
   return (
-    <>
-      {href ? <Link to={href} className={cls}>{image}</Link> : <div className={cls}>{image}</div>}
-      <EditableLinkHint path={`${base}.href`} label={`${label} リンク先URL（空ならリンクなし）`} href={href || "（リンク先URL・任意）"} />
-    </>
+    <div className="relative">
+      {href ? (
+        <Link to={href} className={"group block " + boxCls}>
+          {track}
+        </Link>
+      ) : (
+        <div className={boxCls}>{track}</div>
+      )}
+      {slides.length > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="前の画像"
+            onClick={() => setIdx((i) => (i - 1 + slides.length) % slides.length)}
+            className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow transition-colors hover:bg-brand hover:text-white"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            type="button"
+            aria-label="次の画像"
+            onClick={() => setIdx((i) => (i + 1) % slides.length)}
+            className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow transition-colors hover:bg-brand hover:text-white"
+          >
+            <ChevronRight size={18} />
+          </button>
+          <div className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 flex justify-center gap-1.5">
+            {slides.map((_, n) => (
+              <span key={n} className={"h-1.5 w-1.5 rounded-full " + (n === cur ? "bg-brand" : "bg-white/80")} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
-/** 製品ラインナップ：「こんな使い方」ボックス（電球アイコン＋ラベル＋本文） */
+/** 製品ラインナップ：「こんな使い方」ボックス（薄紅色の座布団にラベル＋本文。枠線・アイコンなし） */
 function LineupUsage({ base, label, def }: { base: string; label: string; def: LineupItem }) {
   const usage = txt(`${base}.usage`, def.usage);
   if (!usage && !EDIT_MODE) return null;
   return (
-    <div className="mt-5 rounded-xl border border-brand/25 bg-brand/[0.04] p-4 pc:p-5">
-      <p className="flex items-center gap-1.5 text-brand" style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em" }}>
-        <Lightbulb size={16} className="shrink-0" />
+    <div className="mt-5 rounded-xl bg-brand/[0.04] p-4 pc:p-5">
+      <p className="text-brand" style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em" }}>
         <span {...ed(`${base}.usageLabel`, `${label} 使い方ラベル`)}>{rt(`${base}.usageLabel`, "こんな使い方")}</span>
       </p>
       <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.95, whiteSpace: "pre-line" }} {...ed(`${base}.usage`, `${label} こんな使い方`, { multiline: true })}>
@@ -1055,10 +1031,10 @@ function LineupHero() {
           <LineupImage base={base} label={label} def={def} aspect="aspect-[2/3]" />
         </div>
         <div className="flex flex-col justify-center">
-          <h3 style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.4 }} {...ed(`${base}.name`, `${label} 商品名`)}>
+          <h3 style={{ fontSize: 24, fontWeight: 400, lineHeight: 1.4 }} {...ed(`${base}.name`, `${label} 商品名`)}>
             {rt(`${base}.name`, def.name)}
           </h3>
-          <p className="mt-3 text-brand" style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.5 }} {...ed(`${base}.copy`, `${label} コピー`)}>
+          <p className="mt-3 text-brand" style={{ fontSize: 20, fontWeight: 400, lineHeight: 1.5 }} {...ed(`${base}.copy`, `${label} コピー`)}>
             {rt(`${base}.copy`, def.copy)}
           </p>
           {(body || EDIT_MODE) && (
@@ -1083,10 +1059,10 @@ function LineupCard({ i }: { i: number }) {
   return (
     <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
       <LineupImage base={base} label={label} def={def} aspect="aspect-[3/2]" />
-      <h3 className="mt-4" style={{ fontSize: 18, fontWeight: 800, lineHeight: 1.5 }} {...ed(`${base}.name`, `${label} 商品名`)}>
+      <h3 className="mt-4" style={{ fontSize: 18, fontWeight: 400, lineHeight: 1.5 }} {...ed(`${base}.name`, `${label} 商品名`)}>
         {rt(`${base}.name`, def.name || "（商品名）")}
       </h3>
-      <p className="mt-2 text-brand" style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.5 }} {...ed(`${base}.copy`, `${label} コピー`)}>
+      <p className="mt-2 text-brand" style={{ fontSize: 16, fontWeight: 400, lineHeight: 1.5 }} {...ed(`${base}.copy`, `${label} コピー`)}>
         {rt(`${base}.copy`, def.copy || "（コピー）")}
       </p>
       {(body || EDIT_MODE) && (
@@ -1134,17 +1110,6 @@ export function DivisionPage({ division }: { division: Division }) {
         overviewDef={OVERVIEW[division]}
         crumbs={[{ label: txt("nav:services", "サービス") }, { label: divTitle }]}
       />
-
-      {/* 氷・氷菓：商品ラインナップ導線（赤帯の外・画像＋グレーオーバーレイ＋白文字のボタン） */}
-      {division === "ice" && (
-        <Section heat={bizHeat} className="bg-transparent py-10 tab:py-12">
-          <div className="mx-auto grid max-w-5xl gap-8 tab:grid-cols-3">
-            {ICE_LINEUP_NAV.map((def, i) => (
-              <LineupNavTile key={i} i={i} def={def} />
-            ))}
-          </div>
-        </Section>
-      )}
 
       {/* 商品一覧より上のセクション（シート準拠） */}
       {DETAIL_PRE[division]

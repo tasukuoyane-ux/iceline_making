@@ -1,6 +1,6 @@
 // 微粒子パーティクル（デザイン支給 Iceline_Hojin/site/assets/js/fv-particles.js の TypeScript 移植）。
 // 氷の微粒子が「散る（drift）→集まる（gather）→シルエット形成・赤グラデ（hold）→爆散（burst）」を繰り返す。
-//   トップFV（hero=false）: 食材8種のシルエット。
+//   トップFV（hero=false）: 支給の画像（黒いシルエットの PNG）6種を粒子で再現（2026-09-21 改修。色は従来どおり）。
 //   下層ヒーロー（hero=true）: ページ内容に応じたシルエット（会社情報＝本社ビル・結晶）。
 // 2026-09 改修: トップFVは「オブジェクトを形作るまで（drift＋gather）」と「解体後にオブジェクトが無い時間
 // （drift）」を元の 1/3 にできるよう、timing で倍率を渡せるようにした（ユーザー指定）。
@@ -10,6 +10,10 @@ export type ShapeName =
   | "kakigori" | "iceball" | "icecube" | "crystal" | "warehouse" | "box" | "truck" | "dryice" | "building";
 
 type Ctx = CanvasRenderingContext2D;
+
+/** 形作るシルエットの指定：組み込みの描画名、または画像（黒いシルエットの PNG/SVG の URL） */
+export type ShapeSpec = ShapeName | { image: string };
+type Pts = { x: number; y: number }[];
 
 /* ---------- シルエット描画（340px 正方・中心原点） ---------- */
 const DRAW: Record<ShapeName, (o: Ctx) => void> = {
@@ -181,8 +185,41 @@ const DRAW: Record<ShapeName, (o: Ctx) => void> = {
   },
 };
 
-/** トップFV の食材シルエット（デザイン支給の順） */
-export const FV_TOP_SHAPES: ShapeName[] = ["fish", "grapes", "lemonWedge", "carrot", "orange", "broccoli", "cup", "strawberry"];
+/** トップFV のシルエット（2026-09-21 支給の画像 6 種。public/images/fv/ に置いた黒いシルエット PNG） */
+export const FV_TOP_SHAPES: ShapeSpec[] = ["cherry", "cutlery", "fish", "lemon", "strawberry", "apple"].map((n) => ({ image: `/images/fv/${n}.png` }));
+
+/** 画像のシルエットを粒子の座標に変換する（不透明かつ暗い画素を拾う。340px 正方に収めて中心原点） */
+function sampleImage(url: string): Promise<Pts> {
+  return new Promise((resolve) => {
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = () => {
+      const S = 340, FIT = 300;
+      const oc = document.createElement("canvas");
+      oc.width = S;
+      oc.height = S;
+      const o = oc.getContext("2d")!;
+      const k = Math.min(FIT / im.naturalWidth, FIT / im.naturalHeight);
+      const w = im.naturalWidth * k, h = im.naturalHeight * k;
+      o.drawImage(im, (S - w) / 2, (S - h) / 2, w, h);
+      let d: Uint8ClampedArray;
+      try {
+        d = o.getImageData(0, 0, S, S).data;
+      } catch {
+        resolve([]);
+        return;
+      }
+      const pts: Pts = [];
+      for (let y = 0; y < S; y += 5) for (let x = 0; x < S; x += 5) {
+        const i = (y * S + x) * 4;
+        if (d[i + 3] > 128 && d[i] + d[i + 1] + d[i + 2] < 384) pts.push({ x: x / S - 0.5, y: y / S - 0.5 });
+      }
+      resolve(pts);
+    };
+    im.onerror = () => resolve([]);
+    im.src = url;
+  });
+}
 
 function sample(name: ShapeName): { x: number; y: number }[] {
   const S = 340;
@@ -243,14 +280,28 @@ export interface FvTiming {
  * キャンバスに微粒子アニメーションを起動する。戻り値は停止関数（アンマウント時に呼ぶ）。
  * @param hero true=下層ヒーロー用（右寄せ・粒子少なめ）、false=トップFV用
  */
-export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero: boolean, timing: FvTiming = {}): () => void {
+export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeSpec[], hero: boolean, timing: FvTiming = {}): () => void {
   const ctx = cv.getContext("2d");
   if (!ctx) return () => {};
   const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   let W = 0, H = 0;
   let P: Particle[] = [];
-  const shapes = names.map(sample);
+  // 組み込みの形は同期に、画像は読み込み後に埋める（読み込み前の番は飛ばして次の形へ）
+  const shapes: (Pts | null)[] = names.map((n) => (typeof n === "string" ? sample(n) : null));
+  names.forEach((n, i) => {
+    if (typeof n === "string") return;
+    sampleImage(n.image).then((pts) => {
+      if (!stopped) shapes[i] = pts.length > 0 ? pts : null;
+    });
+  });
+  const nextLoaded = () => {
+    for (let k = 1; k <= shapes.length; k++) {
+      const j = (shapeIdx + k) % shapes.length;
+      if (shapes[j]) return j;
+    }
+    return shapeIdx;
+  };
   let state: "drift" | "gather" | "hold" | "burst" = "drift";
   let tS = 0;
   let shapeIdx = 0;
@@ -295,6 +346,10 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
   }
   function assign() {
     const pts = shapes[shapeIdx], sc = center();
+    if (!pts) {
+      for (const p of P) p.has = false;
+      return;
+    }
     const idx = P.map((_, i) => i);
     for (let i = idx.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -331,6 +386,7 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
     };
     if (state === "drift" && tS >= DUR.drift) {
       if (timing.canGather && !timing.canGather()) tS = DUR.drift; // 形作れない位置なら漂い続ける（次フレームで再判定）
+      else if (!shapes[shapeIdx]) { tS = DUR.drift; shapeIdx = nextLoaded(); } // 画像が未読み込みなら漂い続ける
       else { state = "gather"; tS = 0; assign(); }
     }
     else if ((state === "gather" || state === "hold") && timing.canGather && !timing.canGather()) startBurst(); // MVの外へ出たら即解体
@@ -372,16 +428,26 @@ export function mountFvParticles(cv: HTMLCanvasElement, names: ShapeName[], hero
   init();
   window.addEventListener("resize", resize);
   if (reduced) {
-    // モーション低減：形作った状態を1枚だけ描く
-    assign();
-    ctx.clearRect(0, 0, W, H);
-    for (const p of P) {
-      const col = p.has ? redAt(p.gt) : p.gray;
-      if (p.has) { p.x = p.tx; p.y = p.ty; }
-      ctx.fillStyle = "rgb(" + (col[0] | 0) + "," + (col[1] | 0) + "," + (col[2] | 0) + ")";
-      ctx.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
-    }
-    return () => window.removeEventListener("resize", resize);
+    // モーション低減：形作った状態を1枚だけ描く（画像の形は読み込み後に描き直す）
+    const still = () => {
+      if (stopped) return;
+      shapeIdx = shapes[shapeIdx] ? shapeIdx : nextLoaded();
+      assign();
+      ctx!.clearRect(0, 0, W, H);
+      for (const p of P) {
+        const col = p.has ? redAt(p.gt) : p.gray;
+        if (p.has) { p.x = p.tx; p.y = p.ty; }
+        ctx!.fillStyle = "rgb(" + (col[0] | 0) + "," + (col[1] | 0) + "," + (col[2] | 0) + ")";
+        ctx!.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+      }
+    };
+    still();
+    const first = names.findIndex((n) => typeof n !== "string");
+    if (first >= 0) sampleImage((names[first] as { image: string }).image).then(() => window.setTimeout(still, 0));
+    return () => {
+      stopped = true;
+      window.removeEventListener("resize", resize);
+    };
   }
   raf = requestAnimationFrame((t) => {
     last = t;

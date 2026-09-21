@@ -55,6 +55,8 @@ export interface RecruitJob {
   active: boolean;
   body: string;
   image: string;
+  /** 職種詳細オーバーレイの見出し直下に大きく置く画像（任意。2026-09-21 追加） */
+  heroImage?: string;
   day: RecruitTimeline;
   career: RecruitTimeline;
   message: string;

@@ -366,6 +366,27 @@ export function PeopleScroller({ style }: { style?: CSSProperties }) {
       t.removeEventListener("pointerdown", mark);
     };
   }, []);
+  // ビューポートに入ったら（出現アニメーションの後に）カードを横に揺らし、横スクロールできることを示す
+  useEffect(() => {
+    const t = trackRef.current;
+    if (!t || EDIT_MODE || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timer = 0;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        timer = window.setTimeout(() => {
+          if (!touched.current) t.classList.add("is-nudge");
+        }, 1000);
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(t);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, []);
   useEffect(() => {
     const t = trackRef.current;
     if (!t || touched.current) return;

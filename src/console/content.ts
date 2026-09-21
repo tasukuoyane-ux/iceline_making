@@ -77,6 +77,8 @@ export interface RecruitJob {
   day: RecruitTimeline;
   /** キャリアパス（同上・旧データ互換のため保持） */
   career: RecruitTimeline;
+  /** 職種詳細の見出し直下に大きく置く画像（任意。2026-09-21 追加） */
+  heroImage: string;
   /** 1日の仕事内容（H2＋本文＋画像。本文か画像が入力されるまで非表示） */
   daywork: RecruitBlock;
   /** やりがい・特徴（H2＋本文＋画像。本文か画像が入力されるまで非表示） */
@@ -283,6 +285,7 @@ export function normalizeRecruit(r: any): RecruitData {
         active: j?.active !== false,
         body: String(j?.body ?? ""),
         image: String(j?.image ?? ""),
+        heroImage: String(j?.heroImage ?? ""),
         day: timeline(j?.day),
         career: timeline(j?.career),
         daywork: block(j?.daywork, "1日の仕事内容"),

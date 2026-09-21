@@ -213,6 +213,10 @@ function JobEditor({ job, onChange }: { job: RecruitJob; onChange: (j: RecruitJo
         </div>
       </Field>
 
+      <Card title="見出し下の画像">
+        <ImageField label="職種名の下に大きく表示する画像（任意）" value={job.heroImage} onChange={(url) => onChange({ ...job, heroImage: url })} />
+      </Card>
+
       <Card title="業務内容">
         <div className="space-y-3">
           <Field label="本文">
@@ -306,6 +310,7 @@ export function RecruitPanel({
       active: false,
       body: "業務内容を入力してください。",
       image: "",
+      heroImage: "",
       day: { note: "", image: "", steps: [] },
       career: { note: "", image: "", steps: [] },
       daywork: { title: "1日の仕事内容", body: "", image: "" },
