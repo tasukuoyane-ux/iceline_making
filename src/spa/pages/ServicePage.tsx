@@ -11,6 +11,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
 import { RichBody } from "../components/common/RichBody";
+import { PageMv } from "../components/common/PageMv";
 import { HEAT } from "../data/heatMap";
 import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
 import { rt, rich } from "../lib/richInline";
@@ -357,53 +358,36 @@ export function ServicePage({ service }: { service: ServiceId }) {
 
   return (
     <>
-      {/* メインビジュアル（画像はオーバーレイなしでそのまま見せる・タイトル中央・
-          タイトル直下に旧「事業概要」の本文を置く。文章量に応じて高さが伸びる。2026-09 改修） */}
-      <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
-        <ImageWithFallback
-          src={img(`${base}.mv.image`, IMG_PLACEHOLDER)}
-          alt={s.title}
-          loading="eager"
-          fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover"
-          {...edImg(`${base}.mv.image`, "メインビジュアル画像", { ypos: true })}
-        />
-        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
-            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`${base}.mv.en`, "英語見出し（補助）")}>
-              {rt(`${base}.mv.en`, s.en)}
-            </p>
-            <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`${base}.mv.title`, "ページタイトル")}>
-              {rt(`${base}.mv.title`, s.title)}
-            </h1>
-            {/* 旧「事業概要」セクションの本文（編集パスは従来のまま） */}
-            <RichBody
-              path={`${base}.overview`}
-              text={txt(`${base}.overview`, s.overview)}
-              label="ページ本文（タイトル直下）"
-              className="mx-auto mt-6 max-w-3xl text-left pc:text-center"
-              style={{ fontSize: 16, lineHeight: 2.1, color: "rgba(255,255,255,0.95)" }}
-            />
-            {/* ドライアイス：ECサイトへの導線ボタン（旧事業概要セクションから移設） */}
-            {s.shopUrl && (
-              <div className="mt-8" style={{ textShadow: "none" }}>
-                <a
-                  href={s.shopUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
-                  style={{ fontSize: 15, fontWeight: 700 }}
-                >
-                  <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
-                    {rt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
-                  </span>
-                  <ArrowRight size={16} />
-                </a>
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </section>
+      {/* メインビジュアル（2026-09-21 改修：共通部品 PageMv。白背景・30px マージン・角丸 18px の画像カード、
+          白い座布団に黒文字のタイトル／英語見出し、本文は黒文字でカードの下） */}
+      <PageMv
+        imgSrc={img(`${base}.mv.image`, IMG_PLACEHOLDER)}
+        imgPath={`${base}.mv.image`}
+        enPath={`${base}.mv.en`}
+        enDef={s.en}
+        titlePath={`${base}.mv.title`}
+        titleDef={s.title}
+        overviewPath={`${base}.overview`}
+        overviewDef={s.overview}
+      >
+        {/* ドライアイス：ECサイトへの導線ボタン（旧事業概要セクションから移設） */}
+        {s.shopUrl && (
+          <div className="mx-auto mt-8 max-w-3xl">
+            <a
+              href={s.shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-brand px-8 py-3.5 text-brand-foreground transition-colors hover:bg-brand-dark"
+              style={{ fontSize: 15, fontWeight: 700 }}
+            >
+              <span {...ed(`${base}.overview.shopBtn`, "ECサイトボタン文言")}>
+                {rt(`${base}.overview.shopBtn`, "ドライアイス販売サイトを見る")}
+              </span>
+              <ArrowRight size={16} />
+            </a>
+          </div>
+        )}
+      </PageMv>
 
       {/* シート構成に沿った各セクション（要確認スロットは未入力の間、公開ページでは非表示） */}
       {s.sections.map((sec, si) => {

@@ -6,6 +6,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
 import { RichBody } from "../components/common/RichBody";
+import { PageMv } from "../components/common/PageMv";
 import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
@@ -978,31 +979,20 @@ export function DivisionPage({ division }: { division: Division }) {
 
   return (
     <>
-      {/* メインビジュアル（画像はオーバーレイなしでそのまま見せる・タイトル中央・
-          タイトル直下に旧「事業概要」の本文を置く。文章量に応じて高さが伸びる。2026-09 改修） */}
-      <section className="relative min-h-[40vh] w-full overflow-hidden bg-ink">
-        {/* 業務用食材のMV画像は既定で上揃え（画像の上側を切らずに見せる。2026-09-09 ユーザー指定）。
-            縦位置はコンソールの「縦位置」スライダー（ypos:）で上書きできる */}
-        <ImageWithFallback src={MV[division].img} alt={divTitle} loading="eager" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" style={division === "food" ? { objectPosition: "center top" } : undefined} {...edImg(division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv", "メインビジュアル画像", { ypos: true })} />
-        <div className="relative z-10 mx-auto flex min-h-[40vh] max-w-[1150px] flex-col items-center justify-center px-5 py-16 text-center pc:px-8 pc:py-20">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>
-            <p className="mb-3 text-brand" style={{ fontFamily: "var(--font-accent)", letterSpacing: "0.18em", fontSize: 13 }} {...ed(`division:${division}.mv.en`, "英語見出し（補助）")}>
-              {rt(`division:${division}.mv.en`, mv.en)}
-            </p>
-            <h1 className="text-white" style={{ fontSize: "clamp(34px, 6vw, 56px)", fontWeight: 900, lineHeight: 1.2 }} {...ed(`division:${division}.mv.title`, "ページタイトル")}>
-              {rich(divTitle)}
-            </h1>
-            {/* 旧「事業概要」セクションの本文（編集パスは従来のまま） */}
-            <RichBody
-              path={`division:${division}.overview`}
-              text={txt(`division:${division}.overview`, OVERVIEW[division])}
-              label="ページ本文（タイトル直下）"
-              className="mx-auto mt-6 max-w-3xl text-left pc:text-center"
-              style={{ fontSize: 16, lineHeight: 2.1, color: "rgba(255,255,255,0.95)" }}
-            />
-          </motion.div>
-        </div>
-      </section>
+      {/* メインビジュアル（2026-09-21 改修：白背景・30px マージン・角丸 18px の画像カード、
+          白い座布団に黒文字のタイトル／英語見出し、本文は黒文字でカードの下。共通部品 PageMv）。
+          業務用食材のMV画像は既定で上揃え（縦位置はコンソールの「縦位置」スライダーで上書き可） */}
+      <PageMv
+        imgSrc={MV[division].img}
+        imgPath={division === "food" ? "images:IMG.foodMv" : "images:IMG.iceMv"}
+        imgStyle={division === "food" ? { objectPosition: "center top" } : undefined}
+        enPath={`division:${division}.mv.en`}
+        enDef={mv.en}
+        titlePath={`division:${division}.mv.title`}
+        titleDef={mv.title}
+        overviewPath={`division:${division}.overview`}
+        overviewDef={OVERVIEW[division]}
+      />
 
       {/* 氷・氷菓：商品ラインナップ導線（赤帯の外・画像＋グレーオーバーレイ＋白文字のボタン） */}
       {division === "ice" && (
