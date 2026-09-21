@@ -182,8 +182,10 @@ export function JobOverlay({ job, data, onClose }: { job: RecruitJob; data: Recr
 
       {/* 見出し直下の画像（採用タブ「見出し下の画像」。未設定なら無し） */}
       {job.heroImage && (
-        <div className="container ov__hero js-reveal is-inview">
-          <ImageWithFallback src={job.heroImage} alt={job.title} />
+        <div className="container">
+          <figure className="ov__hero js-reveal is-inview">
+            <ImageWithFallback src={job.heroImage} alt={job.title} />
+          </figure>
         </div>
       )}
 
