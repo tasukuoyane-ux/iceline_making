@@ -30,7 +30,7 @@ export type RichSize = "xl" | "lg" | "sm";
 //   1. [[属性:文字]]   2. **文字**   3. [文字](URL)
 const INLINE_TOKEN =
   /\[\[([^:\]]+):([^\]]*)\]\]|\*\*([^*\n]+?)\*\*|\[([^\[\]\n]+)\]\(((?:https?:\/\/|mailto:|tel:|\/)[^\s)]*)\)/g;
-const NAMED_COLORS: Record<string, string> = { red: "#E60012", white: "#ffffff", black: "#111111" };
+const NAMED_COLORS: Record<string, string> = { red: "#E60012", white: "#ffffff", black: "#333333" };
 const SIZE_NAMES: Record<string, RichSize> = { xl: "xl", "特大": "xl", lg: "lg", "大": "lg", sm: "sm", "小": "sm" };
 
 /** 文字列に装飾トークンが含まれるか（含まれなければプレーン文字列のまま描画してよい） */

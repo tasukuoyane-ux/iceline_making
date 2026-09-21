@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, ChevronRight, ChevronDown, Search } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronDown, Lightbulb, Minus, Plus, Search } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Section, SectionTitle } from "../components/common/Section";
 import { ContactSection } from "../components/common/ContactSection";
@@ -10,8 +10,8 @@ import { PageMv } from "../components/common/PageMv";
 import { Input } from "../components/ui/input";
 import { HEAT } from "../data/heatMap";
 import { IMG, PRODUCT_IMG } from "../data/images";
-import { Division, ICE_RECIPES, PRODUCTS } from "../data/products";
-import { ed, edImg, txt, img, ratioCols, ratioAttrs, EDIT_MODE } from "../lib/editable";
+import { Division, ICE_RECIPES } from "../data/products";
+import { ed, edImg, txt, img, ratioCols, ratioAttrs, repeatSel, EDIT_MODE } from "../lib/editable";
 import { rt, rich } from "../lib/richInline";
 
 // メインビジュアル。タイトルは内容確定シートのページ名を既定とし、コンソールから編集可能。
@@ -256,41 +256,70 @@ const FAQ: Record<Division, FaqItem[]> = {
 };
 
 // ─────────────────────────────────────────────────────────
-// 氷・氷菓の製品ラインナップ（シートのカテゴリ分け通り）。
-// products は既存の商品詳細ページ（/ice/products/:id）との対応。
-// 炭酸氷はシート未掲載だが、既存詳細ページを残すため氷カフェ・カクテル用アイスに含める。
+// 氷・氷菓の製品ラインナップ（2026-09-21 改修：手描きラフ準拠）。
+// 先頭の製氷（ロッキーアイスシリーズ）は 2:3 の画像＋テキストの横組みで大きく、
+// それ以外の商品は 3 列組のカード（3:2 の画像／H3／コピー／こんな使い方／規格一覧アコーディオン）。
+// カードはコンソールで枚数を増減できる（ice:lineup.items.count、上限 MAX_LINEUP_ITEMS）。
+// product は既存の商品詳細ページ（/ice/products/:id）との対応（画像のリンク先。コンソールで変更可）。
+// 旧デザインの「カテゴリ説明」は、製氷は本文として残し、他の商品は「こんな使い方」に要約して引き継いだ。
 // ─────────────────────────────────────────────────────────
-const ICE_CATEGORIES: { name: string; desc: string; skus: string; products: string[] }[] = [
-  {
-    name: "製氷（ロッキーアイスシリーズ）",
-    desc:
-      "純度の高い原料水を低温でじっくり凍らせた、硬く透明で溶けにくい業務用かち割り氷です。溶けても飲み物の味を損なわず、食品本来のおいしさをそのままお届けします。",
-    skus:
-      "・ロッキーアイス チャック付き（1kg×12）\n・ロッキーアイス 2kg（2kg×6）\n・ロッキーアイス 3kg（3kg×4）\n・ROCKY650（650g×18）\n・プレミアムな氷 オンザロックICE（6個×8×2台）オンザロック専用\n・アイス平（1.7kg×6）板状アイス\n・ブロックアイス（3.75kg×4）\n・ROCKYカップ 130g（130g×12×4合）\n・ROCKYカップ 180g（180g×12×3合）",
-    products: ["rocky-ice"],
-  },
+type LineupItem = { name: string; copy: string; body: string; usage: string; skus: string; product: string };
+const ICE_LINEUP_HERO: LineupItem = {
+  name: "製氷（ロッキーアイスシリーズ）",
+  copy: "硬く透明で、溶けにくい。",
+  body:
+    "純度の高い原料水を低温でじっくり凍らせた、硬く透明で溶けにくい業務用かち割り氷です。溶けても飲み物の味を損なわず、食品本来のおいしさをそのままお届けします。",
+  usage:
+    "ハイボールやロックに。溶けにくいので、最後の一口まで味が薄まりません。バー・居酒屋の定番から、量販店のかち割り氷まで幅広くお使いいただけます。",
+  skus:
+    "・ロッキーアイス チャック付き（1kg×12）\n・ロッキーアイス 2kg（2kg×6）\n・ロッキーアイス 3kg（3kg×4）\n・ROCKY650（650g×18）\n・プレミアムな氷 オンザロックICE（6個×8×2台）オンザロック専用\n・アイス平（1.7kg×6）板状アイス\n・ブロックアイス（3.75kg×4）\n・ROCKYカップ 130g（130g×12×4合）\n・ROCKYカップ 180g（180g×12×3合）",
+  product: "rocky-ice",
+};
+const MAX_LINEUP_ITEMS = 9;
+const ICE_LINEUP_ITEMS: LineupItem[] = [
   {
     name: "雪氷・雪氷果肉入り",
-    desc:
-      "かき氷用に削った氷を個包装した商品です。氷削り機やブレンダーマシンなしで、かき氷・スムージーを作ることができます。一袋使い切りタイプで衛生的に使用することができ、原価計算も容易です。",
-    skus:
-      "・雪氷（200g）\n・雪氷果肉入り いちご（100g×18袋）\n・雪氷果肉入り マンゴー（100g×18袋）\n・雪氷果肉入り レモン（100g×18袋）",
-    products: ["snow-ice"],
+    copy: "ふわふわに削った、かき氷の氷。",
+    body: "",
+    usage:
+      "氷削り機やブレンダーマシンなしで、かき氷・スムージーに。一袋使い切りタイプなので衛生的に使え、原価計算も容易です。",
+    skus: "・雪氷（200g）\n・雪氷果肉入り いちご（100g×18袋）\n・雪氷果肉入り マンゴー（100g×18袋）\n・雪氷果肉入り レモン（100g×18袋）",
+    product: "snow-ice",
   },
   {
-    name: "氷カフェ・カクテル用アイス",
-    desc:
-      "通常の氷をドリンクに入れると、時間とともに飲み物が薄くなってしまいます。氷カフェはそんな飲食店の長年の課題に応えた商品です。コーヒーや果汁などを凍らせてチップアイス状にクラッシュしているため、氷が溶けるほどに味が深まっていきます。グラスに入れて牛乳を注ぐだけでアイスカフェラテを作ることができ、特別な機械も技術も必要ありません。一袋使い切りの個包装なので衛生的に使用でき、原価の計算もしやすく、人手不足の飲食現場でもすぐに導入しやすい商品です。",
-    skus:
-      "氷カフェ（60g×20袋）\n・コーヒー\n・抹茶\n・いちご\n・ほうじ茶\n\nカクテル用アイス（80g×20袋）\n・マンゴー\n・巨峰\n・青りんご\n・レモン",
-    products: ["ice-cafe", "cocktail-ice", "carbonated-ice"],
+    name: "氷カフェ",
+    copy: "溶けるほどに、味が広がる。",
+    body: "",
+    usage:
+      "グラスに入れて牛乳を注ぐだけでアイスカフェラテに。コーヒーや抹茶を凍らせたチップアイスなので、溶けても薄まらず味が深まります。特別な機械も技術も不要です。",
+    skus: "氷カフェ（60g×20袋）\n・コーヒー\n・抹茶\n・いちご\n・ほうじ茶",
+    product: "ice-cafe",
+  },
+  {
+    name: "カクテル用アイス",
+    copy: "味と彩りの、果汁氷。",
+    body: "",
+    usage:
+      "果汁を凍らせた氷をグラスに入れて、炭酸やお酒を注ぐだけでフルーツカクテルに。溶けるほどに果実の味と色が広がります。",
+    skus: "カクテル用アイス（80g×20袋）\n・マンゴー\n・巨峰\n・青りんご\n・レモン",
+    product: "cocktail-ice",
   },
   {
     name: "フラペリッチ",
-    desc:
-      "抹茶やコーヒーの氷を細かく削り、小豆やチョコチップとクランチをあらかじめ混ぜ込んで個包装しています。牛乳を注ぐだけでスムージーを作ることができ、ブレンダーも専門の技術も事前の仕込みも必要ありません。ドリンク1杯あたりのコストが明確になるため、原価管理もしやすくなります。設備投資なしに新メニューを導入できる点が、多くの飲食店に選ばれている理由です。",
+    copy: "注ぐだけの、フローズンドリンク。",
+    body: "",
+    usage:
+      "牛乳を注ぐだけでスムージーに。抹茶やコーヒーの氷に小豆やチョコチップ、クランチをあらかじめ混ぜ込んでいるので、ブレンダーも仕込みも不要。設備投資なしで新メニューを導入できます。",
     skus: "・フラペリッチ 宇治抹茶小豆入り（100g×18袋）\n・フラペリッチ コーヒー",
-    products: ["frappe-rich"],
+    product: "frappe-rich",
+  },
+  {
+    name: "炭酸氷",
+    copy: "溶けると弾ける、炭酸入りの氷。",
+    body: "",
+    usage: "ドリンクに入れると、溶けるにつれて炭酸が弾けます。ソフトドリンクやカクテルの演出に。",
+    skus: "",
+    product: "carbonated-ice",
   },
 ];
 
@@ -941,26 +970,135 @@ export function DetailSectionBlock({
   );
 }
 
-/** 商品カード（既存の商品詳細ページへの導線） */
-function ProductCard({ division, id }: { division: Division; id: string }) {
-  const p = PRODUCTS.find((x) => x.id === id);
-  if (!p) return null;
+/** 製品ラインナップ：商品画像（リンク先があれば商品詳細ページへ。ホバーで拡大） */
+function LineupImage({ base, label, def, aspect }: { base: string; label: string; def: LineupItem; aspect: string }) {
+  const href = txt(`${base}.href`, def.product ? `/ice/products/${def.product}` : "");
+  const name = txt(`${base}.name`, def.name);
+  const image = (
+    <ImageWithFallback
+      src={img(`${base}.image`, PRODUCT_IMG[def.product] || IMG_PLACEHOLDER)}
+      alt={name}
+      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      {...edImg(`${base}.image`, `${label} 画像`)}
+    />
+  );
+  const cls = `group block ${aspect} w-full overflow-hidden rounded-xl bg-secondary`;
   return (
-    <Link
-      to={`/${division}/products/${p.id}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-lg"
-    >
-      <div className="aspect-[4/3] overflow-hidden bg-secondary">
-        <ImageWithFallback src={PRODUCT_IMG[p.id]} alt={p.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" {...edImg(`images:PRODUCT_IMG.${p.id}`)} />
-      </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h4 style={{ fontSize: 16, fontWeight: 700 }} {...ed(`product:${p.id}:name`, "商品名")}>{rt(`product:${p.id}:name`, p.name)}</h4>
-        <p className="mt-1 flex-1 text-muted-foreground" style={{ fontSize: 12, lineHeight: 1.8 }} {...ed(`product:${p.id}:catch`, "商品キャッチ")}>{rt(`product:${p.id}:catch`, p.catch)}</p>
-        <span className="mt-3 inline-flex items-center gap-1 text-brand" style={{ fontSize: 13 }}>
-          詳細を見る <ArrowRight size={14} />
+    <>
+      {href ? <Link to={href} className={cls}>{image}</Link> : <div className={cls}>{image}</div>}
+      <EditableLinkHint path={`${base}.href`} label={`${label} リンク先URL（空ならリンクなし）`} href={href || "（リンク先URL・任意）"} />
+    </>
+  );
+}
+
+/** 製品ラインナップ：「こんな使い方」ボックス（電球アイコン＋ラベル＋本文） */
+function LineupUsage({ base, label, def }: { base: string; label: string; def: LineupItem }) {
+  const usage = txt(`${base}.usage`, def.usage);
+  if (!usage && !EDIT_MODE) return null;
+  return (
+    <div className="mt-5 rounded-xl border border-brand/25 bg-brand/[0.04] p-4 pc:p-5">
+      <p className="flex items-center gap-1.5 text-brand" style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.04em" }}>
+        <Lightbulb size={16} className="shrink-0" />
+        <span {...ed(`${base}.usageLabel`, `${label} 使い方ラベル`)}>{rt(`${base}.usageLabel`, "こんな使い方")}</span>
+      </p>
+      <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.95, whiteSpace: "pre-line" }} {...ed(`${base}.usage`, `${label} こんな使い方`, { multiline: true })}>
+        {rich(usage || "（使い方の提案を入力してください）")}
+      </p>
+    </div>
+  );
+}
+
+/** 製品ラインナップ：規格一覧アコーディオン（「・」始まりの行数を種類数として表示。編集モードでは既定で開く） */
+function LineupSkus({ base, label, def }: { base: string; label: string; def: LineupItem }) {
+  const [open, setOpen] = useState(EDIT_MODE);
+  const skus = txt(`${base}.skus`, def.skus);
+  const count = skus.split(/\r?\n/).filter((l) => l.trim().startsWith("・")).length;
+  if (!skus && !EDIT_MODE) return null;
+  return (
+    <div className="mt-5 border-t border-border">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 py-3 text-left transition-colors hover:text-brand"
+      >
+        <span className="flex items-center gap-1.5" style={{ fontSize: 14, fontWeight: 700 }}>
+          {open ? <Minus size={15} className="shrink-0 text-brand" /> : <Plus size={15} className="shrink-0 text-brand" />}
+          規格一覧
+          {count > 0 && (
+            <span className="text-muted-foreground" style={{ fontSize: 12, fontWeight: 500 }}>（{count}種）</span>
+          )}
         </span>
+        <ChevronDown size={18} className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      <div className="grid transition-[grid-template-rows] duration-300 ease-out" style={{ gridTemplateRows: open ? "1fr" : "0fr" }}>
+        <div className="overflow-hidden">
+          <p className="pb-4" style={{ fontSize: 14, lineHeight: 2, whiteSpace: "pre-line" }} {...ed(`${base}.skus`, `${label} 規格一覧`, { multiline: true })}>
+            {rich(skus || "（規格一覧を入力してください。「・」で始めた行が種類数として数えられます）")}
+          </p>
+        </div>
       </div>
-    </Link>
+    </div>
+  );
+}
+
+/** 製品ラインナップ先頭：製氷（ロッキーアイスシリーズ）。2:3 の画像の横に H3／コピー／本文／こんな使い方／規格一覧 */
+function LineupHero() {
+  const base = "ice:lineup.hero";
+  const def = ICE_LINEUP_HERO;
+  const label = "製氷";
+  const body = txt(`${base}.body`, def.body);
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 pc:p-8">
+      <div className="grid gap-8 pc:grid-cols-[2fr_3fr] pc:gap-12">
+        <div className="mx-auto w-full max-w-[420px] pc:max-w-none">
+          <LineupImage base={base} label={label} def={def} aspect="aspect-[2/3]" />
+        </div>
+        <div className="flex flex-col justify-center">
+          <h3 style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.4 }} {...ed(`${base}.name`, `${label} 商品名`)}>
+            {rt(`${base}.name`, def.name)}
+          </h3>
+          <p className="mt-3 text-brand" style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.5 }} {...ed(`${base}.copy`, `${label} コピー`)}>
+            {rt(`${base}.copy`, def.copy)}
+          </p>
+          {(body || EDIT_MODE) && (
+            <p className="mt-4" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`${base}.body`, `${label} 本文`, { multiline: true })}>
+              {rich(body || "（本文・任意）")}
+            </p>
+          )}
+          <LineupUsage base={base} label={label} def={def} />
+          <LineupSkus base={base} label={label} def={def} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 製品ラインナップ：3 列組の商品カード。3:2 の画像の下に H3／コピー／（本文・任意）／こんな使い方／規格一覧 */
+function LineupCard({ i }: { i: number }) {
+  const def = ICE_LINEUP_ITEMS[i] ?? { name: "", copy: "", body: "", usage: "", skus: "", product: "" };
+  const base = `ice:lineup.items.${i}`;
+  const label = `商品${i + 1}`;
+  const body = txt(`${base}.body`, def.body);
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
+      <LineupImage base={base} label={label} def={def} aspect="aspect-[3/2]" />
+      <h3 className="mt-4" style={{ fontSize: 18, fontWeight: 800, lineHeight: 1.5 }} {...ed(`${base}.name`, `${label} 商品名`)}>
+        {rt(`${base}.name`, def.name || "（商品名）")}
+      </h3>
+      <p className="mt-2 text-brand" style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.5 }} {...ed(`${base}.copy`, `${label} コピー`)}>
+        {rt(`${base}.copy`, def.copy || "（コピー）")}
+      </p>
+      {(body || EDIT_MODE) && (
+        <p className="mt-3" style={{ fontSize: 14, lineHeight: 1.95, whiteSpace: "pre-line" }} {...ed(`${base}.body`, `${label} 本文（任意・空なら非表示）`, { multiline: true })}>
+          {rich(body || "（本文・任意。空なら表示しません）")}
+        </p>
+      )}
+      <LineupUsage base={base} label={label} def={def} />
+      <div className="mt-auto">
+        <LineupSkus base={base} label={label} def={def} />
+      </div>
+    </div>
   );
 }
 
@@ -968,6 +1106,8 @@ export function DivisionPage({ division }: { division: Division }) {
   const mv = MV[division];
   const divTitle = txt(`division:${division}.mv.title`, mv.title);
   const [openCats, setOpenCats] = useState<string[]>([]);
+  // 製品ラインナップの商品カード枚数（コンソールの「追加」「削除」で増減）
+  const lineupRep = repeatSel("ice:lineup.items.count", ICE_LINEUP_ITEMS.length, MAX_LINEUP_ITEMS, "商品カードの数");
   const toggleCat = (c: string) =>
     setOpenCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   const bizHeat = division === "food" ? HEAT.foodBiz : HEAT.iceBiz;
@@ -1012,41 +1152,18 @@ export function DivisionPage({ division }: { division: Division }) {
           <DetailSectionBlock key={sec.pathKey ?? si} division={division} si={si} sec={sec} heat={si % 2 ? listHeat : reasonHeat} />
         ))}
 
-      {/* ── 氷・氷菓：製品ラインナップ（シートのカテゴリ分け通り） ── */}
+      {/* ── 氷・氷菓：製品ラインナップ（2026-09-21 改修：手描きラフ準拠。
+          先頭に製氷を横組みで大きく、以下は 3 列組の商品カード。カード枚数はコンソールで増減） ── */}
       {division === "ice" && (
         <Section heat={listHeat} id="ice-lineup">
           <SectionTitle en="LINEUP" jp="製品ラインナップ" path="division:ice.lineup" />
-          {/* 旧・先頭の「ドライアイス」カテゴリ（ECサイト導線付き）は 2026-09 改修で削除。
-              ドライアイスは「ドライアイスの販売」ページ（/dryice）で案内する */}
-          {/* 見出し以外のコンテンツを白い座布団に載せ、業務用食材「取り扱い商品カテゴリ」と同じ外枠を付ける（2026-09 改修） */}
-          <div className="mt-12 rounded-2xl border border-border bg-card p-6 pc:p-8">
-          <div className="space-y-16">
-            {ICE_CATEGORIES.map((cat, ci) => (
-              <div key={ci}>
-                <h3 className="border-b border-border pb-3 text-brand" style={{ fontSize: 22, fontWeight: 800 }} {...ed(`ice:lineup.${ci}.name`, "カテゴリ名")}>
-                  {rt(`ice:lineup.${ci}.name`, cat.name)}
-                </h3>
-                <p className="mt-5 text-foreground/80" style={{ fontSize: 15, lineHeight: 2.05, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.desc`, "カテゴリ説明", { multiline: true })}>
-                  {rt(`ice:lineup.${ci}.desc`, cat.desc)}
-                </p>
-                <div className="mt-8 grid gap-8 pc:grid-cols-[1fr_2fr]">
-                  {/* 規格一覧 */}
-                  <div className="rounded-2xl border border-border bg-secondary/40 p-6">
-                    <p className="text-muted-foreground" style={{ fontSize: 12, letterSpacing: "0.08em" }}>規格一覧</p>
-                    <p className="mt-3" style={{ fontSize: 14, lineHeight: 2.1, whiteSpace: "pre-line" }} {...ed(`ice:lineup.${ci}.skus`, "規格一覧", { multiline: true })}>
-                      {rt(`ice:lineup.${ci}.skus`, cat.skus)}
-                    </p>
-                  </div>
-                  {/* 対応する商品詳細ページ */}
-                  <div className="grid content-start gap-5 tab:grid-cols-2 pc:grid-cols-3">
-                    {cat.products.map((id) => (
-                      <ProductCard key={id} division="ice" id={id} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="mt-12">
+            <LineupHero />
           </div>
+          <div className="mt-8 grid gap-6 tab:grid-cols-2 pc:grid-cols-3" {...lineupRep.attrs}>
+            {Array.from({ length: MAX_LINEUP_ITEMS }, (_, i) => (
+              <LineupCard key={i} i={i} />
+            ))}
           </div>
         </Section>
       )}

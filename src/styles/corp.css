@@ -99,7 +99,7 @@
   font-size: calc(clamp(10px, 1.333vw, 18.67px) - 1px);
   line-height: 1.2;
   letter-spacing: .04em;
-  color: var(--ink);
+  color: var(--foreground);
   animation-delay: .1s;
 }
 /* [特大]=3em・[大]=2.1em は本文の縮小（-1px）の影響を受けないよう従来の基準（clamp）で固定し、
@@ -153,7 +153,7 @@
 .hero-title {
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--ink);
+  color: var(--foreground);
   font-size: clamp(26px, 3.4vw, 34px);
   line-height: 1.4;
   letter-spacing: .02em;

@@ -2,25 +2,25 @@
 
 :root {
   --font-size: 16px;
-  /* Brand palette: 白 / グレー / 赤 / 黒 */
+  /* Brand palette: 白 / グレー / 赤 / 黒（本文の黒文字は #333。2026-09-21 改修。--ink / --primary は黒い帯・ボタンの背景用なので純黒のまま） */
   --brand: #e60012;
   --brand-dark: #b3000e;
   --brand-foreground: #ffffff;
   --ink: #0a0a0a;
   --background: #ffffff;
-  --foreground: #0a0a0a;
+  --foreground: #333333;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #333333;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
+  --popover-foreground: #333333;
   --primary: #0a0a0a;
   --primary-foreground: #ffffff;
   --secondary: #f4f4f5;
-  --secondary-foreground: #0a0a0a;
+  --secondary-foreground: #333333;
   --muted: #f4f4f5;
   --muted-foreground: #6b6b73;
   --accent: #f4f4f5;
-  --accent-foreground: #0a0a0a;
+  --accent-foreground: #333333;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.1);

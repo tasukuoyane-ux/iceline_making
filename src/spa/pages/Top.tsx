@@ -136,7 +136,7 @@ function CollageTile({ i, def }: { i: number; def: (typeof COLLAGE_TILES)[number
         />
       </button>
       {/* PC：ホバーで写真の上に黒文字の説明を表示 */}
-      <div className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center p-4 text-center text-ink opacity-0 transition-opacity duration-300 pc:flex pc:group-hover:opacity-100">
+      <div className="pointer-events-none absolute inset-0 hidden flex-col items-center justify-center p-4 text-center text-foreground opacity-0 transition-opacity duration-300 pc:flex pc:group-hover:opacity-100">
         <h3 style={{ fontSize: "clamp(13px, 1.2vw, 18px)", fontWeight: 700, lineHeight: 1.5 }} {...ed(`${base}.title`, `コラージュ写真${i + 1} 見出し`)}>
           {rich(title)}
         </h3>
@@ -155,13 +155,13 @@ function CollageTile({ i, def }: { i: number; def: (typeof COLLAGE_TILES)[number
           <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white" onClick={(e) => e.stopPropagation()}>
             <ImageWithFallback src={src} alt={title} className="aspect-[4/3] w-full object-cover" />
             <div className="p-5">
-              <h3 className="text-ink" style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.5 }}>{title}</h3>
+              <h3 className="text-foreground" style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.5 }}>{title}</h3>
               <p className="mt-2 text-foreground/80" style={{ fontSize: 13.5, lineHeight: 1.9, whiteSpace: "pre-line" }}>{body}</p>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink shadow"
+              className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-foreground shadow"
               aria-label="閉じる"
             >
               <X size={18} />
