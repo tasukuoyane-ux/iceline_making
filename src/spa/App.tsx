@@ -29,10 +29,6 @@ const Videos = lazy(() => import("./pages/Videos").then((m) => ({ default: m.Vid
 // 採用サイト（2026-09-15 全面差し替え：デザイン支給 iceline-saiyo）。共通レイアウト＋各ページはネストルート
 const RecruitLayout = lazy(() => import("./recruit/RecruitLayout").then((m) => ({ default: m.RecruitLayout })));
 const RsIndex = lazy(() => import("./recruit/RsIndex").then((m) => ({ default: m.RsIndex })));
-const RsAbout = lazy(() => import("./recruit/RsAbout").then((m) => ({ default: m.RsAbout })));
-const RsWork = lazy(() => import("./recruit/RsWork").then((m) => ({ default: m.RsWork })));
-const RsPeople = lazy(() => import("./recruit/RsPeople").then((m) => ({ default: m.RsPeople })));
-const RsJobs = lazy(() => import("./recruit/RsJobs").then((m) => ({ default: m.RsJobs })));
 const RsEntry = lazy(() => import("./recruit/RsEntry").then((m) => ({ default: m.RsEntry })));
 const InterviewPage = lazy(() => import("./recruit/InterviewPage").then((m) => ({ default: m.InterviewPage })));
 const RecipeDetail = lazy(() => import("./pages/RecipeDetail").then((m) => ({ default: m.RecipeDetail })));
@@ -94,6 +90,10 @@ function AnimateBoot() {
 
 // 旧採用URL（/recruit2・/recruit3）→ /recruit へのリダイレクト。
 // ?job=◯◯（職種オーバーレイ）や #jobs（アンカー）を維持して転送する
+function RecruitSectionRedirect({ hash }: { hash: string }) {
+  const { search } = useLocation();
+  return <Navigate to={`/recruit${search}#${hash}`} replace />;
+}
 function RecruitRedirect() {
   const { search, hash } = useLocation();
   return <Navigate to={`/recruit${search}${hash}`} replace />;
@@ -152,10 +152,11 @@ function Site() {
             <Route path="/videos" element={<Videos />} />
             <Route path="/recruit" element={<RecruitLayout />}>
               <Route index element={<RsIndex />} />
-              <Route path="about" element={<RsAbout />} />
-              <Route path="work" element={<RsWork />} />
-              <Route path="people" element={<RsPeople />} />
-              <Route path="jobs" element={<RsJobs />} />
+              {/* 旧・下層ページ（2026-09-21 の 1 ページ構成化まで）はトップの各セクションへ（クエリ維持。?job= は職種詳細を開く） */}
+              <Route path="about" element={<RecruitSectionRedirect hash="about" />} />
+              <Route path="work" element={<RecruitSectionRedirect hash="work" />} />
+              <Route path="people" element={<RecruitSectionRedirect hash="people" />} />
+              <Route path="jobs" element={<RecruitSectionRedirect hash="recruit" />} />
               <Route path="entry" element={<RsEntry />} />
               <Route path="interview/:id" element={<InterviewPage />} />
             </Route>

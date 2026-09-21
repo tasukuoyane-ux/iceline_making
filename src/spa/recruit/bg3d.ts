@@ -54,8 +54,8 @@ export async function mountBg3d(canvas: HTMLCanvasElement, root: HTMLElement): P
     seaDeep: 0x0073c7,
     ice: 0xeaf6ff,
     terrain: 0xe6e4e0,
-    white: 0xf2f1ec,
-    ink: 0x46525c,
+    white: 0xe9eef2, // トラックの車体: 大気の青に寄せたオフホワイト（背景に溶かす。2026-09-21 支給更新）
+    ink: 0x5c6b77, // シャシー・車輪: コントラストを弱める
     bumper: 0xc9cfd4,
     shadow: 0x66bdf2,
   };
@@ -223,10 +223,9 @@ export async function mountBg3d(canvas: HTMLCanvasElement, root: HTMLElement): P
     cv.width = 1144;
     cv.height = 560;
     const ctx = cv.getContext("2d")!;
-    ctx.fillStyle = "#F2F1EC";
-    ctx.fillRect(0, 0, cv.width, cv.height);
     const tex = new THREE.CanvasTexture(cv);
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    tex.premultiplyAlpha = true; // 透過 PNG をそのまま貼る（プレートを作らない。2026-09-21 支給更新）
     const img = new Image();
     img.onload = () => {
       let src: HTMLImageElement | HTMLCanvasElement = img,
@@ -246,7 +245,7 @@ export async function mountBg3d(canvas: HTMLCanvasElement, root: HTMLElement): P
       }
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.clearRect(0, 0, cv.width, cv.height);
       const dw = cv.width * 0.92;
       const dh = (dw * img.naturalHeight) / img.naturalWidth;
       ctx.drawImage(src, (cv.width - dw) / 2, (cv.height - dh) / 2, dw, dh);
@@ -255,7 +254,8 @@ export async function mountBg3d(canvas: HTMLCanvasElement, root: HTMLElement): P
     img.src = RECRUIT_TRUCK_LOGO;
     return tex;
   }
-  const logoMat = new THREE.MeshBasicMaterial({ map: makeLogoTexture() });
+  // 透過 PNG の背景は車体の白が透ける。color で大気色に少し沈め、遠景として浮かないようにする
+  const logoMat = new THREE.MeshBasicMaterial({ map: makeLogoTexture(), transparent: true, color: 0xd8e2ea });
 
   /* 白い箱トラック */
   const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.42, 18);
@@ -322,11 +322,13 @@ export async function mountBg3d(canvas: HTMLCanvasElement, root: HTMLElement): P
     return g;
   }
   const trucks = [
-    { lane: 5, speed: 13, dir: 1, appearAt: 0.35, x: 0, group: null as any },
-    { lane: -6, speed: 10, dir: -1, appearAt: 0.5, x: 0, group: null as any },
-    { lane: 13, speed: 16, dir: 1, appearAt: 0.65, x: 0, group: null as any },
+    // レーンを奥へ下げ、縮小＋フォグで「遠景の車列」として溶け込ませる（2026-09-21 支給更新）
+    { lane: -2, speed: 11, dir: 1, appearAt: 0.35, x: 0, group: null as any },
+    { lane: -10, speed: 9, dir: -1, appearAt: 0.5, x: 0, group: null as any },
+    { lane: -17, speed: 13, dir: 1, appearAt: 0.65, x: 0, group: null as any },
   ].map((t, idx) => {
     const g = makeBoxTruck();
+    g.scale.setScalar(0.82);
     if (t.dir < 0) g.rotation.y = Math.PI;
     g.visible = false;
     t.x = -t.dir * (90 + idx * 40);

@@ -2,8 +2,10 @@
 //   - 固定背景：空のグラデーション（.bg-sky）／SVG の海（.bg-sea：3D 不可時のフォールバック）／
 //     WebGL 3D 背景（bg3d.ts：氷の海→地形→トラック。ページ間で作り直さず動かし続ける）／
 //     フィルムグレイン（.grain）／ページ遷移のベール（.page-veil）
-//   - 固定ヘッダー（ICELINE RECRUITING SITE・ピル型ナビ・赤いエントリー）＋ SP のドロワー
-//   - フッター（タグライン・ナビ・コピーライト）
+//   - 固定ヘッダー（白ロゴ＋RECRUITING SITE・コーポレートサイトへのリンク・赤いエントリー。
+//     2026-09-21 更新版：ナビは 2 項目のみでハンバーガー廃止）
+//   - フッター（タグライン・トップ各セクションへのアンカーナビ・コピーライト）
+//   - #about などのアンカー：ページ遷移後・同一ページ内ともに該当セクションへスクロール
 //   - 採用ページ間のリンク：クリック → 3D がズームイン → ベール → 遷移 → ズームアウトで着地
 //   - スクロール出現（.js-reveal / .js-reveal-group → .is-inview）
 //   - 職種詳細（?job=<ID>）のオーバーレイ
@@ -12,7 +14,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
 import "../../styles/recruit.css";
-import { EDIT_MODE, ed } from "../lib/editable";
+import { EDIT_MODE, ed, edImg, img, txt } from "../lib/editable";
 import { rt } from "../lib/richInline";
 import { useRecruitData } from "../lib/recruitStore";
 import { mountBg3d, type Bg3dHandle } from "./bg3d";
@@ -29,14 +31,32 @@ function ensureFonts() {
   document.head.appendChild(l);
 }
 
-/** グローバルナビ（文言はコンソールで編集可） */
-const NAV: { to: string; label: string; path: string; exact?: boolean }[] = [
-  { to: "/recruit", label: "トップ", path: "rs:nav.top", exact: true },
-  { to: "/recruit/about", label: "アイスラインとは", path: "rs:nav.about" },
-  { to: "/recruit/work", label: "仕事とカルチャー", path: "rs:nav.work" },
-  { to: "/recruit/people", label: "人を知る", path: "rs:nav.people" },
-  { to: "/recruit/jobs", label: "募集職種", path: "rs:nav.jobs" },
+export const RECRUIT_LOGO_WHITE = "/images/recruit/logo_white.png";
+
+/** フッターナビ（トップの各セクションへのアンカー。文言はコンソールで編集可） */
+const FOOTER_NAV: { to: string; label: string; path: string }[] = [
+  { to: "/recruit#about", label: "アイスラインとは", path: "rs:nav.about" },
+  { to: "/recruit#work", label: "仕事とカルチャー", path: "rs:nav.work" },
+  { to: "/recruit#people", label: "人を知る", path: "rs:nav.people" },
+  { to: "/recruit#recruit", label: "募集職種", path: "rs:nav.jobs" },
+  { to: "/recruit#movie", label: "動画", path: "rs:nav.movie" },
 ];
+
+/** #hash の要素へスクロール（遅延読み込み直後は要素が無いことがあるので少し待って再試行） */
+function scrollToHash(hash: string, smooth: boolean) {
+  const id = decodeURIComponent(hash.replace(/^#/, ""));
+  if (!id) return;
+  let tries = 0;
+  const attempt = () => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+      return;
+    }
+    if (++tries < 20) window.setTimeout(attempt, 100);
+  };
+  attempt();
+}
 
 function prefersReduce(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -50,7 +70,6 @@ export function RecruitLayout() {
   const [veilOff, setVeilOff] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [entering, setEntering] = useState(true);
-  const [drawer, setDrawer] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   // 3D 背景が動いているか（.has-3d：SVG の海を隠し、空のグラデーション等に切り替える）
   const [has3d, setHas3d] = useState(false);
@@ -96,12 +115,11 @@ export function RecruitLayout() {
   /* ページ遷移後：先頭へ・ズームアウトで着地・ベールを開く */
   const first = useRef(true);
   useEffect(() => {
-    setDrawer(false);
     if (first.current) {
       first.current = false;
       return;
     }
-    window.scrollTo(0, 0);
+    if (!location.hash) window.scrollTo(0, 0);
     bg.current?.arrive();
     setLeaving(false);
     setEntering(true);
@@ -112,6 +130,14 @@ export function RecruitLayout() {
       }),
     );
   }, [location.pathname]);
+
+  /* #about などのアンカー：初回表示・ページ遷移後・同一ページ内のリンクいずれもセクションへスクロール */
+  useEffect(() => {
+    if (!location.hash) return;
+    const smooth = !first.current && !prefersReduce();
+    const t = window.setTimeout(() => scrollToHash(location.hash, smooth), first.current ? 300 : 200);
+    return () => window.clearTimeout(t);
+  }, [location.key, location.hash]);
 
   /* ヘッダーの帯（40px 以上スクロールで背景色）＋ SVG の海の視差 */
   useEffect(() => {
@@ -215,6 +241,7 @@ export function RecruitLayout() {
     setParams(next, { replace: true });
   };
 
+  const corpUrl = txt("rs:nav.corpUrl", "/");
   const cls =
     "rc" +
     (has3d ? " has-3d" : "") +
@@ -235,38 +262,29 @@ export function RecruitLayout() {
 
       <header className={"header" + (scrolled ? " is-scrolled" : "")}>
         <Link className="header__logo" to="/recruit">
-          <span className="header__logo-main" {...ed("rs:header.main", "ヘッダー ロゴ文字")}>{rt("rs:header.main", "ICELINE")}</span>
+          <img className="header__logo-img" src={img("rs:header.logo", RECRUIT_LOGO_WHITE)} alt={txt("rs:header.alt", "株式会社アイスライン")} width={143} height={70} {...edImg("rs:header.logo", "ヘッダー ロゴ画像（白）")} />
           <span className="header__logo-sub" {...ed("rs:header.sub", "ヘッダー サブ文字")}>{rt("rs:header.sub", "RECRUITING SITE")}</span>
         </Link>
-        <nav className="gnav" aria-label="グローバルナビゲーション">
-          {NAV.map((n) => {
-            const active = n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to);
-            return (
-              <Link key={n.to} to={n.to} aria-current={active ? "page" : undefined}>
-                <span {...ed(n.path, "ナビ項目")}>{rt(n.path, n.label)}</span>
-              </Link>
-            );
-          })}
+        <nav className="gnav" aria-label="ヘッダーナビゲーション">
+          {/^https?:\/\//.test(corpUrl) ? (
+            <a className="gnav__corp" href={corpUrl} target="_blank" rel="noopener noreferrer">
+              <span {...ed("rs:nav.corp", "コーポレートサイトリンク文言")}>{rt("rs:nav.corp", "コーポレートサイトはこちら")}</span>
+            </a>
+          ) : (
+            <Link className="gnav__corp" to={corpUrl || "/"} data-no-transition>
+              <span {...ed("rs:nav.corp", "コーポレートサイトリンク文言")}>{rt("rs:nav.corp", "コーポレートサイトはこちら")}</span>
+            </Link>
+          )}
+          {EDIT_MODE && (
+            <span className="note" style={{ color: "#fff", fontSize: 11 }} {...ed("rs:nav.corpUrl", "コーポレートサイトのURL（「/」でこのサイトのトップ）")}>
+              {corpUrl || "/"}
+            </span>
+          )}
           <Link className="gnav__entry" to="/recruit/entry" aria-current={location.pathname === "/recruit/entry" ? "page" : undefined}>
             <span {...ed("rs:nav.entry", "ナビ エントリー")}>{rt("rs:nav.entry", "エントリー")}</span>
           </Link>
         </nav>
-        <button type="button" className={"hamburger" + (drawer ? " is-open" : "")} aria-label="メニュー" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
-          <span />
-          <span />
-          <span />
-        </button>
       </header>
-      <div className={"drawer" + (drawer ? " is-open" : "")}>
-        {NAV.map((n) => (
-          <Link key={n.to} to={n.to} onClick={() => setDrawer(false)}>
-            {rt(n.path, n.label)}
-          </Link>
-        ))}
-        <Link className="gnav__entry" to="/recruit/entry" onClick={() => setDrawer(false)}>
-          {rt("rs:nav.entry", "エントリー")}
-        </Link>
-      </div>
 
       <main>
         <Outlet />
@@ -275,9 +293,9 @@ export function RecruitLayout() {
       <footer className="footer">
         <p className="footer__tagline" {...ed("rs:footer.tagline", "フッター タグライン")}>{rt("rs:footer.tagline", "すなおな心で、一歩ずつ。")}</p>
         <nav className="footer__nav" aria-label="フッターナビゲーション">
-          {NAV.filter((n) => !n.exact).map((n) => (
+          {FOOTER_NAV.map((n) => (
             <Link key={n.to} to={n.to}>
-              {rt(n.path, n.label)}
+              <span {...ed(n.path, "フッターナビ項目")}>{rt(n.path, n.label)}</span>
             </Link>
           ))}
           <Link to="/recruit/entry">{rt("rs:nav.entry", "エントリー")}</Link>

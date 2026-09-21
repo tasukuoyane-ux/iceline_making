@@ -115,13 +115,10 @@ export function Billboard({
   );
 }
 
-/** 下層ページの KV（雲のあしらい＋白い看板見出し） */
-export function LowerKv({ en, jp, base, cloud }: { en: string; jp: string; base: string; cloud?: CSSProperties }) {
+/** 下層ページの KV（白い看板見出しのみ。2026-09-21 更新版で雲のあしらいは廃止） */
+export function LowerKv({ en, jp, base }: { en: string; jp: string; base: string }) {
   return (
     <section className="lower-kv">
-      <div className="lower-kv__art" aria-hidden>
-        <CloudSvg style={{ position: "absolute", right: "5%", top: "12%", width: "min(30vw,380px)", ...cloud }} />
-      </div>
       <div className="lower-kv__inner">
         <Billboard as="h1" tone="white" en={en} jp={jp} base={base} className="js-reveal is-inview" style={{ transitionDelay: "0.15s" }} />
       </div>
@@ -135,11 +132,11 @@ export function SecHead({ children, className = "js-reveal" }: { children: React
 }
 
 /** 輪郭ピルボタン（文言はコンソールで編集可） */
-export function BtnLine({ to, path, def, white }: { to: string; path?: string; def: string; white?: boolean }) {
+export function BtnLine({ to, path, def, white, noArrow }: { to: string; path?: string; def: string; white?: boolean; noArrow?: boolean }) {
   return (
     <Link className={"btn-line" + (white ? " -white" : "")} to={to}>
       <span {...(path ? ed(path, "ボタン文言") : {})}>{path ? rt(path, def) : def}</span>
-      <span className="arrow">→</span>
+      {!noArrow && <span className="arrow">→</span>}
     </Link>
   );
 }
@@ -213,14 +210,16 @@ const NUM_DEFAULTS = [
   { label: "売上", value: "86", unit: "億円", title: "一つずつ積み上げて成長", text: "令和8年1月期の実績（連結）。氷・氷菓の製造販売と業務用食材の卸を柱に、4事業で着実に成長してきました。" },
   { label: "昇給", value: "3", unit: "年連続", title: "還元する仕組み", text: "利益は昇給や賞与という形で社員に還元。2025年度は月額1万円のベースアップを実施しました。", note: "※一部職種例外あり" },
   { label: "離職率", value: "1.4", unit: "%", title: "誰もが働きやすい環境を目指して", text: "国内平均14.2%（2024年）と比べても大幅に低い水準。18歳から70代まで、幅広い年代が活躍しています。" },
+  { label: "年間休日", value: "120", unit: "日", title: "しっかり休める、だから続けられる", text: "「年間休日120日以上」の水準で、日本の企業平均（約110日）を上回ります。休むときはしっかり休み、働くときは集中する。" },
 ];
-/** アイスラインとは？ページ用の長文版（デザイン支給 about.html） */
+/** 長文版（デザイン支給 index.html 2026-09-21 更新版の「数字で見る」。採用トップで使用） */
 export const NUM_DEFAULTS_LONG = [
   { ...NUM_DEFAULTS[0], text: "明治38年（1905年）、天然氷の販売から始まりました。氷を扱う技術を軸に、食品卸や物流へと事業を広げながら、120年以上にわたって岡山の食を支えています。時代とともに扱うものは変わっても、低温で品質を守るという仕事の芯は変わっていません。" },
   { ...NUM_DEFAULTS[1], text: "感染症の流行、物価の高騰、海外情勢の変化。外部環境が揺れるなかでも、40期連続で黒字が続いています。自己資本比率は52.8%。この間、減給やボーナスカットをせずに来られたのは、日々の積み重ねと、支えてくださったお客様のおかげです。" },
   { ...NUM_DEFAULTS[2], text: "令和8年1月期の実績です（連結86億円）。氷・氷菓の製造販売と業務用食材の卸という二本柱に、冷凍冷蔵倉庫とドライアイスを加えた4事業で、着実に成長してきました。目の前の業務を一つずつ積み上げてきた結果の数字です。" },
   { ...NUM_DEFAULTS[3], text: "会社の利益は、昇給や賞与という形で社員に還元しています。一部職種において、2025年度は月額1万円のベースアップを実施しました。定期賞与に加えて決算賞与を支給する年もあり、頑張りが数字で返ってくる仕組みを目指しています。" },
   { ...NUM_DEFAULTS[4], text: "離職率1.4%（2025年）。厚生労働省が発表する国内平均離職率14.2%（2024年）と比較しても、大幅に低い水準です。18歳から70代まで幅広い年代が活躍しており、経営の安定と働きやすい環境づくりが、長く働き続けられる理由になっています。" },
+  { ...NUM_DEFAULTS[5], text: "年間休日は120日。就職・転職サイトで人気条件の定番「年間休日120日以上」を満たす水準で、日本の企業平均（約110日）を上回ります。休むときはしっかり休み、働くときは集中する。そのリズムが、離職率1.4%という働きやすさにつながっています。" },
 ];
 const MAX_NUM = 10;
 

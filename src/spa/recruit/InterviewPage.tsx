@@ -1,8 +1,11 @@
 // 社員インタビュー記事（/recruit/interview/:id）。
 // 記事の内容は Payload（/admin の「採用記事」）のまま、見た目をデザイン支給 iceline-saiyo の
-// 記事デザイン（people.html の .article）に合わせて描画する（2026-09-15 全面差し替え）。
-// 本文ブロックの対応：H2 → 次の H3 のセクションラベル（.article__section-label）／H3 → 見出し／
-// 段落 → p／画像・動画 → 図版／求人エントリーリンク → 記事末尾の赤ボタン（/recruit/entry?job=）。
+// 記事デザイン（interview-*.html、2026-09-21 更新版）に合わせて描画する。
+//   - ページ上部：人物写真（16:9・.article__photo.-portrait。動画があれば再生ボタン付き）
+//   - 見出し：INTERVIEW／タイトル（リード）／サブタイトル／氏名・所属・入社年＋趣味／自己紹介（note）
+//   - 本文ブロックの対応：H2 → 次の H3 のセクションラベル（.article__section-label）／H3 → 見出し／
+//     段落 → p／画像・動画 → 図版（記事の写真は縦横比を保つ）／求人エントリーリンク → 記事末尾の赤ボタン
+//   - 末尾：「採用情報へ戻る」（/recruit#people）「募集職種を見る」（/recruit#recruit）
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -12,7 +15,7 @@ import { useRecruitData } from "../lib/recruitStore";
 import type { Block } from "../data/blocks";
 import { toEmbed } from "../lib/video";
 import { txt } from "../lib/editable";
-import { BtnLine, EntryBand, LowerKv } from "./RsParts";
+import { BtnLine, LowerKv } from "./RsParts";
 
 // 段落テキスト内の **太字** と ==マーカー== （記事エディタの装飾）を描画
 function renderInline(text: string): ReactNode[] {
@@ -114,7 +117,7 @@ export function InterviewPage() {
 
   return (
     <>
-      <LowerKv en={txt("rs:interview.kv.en", "Interview")} jp={txt("rs:interview.kv.jp", "社員インタビュー")} base="rs:interview.kv" cloud={{ right: "5%", top: "15%", width: "min(24vw,300px)" }} />
+      <LowerKv en={txt("rs:interview.kv.en", "Interview")} jp={txt("rs:interview.kv.jp", "人を知る")} base="rs:interview.kv" />
       <section className="island">
         <div className="container">
           {!iv ? (
@@ -123,13 +126,26 @@ export function InterviewPage() {
                 <>
                   <p className="lead-text">記事が見つかりませんでした。</p>
                   <p style={{ marginTop: 28 }}>
-                    <BtnLine to="/recruit/people" def="インタビュー一覧へ" />
+                    <BtnLine to="/recruit#people" def="採用情報へ戻る" />
                   </p>
                 </>
               )}
             </div>
           ) : (
             <article className="article">
+              {/* 人物写真（ページ上部）。動画があれば再生ボタン */}
+              {(iv.image !== "" || iv.video !== "") && (
+                <figure className="article__photo -portrait js-reveal">
+                  {iv.video !== "" ? (
+                    <>
+                      <VideoPoster image={iv.image} video={iv.video} alt={iv.lead} />
+                      <button type="button" className="article__play" aria-label="アイキャッチ動画を再生" onClick={() => setPlaying(true)} />
+                    </>
+                  ) : (
+                    <ImageWithFallback src={iv.image} alt={`${iv.name}のポートレート`} />
+                  )}
+                </figure>
+              )}
               <header className="js-reveal">
                 <p className="article__kicker">{txt("rs:interview.kicker", "INTERVIEW")}</p>
                 <h2 className="article__title">{iv.lead}</h2>
@@ -137,30 +153,18 @@ export function InterviewPage() {
                 <div className="article__meta">
                   <p className="article__name">{iv.name}</p>
                   {iv.role && <span className="job-row__place">{iv.role}</span>}
-                  {iv.years && <span className="note">{iv.years}</span>}
+                  {(iv.years || iv.hobby) && (
+                    <span className="note">
+                      {iv.years}
+                      {iv.years && iv.hobby ? "｜" : ""}
+                      {iv.hobby ? `趣味: ${iv.hobby}` : ""}
+                    </span>
+                  )}
                 </div>
-                {(iv.intro !== "" || iv.hobby !== "") && (
-                  <div className="article__intro">
-                    {iv.intro !== "" && <p style={{ whiteSpace: "pre-line" }}>{iv.intro}</p>}
-                    {iv.hobby !== "" && (
-                      <p style={{ marginTop: 6 }}>
-                        <strong>趣味</strong>
-                        {iv.hobby}
-                      </p>
-                    )}
-                  </div>
-                )}
-                {(iv.image !== "" || iv.video !== "") && (
-                  <div className="article__visual">
-                    {iv.video !== "" ? (
-                      <>
-                        <VideoPoster image={iv.image} video={iv.video} alt={iv.lead} />
-                        <button type="button" className="article__play" aria-label="アイキャッチ動画を再生" onClick={() => setPlaying(true)} />
-                      </>
-                    ) : (
-                      <ImageWithFallback src={iv.image} alt={iv.name} />
-                    )}
-                  </div>
+                {iv.intro !== "" && (
+                  <p className="note" style={{ marginTop: 16, whiteSpace: "pre-line" }}>
+                    {iv.intro}
+                  </p>
                 )}
               </header>
               <ArticleBody blocks={iv.blocks} />
@@ -170,8 +174,8 @@ export function InterviewPage() {
                   .map((b, i) => (
                     <RecruitLinkButton key={i} b={b} />
                   ))}
-                <BtnLine to="/recruit/jobs" path="rs:interview.jobsBtn" def="募集職種を見る" />
-                <BtnLine to="/recruit/people" path="rs:interview.backBtn" def="インタビュー一覧へ" />
+                <BtnLine to="/recruit#people" path="rs:interview.backBtn" def="採用情報へ戻る" noArrow />
+                <BtnLine to="/recruit#recruit" path="rs:interview.jobsBtn" def="募集職種を見る" />
               </div>
             </article>
           )}
@@ -180,7 +184,6 @@ export function InterviewPage() {
       {playing && iv && iv.video !== "" && <VideoModal url={iv.video} title={iv.lead} onClose={() => setPlaying(false)} />}
 
       <div className="sea-gap" />
-      <EntryBand />
     </>
   );
 }
