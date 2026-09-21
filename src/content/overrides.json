@@ -827,5 +827,12 @@
   "color:contact:tel.1.title": "#000000",
   "color:contact:tel.3.title": "#000000",
   "color:contact:tel.2.title": "#000000",
-  "color:contact:tel.4.title": "#000000"
+  "color:contact:tel.4.title": "#000000",
+  "ice:lineup.hero.usageLabel": "商品の特徴",
+  "ice:lineup.items.0.usageLabel": "商品の特徴",
+  "ice:lineup.items.1.usageLabel": "商品の特徴",
+  "ice:lineup.items.2.usageLabel": "商品の特徴",
+  "ice:lineup.items.3.usageLabel": "商品の特徴",
+  "ice:lineup.items.4.usageLabel": "商品の特徴",
+  "division:ice.faq.4.q": ""
 }
