@@ -302,7 +302,7 @@ export function NumGrid({ base, defaults = NUM_DEFAULTS }: { base: string; defau
   );
 }
 
-/* ---------- 氷・食・物流のベン図 ---------- */
+/* ---------- 氷・食・物流のベン図（支給 index.html のまま。アイコンは置かない） ---------- */
 export function Venn() {
   return (
     <div className="venn js-reveal" style={{ marginTop: 44 }}>
@@ -312,23 +312,9 @@ export function Venn() {
           <circle cx="148" cy="243" r="112" fill="#009DFA" style={{ mixBlendMode: "multiply" }} opacity="0.9" />
           <circle cx="272" cy="243" r="112" fill="#0073C7" style={{ mixBlendMode: "multiply" }} opacity="0.9" />
         </g>
-        <g fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" transform="translate(196 62)">
-          <rect x="0" y="0" width="28" height="28" rx="7" />
-          <path d="M8 8 L14 14 M20 8 L14 14 M14 14 L14 21" />
-        </g>
-        <text x="210" y="122" textAnchor="middle" fill="#FFFFFF" fontSize="26" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">氷</text>
-        <g fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" transform="translate(86 248)">
-          <path d="M0 22 Q0 8 13 8 Q26 8 26 22 Z" />
-          <path d="M13 8 L13 3 M9 0 Q13 -2 17 0" />
-        </g>
-        <text x="99" y="308" textAnchor="middle" fill="#FFFFFF" fontSize="26" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">食</text>
-        <g fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" transform="translate(305 250)">
-          <rect x="0" y="4" width="16" height="12" rx="2.5" />
-          <path d="M16 8 L23 8 L27 12 L27 16 L16 16" />
-          <circle cx="7" cy="19" r="2.6" />
-          <circle cx="22" cy="19" r="2.6" />
-        </g>
-        <text x="321" y="308" textAnchor="middle" fill="#FFFFFF" fontSize="26" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">物流</text>
+        <text x="210" y="108" textAnchor="middle" fill="#FFFFFF" fontSize="27" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">氷</text>
+        <text x="102" y="290" textAnchor="middle" fill="#FFFFFF" fontSize="27" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">食</text>
+        <text x="318" y="290" textAnchor="middle" fill="#FFFFFF" fontSize="27" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">物流</text>
         <text x="210" y="218" textAnchor="middle" fill="#FFFFFF" fontSize="17" fontWeight="700" fontFamily="'Zen Maru Gothic', sans-serif">人の生活</text>
       </svg>
     </div>
