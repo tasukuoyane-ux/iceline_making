@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight, ChevronDown, Minus, Plus, Search } from "lucide-react";
@@ -497,6 +497,40 @@ export const FOOD_PACKAGES: { id: string; title: string; lead: string }[] = [
 
 // ─────────────────────────────────────────────────────────
 
+/** 1行に収める見出し（2026-09-21 追加）。style.fontSize（clamp 等）を最大として、親幅からはみ出す場合だけ
+ * 縮小して折り返さずに表示する。文言の変更（コンソール編集）やリサイズで再計算する。 */
+function FitOneLine({ style, className, children, ...rest }: { style: CSSProperties; className?: string; children: ReactNode } & Record<string, unknown>) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const maxSize = String(style.fontSize ?? "");
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = maxSize;
+      const base = parseFloat(getComputedStyle(el).fontSize) || 0;
+      const avail = el.clientWidth;
+      const need = el.scrollWidth;
+      if (base > 0 && need > avail && avail > 0) el.style.fontSize = `${Math.floor(base * (avail / need) * 100) / 100}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el.parentElement ?? el);
+    const mo = new MutationObserver(fit);
+    mo.observe(el, { childList: true, characterData: true, subtree: true });
+    window.addEventListener("resize", fit);
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, [maxSize]);
+  return (
+    <p ref={ref} className={className} style={{ ...style, whiteSpace: "nowrap", maxWidth: "100%" }} {...rest}>
+      {children}
+    </p>
+  );
+}
+
 /** 編集モード限定：リンク先URLをテキストとして編集するための行 */
 function EditableLinkHint({ path, label, href }: { path: string; label: string; href: string }) {
   if (!EDIT_MODE) return null;
@@ -680,19 +714,20 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
         style={{ ["--ratio" as any]: ratioCols(`${base}.ratio`, 45, false) }}
         {...ratioAttrs(`${base}.ratio`, 45, false)}
       >
-        <div className="relative z-10 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[65%]">
+        <div className="relative z-10 min-w-0 [direction:ltr] pc:col-start-1 pc:col-end-3 pc:row-start-1 pc:max-w-[65%]">
           {/* 強調テキスト（例「No.1」）：大きく赤字。空なら公開ページでは出さない（2026-09-14 追加） */}
           {(() => {
             const badge = txt(`${base}.badge`, it.badge ?? "");
             if (badge === "" && !EDIT_MODE) return null;
+            // 折り返さず 1 行に収める（現在の文字サイズを最大に、幅に合わせて縮小。2026-09-21 ユーザー指定）
             return (
-              <p
+              <FitOneLine
                 className={"mb-4 " + (badge ? "text-brand" : "text-muted-foreground")}
                 style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(48px, 6vw, 84px)", fontWeight: 900, lineHeight: 1, letterSpacing: "0.02em" }}
                 {...ed(`${base}.badge`, "強調テキスト（例: No.1）")}
               >
                 {rich(badge || "（強調テキスト・任意）")}
-              </p>
+              </FitOneLine>
             );
           })()}
           {it.title && (
