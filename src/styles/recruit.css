@@ -869,7 +869,8 @@
 .rc .article__photo { position: relative; }
 /* 記事ページ上部のアイキャッチは 4:3 の枠に上揃えで表示（顔が切れないよう。2026-09-21 ユーザー指定） */
 .rc .article__photo.-portrait { aspect-ratio: 4 / 3; }
-.rc .article__photo.-portrait img, .rc .article__photo.-portrait video { object-position: center top; }
+/* 切り抜き位置は上端から 120px 下（人物が枠の上寄りに来るように。2026-09-21 ユーザー指定） */
+.rc .article__photo.-portrait img, .rc .article__photo.-portrait video { object-position: center -120px; }
 .rc .article__visual { margin-top: 28px; border-radius: var(--r-img); overflow: hidden; aspect-ratio: 16 / 9; background: var(--sea-deep); position: relative; }
 .rc .article__visual img, .rc .article__visual video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rc .article__play { position: absolute; inset: 0; margin: auto; width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.92); display: grid; place-items: center; cursor: pointer; transition: transform var(--dur-hover); }
