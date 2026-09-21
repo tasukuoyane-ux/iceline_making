@@ -19,9 +19,6 @@ import { rt, rich } from "../lib/richInline";
 // 要確認スロットの案内文（未入力の間、公開ページでは項目ごと非表示になる）
 const PENDING_HINT = "（未確定：原稿確定後にここへ入力してください）";
 
-// 施設写真（倉庫事業）のマーソンリー表示枠の上限
-const MAX_GALLERY_PHOTOS = 10;
-
 // ＋画像の差し替え可能なプレースホルダー（編集前に表示するグレー枠）
 const IMG_PLACEHOLDER =
   "data:image/svg+xml;charset=utf-8," +
@@ -60,9 +57,6 @@ interface ServiceSection {
    * セクションの追加・削除で既存の編集パス（service:*.sec.<キー>.*）が
    * ずれないよう、並びを変えたセクションには明示的に付与すること。 */
   pathKey?: string;
-  /** true なら「写真＋キャプション1行」×6枚のグリッド（items は使わない。
-   * 写真が1枚も設定されるまで公開ページでは非表示） */
-  photoGrid?: boolean;
   /** true なら「ピクトグラム＋1行キャプション」のグリッド（items の title がキャプションの既定値） */
   pictos?: boolean;
   /** true なら見出し付き項目（カード）を PC で 2 列のグリッドに並べる（2026-09 改修） */
@@ -79,8 +73,6 @@ interface ServiceConfig {
   overview: string;
   sections: ServiceSection[];
   faq: { q: string; a?: string; pending?: boolean }[];
-  /** 施設写真（倉庫事業のみ。キャプションはシートの指定に準拠） */
-  photos?: string[];
   /** 外部ショップ導線（ドライアイスのみ） */
   shopUrl?: string;
 }
@@ -133,14 +125,6 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
           },
         ],
       },
-      // 施設・設備の下：写真＋キャプション1行 ×6枚のグリッド（2026-08 追加）
-      {
-        en: "PHOTOS",
-        jp: "フォトギャラリー",
-        pathKey: "facphotos",
-        items: [],
-        photoGrid: true,
-      },
       {
         en: "PRICE",
         jp: "ご利用料金",
@@ -169,14 +153,6 @@ const SERVICES: Record<ServiceId, ServiceConfig> = {
       },
       { q: "最低保管期間はありますか？", pending: true },
       { q: "見学・下見は可能ですか？", pending: true },
-    ],
-    photos: [
-      "移動ラックシステム（冷凍庫内）",
-      "たくさんの商品が様々なお客様に出荷される様子",
-      "低温管理されたプラットホーム",
-      "早朝のトラックの入れ替わりの様子",
-      "青江物流センター　外観",
-      "青江物流センター　倉庫内",
     ],
   },
   dryice: {
@@ -394,41 +370,6 @@ export function ServicePage({ service }: { service: ServiceId }) {
       {s.sections.map((sec, si) => {
         const sk = sec.pathKey ?? String(si);
 
-        // 写真＋キャプション1行 ×6枚のグリッド（倉庫事業「フォトギャラリー」）。
-        // 写真が1枚も設定されるまで公開ページでは非表示
-        if (sec.photoGrid) {
-          const slots = Array.from({ length: 6 }, (_, i) => ({
-            i,
-            image: img(`${base}.sec.${sk}.photo.${i}.image`, ""),
-          })).filter((p) => p.image !== "" || EDIT_MODE);
-          if (slots.length === 0) return null;
-          return (
-            <Section key={si} heat={si % 2 ? HEAT.foodList : HEAT.foodReason}>
-              <SectionTitle en={sec.en} jp={sec.jp} path={`${base}.sec.${sk}`} />
-              <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 pc:grid-cols-3">
-                {slots.map((p) => (
-                  <figure key={p.i}>
-                    <ImageWithFallback
-                      src={p.image || IMG_PLACEHOLDER}
-                      alt={txt(`${base}.sec.${sk}.photo.${p.i}.caption`, "")}
-                      sizes="(min-width: 1025px) 33vw, 50vw"
-                      className="aspect-[4/3] w-full rounded-xl border border-border object-cover"
-                      {...edImg(`${base}.sec.${sk}.photo.${p.i}.image`, `写真${p.i + 1}`)}
-                    />
-                    <figcaption
-                      className="mt-2 text-muted-foreground"
-                      style={{ fontSize: 13, lineHeight: 1.7 }}
-                      {...ed(`${base}.sec.${sk}.photo.${p.i}.caption`, `写真${p.i + 1} キャプション`)}
-                    >
-                      {rt(`${base}.sec.${sk}.photo.${p.i}.caption`, "") || (EDIT_MODE ? "（キャプション）" : "")}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </Section>
-          );
-        }
-
         // ピクトグラム＋1行キャプションのグリッド（ドライアイス「サービスの特徴」）。
         // カード・ボタン風の表示は使わない
         if (sec.pictos) {
@@ -633,44 +574,6 @@ export function ServicePage({ service }: { service: ServiceId }) {
           })}
         </div>
       </Section>
-
-      {/* 施設写真（倉庫事業のみ・よくあるご質問の後・最大10枚のマーソンリー表示。
-          画像が設定された枠だけを公開ページに表示する） */}
-      {s.photos &&
-        (() => {
-          const slots = Array.from({ length: MAX_GALLERY_PHOTOS }, (_, i) => ({
-            i,
-            image: img(`${base}.photo.${i}.image`, ""),
-            capDef: s.photos![i] ?? "",
-          }));
-          const shown = slots.filter((p) => p.image !== "" || EDIT_MODE);
-          if (shown.length === 0) return null;
-          return (
-            <Section heat={HEAT.foodList}>
-              <SectionTitle en="GALLERY" jp="施設写真" path={`${base}.gallery`} />
-              <div className="mt-10 columns-2 gap-5 pc:columns-3">
-                {shown.map((p) => (
-                  <figure key={p.i} className="mb-5 break-inside-avoid">
-                    <ImageWithFallback
-                      src={p.image || IMG_PLACEHOLDER}
-                      alt={txt(`${base}.photo.${p.i}.caption`, p.capDef)}
-                      sizes="(min-width: 1025px) 33vw, 50vw"
-                      className={(p.image ? "" : "aspect-[4/3] object-cover ") + "w-full rounded-xl border border-border"}
-                      {...edImg(`${base}.photo.${p.i}.image`, `施設写真${p.i + 1}`)}
-                    />
-                    <figcaption
-                      className="mt-2 text-muted-foreground"
-                      style={{ fontSize: 13, lineHeight: 1.7 }}
-                      {...ed(`${base}.photo.${p.i}.caption`, `施設写真${p.i + 1} キャプション`)}
-                    >
-                      {rt(`${base}.photo.${p.i}.caption`, p.capDef) || (EDIT_MODE ? "（キャプション・任意）" : "")}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </Section>
-          );
-        })()}
 
       {/* お問い合わせ導線（＋ドライアイスはオンラインショップ導線） */}
       <Section heat={HEAT.foodList}>

@@ -194,7 +194,7 @@ function sampleImage(url: string): Promise<Pts> {
     const im = new Image();
     im.crossOrigin = "anonymous";
     im.onload = () => {
-      const S = 340, FIT = 300;
+      const S = 340, FIT = 200; // 以前の描画シルエットと同程度の見た目の大きさ（340px 中 約 200px）に収める（2026-09-21 ユーザー指定：大きすぎたため縮小）
       const oc = document.createElement("canvas");
       oc.width = S;
       oc.height = S;

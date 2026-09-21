@@ -1,7 +1,7 @@
 // 採用記事（社員インタビュー等）。
 // 記事は Payload CMS（/admin の「採用記事」）へ移行済み。実行時に /api/site/interviews から
 // 読み込み、取得完了までは移行元 interviews.json（ビルド同梱）で即時描画する。
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import interviewsData from "../../content/interviews.json";
 import { Block, toBlocks } from "./blocks";
 
@@ -48,6 +48,14 @@ let cache: InterviewItem[] | null = null;
 let ready = false;
 let inflight: Promise<InterviewItem[]> | null = null;
 const listeners = new Set<() => void>();
+// useSyncExternalStore 用のスナップショット（取得完了のたびに新しいオブジェクトに差し替える）
+type Snap = { items: InterviewItem[]; ready: boolean };
+let snap: Snap = { items: FALLBACK, ready: false };
+const SERVER_SNAP: Snap = { items: FALLBACK, ready: false };
+function publish() {
+  snap = { items: cache ?? FALLBACK, ready };
+  listeners.forEach((l) => l());
+}
 
 function preloadInterviews(): Promise<InterviewItem[]> {
   if (cache) return Promise.resolve(cache);
@@ -64,13 +72,13 @@ function preloadInterviews(): Promise<InterviewItem[]> {
             ? data.map((iv) => ({ ...iv, intro: iv.intro ?? "", hobby: iv.hobby ?? "", image2: iv.image2 ?? "", video: iv.video ?? "" }))
             : FALLBACK;
         ready = true;
-        listeners.forEach((l) => l());
+        publish();
         return cache;
       })
       .catch(() => {
         // API 不達（オフライン等）はフォールバックで表示を維持
         ready = true;
-        listeners.forEach((l) => l());
+        publish();
         return FALLBACK;
       });
   }
@@ -80,21 +88,23 @@ function preloadInterviews(): Promise<InterviewItem[]> {
 // SPA 読み込みと同時に取得を開始（React マウントと並行して走る）
 if (typeof window !== "undefined") preloadInterviews();
 
+function subscribe(l: () => void) {
+  listeners.add(l);
+  preloadInterviews();
+  return () => {
+    listeners.delete(l);
+  };
+}
+const getSnapshot = () => snap;
+const getServerSnapshot = () => SERVER_SNAP;
+
 /**
  * 採用記事一覧。取得完了までは同梱データ（フォールバック）を返して即時描画し、
  * Payload のデータが届いたら差し替える。ready は「APIの取得を試み終えたか」
  * （記事ページの「見つかりません」判定はこれを待ってから行う）。
+ * 2026-09-21: useSyncExternalStore に変更。初回描画と effect 登録の間に取得が完了すると
+ * 再描画されない（本番では API が速いので同梱データのまま＝写真が出ない）レース条件を解消。
  */
 export function useInterviews(): { items: InterviewItem[]; ready: boolean } {
-  const [, force] = useState(0);
-  useEffect(() => {
-    if (ready) return;
-    const l = () => force((v) => v + 1);
-    listeners.add(l);
-    preloadInterviews();
-    return () => {
-      listeners.delete(l);
-    };
-  }, []);
-  return { items: cache ?? FALLBACK, ready };
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
