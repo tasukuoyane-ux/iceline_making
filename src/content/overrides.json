@@ -313,7 +313,7 @@
   "sectionEn:top.strength": "OUR BUSINESS",
   "top:services.2.image": "/uploads/_______-rvUoKLnpqPvC1tdydZHkYs7enZukgL.webp",
   "top:services.3.image": "/uploads/%E3%83%89%E3%83%A9%E3%82%A4%E3%82%A2%E3%82%A4%E3%82%B9%E3%82%B5%E3%83%A0%E3%83%8D.jpeg?v=f9b7210",
-  "service:warehouse.mv.image": "/uploads/phMain.jpg?v=9f04686",
+  "service:warehouse.mv.image": "/uploads/Iceline_pic0909_2_35.jpg?v=0321bcd",
   "service:warehouse.sec.0.0.image": "/uploads/ph02.jpg?v=333b3b5",
   "service:warehouse.sec.0.1.image": "/uploads/Iceline_pic0909_2_36.jpg?v=cca1c6d",
   "service:warehouse.photo.0.image": "",
@@ -365,7 +365,7 @@
   "ar:division:food.sec.logistics.2.image": "16:9",
   "division:food.sec.supply.0.image": "/uploads/ICELINE_Flow_NEW_Trans.png?v=5683940",
   "ar:division:food.sec.supply.0.image": "16:9",
-  "service:dryice.mv.image": "/uploads/ICELINE_0909_19.jpg?v=9aba4fc",
+  "service:dryice.mv.image": "/uploads/ICELINE_0909_24.jpg?v=3f52217",
   "ar:division:food.sec.features.2.image": "16:9",
   "ar:division:food.sec.quality.1.image": "16:9",
   "division:food.sec.features.2.image": "/uploads/Photo_Album_1_-_09-d2QnuLnBAUYmFT5WnwC7JCSiK0RvxL.webp",
@@ -837,5 +837,8 @@
   "division:ice.faq.4.q": "",
   "division:food.sec.topshare.0.badge": "岡山県内トップクラス",
   "division:food.sec.quality.1.badge": "世界各国から調達",
-  "division:food.sec.11.jp": "地域での取り組みー子ども食堂への支援"
+  "division:food.sec.11.jp": "地域での取り組みー子ども食堂への支援",
+  "ypos:images:IMG.foodMv": "35",
+  "ypos:service:warehouse.mv.image": "70",
+  "ypos:service:dryice.mv.image": "25"
 }
