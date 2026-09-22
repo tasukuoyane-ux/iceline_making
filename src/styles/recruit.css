@@ -941,6 +941,23 @@
 /* 特集動画（1本）は横長サムネのまま大きく */
 .rc .video-feature .movie-card__thumb { aspect-ratio: 16 / 9; }
 
+/* 人を知る：左右の矢印ボタン（横スクロールできることを示す。端では薄く） */
+.rc .people-wrap { position: relative; }
+.rc .people-nav {
+  position: absolute; top: 38%; z-index: 5;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--white); color: var(--sea-deep);
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--dur-hover), opacity var(--dur-hover), background-color var(--dur-hover), color var(--dur-hover);
+  cursor: pointer;
+}
+.rc .people-nav.-prev { left: -14px; }
+.rc .people-nav.-next { right: -14px; }
+.rc .people-nav:hover { background: var(--sea); color: var(--white); transform: scale(1.06); }
+.rc .people-nav.is-edge { opacity: 0.35; pointer-events: none; }
+@media (max-width: 640px) { .rc .people-nav { width: 40px; height: 40px; } .rc .people-nav.-prev { left: -6px; } .rc .people-nav.-next { right: -6px; } }
+
 /* 人を知る：ビューポートに入ったらカードを横に揺らして横スクロールを示唆（1回だけ・少しずつ遅らせる） */
 @keyframes rc-nudge {
   0% { transform: translateX(0); }

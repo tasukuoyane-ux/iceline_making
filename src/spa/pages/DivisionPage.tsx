@@ -719,11 +719,11 @@ function DetailItemBlock({ division, sk, ii, it, secJp }: { division: Division; 
           {(() => {
             const badge = txt(`${base}.badge`, it.badge ?? "");
             if (badge === "" && !EDIT_MODE) return null;
-            // 折り返さず 1 行に収める（現在の文字サイズを最大に、幅に合わせて縮小。2026-09-21 ユーザー指定）
+            // 折り返さず 1 行に収める（H2＋3px＝33px を最大に、幅に合わせて縮小。2026-09-22 ユーザー指定）
             return (
               <FitOneLine
                 className={"mb-4 " + (badge ? "text-brand" : "text-muted-foreground")}
-                style={{ fontFamily: "var(--font-accent)", fontSize: "clamp(48px, 6vw, 84px)", fontWeight: 900, lineHeight: 1, letterSpacing: "0.02em" }}
+                style={{ fontFamily: "var(--font-accent)", fontSize: 33, fontWeight: 900, lineHeight: 1.2, letterSpacing: "0.02em" }}
                 {...ed(`${base}.badge`, "強調テキスト（例: No.1）")}
               >
                 {rich(badge || "（強調テキスト・任意）")}

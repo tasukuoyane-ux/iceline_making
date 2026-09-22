@@ -2,7 +2,7 @@
 //   Billboard（英字看板＋日本語見出し）／LowerKv（下層 KV）／SecHead／LeadText／EntryBand／NextIsland
 //   ／PeopleScroller（インタビューカード）／NumGrid（数字で見る）／Venn（ベン図）／雲・流氷の SVG
 // 文言はすべてコンソールで編集できる（編集パスは rs:〜）。
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useInterviews } from "../data/interviews";
@@ -396,7 +396,37 @@ export function PeopleScroller({ style }: { style?: CSSProperties }) {
     }, 300);
     return () => window.clearTimeout(id);
   }, [items]);
+  // 左右の矢印ボタン（カード 1 枚ぶんスクロール。端では薄くする。2026-09-22 追加）
+  const [edge, setEdge] = useState<{ l: boolean; r: boolean }>({ l: true, r: false });
+  useEffect(() => {
+    const t = trackRef.current;
+    if (!t) return;
+    const update = () => setEdge({ l: t.scrollLeft <= 2, r: t.scrollLeft + t.clientWidth >= t.scrollWidth - 2 });
+    update();
+    t.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(t);
+    return () => {
+      t.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, [items]);
+  const step = (dir: 1 | -1) => {
+    const t = trackRef.current;
+    if (!t) return;
+    touched.current = true;
+    const card = t.querySelector<HTMLElement>(".people-card");
+    const w = card ? card.getBoundingClientRect().width + 24 : t.clientWidth * 0.8;
+    t.scrollBy({ left: dir * w, behavior: "smooth" });
+  };
   return (
+    <div className="people-wrap">
+      <button type="button" className={"people-nav -prev" + (edge.l ? " is-edge" : "")} aria-label="前のインタビューへ" onClick={() => step(-1)}>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 4 L6.5 10 L12.5 16" /></svg>
+      </button>
+      <button type="button" className={"people-nav -next" + (edge.r ? " is-edge" : "")} aria-label="次のインタビューへ" onClick={() => step(1)}>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M7.5 4 L13.5 10 L7.5 16" /></svg>
+      </button>
     <div ref={trackRef} className="people-scroller js-reveal-group" style={style}>
       {items.map((iv, i) => {
         const r = splitRole(iv.role);
@@ -422,6 +452,7 @@ export function PeopleScroller({ style }: { style?: CSSProperties }) {
           </Link>
         );
       })}
+    </div>
     </div>
   );
 }
